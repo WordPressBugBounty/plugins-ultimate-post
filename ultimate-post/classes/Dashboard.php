@@ -524,7 +524,7 @@ class Dashboard {
                 if ( isset( $r_post ) && $r_post != null ) {
                     $args = array(
                         'post_author'    => $new_post_author,
-                        'post_content'   => str_replace('u0022', '\u0022', $r_post->post_content),
+                        'post_content'   => str_replace(['u0022', 'u002d'], ['\u0022', '\u002d'], $r_post->post_content),
                         'post_excerpt'   => $r_post->post_excerpt,
                         'post_name'      => $r_post->post_name,
                         'post_status'    => $fromBuilder ? 'draft' : $r_post->post_status,

@@ -162,12 +162,7 @@ class RequestAPI {
                 'value' => 'search',
             )
         );
-        $single_data = array(
-            array(
-                'label' => 'Front Page', 
-                'value' => 'front_page', 
-            )
-        );
+        $single_data = array();
         $header_data = array(
             array(
                 'label' => 'Entire Site',
@@ -464,8 +459,8 @@ class RequestAPI {
                 $settings['singular'][$post_id] = ['include/singular/post'];
                 break;
             case 'front_page':
-                update_post_meta($post_id, '__ultp_builder_type', 'singular');
-                $settings['singular'][$post_id] = ['include/singular/front_page'];
+                update_post_meta($post_id, '__ultp_builder_type', 'front_page');
+                $settings['singular'][$post_id] = ['include/front_page'];
                 break;
             case 'author':
             case 'post_tag':

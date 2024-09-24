@@ -72,33 +72,6 @@ class Functions{
         $id = get_the_ID();
         return  get_post_type( $id ) == 'ultp_builder' ? get_post_meta( $id, '__ultp_builder_type', true ) : false;
     }
-     /**
-	 * Checking Archive Child Builder
-     * 
-     * @since v.2.8.6
-	 * @return STRING | archive child builder
-	 */
-    public function is_archive_child_builder() {
-        $id = get_the_ID();
-        $builder_type = get_post_type( $id ) == 'ultp_builder' ? get_post_meta( $id, '__ultp_builder_type', true ) : false;
-        if($builder_type) {
-            $settings = get_option('ultp_builder_conditions', array());
-            if ($builder_type == '404' || $builder_type == 'header' || $builder_type == 'footer' ) {
-                return $builder_type;
-            }
-            if (isset($settings[$builder_type])) {
-                $conditions = $settings[$builder_type][$id];
-                $conditions_length = sizeof($conditions) > 1 ? 'multiple' : 'single';
-                foreach ($conditions as $condition) {
-                    if(strpos($condition,'singular/front_page') > -1) {
-                        return $conditions_length.'#singular/front_page';
-                    }
-                }
-            }
-        }
-        return '';
-    }
-
 
     /**
 	 * Set Link with the Parameters
@@ -515,7 +488,7 @@ class Functions{
 	 * @return STRING
 	 */
     public function excerpt( $post_id, $limit = 55 ) {
-        $content = preg_replace('/(\[postx_template[\s\w="]*)]/m', '', get_the_content( $post_id )); // Remove postx_template shortcode form Content
+        $content = preg_replace('/(\[postx_template[\s\w="]*)]/m', '', get_the_excerpt( $post_id )); // Remove postx_template shortcode form Content
         return apply_filters( 'the_excerpt', wp_trim_words($content, $limit)  );
     }
 
@@ -557,7 +530,7 @@ class Functions{
     public function is_builder($builder = '') {
         $id = '';
         if ( ultimate_post()->get_setting('ultp_builder') != 'false' ) {
-            $page_id = ultimate_post()->builder_check_conditions('return');
+            $page_id = ultimate_post()->builder_check_conditions('return_ib');
             if ( $page_id ) {
                 $id = $page_id;
             }
@@ -1602,526 +1575,366 @@ class Functions{
     /**
 	 * String Part finder inside array
      * 
-     * @since v.2.7.0
+     * @since v.2.7.0 updated 4.1.12
 	 * @return ARRAY | String Part
 	 */
-    public function in_string_part($part, $data, $isValue = false) {
-        $return = false;
-        foreach ($data as $val) {
-            if ( strpos($val, $part) !== false ) {
-                $return = $isValue ? $val : true;
-                break;
+    public function in_array_part($part, $data, $toR = '') {
+        $res = array();
+        foreach( $data as $key => $val ) {
+            if ( strpos( $val, $part ) !== false ) {
+                if ( $toR == 'bool' ) {
+                    return true;
+                } else if ( $toR == 'value' ) {
+                    return $val;
+                }
+                $res[$key] = $val;
             }
         }
-        return $return;
+        if ( $toR == 'bool' ) {
+            return false;
+        } else if ( $toR == 'value' ) {
+            return '';
+        }
+        return $res;
     }
-        
 
     /**
 	 * Builder Conditions
      * 
-     * @since v.2.7.0
+     * @since v.2.7.0 updated 4.1.12
      * @param STRING | Type of Return
 	 * @return MIXED || ID or Path
 	 */
-     public function builder_check_conditions( $type = 'return', $condition = '' ) {
+    public function builder_check_conditions( $type = 'return', $cus_condition = '' ) {
         $page_id = '';
-
-        $conditions = $condition ? $condition : get_option('ultp_builder_conditions', array());
-        if (isset($conditions['archive']) && $type != 'header' && $type != 'footer') {
-            if (!empty($conditions['archive'])) {
-                $is_search = is_search();
-                $is_archive = is_archive();
-                $taxonomy = (is_category() || is_tag() || is_tax()) ? get_queried_object() : (object)[];
-                
-                    if (is_archive()) {
-                        foreach ($conditions['archive'] as $key => $val) {
-                            if (in_array('include/archive', $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = $key;
-                                }
-                            }
-                            if (in_array('exclude/archive', $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = '';
-                                }
-                            }
+        $conditions = $cus_condition ? $cus_condition : get_option('ultp_builder_conditions', array());
+    
+        if ( $type == 'header' || $type == 'footer' ) {
+            if ( !empty($conditions[$type]) ) {
+                foreach( $conditions[$type] as $key => $val) {
+                    if ( 'publish' == get_post_status($key) && !empty($val) ) {
+                        if ( in_array('include/'.$type.'/entire_site', $val) ) {
+                            $page_id = $key;
+                        } else if ( in_array('exclude/'.$type.'/entire_site', $val) ) {
+                            $page_id = '';
                         }
-                        if (is_category()) {
-                            foreach ($conditions['archive'] as $key => $val) {
-                            if (in_array('include/archive/category', $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = $key;
+                        
+                        $c_page = ( is_archive() || is_search() ) ? 'archive' : 'singular';
+                        $hf_archive = $this->in_array_part($type.'/'.$c_page, $val, '');
+                        if ( !empty($hf_archive) ) {
+                            foreach($hf_archive as $k => $v) {
+                                if ( strpos($v, 'include/'.$type.'/'.$c_page) !== false ) {
+                                    $temp = $this->builder_check_conditions('return_h', [$c_page => [$key => [str_replace($type."/", "", $v)]]]);
+                                    $page_id = $temp ? $temp : $page_id;
+                                } else if (strpos($v, 'exclude/'.$type.'/'.$c_page) !== false) {
+                                    $temp = $this->builder_check_conditions('return_f', [$c_page => [$key => [str_replace("exclude/".$type, "include", $v)]]]);
+                                    $page_id = $temp ? '' : $page_id;
                                 }
                             }
-                            if (in_array('exclude/archive/category', $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = '';
-                                }
-                            }
-                            if (in_array('include/archive/category/'.$taxonomy->term_id, $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = $key;
-                                }
-                            }
-                            if (in_array('exclude/archive/category/'.$taxonomy->term_id, $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = '';
-                                }
-                            }
-                            if ($this->in_string_part('any_child_of', $val)) {
-                                if (in_array('include/archive/any_child_of_category', $val)) {
-                                    if ('publish' == get_post_status($key)) {
-                                        $page_id = $key;
-                                    }
-                                }
-                                if (in_array('exclude/archive/any_child_of_category', $val)) {
-                                    if ('publish' == get_post_status($key)) {
-                                        $page_id = '';
-                                    }
-                                }
-                                foreach ($val as $v) {
-                                    if (strpos($v, '/archive/any_child_of_category/') !== false) {
-                                        if ($v) {
-                                            $data = explode("/", $v);
-                                            if (isset($data[3]) && $data[3]) {
-                                                if (term_is_ancestor_of($data[3], $taxonomy->term_id, 'category')) {
-                                                    if ('publish' == get_post_status($key)) {
-                                                        $page_id = $data[0] == 'exclude' ? '' : $key;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            } else {
-                                if ($this->in_string_part('child_of', $val)) {
-                                    if (in_array('include/archive/child_of_category', $val)) {
-                                        if ('publish' == get_post_status($key)) {
-                                            $page_id = $key;
-                                        }
-                                    }
-                                    if (in_array('exclude/archive/child_of_category', $val)) {
-                                        if ('publish' == get_post_status($key)) {
-                                            $page_id = '';
-                                        }
-                                    }
-                                    if (in_array('include/archive/child_of_category/'.$taxonomy->parent, $val)) {
-                                        if ('publish' == get_post_status($key)) {
-                                            $page_id = $key;
-                                        }
-                                    }
-                                    if (in_array('exclude/archive/child_of_category/'.$taxonomy->parent, $val)) {
-                                        if ('publish' == get_post_status($key)) {
-                                            $page_id = '';
-                                        }
-                                    }
-                                }
-                            }
-                            }
-                        } else if (is_tag()) {
-                            foreach ($conditions['archive'] as $key => $val) {
-                            if (in_array('include/archive/post_tag', $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = $key;
-                                }
-                            }
-                            if (in_array('exclude/archive/post_tag', $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = '';
-                                }
-                            }
-                            if (in_array('include/archive/post_tag/'.$taxonomy->term_id, $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = $key;
-                                }
-                            }
-                            if (in_array('exclude/archive/post_tag/'.$taxonomy->term_id, $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = '';
-                                }
-                            }
-                            }
-                        } else if (is_tax()) {
-                            foreach ($conditions['archive'] as $key => $val) {
-                            if (in_array('include/archive/'.$taxonomy->taxonomy, $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = $key;
-                                }
-                            }
-                            if (in_array('exclude/archive/'.$taxonomy->taxonomy, $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = '';
-                                }
-                            }
-                            if (in_array('include/archive/'.$taxonomy->taxonomy.'/'.$taxonomy->term_id, $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = $key;
-                                }
-                            }
-                            if (in_array('exclude/archive/'.$taxonomy->taxonomy.'/'.$taxonomy->term_id, $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = '';
-                                }
-                            }
-                            if ($this->in_string_part('any_child_of', $val)) {
-                                if (in_array('include/archive/any_child_of_'.$taxonomy->taxonomy, $val)) {
-                                    if ('publish' == get_post_status($key)) {
-                                        $page_id = $key;
-                                    }
-                                }
-                                if (in_array('exclude/archive/any_child_of_'.$taxonomy->taxonomy, $val)) {
-                                    if ('publish' == get_post_status($key)) {
-                                        $page_id = '';
-                                    }
-                                }
-                                foreach ($val as $v) {
-                                    if (strpos($v, '/archive/any_child_of_'.$taxonomy->taxonomy.'/') !== false) {
-                                        if ($v) {
-                                            $data = explode("/", $v);
-                                            if (isset($data[3]) && $data[3]) {
-                                                if (term_is_ancestor_of($data[3], $taxonomy->term_id, $taxonomy->taxonomy)) {
-                                                    if ('publish' == get_post_status($key)) {
-                                                        $page_id = $data[0] == 'exclude' ? '' : $key;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            } else {
-                                if ($this->in_string_part('child_of', $val)) {
-                                    if (in_array('include/archive/child_of_'.$taxonomy->taxonomy, $val)) {
-                                        if ('publish' == get_post_status($key)) {
-                                            $page_id = $key;
-                                        }
-                                    }
-                                    if (in_array('exclude/archive/child_of_'.$taxonomy->taxonomy, $val)) {
-                                        if ('publish' == get_post_status($key)) {
-                                            $page_id = '';
-                                        }
-                                    }
-                                    if (in_array('include/archive/child_of_'.$taxonomy->taxonomy.'/'.$taxonomy->parent, $val)) {
-                                        if ('publish' == get_post_status($key)) {
-                                            $page_id = $key;
-                                        }
-                                    }
-                                    if (in_array('exclude/archive/child_of_'.$taxonomy->taxonomy.'/'.$taxonomy->parent, $val)) {
-                                        if ('publish' == get_post_status($key)) {
-                                            $page_id = '';
-                                        }
-                                    }
-                                }
-                            }
-                            }
-                        } else if (is_date()) {
-                            foreach ($conditions['archive'] as $key => $val) {
-                            if (in_array('include/archive/date', $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = $key;
-                                }
-                            }
-                            if (in_array('exclude/archive/date', $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = '';
-                                }
-                            }
-                            }
-                        } else if (is_author()) {
-                            foreach ($conditions['archive'] as $key => $val) {
-                            if (in_array('include/archive/author', $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = $key;
-                                }
-                            }
-                            if (in_array('exclude/archive/author', $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = '';
-                                }
-                            }
-                            $author_id = get_the_author_meta('ID');
-                            if (in_array('include/archive/author/'.$author_id, $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = $key;
-                                }
-                            }
-                            if (in_array('exclude/archive/author/'.$author_id, $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = '';
-                                }
-                            }
-                            }
-                        }
-                    } else if (is_search()) {
-                        foreach ($conditions['archive'] as $key => $val) {
-                        if (in_array('include/archive/search', $val)) {
-                            if ('publish' == get_post_status($key)) {
-                                $page_id = $key;
-                            }
-                        }
-                        if (in_array('exclude/archive/search', $val)) {
-                            if ('publish' == get_post_status($key)) {
-                                $page_id = '';
-                            }
-                        }
-                        }
-                    }
-            }  
-        }
-        // Singular
-        if (isset($conditions['singular']) && $type != 'header' && $type != 'footer') {
-            if (!empty($conditions['singular']) && ( is_singular() || is_front_page() || is_home() ) ) {
-                $obj = get_queried_object();
-                $tax_list = $this->get_taxonomy_list();
-                foreach ($conditions['singular'] as $key => $val) {
-                    if (get_post_status($key)) {
-                        // Front Page
-                        if ((is_front_page() && is_home()) 
-                            || (is_home() && !is_object($obj))
-                            || (is_singular() && is_front_page() && is_object($obj))) {
-                            if (in_array('include/singular/front_page', $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = $key;
-                                }
-                            }
-                            if (in_array('exclude/singular/front_page', $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = '';
-                                }
-                            }
-                        }
-                        // Author check
-                        if (in_array('singular/post_by_author', $val)) {
-                            if (in_array('include/singular/post_by_author', $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = $key;
-                                }
-                            }
-                            if (in_array('exclude/singular/post_by_author', $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = '';
-                                }
-                            }
-                            if (in_array('include/singular/post_by_author/'.$obj->post_author, $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = $key;
-                                }
-                            }
-                            if (in_array('exclude/singular/post_by_author/'.$obj->post_author, $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = '';
-                                }
-                            }
-                        }
-                        // All Taxonomy
-                        if($this->in_string_part('/singular/in_', $val)) {
-                            foreach ($tax_list as $tax) { 
-                                if ($this->in_string_part('singular/in_'.$tax.'_children', $val)) {
-                                    // In Taxonomy Children
-                                    if (in_array('include/singular/in_'.$tax.'_children', $val)) {
-                                        if ('publish' == get_post_status($key)) {
-                                            $page_id = $key;
-                                        }
-                                    }
-                                    if (in_array('exclude/singular/in_'.$tax.'_children', $val)) {
-                                        if ('publish' == get_post_status($key)) {
-                                            $page_id = '';
-                                        }
-                                    }
-                                    if (is_object($obj)) {
-                                        foreach ($val as $v) {
-                                            if (strpos($v, '/singular/in_'.$tax.'_children/') !== false) {
-                                                if ($v) {
-                                                    $data = explode("/", $v);
-                                                    if (isset($data[3]) && $data[3]) {
-                                                        if (is_object_in_term($obj->ID , $tax, $data[3] )) {
-                                                            if ('publish' == get_post_status($key)) {
-                                                                $page_id = $data[0] == 'exclude' ? '' : $key;
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    // IN Taxonomy 
-                                    if (in_array('include/singular/in_'.$tax, $val)) {
-                                        if ('publish' == get_post_status($key)) {
-                                            $page_id = $key;
-                                        }
-                                    }
-                                    if (in_array('exclude/singular/in_'.$tax, $val)) {
-                                        if ('publish' == get_post_status($key)) {
-                                            $page_id = '';
-                                        }
-                                    }
-                                    if (is_object($obj)) {
-                                        foreach ($val as $v) {
-                                            if (strpos($v, '/singular/in_'.$tax.'/') !== false) {
-                                                if ($v) {
-                                                    $data = explode("/", $v);
-                                                    if (isset($data[3]) && $data[3]) {
-                                                        if (is_object_in_term($obj->ID , $tax, $data[3] )) {
-                                                            if ('publish' == get_post_status($key)) {
-                                                                $page_id = $data[0] == 'exclude' ? '' : $key;
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        if (is_object($obj)) {
-                        // All Post Type
-                        if (in_array('include/singular/'.$obj->post_type, $val)) {
-                            if ('publish' == get_post_status($key)) {
-                                $page_id = $key;
-                            }
-                        }
-                        if (in_array('exclude/singular/'.$obj->post_type, $val)) {
-                            if ('publish' == get_post_status($key)) {
-                                $page_id = '';
-                            }
-                        }
-                        if ($this->in_string_part('include/singular/'.$obj->post_type.'/'.$obj->ID, $val)) {
-                            if ('publish' == get_post_status($key)) {
-                                $page_id = $key;
-                            }
-                        }
-                        if ($this->in_string_part('exclude/singular/'.$obj->post_type.'/'.$obj->ID, $val)) {
-                            if ('publish' == get_post_status($key)) {
-                                $page_id = '';
-                            }
-                        }
                         }
                     }
                 }
             }
-        }
-
-        // 404 Page
-        if (isset($conditions['404']) && $type != 'header' && $type != 'footer') {
-            if (!empty($conditions['404']) && is_404() ) {
-                foreach ($conditions['404'] as $key => $val) {
-                    if ('publish' == get_post_status($key)) {
+        } else {
+            // 404 page
+            if ( !empty($conditions['404']) && is_404() ) {
+                foreach( $conditions['404'] as $key => $val ) {
+                    if ( 'publish' == get_post_status($key) ) {
                         $page_id = $key;
                     }
                 }
-            }
-        }
-
-        // Header
-        if ($type == 'header') {
-            if (isset($conditions['header'])) {
-                if (!empty($conditions['header'])) {
-                    foreach ($conditions['header'] as $key => $val) {
-                        if (!empty($val)) {
-                            if (in_array('include/header/entire_site', $val)) {
-                                if ('publish' == get_post_status($key)) {
+            } 
+            // Singular or Front Page
+            else if (
+                ( 
+                    !empty($conditions['singular']) || 
+                    !empty($conditions['front_page']) 
+                ) &&
+                ( 
+                    is_singular() || 
+                    is_front_page() || 
+                    is_home() 
+                )
+            ) {
+                $obj = get_queried_object();
+                $queried_is_obj = is_object($obj);
+                // front page only
+                if (
+                    ( is_front_page() && is_home() ) ||
+                    ( is_home() && !$queried_is_obj ) || 
+                    ( is_singular() && is_front_page() && $queried_is_obj )
+                ) {
+                    $f_conditions = [];
+                    if ( !empty($conditions['front_page']) ) {
+                        $f_conditions = $conditions['front_page'];
+                    } else if ( !empty($conditions['singular']) ) {
+                        $f_conditions = $conditions['singular'];
+                    }
+                    if ( !empty($f_conditions) ) {
+                        foreach( $f_conditions as $key => $val ) {
+                            if ( 
+                                ( is_array($val) && in_array('include/singular/front_page', $val) ) ||
+                                ( is_array($val) && in_array('include/front_page', $val) ) ||
+                                'include/front_page' == $val
+                            ) {
+                                if ( 'publish' == get_post_status($key) ) {
                                     $page_id = $key;
-                                }
-                            }
-                            if (in_array('exclude/header/entire_site', $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    $page_id = '';
-                                }
-                            }
-                            if ($this->in_string_part('header/singular', $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    foreach ($val as $k => $v) {
-                                        if ($key && strpos($v, 'include/header/singular') !== false) {
-                                            $temp = $this->builder_check_conditions('return', ['singular' => [$key => [str_replace("header/", "", $v)]]]);
-                                            $page_id = $temp ? $temp : $page_id;
-                                        }
-                                        if (strpos($v, 'exclude/header/singular') !== false) {
-                                            $temp = $this->builder_check_conditions('return', ['singular' => [$key => [str_replace("exclude/header", "include", $v)]]]);
-                                            $page_id = $temp ? '' : $page_id;
-                                        }
-                                    }
-                                }
-                            }
-                            if ($this->in_string_part('header/archive', $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    foreach ($val as $k => $v) {
-                                        if ($key && strpos($v, 'include/header/archive') !== false) {
-                                            $temp = $this->builder_check_conditions('return', ['archive' => [$key => [str_replace("header/", "", $v)]]]);
-                                            $page_id = $temp ? $temp : $page_id;
-                                        }
-                                        if (strpos($v, 'exclude/header/archive') !== false) {
-                                            $temp = $this->builder_check_conditions('return', ['archive' => [$key => [str_replace("exclude/header", "include", $v)]]]);
-                                            $page_id = $temp ? '' : $page_id;
-                                        }
-                                    }
                                 }
                             }
                         }
                     }
-                    return $page_id;
-                }
-            }
-        }
-
-        // Footer
-        if ($type == 'footer') {
-            if (isset($conditions['footer'])) {
-                if (!empty($conditions['footer'])) {
-                    foreach ($conditions['footer'] as $key => $val) {
-                        if (!empty($val)) {
-                            if (in_array('include/footer/entire_site', $val)) {
-                                if ('publish' == get_post_status($key)) {
+                } 
+                // Singular page
+                else if ( !empty($conditions['singular']) ) {
+                    foreach( $conditions['singular'] as $key => $val ) {
+                        if ( 'publish' == get_post_status($key) ) {
+                            // All Post Type                -----Prority 1
+                            if ( $queried_is_obj ) {
+                                if ( in_array('include/singular/'.$obj->post_type, $val) ) {
                                     $page_id = $key;
-                                }
-                            }
-                            if (in_array('exclude/footer/entire_site', $val)) {
-                                if ('publish' == get_post_status($key)) {
+                                } else if ( in_array('exclude/singular/'.$obj->post_type, $val) ) {
                                     $page_id = '';
                                 }
                             }
-                            if ($this->in_string_part('footer/singular', $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    foreach ($val as $k => $v) {
-                                        if ($key && strpos($v, 'include/footer/singular') !== false) {
-                                            $temp = $this->builder_check_conditions('return', ['singular' => [$key => [str_replace("footer/", "", $v)]]]);
-                                            $page_id = $temp ? $temp : $page_id;
+    
+                            $singular_in_tax = $this->in_array_part("/singular/in_", $val, '');
+                            if ( !empty($singular_in_tax) )  {
+                                $tax_list = $this->get_taxonomy_list();
+                                foreach( $tax_list as $tax ) {
+                                    if ( in_array('include/singular/in_'.$tax.'_children', $singular_in_tax) ) {
+                                        $page_id = $key;
+                                    } else if ( in_array('exclude/singular/in_'.$tax.'_children', $singular_in_tax) ) {
+                                        $page_id = '';
+                                    }
+    
+                                    if ( $queried_is_obj ) {
+                                        $singular_in_tax_children = $this->in_array_part('/singular/in_'.$tax.'_children/', $singular_in_tax, '');
+                                        foreach( $singular_in_tax_children as $v ) {
+                                            $data = explode("/", $v);
+                                            if ( isset($data[3]) && $data[3] ) {
+                                                $childs = get_term_children( $data[3], $tax );
+                                                if ( !empty($childs) && has_term($childs, $tax) ) {
+                                                    $page_id = $data[0] == 'exclude' ? '' : $key;
+                                                }
+                                            }
                                         }
-                                        if (strpos($v, 'exclude/footer/singular') !== false) {
-                                            $temp = $this->builder_check_conditions('return', ['singular' => [$key => [str_replace("exclude/footer", "include", $v)]]]);
-                                            $page_id = $temp ? '' : $page_id;
+                                    }
+    
+                                    if ( in_array('include/singular/in_'.$tax, $singular_in_tax) ) {
+                                        if ( $tax == "post_tag" && $queried_is_obj) {
+                                            $cat = get_the_terms($obj->ID, "post_tag");
+                                            if ( !empty( $cat ) ) {
+                                                $page_id = $key;
+                                            }
+                                        } else {
+                                            $page_id = $key;
+                                        }
+                                    } else if ( in_array('exclude/singular/in_'.$tax, $singular_in_tax) ) {
+                                        $page_id = '';
+                                    }
+    
+                                    if ( $queried_is_obj ) {
+                                        $singular_in_tax_only = $this->in_array_part('/singular/in_'.$tax.'/', $singular_in_tax, '');
+                                        foreach( $singular_in_tax_only as $v ) {
+                                            $data = explode("/", $v);
+                                            if ( isset($data[3]) && $data[3] ) {
+                                                if ( is_object_in_term($obj->ID , $tax, $data[3] ) ) {
+                                                    $page_id = $data[0] == 'exclude' ? '' : $key;
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             }
-                            if ($this->in_string_part('footer/archive', $val)) {
-                                if ('publish' == get_post_status($key)) {
-                                    foreach ($val as $k => $v) {
-                                        if ($key && strpos($v, 'include/footer/archive') !== false) {
-                                            $temp = $this->builder_check_conditions('return', ['archive' => [$key => [str_replace("footer/", "", $v)]]]);
-                                            $page_id = $temp ? $temp : $page_id;
-                                        }
-                                        if (strpos($v, 'exclude/footer/archive') !== false) {
-                                            $temp = $this->builder_check_conditions('return', ['archive' => [$key => [str_replace("exclude/footer", "include", $v)]]]);
-                                            $page_id = $temp ? '' : $page_id;
-                                        }
-                                    }
+    
+                            // Posts by author              -----Prority 9
+                            if ( in_array('include/singular/post_by_author', $val) ) {
+                                $page_id = $key;
+                            } else if ( in_array('exclude/singular/post_by_author', $val) ) {
+                                $page_id = '';
+                            }
+                            if ( $queried_is_obj ) {
+                                if ( in_array('include/singular/post_by_author/'.$obj->post_author, $val) ) {
+                                    $page_id = $key;
+                                } else if ( in_array('exclude/singular/post_by_author/'.$obj->post_author, $val) ) {
+                                    $page_id = '';
+                                }
+                                // Post Type with specific id  -----Prority 10
+                                if ( in_array('include/singular/'.$obj->post_type.'/'.$obj->ID, $val) ) {
+                                    $page_id = $key;
+                                } else if ( in_array('exclude/singular/'.$obj->post_type.'/'.$obj->ID, $val) ) {
+                                    $page_id = '';
                                 }
                             }
                         }
                     }
-                    return $page_id;
+                }
+            }
+    
+            // Archive and Search Page
+            else if ( !empty($conditions['archive']) ) {
+                // Search Page
+                if ( is_search() ) {
+                    foreach( $conditions['archive'] as $key => $val ) {
+                        if ( 'publish' == get_post_status($key) ) {
+                            if ( in_array('include/archive/search', $val) ) {
+                                $page_id = $key;
+                            } else if ( in_array('exclude/archive/search', $val) ) {
+                                $page_id = '';
+                            }
+                        }
+                    }
+                }
+                // Archive Page
+                else if ( is_archive() ) {
+                    $is_cat = is_category();
+                    $is_tag = is_tag();
+                    $is_tax = is_tax();
+                    $is_date = is_date();
+                    $is_author = is_author();
+                    $taxonomy = ( $is_cat || $is_tag || $is_tax ) ? get_queried_object() : (object)[];
+    
+                    foreach( $conditions['archive'] as $key => $val ) {
+                        if ( 'publish' == get_post_status($key) ) {
+                            // This section is for all archive page
+                            if ( in_array('include/archive', $val) ) {
+                                $page_id = $key;
+                            } else if ( in_array('exclude/archive', $val) ) {
+                                $page_id = '';
+                            }
+                            // For Category
+                            if ( $is_cat ) {
+                                // all category
+                                if ( in_array('include/archive/category', $val) ) {
+                                    $page_id = $key;
+                                } else if ( in_array('exclude/archive/category', $val) ) {
+                                    $page_id = '';
+                                }
+                                // specific category
+                                if ( in_array('include/archive/category/'.$taxonomy->term_id, $val) ) {
+                                    $page_id = $key;
+                                }  else if ( in_array('exclude/archive/category/'.$taxonomy->term_id, $val) ) {
+                                    $page_id = '';
+                                }
+    
+                                // any child of category
+                                if ( in_array('include/archive/any_child_of_category', $val) ) {
+                                    $page_id = $key;
+                                } else if ( in_array('exclude/archive/any_child_of_category', $val) ) {
+                                    $page_id = '';
+                                }
+    
+                                $any_child_of_cat = $this->in_array_part("archive/any_child_of_category/", $val, '');
+                                if ( !empty($any_child_of_cat) ) {
+                                    foreach( $any_child_of_cat as $v ) {
+                                        $data = explode("/", $v);
+                                        if ( isset($data[3]) && $data[3] ) {
+                                            if ( term_is_ancestor_of($data[3], $taxonomy->term_id, 'category') ) {
+                                                $page_id = $data[0] == 'exclude' ? '' : $key;
+                                            }
+                                        }
+                                    }
+                                }
+    
+                                // all child of category
+                                if ( in_array('include/archive/child_of_category', $val) ) {
+                                    $page_id = $key;
+                                } else if ( in_array('exclude/archive/child_of_category', $val) ) {
+                                    $page_id = '';
+                                }
+                                // specific child of category
+                                if ( in_array('include/archive/child_of_category/'.$taxonomy->parent, $val) ) {
+                                    $page_id = $key;
+                                } else if ( in_array('exclude/archive/child_of_category/'.$taxonomy->parent, $val) ) {
+                                    $page_id = '';
+                                }
+                            }
+                            // For Tag
+                            else if ( $is_tag ) {
+                                if ( in_array('include/archive/post_tag', $val) ) {
+                                    $page_id = $key;
+                                } else if ( in_array('exclude/archive/post_tag', $val) ) {
+                                    $page_id = '';
+                                }
+                                if ( in_array('include/archive/post_tag/'.$taxonomy->term_id, $val) ) {
+                                    $page_id = $key;
+                                } else if ( in_array('exclude/archive/post_tag/'.$taxonomy->term_id, $val) ) {
+                                    $page_id = '';
+                                }
+                            }
+                            // Other taxonomy
+                            else if ( $is_tax ) {
+                                if ( in_array('include/archive/'.$taxonomy->taxonomy, $val) ) {
+                                    $page_id = $key;
+                                } else if ( in_array('exclude/archive/'.$taxonomy->taxonomy, $val) ) {
+                                    $page_id = '';
+                                }
+    
+                                if ( in_array('include/archive/'.$taxonomy->taxonomy.'/'.$taxonomy->term_id, $val) ) {
+                                    $page_id = $key;
+                                } else if ( in_array('exclude/archive/'.$taxonomy->taxonomy.'/'.$taxonomy->term_id, $val) ) {
+                                    $page_id = '';
+                                }
+    
+                                if ( in_array('include/archive/any_child_of_'.$taxonomy->taxonomy, $val) ) {
+                                    $page_id = $key;
+                                } else if ( in_array('exclude/archive/any_child_of_'.$taxonomy->taxonomy, $val) ) {
+                                    $page_id = '';
+                                }
+    
+                                $any_child_of_tax = $this->in_array_part('archive/any_child_of_'.$taxonomy->taxonomy.'/', $val, '');
+                                if ( !empty($any_child_of_tax) ) {
+                                    foreach( $any_child_of_tax as $v ) {
+                                        $data = explode("/", $v);
+                                        if ( isset($data[3]) && $data[3] ) {
+                                            if ( term_is_ancestor_of($data[3], $taxonomy->term_id, $taxonomy->taxonomy) ) {
+                                                $page_id = $data[0] == 'exclude' ? '' : $key;
+                                            }
+                                        }
+                                    }
+                                }
+    
+                                if ( in_array('include/archive/child_of_'.$taxonomy->taxonomy, $val) ) {
+                                    $page_id = $key;
+                                } else if ( in_array('exclude/archive/child_of_'.$taxonomy->taxonomy, $val) ) {
+                                    $page_id = '';
+                                }
+    
+                                if ( in_array('include/archive/child_of_'.$taxonomy->taxonomy.'/'.$taxonomy->parent, $val) ) {
+                                    $page_id = $key;
+                                } else if ( in_array('exclude/archive/child_of_'.$taxonomy->taxonomy.'/'.$taxonomy->parent, $val) ) {
+                                    $page_id = '';
+                                }
+    
+                            }
+                            // For Date 
+                            else if ( $is_date ) {
+                                if ( in_array('include/archive/date', $val) ) {
+                                    $page_id = $key;
+                                } else if ( in_array('exclude/archive/date', $val) ) {
+                                    $page_id = '';
+                                }
+                            }
+                            // For Author
+                            else if ( $is_author ) {
+                                if ( in_array('include/archive/author', $val) ) {
+                                    $page_id = $key;
+                                } else if ( in_array('exclude/archive/author', $val) ) {
+                                    $page_id = '';
+                                }
+                                $author_id = get_the_author_meta('ID');
+                                if ( in_array('include/archive/author/'.$author_id, $val) ) {
+                                    $page_id = $key;
+                                } else if ( in_array('exclude/archive/author/'.$author_id, $val) ) {
+                                    $page_id = '';
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
-        
-        if ($type == 'return') {
-            return $page_id;
-        }
-        if ($type == 'includes') {
-            return $page_id ? ULTP_PATH.'addons/builder/templates/page.php' : '';
-        }
+        return $page_id;
     }
 
     /**

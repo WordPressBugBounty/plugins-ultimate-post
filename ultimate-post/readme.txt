@@ -4,7 +4,7 @@ Tags: post grid, gutenberg blocks, magazine, news, blog plugin
 Requires at least: 5.0    
 Tested up to: 6.6
 Requires PHP: 5.6
-Stable tag: 4.1.11
+Stable tag: 4.1.12
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -105,7 +105,7 @@ PostX offers three types of Ajax paginations: load more, navigation, and numeric
 
 Let your freelance and guest writers have access to submit posts from the front end. Moreover, registered writers will get individual dashboards and SEO support. And, you can improve the submitted content by adding comments and suggesting changes.
 
-👉 [Learn More](https://www.wpxpo.com/postx/front-end-posting/)
+👉 [Learn More](https://www.wpxpo.com/postx/front-end-post-submission/)
 
 ## Custom Font
 
@@ -261,6 +261,9 @@ It is a Gutenberg plugin it works great with WordPress version 5.x.x or more. An
 11. With the help of the Elementor and Saved Template addons, you can use any of the post blocks of PostX to any pages while editing with Elementor builder.
 
 == Changelog ==
+= 4.1.12 – 24 September 2024 =
+* Update: Site Builder performance optimization
+
 = 4.1.11 – 2 September 2024 =
 * Update: Speed Optimization
 

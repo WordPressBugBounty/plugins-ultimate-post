@@ -2,21 +2,21 @@
 # This file is distributed under the GPLv3.
 msgid ""
 msgstr ""
-"Project-Id-Version: PostX 4.1.9\n"
+"Project-Id-Version: PostX 4.1.12\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/ultimate-post\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-08-12T05:16:04+00:00\n"
+"POT-Creation-Date: 2024-09-24T07:05:05+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.8.1\n"
 "X-Domain: ultimate-post\n"
 
 #. Plugin Name of the plugin
-#: classes/Options.php:94
-#: classes/Options.php:95
+#: classes/Options.php:79
+#: classes/Options.php:80
 #: assets/js/ultp_initial_setup_min.js:39
 msgid "PostX"
 msgstr ""
@@ -85,7 +85,7 @@ msgid "Add New Template"
 msgstr ""
 
 #: addons/beaver_builder/includes/frontend.php:19
-#: addons/bricks_builder/bricksbuilder.php:65
+#: addons/bricks_builder/bricksbuilder.php:66
 #: addons/divi/divi.php:53
 #: addons/elementor/Elementor_Widget.php:77
 #: addons/oxygen/oxygen.php:53
@@ -93,189 +93,163 @@ msgstr ""
 msgid "Pick a Template from your saved ones. Or create a template from: %s."
 msgstr ""
 
-#: addons/beaver_builder/init.php:7
-msgid "Beaver"
-msgstr ""
-
-#: addons/beaver_builder/init.php:8
-msgid "It lets you use PostX’s Gutenberg blocks in the Beaver Builder by using the Saved Template Addon."
+#: addons/beaver_builder/includes/frontend.php:19
+#: addons/bricks_builder/bricksbuilder.php:66
+#: addons/divi/divi.php:53
+#: addons/elementor/Elementor_Widget.php:77
+#: addons/oxygen/oxygen.php:53
+#: addons/wpbakery/wpbakery.php:44
+msgid "Dashboard > PostX > Saved Templates"
 msgstr ""
 
 #: addons/bricks_builder/bricksbuilder.php:22
 msgid "Select Template"
 msgstr ""
 
-#: addons/bricks_builder/bricksbuilder.php:65
-msgid "Dashboard > PostX > Saved Templates"
-msgstr ""
-
-#: addons/bricks_builder/init.php:7
-msgid "Bricks Builder"
-msgstr ""
-
-#: addons/bricks_builder/init.php:8
-msgid "It lets you use PostX’s Gutenberg blocks in the Bricks Builder by using the Saved Template Addon."
-msgstr ""
-
-#: addons/builder/Builder.php:176
+#: addons/builder/Builder.php:192
 msgid "PostX Builder Settings"
 msgstr ""
 
-#: addons/builder/Builder.php:198
+#: addons/builder/Builder.php:214
 msgid "Enable PostX Single Builder"
 msgstr ""
 
-#: addons/builder/Builder.php:200
+#: addons/builder/Builder.php:216
 #: assets/js/editor.blocks.js:2164
 msgid "Featured Video"
 msgstr ""
 
-#: addons/builder/Builder.php:205
-#: assets/js/ultp_dashboard_min.js:189
+#: addons/builder/Builder.php:221
+#: assets/js/ultp_dashboard_min.js:199
 msgid "Note: "
 msgstr ""
 
-#: addons/builder/Builder.php:205
+#: addons/builder/Builder.php:221
 msgid "Enter Youtube/ Vimeo/ Self Hosted URL"
 msgstr ""
 
-#: addons/builder/Builder.php:206
+#: addons/builder/Builder.php:222
 msgid "Featured Video Caption"
 msgstr ""
 
-#: addons/builder/Builder.php:237
+#: addons/builder/Builder.php:253
 #: addons/builder/assets/js/conditions.js:29
 #: assets/js/ultp_dashboard_min.js:29
 msgid "Container Width"
 msgstr ""
 
-#: addons/builder/Builder.php:241
+#: addons/builder/Builder.php:257
 msgid "Sidebar"
 msgstr ""
 
-#: addons/builder/Builder.php:243
-#: addons/builder/Builder.php:251
+#: addons/builder/Builder.php:259
+#: addons/builder/Builder.php:267
 #: assets/js/editor.blocks.js:591
 msgid "- None -"
 msgstr ""
 
-#: addons/builder/Builder.php:244
+#: addons/builder/Builder.php:260
 msgid "Left Sidebar"
 msgstr ""
 
-#: addons/builder/Builder.php:245
+#: addons/builder/Builder.php:261
 msgid "Right Sidebar"
 msgstr ""
 
-#: addons/builder/Builder.php:249
+#: addons/builder/Builder.php:265
 msgid "Select Sidebar(Widget Area)"
 msgstr ""
 
-#: addons/builder/Builder.php:354
-#: addons/builder/Builder.php:355
+#: addons/builder/Builder.php:393
+#: addons/builder/Builder.php:394
 msgctxt "Builder"
 msgid "Builder"
 msgstr ""
 
-#: addons/builder/Builder.php:356
-#: addons/builder/Builder.php:358
+#: addons/builder/Builder.php:395
+#: addons/builder/Builder.php:397
 msgid "Builder"
 msgstr ""
 
-#: addons/builder/Builder.php:357
+#: addons/builder/Builder.php:396
 msgid "Parent Builder"
 msgstr ""
 
-#: addons/builder/Builder.php:359
+#: addons/builder/Builder.php:398
 msgid "View Builder"
 msgstr ""
 
-#: addons/builder/Builder.php:360
-#: addons/builder/Builder.php:361
-#: addons/custom_font/Custom_Font.php:269
-#: addons/custom_font/Custom_Font.php:270
-#: assets/js/ultp_dashboard_min.js:139
+#: addons/builder/Builder.php:399
+#: addons/builder/Builder.php:400
+#: addons/custom_font/Custom_Font.php:271
+#: addons/custom_font/Custom_Font.php:272
+#: assets/js/ultp_dashboard_min.js:149
 msgid "Add New"
 msgstr ""
 
-#: addons/builder/Builder.php:362
+#: addons/builder/Builder.php:401
 msgid "Edit Builder"
 msgstr ""
 
-#: addons/builder/Builder.php:363
+#: addons/builder/Builder.php:402
 msgid "Update Builder"
 msgstr ""
 
-#: addons/builder/Builder.php:364
+#: addons/builder/Builder.php:403
 msgid "Search Builder"
 msgstr ""
 
-#: addons/builder/Builder.php:365
+#: addons/builder/Builder.php:404
 msgid "No Builder Found"
 msgstr ""
 
-#: addons/builder/Builder.php:366
+#: addons/builder/Builder.php:405
 msgid "Not Builder found in Trash"
 msgstr ""
 
-#: addons/builder/init.php:7
-#: assets/js/ultp_dashboard_min.js:39
-#: assets/js/ultp_initial_setup_min.js:49
-msgid "Dynamic Site Builder"
-msgstr ""
-
-#: addons/builder/init.php:8
-msgid "The Gutenberg-based Builder allows users to create dynamic templates for Home and all Archive pages."
-msgstr ""
-
-#: addons/chatgpt/init.php:13
-#: addons/chatgpt/init.php:37
+#: addons/chatgpt/init.php:14
 #: assets/js/editor.blocks.js:2417
-#: assets/js/editor.blocks.js:3220
+#: assets/js/editor.blocks.js:3352
 msgid "ChatGPT"
 msgstr ""
 
-#: addons/chatgpt/init.php:14
-msgid "PostX brings the ChatGPT into the WordPress Dashboard to let you generate content effortlessly. "
-msgstr ""
-
-#: addons/chatgpt/init.php:41
+#: addons/chatgpt/init.php:18
 msgid "ChatGPT Settings"
 msgstr ""
 
-#: addons/chatgpt/init.php:45
+#: addons/chatgpt/init.php:22
 msgid "OpenAI API Secret Key"
 msgstr ""
 
-#: addons/chatgpt/init.php:46
+#: addons/chatgpt/init.php:23
 msgid "For using ChatGPT addon, you have to add your OpenAI secret key."
 msgstr ""
 
-#: addons/chatgpt/init.php:48
+#: addons/chatgpt/init.php:25
 msgid "Get key."
 msgstr ""
 
-#: addons/chatgpt/init.php:52
+#: addons/chatgpt/init.php:29
 msgid "OpenAI Model"
 msgstr ""
 
-#: addons/chatgpt/init.php:53
+#: addons/chatgpt/init.php:30
 msgid "Choose your preferable OpenAI model"
 msgstr ""
 
-#: addons/chatgpt/init.php:64
+#: addons/chatgpt/init.php:41
 msgid "Response Time"
 msgstr ""
 
-#: addons/chatgpt/init.php:65
+#: addons/chatgpt/init.php:42
 msgid "Choose your preferable OpenAI response time"
 msgstr ""
 
-#: addons/chatgpt/init.php:70
+#: addons/chatgpt/init.php:47
 msgid "Max Tokens"
 msgstr ""
 
-#: addons/chatgpt/init.php:71
+#: addons/chatgpt/init.php:48
 msgid "Choose your preferable OpenAI max Number of Tokens to be generated by ChatGPT"
 msgstr ""
 
@@ -283,55 +257,55 @@ msgstr ""
 msgid "Add Font Family Name"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:58
-#: assets/js/ultp_dashboard_min.js:139
+#: addons/custom_font/Custom_Font.php:60
+#: assets/js/ultp_dashboard_min.js:149
 msgid "Preview"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:59
-#: assets/js/ultp_dashboard_min.js:139
+#: addons/custom_font/Custom_Font.php:61
+#: assets/js/ultp_dashboard_min.js:149
 msgid "WOFF"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:60
-#: assets/js/ultp_dashboard_min.js:139
+#: addons/custom_font/Custom_Font.php:62
+#: assets/js/ultp_dashboard_min.js:149
 msgid "WOFF2"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:61
-#: assets/js/ultp_dashboard_min.js:139
+#: addons/custom_font/Custom_Font.php:63
+#: assets/js/ultp_dashboard_min.js:149
 msgid "TTF"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:62
-#: assets/js/ultp_dashboard_min.js:139
+#: addons/custom_font/Custom_Font.php:64
+#: assets/js/ultp_dashboard_min.js:149
 msgid "SVG"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:63
-#: assets/js/ultp_dashboard_min.js:139
+#: addons/custom_font/Custom_Font.php:65
+#: assets/js/ultp_dashboard_min.js:149
 msgid "EOT"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:65
-#: assets/js/ultp_dashboard_min.js:139
+#: addons/custom_font/Custom_Font.php:67
+#: assets/js/ultp_dashboard_min.js:149
 msgid "Font Family"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:118
-#: assets/js/ultp_dashboard_min.js:139
+#: addons/custom_font/Custom_Font.php:120
+#: assets/js/ultp_dashboard_min.js:149
 msgid "The quick brown fox jumps over the lazy dog."
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:145
+#: addons/custom_font/Custom_Font.php:147
 msgid "Font Vaiations"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:157
+#: addons/custom_font/Custom_Font.php:159
 msgid "Weight:  "
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:160
+#: addons/custom_font/Custom_Font.php:162
 #: assets/js/editor.blocks.js:41
 #: assets/js/editor.blocks.js:85
 #: assets/js/editor.blocks.js:184
@@ -352,189 +326,172 @@ msgstr ""
 #: assets/js/editor.blocks.js:2219
 #: assets/js/editor.blocks.js:2252
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3088
+#: assets/js/editor.blocks.js:3187
 msgid "Normal"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:161
+#: addons/custom_font/Custom_Font.php:163
 msgid "100"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:162
+#: addons/custom_font/Custom_Font.php:164
 msgid "200"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:163
+#: addons/custom_font/Custom_Font.php:165
 msgid "300"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:164
+#: addons/custom_font/Custom_Font.php:166
 msgid "400"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:165
+#: addons/custom_font/Custom_Font.php:167
 msgid "500"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:166
+#: addons/custom_font/Custom_Font.php:168
 msgid "600"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:167
+#: addons/custom_font/Custom_Font.php:169
 msgid "700"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:168
+#: addons/custom_font/Custom_Font.php:170
 msgid "800"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:169
+#: addons/custom_font/Custom_Font.php:171
 msgid "900"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:180
+#: addons/custom_font/Custom_Font.php:182
 msgid "The quick brown fox jumps over the lazy dog"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:182
+#: addons/custom_font/Custom_Font.php:184
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
-#: assets/js/ultp_dashboard_min.js:139
+#: assets/js/ultp_dashboard_min.js:109
+#: assets/js/ultp_dashboard_min.js:149
 msgid "Edit"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:183
+#: addons/custom_font/Custom_Font.php:185
 #: addons/builder/assets/js/conditions.js:89
 #: assets/js/editor.blocks.js:1713
 #: assets/js/editor.blocks.js:1900
 #: assets/js/editor.blocks.js:2406
 #: assets/js/editor.blocks.js:2461
-#: assets/js/ultp_dashboard_min.js:239
+#: assets/js/ultp_dashboard_min.js:249
 msgid "Close"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:184
+#: addons/custom_font/Custom_Font.php:186
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
-#: assets/js/ultp_dashboard_min.js:139
+#: assets/js/ultp_dashboard_min.js:109
+#: assets/js/ultp_dashboard_min.js:149
 msgid "Delete"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:189
+#: addons/custom_font/Custom_Font.php:191
 msgid "WOFF File"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:190
+#: addons/custom_font/Custom_Font.php:192
 msgid "The web open Font Format, Used by Modern Browsers"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:191
-#: addons/custom_font/Custom_Font.php:196
-#: addons/custom_font/Custom_Font.php:201
-#: addons/custom_font/Custom_Font.php:206
-#: addons/custom_font/Custom_Font.php:211
-#: assets/js/editor.blocks.js:2956
+#: addons/custom_font/Custom_Font.php:193
+#: addons/custom_font/Custom_Font.php:198
+#: addons/custom_font/Custom_Font.php:203
+#: addons/custom_font/Custom_Font.php:208
+#: addons/custom_font/Custom_Font.php:213
+#: assets/js/editor.blocks.js:3055
 msgid "Upload"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:194
+#: addons/custom_font/Custom_Font.php:196
 msgid "WOFF2 File"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:195
+#: addons/custom_font/Custom_Font.php:197
 msgid "The web open Font Format 2, Used by Super Modern Browsers"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:199
+#: addons/custom_font/Custom_Font.php:201
 msgid "TTF File"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:200
+#: addons/custom_font/Custom_Font.php:202
 msgid "TrueType Fonts, Used for better supporting Safari, Android, iOS"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:204
+#: addons/custom_font/Custom_Font.php:206
 msgid "SVG File"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:205
+#: addons/custom_font/Custom_Font.php:207
 msgid "SVG font allow SVG to be used as glyphs when displaying text, Used by Legacy iOS"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:209
+#: addons/custom_font/Custom_Font.php:211
 msgid "EOT File"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:210
+#: addons/custom_font/Custom_Font.php:212
 msgid "Embedded OpenType, Used by IE6-IE9 Browsers"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:229
+#: addons/custom_font/Custom_Font.php:231
 msgid "Add Variation"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:263
+#: addons/custom_font/Custom_Font.php:265
 msgctxt "Custom Font"
 msgid "Custom Fonts"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:264
+#: addons/custom_font/Custom_Font.php:266
 msgctxt "Custom Font"
 msgid "Saved Custom Font"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:265
 #: addons/custom_font/Custom_Font.php:267
+#: addons/custom_font/Custom_Font.php:269
 msgid "Saved Custom Font"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:266
+#: addons/custom_font/Custom_Font.php:268
 msgid "Parent Custom Font"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:268
+#: addons/custom_font/Custom_Font.php:270
 msgid "View Custom Font"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:271
+#: addons/custom_font/Custom_Font.php:273
 msgid "Edit Custom Font"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:272
+#: addons/custom_font/Custom_Font.php:274
 msgid "Update Custom Font"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:273
+#: addons/custom_font/Custom_Font.php:275
 msgid "Search Custom Font"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:274
+#: addons/custom_font/Custom_Font.php:276
 msgid "No Custom Font Found"
 msgstr ""
 
-#: addons/custom_font/Custom_Font.php:275
+#: addons/custom_font/Custom_Font.php:277
 msgid "Not Custom Font found in Trash"
-msgstr ""
-
-#: addons/custom_font/init.php:7
-#: assets/js/ultp_dashboard_min.js:119
-msgid "Custom Font"
-msgstr ""
-
-#: addons/custom_font/init.php:8
-msgid "It allows you to upload custom fonts and use them on any PostX blocks with all typographical options."
 msgstr ""
 
 #: addons/divi/divi.php:25
 msgid "Pick a Template from your saved ones. Or create a template from: <strong><i>Dashboard > PostX > Saved Templates</i></strong>"
-msgstr ""
-
-#: addons/divi/init.php:7
-msgid "Divi"
-msgstr ""
-
-#: addons/divi/init.php:8
-msgid "It lets you use PostX’s Gutenberg blocks in the Divi Builder by using the Saved Template Addon."
 msgstr ""
 
 #: addons/dynamic_content/includes/DCService.php:578
@@ -565,22 +522,14 @@ msgstr ""
 msgid "Page Not Found"
 msgstr ""
 
-#: addons/dynamic_content/init.php:8
-msgid "Dynamic Content"
-msgstr ""
-
-#: addons/dynamic_content/init.php:9
-msgid "Insert dynamic, real-time content like excerpts, dates, author names, etc. in PostX blocks. "
-msgstr ""
-
 #: addons/elementor/Elementor_Widget.php:26
 #: assets/js/editor.blocks.js:184
 #: assets/js/editor.blocks.js:228
 #: assets/js/editor.blocks.js:294
 #: assets/js/editor.blocks.js:943
-#: assets/js/editor.blocks.js:2758
+#: assets/js/editor.blocks.js:2747
 #: assets/js/ultp_dashboard_min.js:39
-#: assets/js/ultp_dashboard_min.js:119
+#: assets/js/ultp_dashboard_min.js:129
 msgid "Settings"
 msgstr ""
 
@@ -588,49 +537,12 @@ msgstr ""
 msgid "Saved Template"
 msgstr ""
 
-#: addons/elementor/init.php:7
-msgid "Elementor"
-msgstr ""
-
-#: addons/elementor/init.php:8
-msgid "It lets you use PostX’s Gutenberg blocks in the Elementor Builder by using the Saved Template Addon."
-msgstr ""
-
-#: addons/oxygen/init.php:7
-msgid "Oxygen"
-msgstr ""
-
-#: addons/oxygen/init.php:8
-msgid "It lets you use PostX’s Gutenberg blocks in the Oxygen Builder by using the Saved Template Addon."
-msgstr ""
-
 #: addons/oxygen/oxygen.php:14
 msgid "PostX Templates"
 msgstr ""
 
-#: addons/table_of_content/init.php:7
-#: assets/js/editor.blocks.js:1614
-#: assets/js/editor.blocks.js:2384
-msgid "Table of Contents"
-msgstr ""
-
-#: addons/table_of_content/init.php:8
-msgid "It enables a highly customizable block to the Gutenberg blocks library to display the Table of Contents."
-msgstr ""
-
-#: addons/templates/init.php:7
-#: addons/templates/Saved_Templates.php:53
-#: addons/templates/Saved_Templates.php:55
-#: assets/js/ultp_dashboard_min.js:119
-msgid "Saved Templates"
-msgstr ""
-
-#: addons/templates/init.php:8
-msgid "Create unlimited templates by converting Gutenberg blocks into shortcodes to use them anywhere."
-msgstr ""
-
 #: addons/templates/Saved_Templates.php:37
-#: assets/js/ultp_dashboard_min.js:139
+#: assets/js/ultp_dashboard_min.js:149
 msgid "Shortcode"
 msgstr ""
 
@@ -642,6 +554,12 @@ msgstr ""
 #: addons/templates/Saved_Templates.php:52
 msgctxt "Templates"
 msgid "Saved Template"
+msgstr ""
+
+#: addons/templates/Saved_Templates.php:53
+#: addons/templates/Saved_Templates.php:55
+#: assets/js/ultp_dashboard_min.js:129
+msgid "Saved Templates"
 msgstr ""
 
 #: addons/templates/Saved_Templates.php:54
@@ -668,14 +586,6 @@ msgstr ""
 msgid "Not Template found in Trash"
 msgstr ""
 
-#: addons/wpbakery/init.php:7
-msgid "WPBakery"
-msgstr ""
-
-#: addons/wpbakery/init.php:8
-msgid "It lets you use PostX’s Gutenberg blocks in the WPBakery Builder by using the Saved Template Addon."
-msgstr ""
-
 #: addons/wpbakery/wpbakery.php:57
 msgid "PostX Templates for WPBakery."
 msgstr ""
@@ -685,22 +595,22 @@ msgid "Pick a Template from your saved ones. Or create a template from: \"Dashbo
 msgstr ""
 
 #: blocks/Advanced_Filter.php:413
-#: classes/REST_API.php:1078
+#: classes/REST_API.php:490
 #: addons/builder/assets/js/conditions.js:69
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/ultp_dashboard_min.js:109
 msgid "All"
 msgstr ""
 
-#: blocks/News_Ticker.php:210
+#: blocks/News_Ticker.php:217
 msgid "Show Previous Post"
 msgstr ""
 
-#: blocks/News_Ticker.php:212
+#: blocks/News_Ticker.php:219
 msgid "Pause Current Post"
 msgstr ""
 
-#: blocks/News_Ticker.php:214
+#: blocks/News_Ticker.php:221
 msgid "Show Next Post"
 msgstr ""
 
@@ -717,8 +627,8 @@ msgstr ""
 #: blocks/Post_List_4.php:411
 #: blocks/Post_Module_1.php:400
 #: blocks/Post_Module_2.php:403
-#: blocks/Post_Slider_1.php:297
-#: blocks/Post_Slider_2.php:280
+#: blocks/Post_Slider_1.php:296
+#: blocks/Post_Slider_2.php:279
 #: assets/js/editor.blocks.js:2461
 #: assets/js/editor.blocks.js:2615
 msgid "Read More"
@@ -744,65 +654,156 @@ msgstr ""
 msgid " ago"
 msgstr ""
 
-#: classes/Caches.php:61
-#: classes/Caches.php:123
+#: classes/Caches.php:56
+#: classes/Caches.php:125
 msgid "Data Fetched!!!"
 msgstr ""
 
-#: classes/Deactive.php:118
+#: classes/Dashboard.php:166
+msgid "The addon has been enabled."
+msgstr ""
+
+#: classes/Dashboard.php:166
+msgid "The addon has been disabled."
+msgstr ""
+
+#: classes/Dashboard.php:166
+msgid "The block has been enabled."
+msgstr ""
+
+#: classes/Dashboard.php:166
+msgid "The block has been disabled."
+msgstr ""
+
+#: classes/Dashboard.php:187
+msgid "You have successfully saved the settings data."
+msgstr ""
+
+#: classes/Dashboard.php:278
+msgid "Status changed for selected items."
+msgstr ""
+
+#: classes/Dashboard.php:317
+msgid "Your license key expired on %s."
+msgstr ""
+
+#: classes/Dashboard.php:322
+msgid "Your license key has been disabled."
+msgstr ""
+
+#: classes/Dashboard.php:325
+#: classes/Dashboard.php:351
+#: classes/Dashboard.php:354
+msgid "Invalid license."
+msgstr ""
+
+#: classes/Dashboard.php:329
+msgid "Your license is not active for this URL."
+msgstr ""
+
+#: classes/Dashboard.php:332
+msgid "This appears to be an invalid license key."
+msgstr ""
+
+#: classes/Dashboard.php:335
+msgid "Your license key has reached its activation limit."
+msgstr ""
+
+#: classes/Dashboard.php:338
+msgid "An error occurred, please try again."
+msgstr ""
+
+#: classes/Dashboard.php:342
+msgid "Your license key has been updated."
+msgstr ""
+
+#: classes/Dashboard.php:356
+msgid "Install & Acivate PostX Pro plugin."
+msgstr ""
+
+#: classes/Dashboard.php:371
+msgid "The selected item is deleted."
+msgstr ""
+
+#: classes/Dashboard.php:405
+msgid "New Support Ticket has been Created."
+msgstr ""
+
+#: classes/Dashboard.php:405
+msgid "New Support Ticket is not Created Due to Some Issues."
+msgstr ""
+
+#: classes/Dashboard.php:413
+#: classes/Dashboard.php:420
+msgid "Notice is removed."
+msgstr ""
+
+#: classes/Dashboard.php:517
+msgid "Template has been deleted."
+msgstr ""
+
+#: classes/Dashboard.php:562
+msgid "Template has been duplicated."
+msgstr ""
+
+#: classes/Dashboard.php:570
+msgid "Status has been changed."
+msgstr ""
+
+#: classes/Deactive.php:83
 msgid "I no longer need the plugin."
 msgstr ""
 
-#: classes/Deactive.php:123
+#: classes/Deactive.php:88
 msgid "I found a better plugin."
 msgstr ""
 
-#: classes/Deactive.php:124
+#: classes/Deactive.php:89
 msgid "Please share which plugin."
 msgstr ""
 
-#: classes/Deactive.php:129
+#: classes/Deactive.php:94
 msgid "The plugin suddenly stopped working."
 msgstr ""
 
-#: classes/Deactive.php:130
+#: classes/Deactive.php:95
 msgid "Please share more details."
 msgstr ""
 
-#: classes/Deactive.php:135
+#: classes/Deactive.php:100
 msgid "I could not get the plugin to work."
 msgstr ""
 
-#: classes/Deactive.php:140
+#: classes/Deactive.php:105
 msgid "It's a temporary deactivation."
 msgstr ""
 
-#: classes/Deactive.php:145
+#: classes/Deactive.php:110
 msgid "Other."
 msgstr ""
 
-#: classes/Deactive.php:146
+#: classes/Deactive.php:111
 msgid "Please share the reason."
 msgstr ""
 
-#: classes/Deactive.php:174
+#: classes/Deactive.php:136
 msgid "Quick Feedback"
 msgstr ""
 
-#: classes/Deactive.php:179
+#: classes/Deactive.php:141
 msgid "If you have a moment, please let us know why you are deactivating PostX:"
 msgstr ""
 
-#: classes/Deactive.php:196
+#: classes/Deactive.php:158
 msgid "Submit & Deactivate"
 msgstr ""
 
-#: classes/Deactive.php:197
+#: classes/Deactive.php:159
 msgid "Skip & Deactivate"
 msgstr ""
 
-#: classes/Functions.php:1153
-#: classes/Functions.php:1406
+#: classes/Functions.php:1140
+#: classes/Functions.php:1380
 #: assets/js/editor.blocks.js:1834
 #: assets/js/editor.blocks.js:1856
 #: assets/js/editor.blocks.js:2461
@@ -812,8 +813,8 @@ msgstr ""
 msgid "Previous"
 msgstr ""
 
-#: classes/Functions.php:1154
-#: classes/Functions.php:1411
+#: classes/Functions.php:1141
+#: classes/Functions.php:1385
 #: assets/js/editor.blocks.js:1834
 #: assets/js/editor.blocks.js:1856
 #: assets/js/editor.blocks.js:2461
@@ -823,291 +824,132 @@ msgstr ""
 msgid "Next"
 msgstr ""
 
-#: classes/Functions.php:1580
+#: classes/Functions.php:1532
 msgid "Your browser does not support the video tag."
 msgstr ""
 
-#: classes/Functions.php:1649
-msgid "Front End Post Submission"
-msgstr ""
-
-#: classes/Functions.php:1650
-msgid "Registered/guest writers can submit posts from frontend. Admins can easily manage, review, and publish posts."
-msgstr ""
-
-#: classes/Functions.php:1661
-msgid "Taxonomy Image & Color"
-msgstr ""
-
-#: classes/Functions.php:1662
-msgid "It allows you to add category or taxonomy-specific featured images and colors to make them attractive."
-msgstr ""
-
-#: classes/Functions.php:1671
-msgid "Progress Bar"
-msgstr ""
-
-#: classes/Functions.php:1672
-msgid "Display a visual indicator of the reading progression of blog posts and the scrolling progression of pages."
-msgstr ""
-
-#: classes/Functions.php:1681
-msgid "Yoast"
-msgstr ""
-
-#: classes/Functions.php:1682
-msgid "It allows you to display custom meta descriptions added with the Yoast SEO plugin instead of excerpts."
-msgstr ""
-
-#: classes/Functions.php:1696
-msgid "All in One SEO"
-msgstr ""
-
-#: classes/Functions.php:1697
-msgid "It allows you to display custom meta descriptions added with the All in One SEO plugin instead of excerpts."
-msgstr ""
-
-#: classes/Functions.php:1711
-msgid "Rank Math"
-msgstr ""
-
-#: classes/Functions.php:1712
-msgid "It allows you to display custom meta descriptions added with the Rank Math plugin instead of excerpts."
-msgstr ""
-
-#: classes/Functions.php:1726
-msgid "SEOPress"
-msgstr ""
-
-#: classes/Functions.php:1727
-msgid "It allows you to display custom meta descriptions added with the SEOPress plugin instead of excerpts."
-msgstr ""
-
-#: classes/Functions.php:1741
-msgid "Squirrly"
-msgstr ""
-
-#: classes/Functions.php:1742
-msgid "It allows you to display custom meta descriptions added with the Squirrly plugin instead of excerpts."
-msgstr ""
-
-#: classes/Functions.php:2368
+#: classes/Functions.php:2041
 msgid "- Select Template -"
 msgstr ""
 
 #: classes/Importer.php:557
-#: classes/Styles.php:481
+#: classes/Styles.php:158
 msgid "CSS can not be saved due to permission!!!"
 msgstr ""
 
 #: classes/Importer.php:560
-#: classes/Styles.php:483
+#: classes/Styles.php:160
 msgid "PostX css file has been updated."
 msgstr ""
 
-#: classes/Initialization.php:683
+#: classes/Initialization.php:177
 msgid "PostX - Gutenberg Post Blocks"
 msgstr ""
 
-#: classes/Initialization.php:687
+#: classes/Initialization.php:181
 msgid "PostX Site Builder"
 msgstr ""
 
-#: classes/Initialization.php:1198
-msgid "PostX is ready for the next update. Changelog:-"
-msgstr ""
-
-#: classes/Options.php:56
-#: classes/Options.php:75
+#: classes/Options.php:40
+#: classes/Options.php:59
 #: assets/js/ultp_dashboard_min.js:39
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Docs"
 msgstr ""
 
-#: classes/Options.php:57
+#: classes/Options.php:41
 msgid "Tutorials"
 msgstr ""
 
-#: classes/Options.php:58
+#: classes/Options.php:42
 msgid "Support"
 msgstr ""
 
-#: classes/Options.php:74
-#: classes/Options.php:113
-#: classes/Options.php:148
-#: classes/Options.php:149
-#: assets/js/ultp_dashboard_min.js:119
+#: classes/Options.php:58
+#: classes/Options.php:98
+#: classes/Options.php:133
+#: classes/Options.php:134
+#: assets/js/ultp_dashboard_min.js:129
 msgid "Starter Sites"
 msgstr ""
 
-#: classes/Options.php:77
+#: classes/Options.php:61
 msgid "Get PostX Pro"
 msgstr ""
 
-#: classes/Options.php:80
-#: classes/Options.php:117
+#: classes/Options.php:64
+#: classes/Options.php:102
 msgid "Quick Support"
 msgstr ""
 
-#: classes/Options.php:105
+#: classes/Options.php:90
 msgid "PostX Dashboard"
 msgstr ""
 
-#: classes/Options.php:106
-#: assets/js/ultp_dashboard_min.js:119
+#: classes/Options.php:91
+#: assets/js/ultp_dashboard_min.js:129
 msgid "Getting Started"
 msgstr ""
 
-#: classes/Options.php:112
-#: assets/js/ultp_dashboard_min.js:119
+#: classes/Options.php:97
+#: assets/js/ultp_dashboard_min.js:129
 msgid "Site Builder"
 msgstr ""
 
-#: classes/Options.php:114
-#: assets/js/ultp_dashboard_min.js:119
+#: classes/Options.php:99
+#: assets/js/ultp_dashboard_min.js:129
 msgid "Blocks"
 msgstr ""
 
-#: classes/Options.php:115
-#: assets/js/ultp_dashboard_min.js:119
+#: classes/Options.php:100
+#: assets/js/ultp_dashboard_min.js:129
 msgid "Integrations"
 msgstr ""
 
-#: classes/Options.php:116
+#: classes/Options.php:101
 msgid "License"
 msgstr ""
 
-#: classes/Options.php:131
-#: classes/Options.php:132
+#: classes/Options.php:116
+#: classes/Options.php:117
 msgid "Initial Setup"
 msgstr ""
 
-#: classes/Options.php:141
+#: classes/Options.php:126
 #: addons/builder/assets/js/conditions.js:29
 #: addons/builder/assets/js/conditions.js:69
 #: assets/js/editor.blocks.js:2384
-#: assets/js/editor.blocks.js:2670
-#: assets/js/editor.blocks.js:3011
-#: assets/js/editor.blocks.js:3022
+#: assets/js/editor.blocks.js:2659
+#: assets/js/editor.blocks.js:3110
+#: assets/js/editor.blocks.js:3121
 #: assets/js/ultp_dashboard_min.js:29
 #: assets/js/ultp_dashboard_min.js:39
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/ultp_dashboard_min.js:109
 msgid "Upgrade to Pro"
 msgstr ""
 
-#: classes/REST_API.php:320
-msgid "Template has been deleted."
-msgstr ""
-
-#: classes/REST_API.php:365
-msgid "Template has been duplicated."
-msgstr ""
-
-#: classes/REST_API.php:373
-msgid "Status has been changed."
-msgstr ""
-
-#: classes/REST_API.php:468
-msgid "You have successfully saved the settings data."
-msgstr ""
-
-#: classes/REST_API.php:501
+#: classes/REST_API.php:182
 msgid "Item has been removed from wishlist."
 msgstr ""
 
-#: classes/REST_API.php:501
+#: classes/REST_API.php:182
 msgid "Item added to wishlist."
 msgstr ""
 
-#: classes/REST_API.php:524
-msgid "The addon has been enabled."
+#: classes/Styles.php:174
+msgid "Data Delete Done"
 msgstr ""
 
-#: classes/REST_API.php:524
-msgid "The addon has been disabled."
-msgstr ""
-
-#: classes/REST_API.php:524
-msgid "The block has been enabled."
-msgstr ""
-
-#: classes/REST_API.php:524
-msgid "The block has been disabled."
-msgstr ""
-
-#: classes/REST_API.php:604
-msgid "Status changed for selected items."
-msgstr ""
-
-#: classes/REST_API.php:643
-msgid "Your license key expired on %s."
-msgstr ""
-
-#: classes/REST_API.php:648
-msgid "Your license key has been disabled."
-msgstr ""
-
-#: classes/REST_API.php:651
-#: classes/REST_API.php:677
-#: classes/REST_API.php:680
-msgid "Invalid license."
-msgstr ""
-
-#: classes/REST_API.php:655
-msgid "Your license is not active for this URL."
-msgstr ""
-
-#: classes/REST_API.php:658
-msgid "This appears to be an invalid license key."
-msgstr ""
-
-#: classes/REST_API.php:661
-msgid "Your license key has reached its activation limit."
-msgstr ""
-
-#: classes/REST_API.php:664
-msgid "An error occurred, please try again."
-msgstr ""
-
-#: classes/REST_API.php:668
-msgid "Your license key has been updated."
-msgstr ""
-
-#: classes/REST_API.php:682
-msgid "Install & Acivate PostX Pro plugin."
-msgstr ""
-
-#: classes/REST_API.php:697
-msgid "The selected item is deleted."
-msgstr ""
-
-#: classes/REST_API.php:731
-msgid "New Support Ticket has been Created."
-msgstr ""
-
-#: classes/REST_API.php:731
-msgid "New Support Ticket is not Created Due to Some Issues."
-msgstr ""
-
-#: classes/REST_API.php:739
-#: classes/REST_API.php:746
-msgid "Notice is removed."
-msgstr ""
-
-#: classes/Styles.php:242
-msgid "CSS Updated!"
-msgstr ""
-
-#: classes/Styles.php:374
+#: classes/Styles.php:207
 msgid "Data retrive done"
 msgstr ""
 
-#: classes/Styles.php:376
+#: classes/Styles.php:212
 msgid "Data not found!!"
 msgstr ""
 
-#: classes/Styles.php:497
-msgid "Data Delete Done"
+#: classes/Styles.php:338
+msgid "CSS Updated!"
 msgstr ""
 
 #: classes/Templates.php:52
@@ -1216,11 +1058,11 @@ msgid "Re-Generate Font Files"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:29
-#: assets/js/editor.blocks.js:2681
-#: assets/js/editor.blocks.js:2846
-#: assets/js/editor.blocks.js:2857
-#: assets/js/editor.blocks.js:2989
-#: assets/js/editor.blocks.js:3077
+#: assets/js/editor.blocks.js:2670
+#: assets/js/editor.blocks.js:2945
+#: assets/js/editor.blocks.js:2956
+#: assets/js/editor.blocks.js:3088
+#: assets/js/editor.blocks.js:3176
 #: assets/js/ultp_dashboard_min.js:29
 msgid "Pro Features"
 msgstr ""
@@ -1264,7 +1106,7 @@ msgstr ""
 
 #: addons/builder/assets/js/conditions.js:29
 #: assets/js/ultp_dashboard_min.js:29
-#: assets/js/ultp_dashboard_min.js:119
+#: assets/js/ultp_dashboard_min.js:129
 msgid "Feature Request"
 msgstr ""
 
@@ -1275,13 +1117,13 @@ msgstr ""
 
 #: addons/builder/assets/js/conditions.js:29
 #: assets/js/ultp_dashboard_min.js:29
-#: assets/js/ultp_dashboard_min.js:209
+#: assets/js/ultp_dashboard_min.js:219
 msgid "PostX Community"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:29
 #: assets/js/ultp_dashboard_min.js:29
-#: assets/js/ultp_dashboard_min.js:209
+#: assets/js/ultp_dashboard_min.js:219
 msgid "Join the Facebook community of PostX to stay up-to-date and share your thoughts and feedback."
 msgstr ""
 
@@ -1321,116 +1163,117 @@ msgid "Enjoying PostX? Give us a 5 Star review to support our ongoing work."
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:39
-#: assets/js/ultp_dashboard_min.js:69
+#: assets/js/ultp_dashboard_min.js:79
 msgid "Where Do You Want to Display Your Template?"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:39
-#: assets/js/ultp_dashboard_min.js:69
+#: assets/js/ultp_dashboard_min.js:79
 msgid "Set the conditions that determine where your Template is used throughout your site."
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:39
-#: assets/js/ultp_dashboard_min.js:69
+#: assets/js/ultp_dashboard_min.js:79
 msgid "Add Conditions"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/editor.blocks.js:2670
-#: assets/js/editor.blocks.js:3055
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/editor.blocks.js:2659
+#: assets/js/editor.blocks.js:3154
+#: assets/js/ultp_dashboard_min.js:109
 msgid "Get License"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
 #: assets/js/editor.blocks.js:2384
 #: assets/js/editor.blocks.js:2417
-#: assets/js/editor.blocks.js:2670
-#: assets/js/editor.blocks.js:3055
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/editor.blocks.js:2659
+#: assets/js/editor.blocks.js:3154
+#: assets/js/ultp_dashboard_min.js:109
 msgid "Import"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
 #: assets/js/editor.blocks.js:2384
-#: assets/js/editor.blocks.js:2670
-#: assets/js/ultp_dashboard_min.js:99
-#: assets/js/ultp_dashboard_min.js:149
+#: assets/js/editor.blocks.js:2659
+#: assets/js/ultp_dashboard_min.js:109
+#: assets/js/ultp_dashboard_min.js:159
 msgid "Live Preview"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/ultp_dashboard_min.js:109
 msgid "Start from Scratch"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/ultp_dashboard_min.js:109
 msgid "Add"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/ultp_dashboard_min.js:109
 msgid "Conditions"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
-#: assets/js/ultp_dashboard_min.js:139
+#: assets/js/ultp_dashboard_min.js:109
+#: assets/js/ultp_dashboard_min.js:149
 msgid "Duplicate"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
-#: assets/js/ultp_dashboard_min.js:139
+#: assets/js/ultp_dashboard_min.js:109
+#: assets/js/ultp_dashboard_min.js:149
 msgid "Set to"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
-#: assets/js/ultp_dashboard_min.js:139
+#: assets/js/ultp_dashboard_min.js:109
+#: assets/js/ultp_dashboard_min.js:149
 msgid "Draft"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
-#: assets/js/ultp_dashboard_min.js:139
+#: assets/js/ultp_dashboard_min.js:109
+#: assets/js/ultp_dashboard_min.js:149
 msgid "Publish"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
 #: assets/js/editor.blocks.js:2373
-#: assets/js/editor.blocks.js:2670
-#: assets/js/editor.blocks.js:2703
-#: assets/js/ultp_dashboard_min.js:99
-#: assets/js/ultp_dashboard_min.js:199
+#: assets/js/editor.blocks.js:2659
+#: assets/js/editor.blocks.js:2692
+#: assets/js/ultp_dashboard_min.js:109
+#: assets/js/ultp_dashboard_min.js:209
 msgid "Synchronize"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/ultp_dashboard_min.js:109
 msgid "All Template"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/ultp_dashboard_min.js:109
 msgid "Front Page"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/ultp_dashboard_min.js:109
 msgid "Singular"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
 #: assets/js/editor.blocks.js:360
 #: assets/js/editor.blocks.js:382
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/ultp_dashboard_min.js:109
 msgid "Search Result"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/editor.blocks.js:2890
+#: assets/js/ultp_dashboard_min.js:109
 msgid "Archive"
 msgstr ""
 
@@ -1438,19 +1281,19 @@ msgstr ""
 #: assets/js/editor.blocks.js:1647
 #: assets/js/editor.blocks.js:1713
 #: assets/js/editor.blocks.js:1955
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/ultp_dashboard_min.js:109
 msgid "Category"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/ultp_dashboard_min.js:109
 msgid "Authors"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
 #: assets/js/editor.blocks.js:1713
 #: assets/js/editor.blocks.js:2274
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/ultp_dashboard_min.js:109
 msgid "Tags"
 msgstr ""
 
@@ -1458,38 +1301,38 @@ msgstr ""
 #: assets/js/editor.blocks.js:1834
 #: assets/js/editor.blocks.js:2098
 #: assets/js/editor.blocks.js:2461
-#: assets/js/ultp_dashboard_min.js:99
-#: assets/js/ultp_dashboard_min.js:139
+#: assets/js/ultp_dashboard_min.js:109
+#: assets/js/ultp_dashboard_min.js:149
 msgid "Date"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/ultp_dashboard_min.js:109
 msgid "Header"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/ultp_dashboard_min.js:109
 msgid "Footer"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/ultp_dashboard_min.js:109
 msgid "Back"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/ultp_dashboard_min.js:109
 msgid "Templates"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/ultp_dashboard_min.js:109
 msgid "Create"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/ultp_dashboard_min.js:109
 msgid "Template"
 msgstr ""
 
@@ -1510,17 +1353,19 @@ msgstr ""
 #: assets/js/editor.blocks.js:1295
 #: assets/js/editor.blocks.js:1339
 #: assets/js/editor.blocks.js:1625
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/editor.blocks.js:2824
+#: assets/js/editor.blocks.js:2890
+#: assets/js/ultp_dashboard_min.js:109
 msgid "Loading..."
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/ultp_dashboard_min.js:109
 msgid "Create Unlimited Templates With PostX Pro"
 msgstr ""
 
 #: addons/builder/assets/js/conditions.js:69
-#: assets/js/ultp_dashboard_min.js:99
+#: assets/js/ultp_dashboard_min.js:109
 msgid "We are sorry. Unfortunately, the free version of PostX lets you create only one template. Please upgrade to a pro version that unlocks the full capabilities of the dynamic site builder."
 msgstr ""
 
@@ -1642,6 +1487,8 @@ msgstr ""
 #: assets/js/editor.blocks.js:1592
 #: assets/js/editor.blocks.js:1867
 #: assets/js/editor.blocks.js:2076
+#: assets/js/editor.blocks.js:2813
+#: assets/js/editor.blocks.js:2868
 msgid "Icon"
 msgstr ""
 
@@ -1654,8 +1501,8 @@ msgstr ""
 #: assets/js/editor.blocks.js:2142
 #: assets/js/editor.blocks.js:2164
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:2857
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/editor.blocks.js:2956
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Image"
 msgstr ""
 
@@ -1676,7 +1523,8 @@ msgstr ""
 #: assets/js/editor.blocks.js:1570
 #: assets/js/editor.blocks.js:1625
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3088
+#: assets/js/editor.blocks.js:2890
+#: assets/js/editor.blocks.js:3187
 msgid "None"
 msgstr ""
 
@@ -1753,7 +1601,8 @@ msgstr ""
 #: assets/js/editor.blocks.js:2296
 #: assets/js/editor.blocks.js:2329
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3154
+#: assets/js/editor.blocks.js:2813
+#: assets/js/editor.blocks.js:3253
 msgid "Typography"
 msgstr ""
 
@@ -1793,6 +1642,7 @@ msgstr ""
 #: assets/js/editor.blocks.js:2219
 #: assets/js/editor.blocks.js:2252
 #: assets/js/editor.blocks.js:2461
+#: assets/js/editor.blocks.js:2813
 msgid "Icon Color"
 msgstr ""
 
@@ -2033,7 +1883,7 @@ msgstr ""
 #: assets/js/editor.blocks.js:481
 #: assets/js/editor.blocks.js:1625
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:2857
+#: assets/js/editor.blocks.js:2956
 msgid "Solid"
 msgstr ""
 
@@ -2102,12 +1952,13 @@ msgstr ""
 #: assets/js/editor.blocks.js:2252
 #: assets/js/editor.blocks.js:2296
 #: assets/js/editor.blocks.js:2329
+#: assets/js/editor.blocks.js:2868
 msgid "Advanced"
 msgstr ""
 
 #: assets/js/editor.blocks.js:52
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "List - PostX"
 msgstr ""
 
@@ -2127,7 +1978,7 @@ msgstr ""
 #: assets/js/editor.blocks.js:1482
 #: assets/js/editor.blocks.js:1614
 #: assets/js/editor.blocks.js:1647
-#: assets/js/ultp_dashboard_min.js:119
+#: assets/js/ultp_dashboard_min.js:129
 msgid "Documentation"
 msgstr ""
 
@@ -2165,7 +2016,7 @@ msgid "Button"
 msgstr ""
 
 #: assets/js/editor.blocks.js:85
-#: assets/js/editor.blocks.js:3088
+#: assets/js/editor.blocks.js:3187
 msgid "Inherit"
 msgstr ""
 
@@ -2322,6 +2173,7 @@ msgstr ""
 #: assets/js/editor.blocks.js:2296
 #: assets/js/editor.blocks.js:2329
 #: assets/js/editor.blocks.js:2461
+#: assets/js/editor.blocks.js:2813
 msgid "Alignment"
 msgstr ""
 
@@ -2331,6 +2183,7 @@ msgid "Position"
 msgstr ""
 
 #: assets/js/editor.blocks.js:184
+#: assets/js/editor.blocks.js:2813
 msgid "Inline"
 msgstr ""
 
@@ -2363,7 +2216,8 @@ msgstr ""
 #: assets/js/editor.blocks.js:2329
 #: assets/js/editor.blocks.js:2461
 #: assets/js/editor.blocks.js:2813
-#: assets/js/editor.blocks.js:2824
+#: assets/js/editor.blocks.js:2912
+#: assets/js/editor.blocks.js:2923
 msgid "Color"
 msgstr ""
 
@@ -2382,6 +2236,7 @@ msgstr ""
 #: assets/js/editor.blocks.js:2219
 #: assets/js/editor.blocks.js:2252
 #: assets/js/editor.blocks.js:2461
+#: assets/js/editor.blocks.js:2945
 msgid "Hover Color"
 msgstr ""
 
@@ -2418,6 +2273,7 @@ msgstr ""
 #: assets/js/editor.blocks.js:2219
 #: assets/js/editor.blocks.js:2252
 #: assets/js/editor.blocks.js:2461
+#: assets/js/editor.blocks.js:2813
 msgid "Icon Size"
 msgstr ""
 
@@ -3224,7 +3080,7 @@ msgstr ""
 
 #: assets/js/editor.blocks.js:382
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Search - PostX"
 msgstr ""
 
@@ -3529,7 +3385,7 @@ msgstr ""
 
 #: assets/js/editor.blocks.js:470
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Button Group"
 msgstr ""
 
@@ -3598,7 +3454,7 @@ msgid "Icon Background Color"
 msgstr ""
 
 #: assets/js/editor.blocks.js:481
-#: assets/js/editor.blocks.js:3154
+#: assets/js/editor.blocks.js:3253
 msgid "Dark Mode"
 msgstr ""
 
@@ -3634,7 +3490,7 @@ msgstr ""
 #: assets/js/editor.blocks.js:547
 #: assets/js/editor.blocks.js:591
 #: assets/js/editor.blocks.js:2461
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Heading"
 msgstr ""
 
@@ -3675,7 +3531,7 @@ msgid "Link"
 msgstr ""
 
 #: assets/js/editor.blocks.js:558
-#: assets/js/editor.blocks.js:2945
+#: assets/js/editor.blocks.js:3044
 msgid "Link Target"
 msgstr ""
 
@@ -3734,7 +3590,7 @@ msgid "Enable Dark Image"
 msgstr ""
 
 #: assets/js/editor.blocks.js:558
-#: assets/js/editor.blocks.js:3220
+#: assets/js/editor.blocks.js:3352
 msgid "Upload Dark Mode Image"
 msgstr ""
 
@@ -3803,7 +3659,7 @@ msgid "Caption Margin"
 msgstr ""
 
 #: assets/js/editor.blocks.js:558
-#: assets/js/editor.blocks.js:2780
+#: assets/js/editor.blocks.js:2769
 msgid "Add Text..."
 msgstr ""
 
@@ -4073,6 +3929,17 @@ msgid "Time Badge"
 msgstr ""
 
 #: assets/js/editor.blocks.js:591
+msgid "Badge Type"
+msgstr ""
+
+#: assets/js/editor.blocks.js:591
+#: assets/js/editor.blocks.js:1713
+#: assets/js/editor.blocks.js:2076
+#: assets/js/editor.blocks.js:2461
+msgid "Date/Time Format"
+msgstr ""
+
+#: assets/js/editor.blocks.js:591
 msgid "Time Style"
 msgstr ""
 
@@ -4101,7 +3968,7 @@ msgid "image Space"
 msgstr ""
 
 #: assets/js/editor.blocks.js:613
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "News Ticker"
 msgstr ""
 
@@ -4159,6 +4026,44 @@ msgstr ""
 #: assets/js/editor.blocks.js:1207
 #: assets/js/editor.blocks.js:1251
 msgid "Grid Features"
+msgstr ""
+
+#: assets/js/editor.blocks.js:635
+#: assets/js/editor.blocks.js:679
+#: assets/js/editor.blocks.js:723
+#: assets/js/editor.blocks.js:767
+#: assets/js/editor.blocks.js:811
+#: assets/js/editor.blocks.js:855
+#: assets/js/editor.blocks.js:899
+#: assets/js/editor.blocks.js:1042
+#: assets/js/editor.blocks.js:1086
+#: assets/js/editor.blocks.js:1130
+#: assets/js/editor.blocks.js:1174
+#: assets/js/editor.blocks.js:1218
+#: assets/js/editor.blocks.js:1262
+#: assets/js/editor.blocks.js:1306
+#: assets/js/editor.blocks.js:1350
+#: assets/js/editor.blocks.js:2461
+msgid "Enable Dynamic Content"
+msgstr ""
+
+#: assets/js/editor.blocks.js:635
+#: assets/js/editor.blocks.js:679
+#: assets/js/editor.blocks.js:723
+#: assets/js/editor.blocks.js:767
+#: assets/js/editor.blocks.js:811
+#: assets/js/editor.blocks.js:855
+#: assets/js/editor.blocks.js:899
+#: assets/js/editor.blocks.js:1042
+#: assets/js/editor.blocks.js:1086
+#: assets/js/editor.blocks.js:1130
+#: assets/js/editor.blocks.js:1174
+#: assets/js/editor.blocks.js:1218
+#: assets/js/editor.blocks.js:1262
+#: assets/js/editor.blocks.js:1306
+#: assets/js/editor.blocks.js:1350
+#: assets/js/editor.blocks.js:2461
+msgid "Insert dynamic data & custom fields that update automatically."
 msgstr ""
 
 #: assets/js/editor.blocks.js:635
@@ -4718,7 +4623,7 @@ msgstr ""
 
 #: assets/js/editor.blocks.js:657
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Grid #1"
 msgstr ""
 
@@ -4733,13 +4638,13 @@ msgstr ""
 #: assets/js/editor.blocks.js:1427
 #: assets/js/editor.blocks.js:1834
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3088
+#: assets/js/editor.blocks.js:3187
 msgid "Height"
 msgstr ""
 
 #: assets/js/editor.blocks.js:701
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Grid #2"
 msgstr ""
 
@@ -4818,7 +4723,7 @@ msgstr ""
 
 #: assets/js/editor.blocks.js:745
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Grid #3"
 msgstr ""
 
@@ -4858,7 +4763,7 @@ msgstr ""
 
 #: assets/js/editor.blocks.js:789
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Grid #4"
 msgstr ""
 
@@ -4869,19 +4774,19 @@ msgstr ""
 
 #: assets/js/editor.blocks.js:833
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Grid #5"
 msgstr ""
 
 #: assets/js/editor.blocks.js:877
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Grid #6"
 msgstr ""
 
 #: assets/js/editor.blocks.js:921
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Grid #7"
 msgstr ""
 
@@ -4982,7 +4887,7 @@ msgstr ""
 
 #: assets/js/editor.blocks.js:1064
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post List #1"
 msgstr ""
 
@@ -5005,7 +4910,7 @@ msgstr ""
 #: assets/js/editor.blocks.js:2219
 #: assets/js/editor.blocks.js:2252
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3088
+#: assets/js/editor.blocks.js:3187
 msgid "Spacing"
 msgstr ""
 
@@ -5063,7 +4968,7 @@ msgstr ""
 
 #: assets/js/editor.blocks.js:1108
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post List #2"
 msgstr ""
 
@@ -5081,7 +4986,7 @@ msgstr ""
 
 #: assets/js/editor.blocks.js:1152
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post List #3"
 msgstr ""
 
@@ -5123,7 +5028,7 @@ msgstr ""
 
 #: assets/js/editor.blocks.js:1196
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post List #4"
 msgstr ""
 
@@ -5137,7 +5042,7 @@ msgstr ""
 
 #: assets/js/editor.blocks.js:1240
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Module #1"
 msgstr ""
 
@@ -5174,7 +5079,7 @@ msgstr ""
 
 #: assets/js/editor.blocks.js:1284
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Module #2"
 msgstr ""
 
@@ -5252,7 +5157,7 @@ msgstr ""
 
 #: assets/js/editor.blocks.js:1328
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Slider #1"
 msgstr ""
 
@@ -5350,7 +5255,7 @@ msgstr ""
 
 #: assets/js/editor.blocks.js:1372
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Slider #2"
 msgstr ""
 
@@ -5527,13 +5432,13 @@ msgstr ""
 
 #: assets/js/editor.blocks.js:1427
 #: assets/js/editor.blocks.js:1460
-#: assets/js/editor.blocks.js:2890
+#: assets/js/editor.blocks.js:2989
 msgid "Hue"
 msgstr ""
 
 #: assets/js/editor.blocks.js:1427
 #: assets/js/editor.blocks.js:1460
-#: assets/js/editor.blocks.js:2890
+#: assets/js/editor.blocks.js:2989
 msgid "Saturation"
 msgstr ""
 
@@ -5721,7 +5626,7 @@ msgstr ""
 
 #: assets/js/editor.blocks.js:1471
 #: assets/js/editor.blocks.js:1482
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Row"
 msgstr ""
 
@@ -5859,7 +5764,7 @@ msgid "Hover Style"
 msgstr ""
 
 #: assets/js/editor.blocks.js:1592
-#: assets/js/editor.blocks.js:2813
+#: assets/js/editor.blocks.js:2912
 msgid "Border Width"
 msgstr ""
 
@@ -5920,6 +5825,11 @@ msgstr ""
 
 #: assets/js/editor.blocks.js:1592
 msgid "Heading Table of Contents..."
+msgstr ""
+
+#: assets/js/editor.blocks.js:1614
+#: assets/js/editor.blocks.js:2384
+msgid "Table of Contents"
 msgstr ""
 
 #: assets/js/editor.blocks.js:1614
@@ -6000,7 +5910,7 @@ msgstr ""
 #: assets/js/editor.blocks.js:1955
 #: assets/js/editor.blocks.js:2384
 #: assets/js/editor.blocks.js:2461
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Taxonomy"
 msgstr ""
 
@@ -6013,7 +5923,7 @@ msgid "Category List"
 msgstr ""
 
 #: assets/js/editor.blocks.js:1691
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Wrapper"
 msgstr ""
 
@@ -6091,8 +6001,8 @@ msgstr ""
 #: assets/js/editor.blocks.js:2175
 #: assets/js/editor.blocks.js:2329
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:2857
-#: assets/js/editor.blocks.js:3088
+#: assets/js/editor.blocks.js:2956
+#: assets/js/editor.blocks.js:3187
 msgid "Size"
 msgstr ""
 
@@ -6152,12 +6062,6 @@ msgstr ""
 
 #: assets/js/editor.blocks.js:1713
 msgid "Date Format"
-msgstr ""
-
-#: assets/js/editor.blocks.js:1713
-#: assets/js/editor.blocks.js:2076
-#: assets/js/editor.blocks.js:2461
-msgid "Date/Time Format"
 msgstr ""
 
 #: assets/js/editor.blocks.js:1713
@@ -6257,6 +6161,7 @@ msgid "Display Advance Post Meta with the ultimate controls."
 msgstr ""
 
 #: assets/js/editor.blocks.js:1735
+#: assets/js/editor.blocks.js:2890
 msgid "Post Meta"
 msgstr ""
 
@@ -6276,7 +6181,8 @@ msgid "Description"
 msgstr ""
 
 #: assets/js/editor.blocks.js:1768
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/editor.blocks.js:2890
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Archive Title"
 msgstr ""
 
@@ -6345,7 +6251,7 @@ msgid "View All Post Link"
 msgstr ""
 
 #: assets/js/editor.blocks.js:1812
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Author Box"
 msgstr ""
 
@@ -6355,6 +6261,7 @@ msgstr ""
 
 #: assets/js/editor.blocks.js:1812
 #: assets/js/editor.blocks.js:2461
+#: assets/js/editor.blocks.js:2890
 msgid "Author"
 msgstr ""
 
@@ -6394,7 +6301,7 @@ msgstr ""
 
 #: assets/js/editor.blocks.js:1834
 #: assets/js/editor.blocks.js:2461
-#: assets/js/ultp_dashboard_min.js:139
+#: assets/js/ultp_dashboard_min.js:149
 msgid "Title"
 msgstr ""
 
@@ -6443,7 +6350,7 @@ msgid "space"
 msgstr ""
 
 #: assets/js/editor.blocks.js:1856
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Next Previous"
 msgstr ""
 
@@ -6478,7 +6385,7 @@ msgid "Label Space X"
 msgstr ""
 
 #: assets/js/editor.blocks.js:1889
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Author Meta"
 msgstr ""
 
@@ -6507,7 +6414,7 @@ msgid "Separator Size [px]"
 msgstr ""
 
 #: assets/js/editor.blocks.js:1922
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Breadcrumb"
 msgstr ""
 
@@ -6553,7 +6460,7 @@ msgid "Category Icon"
 msgstr ""
 
 #: assets/js/editor.blocks.js:1955
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Category"
 msgstr ""
 
@@ -6566,7 +6473,7 @@ msgid "Categories"
 msgstr ""
 
 #: assets/js/editor.blocks.js:1988
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Comment Count"
 msgstr ""
 
@@ -6778,7 +6685,8 @@ msgid "Replay Cancel Hover Color"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2032
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/editor.blocks.js:2890
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Comments"
 msgstr ""
 
@@ -6859,7 +6767,7 @@ msgid "Unordered List"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2065
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Content"
 msgstr ""
 
@@ -6884,7 +6792,7 @@ msgid "Prefix label Space X"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2098
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Date Meta"
 msgstr ""
 
@@ -6905,6 +6813,7 @@ msgid "Date Meta"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2098
+#: assets/js/editor.blocks.js:2890
 msgid "Post Date"
 msgstr ""
 
@@ -6913,7 +6822,8 @@ msgid "Excerpt Limit(Word)"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2131
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/editor.blocks.js:2890
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Excerpt"
 msgstr ""
 
@@ -6999,7 +6909,7 @@ msgstr ""
 #: assets/js/editor.blocks.js:2142
 #: assets/js/editor.blocks.js:2164
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:2857
+#: assets/js/editor.blocks.js:2956
 #: assets/js/ultp_dashboard_min.js:39
 msgid "Video"
 msgstr ""
@@ -7057,7 +6967,7 @@ msgid "Close Background Color"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2164
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Featured Image/Video"
 msgstr ""
 
@@ -7082,7 +6992,7 @@ msgid "Enable Label"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2197
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Reading Time"
 msgstr ""
 
@@ -7236,7 +7146,7 @@ msgid "Disable Sticky ( when footer is visible )"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2241
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Social Share"
 msgstr ""
 
@@ -7265,7 +7175,7 @@ msgid "Tag Label"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2274
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Tag"
 msgstr ""
 
@@ -7278,7 +7188,8 @@ msgid "Post Tags"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2318
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/editor.blocks.js:2890
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Title"
 msgstr ""
 
@@ -7291,7 +7202,7 @@ msgid "post title"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2351
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post View Count"
 msgstr ""
 
@@ -7308,43 +7219,43 @@ msgid "View"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2373
-#: assets/js/ultp_dashboard_min.js:199
+#: assets/js/ultp_dashboard_min.js:209
 msgid "Filter:"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2373
-#: assets/js/ultp_dashboard_min.js:199
+#: assets/js/ultp_dashboard_min.js:209
 msgid "Popular / Latest"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2373
-#: assets/js/ultp_dashboard_min.js:199
+#: assets/js/ultp_dashboard_min.js:209
 msgid "Popular"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2373
-#: assets/js/ultp_dashboard_min.js:199
+#: assets/js/ultp_dashboard_min.js:209
 msgid "Latest"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2373
-#: assets/js/ultp_dashboard_min.js:199
+#: assets/js/ultp_dashboard_min.js:209
 msgid "Free / Pro"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2373
 #: assets/js/editor.blocks.js:2384
-#: assets/js/editor.blocks.js:2670
-#: assets/js/ultp_dashboard_min.js:149
-#: assets/js/ultp_dashboard_min.js:199
+#: assets/js/editor.blocks.js:2659
+#: assets/js/ultp_dashboard_min.js:159
+#: assets/js/ultp_dashboard_min.js:209
 msgid "Free"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2373
 #: assets/js/editor.blocks.js:2384
-#: assets/js/editor.blocks.js:2670
-#: assets/js/ultp_dashboard_min.js:149
-#: assets/js/ultp_dashboard_min.js:199
+#: assets/js/editor.blocks.js:2659
+#: assets/js/ultp_dashboard_min.js:159
+#: assets/js/ultp_dashboard_min.js:209
 msgid "Pro"
 msgstr ""
 
@@ -7353,70 +7264,70 @@ msgid "News ticker"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:149
+#: assets/js/ultp_dashboard_min.js:159
 msgid "All Categories"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:149
+#: assets/js/ultp_dashboard_min.js:159
 #: assets/js/ultp_initial_setup_min.js:59
 msgid "News"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:149
+#: assets/js/ultp_dashboard_min.js:159
 #: assets/js/ultp_initial_setup_min.js:59
 msgid "Magazine"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:149
+#: assets/js/ultp_dashboard_min.js:159
 #: assets/js/ultp_initial_setup_min.js:59
 msgid "Blog"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:149
+#: assets/js/ultp_dashboard_min.js:159
 msgid "Sports"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:149
+#: assets/js/ultp_dashboard_min.js:159
 msgid "Fashion"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:149
+#: assets/js/ultp_dashboard_min.js:159
 msgid "Tech"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:149
+#: assets/js/ultp_dashboard_min.js:159
 msgid "Travel"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:149
+#: assets/js/ultp_dashboard_min.js:159
 msgid "Food"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:149
+#: assets/js/ultp_dashboard_min.js:159
 msgid "Movie"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:149
+#: assets/js/ultp_dashboard_min.js:159
 msgid "Health"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:149
+#: assets/js/ultp_dashboard_min.js:159
 msgid "Gaming"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:149
+#: assets/js/ultp_dashboard_min.js:159
 msgid "NFT"
 msgstr ""
 
@@ -7433,7 +7344,7 @@ msgid "Go to Site Builder"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2384
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid "Note:"
 msgstr ""
 
@@ -7590,92 +7501,92 @@ msgid "Related by Query Builder (Single Post)"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3187
+#: assets/js/editor.blocks.js:3286
 msgid "Popular Posts (1 Day - Views)"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3187
+#: assets/js/editor.blocks.js:3286
 msgid "Popular Posts (7 Days - Views)"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3187
+#: assets/js/editor.blocks.js:3286
 msgid "Popular Posts (30 Days - Views)"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3187
+#: assets/js/editor.blocks.js:3286
 msgid "Popular Posts (All Time - Views)"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3187
+#: assets/js/editor.blocks.js:3286
 msgid "Random Posts"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3187
+#: assets/js/editor.blocks.js:3286
 msgid "Random Posts (7 Days)"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3187
+#: assets/js/editor.blocks.js:3286
 msgid "Random Posts (30 Days)"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3187
+#: assets/js/editor.blocks.js:3286
 msgid "Latest Posts - Published Date"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3187
+#: assets/js/editor.blocks.js:3286
 msgid "Latest Posts - Last Modified Date"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3187
+#: assets/js/editor.blocks.js:3286
 msgid "Oldest Posts - Published Date"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3187
+#: assets/js/editor.blocks.js:3286
 msgid "Oldest Posts - Last Modified Date"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3187
+#: assets/js/editor.blocks.js:3286
 msgid "Alphabetical ASC"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3187
+#: assets/js/editor.blocks.js:3286
 msgid "Alphabetical DESC"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3187
+#: assets/js/editor.blocks.js:3286
 msgid "Sticky Post"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3187
+#: assets/js/editor.blocks.js:3286
 msgid "Most Comments"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3187
+#: assets/js/editor.blocks.js:3286
 msgid "Most Comments (1 Day)"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3187
+#: assets/js/editor.blocks.js:3286
 msgid "Most Comments (7 Days)"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:3187
+#: assets/js/editor.blocks.js:3286
 msgid "Most Comments (30 Days)"
 msgstr ""
 
@@ -7832,10 +7743,6 @@ msgid "Space Y"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-msgid "Add Heading"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2461
 msgid "Style 9"
 msgstr ""
 
@@ -7892,10 +7799,6 @@ msgid "Heading Tag"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-msgid "Heading URL"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2461
 msgid "Heading Background"
 msgstr ""
 
@@ -7937,10 +7840,6 @@ msgstr ""
 
 #: assets/js/editor.blocks.js:2461
 msgid "Sub Heading"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2461
-msgid "Sub Heading Text"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
@@ -8072,6 +7971,7 @@ msgid "Meta Under Title"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
+#: assets/js/editor.blocks.js:2868
 msgid "Max Length"
 msgstr ""
 
@@ -8312,10 +8212,12 @@ msgid "Hover Opacity"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
+#: assets/js/editor.blocks.js:2813
 msgid "Spacing Top"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
+#: assets/js/editor.blocks.js:2813
 msgid "Spacing Bottom"
 msgstr ""
 
@@ -8336,7 +8238,7 @@ msgid "Excerpt"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-#: assets/js/editor.blocks.js:2758
+#: assets/js/editor.blocks.js:2747
 msgid "Grid Spacing"
 msgstr ""
 
@@ -8419,7 +8321,7 @@ msgid "Need quick Human Support?"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2461
-#: assets/js/ultp_dashboard_min.js:119
+#: assets/js/ultp_dashboard_min.js:129
 msgid "Get Support"
 msgstr ""
 
@@ -8431,270 +8333,530 @@ msgstr ""
 msgid "Upgrade Now"
 msgstr ""
 
-#: assets/js/editor.blocks.js:2670
+#: assets/js/editor.blocks.js:2505
+msgid "Unlock It"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2659
 msgid "No Data Found..."
 msgstr ""
 
-#: assets/js/editor.blocks.js:2681
+#: assets/js/editor.blocks.js:2670
 msgid "Multiple Taxonomy"
 msgstr ""
 
-#: assets/js/editor.blocks.js:2681
-#: assets/js/editor.blocks.js:2846
-#: assets/js/editor.blocks.js:2857
-#: assets/js/editor.blocks.js:2989
+#: assets/js/editor.blocks.js:2670
+#: assets/js/editor.blocks.js:2945
+#: assets/js/editor.blocks.js:2956
+#: assets/js/editor.blocks.js:3088
 msgid "Unlock It! Explore More"
 msgstr ""
 
-#: assets/js/editor.blocks.js:2692
+#: assets/js/editor.blocks.js:2681
 msgid "Resolve Comment"
 msgstr ""
 
-#: assets/js/editor.blocks.js:2692
+#: assets/js/editor.blocks.js:2681
 msgid "Add Comment"
 msgstr ""
 
-#: assets/js/editor.blocks.js:2692
+#: assets/js/editor.blocks.js:2681
 msgid "Accept"
 msgstr ""
 
-#: assets/js/editor.blocks.js:2692
+#: assets/js/editor.blocks.js:2681
 msgid "Add Suggestion"
 msgstr ""
 
-#: assets/js/editor.blocks.js:2703
-#: assets/js/editor.blocks.js:3220
+#: assets/js/editor.blocks.js:2692
+#: assets/js/editor.blocks.js:3352
 msgid "Builder Library"
 msgstr ""
 
-#: assets/js/editor.blocks.js:2703
-#: assets/js/editor.blocks.js:3220
+#: assets/js/editor.blocks.js:2692
+#: assets/js/editor.blocks.js:3352
 msgid "Template Kits"
 msgstr ""
 
-#: assets/js/editor.blocks.js:2703
+#: assets/js/editor.blocks.js:2692
 msgid "Starter Packs"
 msgstr ""
 
-#: assets/js/editor.blocks.js:2703
+#: assets/js/editor.blocks.js:2692
 #: assets/js/ultp_initial_setup_min.js:49
 msgid "Premade Patterns"
 msgstr ""
 
-#: assets/js/editor.blocks.js:2736
+#: assets/js/editor.blocks.js:2725
 msgid "Design Library"
 msgstr ""
 
-#: assets/js/editor.blocks.js:2736
+#: assets/js/editor.blocks.js:2725
 msgid "Blocks Preview"
 msgstr ""
 
-#: assets/js/editor.blocks.js:2758
+#: assets/js/editor.blocks.js:2747
 msgid "Grid Content Alignment"
 msgstr ""
 
-#: assets/js/editor.blocks.js:2758
+#: assets/js/editor.blocks.js:2747
 msgid "Insert Blocks"
 msgstr ""
 
+#: assets/js/editor.blocks.js:2813
+msgid "Meta Group Style"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2813
+msgid "Spacing Between"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2813
+msgid "Add New Meta Field"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2813
+msgid "Delete Meta Group"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2813
+msgid "Select Parent Meta Group"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2813
+msgid "Meta Field Style"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2813
+msgid "Meta Field"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2813
+#: assets/js/editor.blocks.js:2868
+msgid "Before Text"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2813
+msgid "Before Typography"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2813
+msgid "Before Color"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2813
+msgid "Before Spacing"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2813
+#: assets/js/editor.blocks.js:2868
+msgid "After Text"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2813
+msgid "Afte Typography"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2813
+msgid "After Color"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2813
+msgid "After Spacing"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2813
+msgid "Delete Meta Field"
+msgstr ""
+
 #: assets/js/editor.blocks.js:2824
+msgid "Custom Field"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2868
+#: assets/js/editor.blocks.js:2879
+msgid "Dynamic Content"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2868
+msgid "Meta Field Settings"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2868
+msgid "This block only supports 1 Dynamic Data Binding."
+msgstr ""
+
+#: assets/js/editor.blocks.js:2868
+msgid "Data Source"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2868
+msgid "Select Post Type"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2868
+msgid "Enable Link"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2868
+msgid "Fallback"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2868
+#: assets/js/ultp_dashboard_min.js:149
+msgid "Apply"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2868
+msgid "Reset"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2868
+msgid "Get ACF Integration & Meta Box Access"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2868
+msgid "Upgrade to PRO"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Current Post"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Post Type"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Archive Description"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Site"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Site Tagline"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Site Title"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Choose"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "No Post Types Found"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Select Post"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Post Id"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Post Number of Comments"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Name"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "First Name"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Last Name"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Nickname"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Bio"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Email"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Website"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Post Feature Image"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Author Profile Image"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Post"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "No Post Meta Found"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "ACF"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "No ACF Data Found"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Meta Box"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "No Meta Box Data Found"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Pods"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "No Pods Data Found"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Content Source"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Post Permalink"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Avatar (Profile URL)"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Author Archive URL"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Author Page URL"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2890
+msgid "Link Source"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2923
 msgid "Shadow"
 msgstr ""
 
-#: assets/js/editor.blocks.js:2824
+#: assets/js/editor.blocks.js:2923
 msgid "Inset"
 msgstr ""
 
-#: assets/js/editor.blocks.js:2846
+#: assets/js/editor.blocks.js:2945
 msgid "PostX Color"
 msgstr ""
 
-#: assets/js/editor.blocks.js:2846
+#: assets/js/editor.blocks.js:2945
 msgid "Theme Color"
 msgstr ""
 
-#: assets/js/editor.blocks.js:2857
-msgid "PostX Gradient"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2857
-msgid "Gradient"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2857
-msgid "Attachment"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2857
-msgid "Repeat"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2857
-msgid "Only Youtube & Vimeo  & Self Hosted Url"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2857
-msgid "Video URL"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2857
-msgid "Start Time(Seconds)"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2857
-msgid "End Time(Seconds)"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2857
-msgid "Loop Video"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2857
-msgid "Video Fallback Image"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2890
-msgid "Brightness"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2890
-msgid "Contrast"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2890
-msgid "Invert"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2890
-msgid "Blur"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2912
-msgid "Icon Type Name"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2912
-msgid "Show All Icon"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2912
-msgid "Solid Icon"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2912
-msgid "Line Icon"
-msgstr ""
-
 #: assets/js/editor.blocks.js:2945
-msgid "Same Tab/Window"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2945
-msgid "Open in New Tab"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2945
-msgid "No Follow"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2945
-msgid "Sponsored"
-msgstr ""
-
-#: assets/js/editor.blocks.js:2945
-msgid "Download"
+msgid "Normal Color"
 msgstr ""
 
 #: assets/js/editor.blocks.js:2956
+msgid "PostX Gradient"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2956
+msgid "Gradient"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2956
+msgid "Attachment"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2956
+msgid "Repeat"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2956
+msgid "Only Youtube & Vimeo  & Self Hosted Url"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2956
+msgid "Video URL"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2956
+msgid "Start Time(Seconds)"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2956
+msgid "End Time(Seconds)"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2956
+msgid "Loop Video"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2956
+msgid "Video Fallback Image"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2989
+msgid "Brightness"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2989
+msgid "Contrast"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2989
+msgid "Invert"
+msgstr ""
+
+#: assets/js/editor.blocks.js:2989
+msgid "Blur"
+msgstr ""
+
+#: assets/js/editor.blocks.js:3011
+msgid "Icon Type Name"
+msgstr ""
+
+#: assets/js/editor.blocks.js:3011
+msgid "Show All Icon"
+msgstr ""
+
+#: assets/js/editor.blocks.js:3011
+msgid "Solid Icon"
+msgstr ""
+
+#: assets/js/editor.blocks.js:3011
+msgid "Line Icon"
+msgstr ""
+
+#: assets/js/editor.blocks.js:3044
+msgid "Same Tab/Window"
+msgstr ""
+
+#: assets/js/editor.blocks.js:3044
+msgid "Open in New Tab"
+msgstr ""
+
+#: assets/js/editor.blocks.js:3044
+msgid "No Follow"
+msgstr ""
+
+#: assets/js/editor.blocks.js:3044
+msgid "Sponsored"
+msgstr ""
+
+#: assets/js/editor.blocks.js:3044
+msgid "Download"
+msgstr ""
+
+#: assets/js/editor.blocks.js:3055
 msgid "image"
 msgstr ""
 
-#: assets/js/editor.blocks.js:3011
+#: assets/js/editor.blocks.js:3110
 msgid "Search here for more..."
 msgstr ""
 
-#: assets/js/editor.blocks.js:3011
-#: assets/js/editor.blocks.js:3022
+#: assets/js/editor.blocks.js:3110
+#: assets/js/editor.blocks.js:3121
 msgid "To Enable This Feature"
 msgstr ""
 
-#: assets/js/editor.blocks.js:3055
+#: assets/js/editor.blocks.js:3154
 msgid "Premium"
 msgstr ""
 
-#: assets/js/editor.blocks.js:3055
+#: assets/js/editor.blocks.js:3154
 msgid "Go Pro"
 msgstr ""
 
-#: assets/js/editor.blocks.js:3088
+#: assets/js/editor.blocks.js:3187
 msgid "Italic"
 msgstr ""
 
-#: assets/js/editor.blocks.js:3088
+#: assets/js/editor.blocks.js:3187
 msgid "Oblique"
 msgstr ""
 
-#: assets/js/editor.blocks.js:3088
+#: assets/js/editor.blocks.js:3187
 msgid "Initial"
 msgstr ""
 
-#: assets/js/editor.blocks.js:3088
+#: assets/js/editor.blocks.js:3187
 msgid "Underline"
 msgstr ""
 
-#: assets/js/editor.blocks.js:3088
+#: assets/js/editor.blocks.js:3187
 msgid "Overline"
 msgstr ""
 
-#: assets/js/editor.blocks.js:3088
+#: assets/js/editor.blocks.js:3187
 msgid "Line Through"
 msgstr ""
 
-#: assets/js/editor.blocks.js:3088
+#: assets/js/editor.blocks.js:3187
 msgid "Select Font"
 msgstr ""
 
-#: assets/js/editor.blocks.js:3088
+#: assets/js/editor.blocks.js:3187
 msgid "Weight"
 msgstr ""
 
-#: assets/js/editor.blocks.js:3088
+#: assets/js/editor.blocks.js:3187
 msgid "Select Global Style"
 msgstr ""
 
-#: assets/js/editor.blocks.js:3088
+#: assets/js/editor.blocks.js:3187
 msgid "Select Global"
 msgstr ""
 
-#: assets/js/editor.blocks.js:3154
+#: assets/js/editor.blocks.js:3253
 msgid "PostX Settings"
 msgstr ""
 
-#: assets/js/editor.blocks.js:3154
+#: assets/js/editor.blocks.js:3253
 msgid "Override Theme Style & Color"
 msgstr ""
 
-#: assets/js/editor.blocks.js:3154
+#: assets/js/editor.blocks.js:3253
 msgid "Editor Width"
 msgstr ""
 
-#: assets/js/editor.blocks.js:3154
+#: assets/js/editor.blocks.js:3253
 msgid "Breakpoints"
 msgstr ""
 
-#: assets/js/editor.blocks.js:3154
+#: assets/js/editor.blocks.js:3253
 msgid "Tablet (Max Width)"
 msgstr ""
 
-#: assets/js/editor.blocks.js:3154
+#: assets/js/editor.blocks.js:3253
 msgid "Mobile (Max Width)"
 msgstr ""
 
-#: assets/js/editor.blocks.js:3176
+#: assets/js/editor.blocks.js:3275
 msgid "Override Theme Typography"
 msgstr ""
 
-#: assets/js/editor.blocks.js:3220
+#: assets/js/editor.blocks.js:3352
 msgid "Enable Dark Mode Logo(PostX)"
 msgstr ""
 
@@ -8741,6 +8903,11 @@ msgstr ""
 
 #: assets/js/ultp_dashboard_min.js:39
 msgid "Display/reorder posts, pages, and custom post types"
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:39
+#: assets/js/ultp_initial_setup_min.js:49
+msgid "Dynamic Site Builder"
 msgstr ""
 
 #: assets/js/ultp_dashboard_min.js:39
@@ -8799,7 +8966,7 @@ msgid "Demo"
 msgstr ""
 
 #: assets/js/ultp_dashboard_min.js:39
-#: assets/js/ultp_dashboard_min.js:109
+#: assets/js/ultp_dashboard_min.js:119
 msgid "Save Settings"
 msgstr ""
 
@@ -8909,371 +9076,451 @@ msgid "Postx Intro"
 msgstr ""
 
 #: assets/js/ultp_dashboard_min.js:59
+msgid "It lets you use PostX’s Gutenberg blocks in the WPBakery Builder by using the Saved Template Addon."
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:59
+msgid "Create unlimited templates by converting Gutenberg blocks into shortcodes to use them anywhere."
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:59
+msgid "It enables a highly customizable block to the Gutenberg blocks library to display the Table of Contents."
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:59
+msgid "It lets you use PostX’s Gutenberg blocks in the Oxygen Builder by using the Saved Template Addon."
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:59
+msgid "It lets you use PostX’s Gutenberg blocks in the Elementor Builder by using the Saved Template Addon."
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:59
+msgid "Insert dynamic, real-time content like excerpts, dates, author names, etc. in PostX blocks. "
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:59
+msgid "It lets you use PostX’s Gutenberg blocks in the Divi Builder by using the Saved Template Addon."
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:59
+msgid "It allows you to upload custom fonts and use them on any PostX blocks with all typographical options."
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:59
+msgid "It lets you use PostX’s Gutenberg blocks in the Bricks Builder by using the Saved Template Addon."
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:59
+msgid "It lets you use PostX’s Gutenberg blocks in the Beaver Builder by using the Saved Template Addon."
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:59
+msgid "Registered/guest writers can submit posts from frontend. Admins can easily manage, review, and publish posts."
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:59
+msgid "It allows you to add category or taxonomy-specific featured images and colors to make them attractive."
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:59
+msgid "Display a visual indicator of the reading progression of blog posts and the scrolling progression of pages."
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:59
+msgid "It allows you to display custom meta descriptions added with the Yoast SEO plugin instead of excerpts."
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:59
+msgid "It allows you to display custom meta descriptions added with the All in One SEO plugin instead of excerpts."
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:59
+msgid "It allows you to display custom meta descriptions added with the Rank Math plugin instead of excerpts."
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:59
+msgid "It allows you to display custom meta descriptions added with the SEOPress plugin instead of excerpts."
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:59
+msgid "It allows you to display custom meta descriptions added with the Squirrly plugin instead of excerpts."
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:59
+msgid "The Gutenberg-based Builder allows users to create dynamic templates for Home and all Archive pages."
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:59
+msgid "PostX brings the ChatGPT into the WordPress Dashboard to let you generate content effortlessly. "
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Grid Blocks"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post List Blocks"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Post Slider Blocks"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Others PostX Blocks"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Dark Light"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Site Builder Blocks"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Advance Post Meta"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:59
+#: assets/js/ultp_dashboard_min.js:69
 msgid "Live"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:109
+#: assets/js/ultp_dashboard_min.js:119
 msgid "General Settings"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:119
+#: assets/js/ultp_dashboard_min.js:129
+msgid "Custom Font"
+msgstr ""
+
+#: assets/js/ultp_dashboard_min.js:129
 msgid "Welcome Guide"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:119
-#: assets/js/ultp_dashboard_min.js:209
+#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:219
 msgid "Join Community"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:119
+#: assets/js/ultp_dashboard_min.js:129
 msgid "Youtube Tutorials"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:119
+#: assets/js/ultp_dashboard_min.js:129
 msgid "What’s New"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:119
+#: assets/js/ultp_dashboard_min.js:129
 msgid "Sizzling Summer Sale is "
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:119
+#: assets/js/ultp_dashboard_min.js:129
 msgid "LIVE!"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:119
+#: assets/js/ultp_dashboard_min.js:129
 msgid " Beat the heat with upto "
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:119
+#: assets/js/ultp_dashboard_min.js:129
 msgid "50% DISCOUNT"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:119
+#: assets/js/ultp_dashboard_min.js:129
 msgid " on PostX Pro - "
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:119
+#: assets/js/ultp_dashboard_min.js:129
 msgid "Grab Now"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:119
+#: assets/js/ultp_dashboard_min.js:129
 msgid "Enjoy Up to 45% Off"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:119
+#: assets/js/ultp_dashboard_min.js:129
 msgid " - Upgrade to a Lifetime Plan -"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:119
+#: assets/js/ultp_dashboard_min.js:129
 msgid "Skip Renewal Hassle!"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:119
+#: assets/js/ultp_dashboard_min.js:129
 msgid "Starter Sites:"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:119
+#: assets/js/ultp_dashboard_min.js:129
 msgid "Build Complete Site in 3 Simple Steps -"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:119
+#: assets/js/ultp_dashboard_min.js:129
 msgid "Explore Now"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:119
+#: assets/js/ultp_dashboard_min.js:129
 msgid "Get Discount"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid "Your License is"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid "Activated."
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid " Expiry Date: "
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid "Want to reset this license? "
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid "Click "
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid "Your License is "
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid "Invalid / Expired."
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid " To unlock pro features, please"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid "Renew your license"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid "Want to add a new license?"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid "Click here"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid "Add New License"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid "Activate License"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid "Enter your license key"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid "Deactivate Site License Docs"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid "Upgrade License Docs"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid "Renew License Docs"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid "Install PostX Pro Docs"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid "How to use license key?"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid " Make sure you have installed both the"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid " free and pro version of PostX."
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid "You have to add the license key and activate it to start using all the amazing features of PostX."
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid "Do you need any assistance?"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:129
+#: assets/js/ultp_dashboard_min.js:139
 msgid "Check out the complete documentation of PostX to get your perfect solution."
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:139
+#: assets/js/ultp_dashboard_min.js:149
 msgid "Action"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:139
+#: assets/js/ultp_dashboard_min.js:149
 msgid "Bulk Action"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:139
-msgid "Apply"
-msgstr ""
-
-#: assets/js/ultp_dashboard_min.js:139
+#: assets/js/ultp_dashboard_min.js:149
 msgid "No Data Found !!!"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:139
+#: assets/js/ultp_dashboard_min.js:149
 msgid "Page"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:139
+#: assets/js/ultp_dashboard_min.js:149
 msgid "of"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:139
+#: assets/js/ultp_dashboard_min.js:149
 msgid "items"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:139
+#: assets/js/ultp_dashboard_min.js:149
 msgid "Create Unlimited Saved Templates with PostX Pro"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:139
+#: assets/js/ultp_dashboard_min.js:149
 msgid "You can create only one saved template with the free version of PostX. Please upgrade to a pro plan to create unlimited saved templates."
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:149
+#: assets/js/ultp_dashboard_min.js:159
 msgid "No Data Available..."
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:159
+#: assets/js/ultp_dashboard_min.js:169
 msgid "Change Color Palette"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:169
+#: assets/js/ultp_dashboard_min.js:179
 msgid "Change Font & Typography"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:189
+#: assets/js/ultp_dashboard_min.js:199
 msgid "The import process can take a few seconds depending on the size of the kit you are importing and speed of the connection."
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:189
+#: assets/js/ultp_dashboard_min.js:199
 msgid "Please do not close this browser window until import is completed."
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:189
+#: assets/js/ultp_dashboard_min.js:199
 msgid " Due to resquest timeout this import is failed"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:189
+#: assets/js/ultp_dashboard_min.js:199
 msgid "Refresh"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:189
+#: assets/js/ultp_dashboard_min.js:199
 msgid " page and try again"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:189
+#: assets/js/ultp_dashboard_min.js:199
 msgid "Navigate to "
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:189
+#: assets/js/ultp_dashboard_min.js:199
 msgid "Site Builder to edit"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:189
+#: assets/js/ultp_dashboard_min.js:199
 msgid " your Archive, Post, Default Page and other templates."
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:189
+#: assets/js/ultp_dashboard_min.js:199
 msgid "View Your Website"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:189
+#: assets/js/ultp_dashboard_min.js:199
 msgid "Import the entire site including posts, images, pages, content and plugins."
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:189
+#: assets/js/ultp_dashboard_min.js:199
 msgid "Import Settings"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:189
+#: assets/js/ultp_dashboard_min.js:199
 msgid "Import dummy post, taxonomy and featured images"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:189
+#: assets/js/ultp_dashboard_min.js:199
 msgid "Delete Previously imported sites"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:189
+#: assets/js/ultp_dashboard_min.js:199
 msgid "Install required plugins"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:189
+#: assets/js/ultp_dashboard_min.js:199
 msgid "Template/Pages"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:189
+#: assets/js/ultp_dashboard_min.js:199
 msgid "Subscribe"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:189
+#: assets/js/ultp_dashboard_min.js:199
 msgid "Stay up to date with the latest started templates and special offers"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:189
+#: assets/js/ultp_dashboard_min.js:199
 msgid "Start Importing"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:189
+#: assets/js/ultp_dashboard_min.js:199
 msgid "Import Site"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:209
+#: assets/js/ultp_dashboard_min.js:219
 msgid "Please Select Support type."
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:209
+#: assets/js/ultp_dashboard_min.js:219
 msgid "Please Fill all the Input Field."
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:209
+#: assets/js/ultp_dashboard_min.js:219
 msgid "Having Difficulties? We are here to help"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:209
+#: assets/js/ultp_dashboard_min.js:219
 msgid "Let us know how we can help you."
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:209
+#: assets/js/ultp_dashboard_min.js:219
 msgid "Create a Ticket"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:209
+#: assets/js/ultp_dashboard_min.js:219
 msgid "Select Support Type from above"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:209
+#: assets/js/ultp_dashboard_min.js:219
 msgid "You can Contact in Support via our "
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:209
+#: assets/js/ultp_dashboard_min.js:219
 msgid "Contact Form "
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:209
+#: assets/js/ultp_dashboard_min.js:219
 msgid "Submit Ticket"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:209
+#: assets/js/ultp_dashboard_min.js:219
 msgid "Useful Guides"
 msgstr ""
 
-#: assets/js/ultp_dashboard_min.js:209
+#: assets/js/ultp_dashboard_min.js:219
 msgid "Explore in-depth documentations."
 msgstr ""
 

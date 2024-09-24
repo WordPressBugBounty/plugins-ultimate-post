@@ -464,6 +464,7 @@ class Styles {
     */
 	public function render_block_callback($block_content, $block) {
 		if ( 
+			!is_admin() &&
 			isset($block['blockName']) &&
 			strpos($block['blockName'], 'ultimate-post/') === 0
 			&& !empty($block['attrs']['currentPostId'])
@@ -512,10 +513,10 @@ class Styles {
 				}
 			}
 			if ( $css ) {
+				ultimate_post()->register_scripts_common();
 				wp_register_style( "ultp-post-{$post_id}", false );
 				wp_enqueue_style( "ultp-post-{$post_id}" );
 				wp_add_inline_style( "ultp-post-{$post_id}", $css );
-				ultimate_post()->register_scripts_common();
 			}
 		}
 	}

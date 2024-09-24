@@ -462,7 +462,6 @@ class ULTP_Initialization {
             'date_format' => get_option('date_format'),
             'time_format' => get_option('time_format'),
             'blog' => get_current_blog_id(),
-            'archive_child' => ultimate_post()->is_archive_child_builder(),
             'affiliate_id' => apply_filters( 'ultp_affiliate_id', FALSE ),
             'category_url' =>admin_url( 'edit-tags.php?taxonomy=category' ),
             'disable_image_size' => ultimate_post()->get_setting('disable_image_size'),

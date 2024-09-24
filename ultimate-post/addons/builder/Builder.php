@@ -84,20 +84,24 @@ class Builder {
             if ( $this->is_block_theme ) {
                 remove_action('wp_head', array($this, 'ultp_header_builder_template'));
             } else {
-                if ($this->theme_name != 'astra') {  // Astra theme issue
+                if ( $this->theme_name == 'generatepress' ) {
                     require_once ULTP_PATH.'addons/builder/templates/header.php';
-                }
-                $templates   = [];
-                $templates[] = 'header.php';
-                remove_all_actions( 'wp_head' );
-                if ($this->theme_name != 'bricks') {  // Conflict with Bricks Builder Backend
-                    ob_start(); 
-                }
-                locate_template( $templates, true );
-                if ($this->theme_name != 'bricks') { // Conflict with Bricks Builder Backend
-                    ob_get_clean();
-                } else { 
-                    wp_enqueue_style( 'wp-block-library' );  // Gutenberg CSS issue Bricks Builder frontend
+                } else {
+                    if ( $this->theme_name != 'astra' ) {  // Astra theme issue
+                        require_once ULTP_PATH.'addons/builder/templates/header.php';
+                    }
+                    $templates   = [];
+                    $templates[] = 'header.php';
+                    remove_all_actions( 'wp_head' );
+                    if ($this->theme_name != 'bricks') {  // Conflict with Bricks Builder Backend
+                        ob_start(); 
+                    }
+                    locate_template( $templates, true );
+                    if ($this->theme_name != 'bricks') { // Conflict with Bricks Builder Backend
+                        ob_get_clean();
+                    } else { 
+                        wp_enqueue_style( 'wp-block-library' );  // Gutenberg CSS issue Bricks Builder frontend
+                    }
                 }
             }
             ?> 
@@ -109,8 +113,14 @@ class Builder {
 	}
     public function ultp_footer_builder_template() {
         if ( $this->footer_id ) {
+
+            ?> 
+                <footer id="ultp-footer-template" class="<?php esc_html_e('ultp-builderid-'.$this->footer_id); ?>" role="contentinfo">
+                    <?php echo ultimate_post()->get_post_content($this->footer_id) //phpcs:ignore ?>
+                </footer> 
+            <?php
             if ( !$this->is_block_theme ) {
-                if ($this->theme_name == 'astra') {  // Astra theme issue
+                if ($this->theme_name == 'astra' || $this->theme_name == 'generatepress' ) {  // Astra theme issue
                     wp_footer();
                 } else {
                     require_once ULTP_PATH.'addons/builder/templates/footer.php';
@@ -126,12 +136,6 @@ class Builder {
                     ob_get_clean();
                 }
             }
-
-            ?> 
-                <footer id="ultp-footer-template" class="<?php esc_html_e('ultp-builderid-'.$this->footer_id); ?>" role="contentinfo">
-                    <?php echo ultimate_post()->get_post_content($this->footer_id) //phpcs:ignore ?>
-                </footer> 
-            <?php
         }
 	}
 
@@ -170,8 +174,14 @@ class Builder {
 
 
     public function include_builder_files($template) {
-        $includes = ultimate_post()->builder_check_conditions('includes');
-        return $includes ? $includes : $template;
+        $includes = ultimate_post()->builder_check_conditions('return');
+
+        global $ultp_page_builder_id;
+        if ( $includes ) {
+            $ultp_page_builder_id = $includes;
+            return ULTP_PATH.'addons/builder/templates/page.php';
+        }
+        return $template;
     }
 
     function init_metabox_callback() {
@@ -289,19 +299,32 @@ class Builder {
         }
 
         // Save Conditions Data
-        if (get_post_type($post_id) == 'ultp_builder') {
-            if (get_post_type($post_id) == 'ultp_builder') {
+        if ( get_post_type($post_id) == 'ultp_builder' ) {
+            if ( get_post_type($post_id) == 'ultp_builder' ) {
                 $settings = get_option('ultp_builder_conditions', array());
                 $p_type = isset($_POST['postx-type']) ? sanitize_text_field($_POST['postx-type']) : 'singular';
+                $up_meta = '';
                 switch ($p_type) {
                     case 'singular':
-                        update_post_meta($post_id, '__ultp_builder_type', 'singular');
                         if (isset($settings['singular'])) {
                             if (!isset($settings['singular'][$post_id])) {
+                                $up_meta = 'singular';
                                 $settings['singular'][$post_id] = ['include/singular/post'];
                             }
                         } else {
+                            $up_meta = 'singular';
                             $settings['singular'][$post_id] = ['include/singular/post'];
+                        }
+                        break;
+                    case 'front_page':
+                        if ( isset($settings['front_page']) ) {
+                            if ( !isset($settings['front_page'][$post_id]) ) {
+                                $up_meta = 'front_page';
+                                $settings['front_page'][$post_id] = ['include/front_page'];
+                            }
+                        } else {
+                            $up_meta = 'front_page';
+                            $settings['front_page'][$post_id] = ['include/front_page'];
                         }
                         break;
                     case 'post_tag':
@@ -310,44 +333,54 @@ class Builder {
                     case 'author':
                     case 'archive':
                     case 'category':
-                        update_post_meta($post_id, '__ultp_builder_type', 'archive');
                         $extra = $p_type != 'archive' ? '/'.$p_type : '';
                         if (isset($settings['archive'])) {
-                            if (!isset($settings['archive'][$post_id])) {  
+                            if (!isset($settings['archive'][$post_id])) {
+                                $up_meta = 'archive';
                                 $settings['archive'][$post_id] = ['include/archive'.$extra];
                             }
                         } else {
+                            $up_meta = 'archive';
                             $settings['archive'][$post_id] = ['include/archive'+$extra];
                         }
                         break;
                     case 'header':
                         if ( isset($settings['header']) ) {
                             if ( !isset($settings['header'][$post_id]) ) {
+                                $up_meta = 'header';
                                 $settings['header'][$post_id] = ['include/header/entire_site'];
                             }
                         } else {
+                            $up_meta = 'header';
                             $settings['header'][$post_id] = ['include/header/entire_site'];
                         }
                         break;
                     case 'footer':
                         if ( isset($settings['footer']) ) {
                             if ( !isset($settings['footer'][$post_id]) ) {
+                                $up_meta = 'footer';
                                 $settings['footer'][$post_id] = ['include/footer/entire_site'];
                             }
                         } else {
+                            $up_meta = 'footer';
                             $settings['footer'][$post_id] = ['include/footer/entire_site'];
                         }
                         break;
                     case '404':
                         if ( isset($settings['404']) ) {
                             if ( !isset($settings['404'][$post_id]) ) {
+                                $up_meta = '404';
                                 $settings['404'][$post_id] = ['include/404'];
                             }
                         } else {
+                            $up_meta = '404';
                             $settings['404'][$post_id] = ['include/404'];
                         }
                     default:
                         break;
+                }
+                if ( $up_meta ) {
+                    update_post_meta($post_id, '__ultp_builder_type', $up_meta);
                 }
                 update_option('ultp_builder_conditions', $settings);
             }

@@ -341,7 +341,7 @@ class REST_API {
                 $var['title']       = get_the_title();
                 $var['permalink']   = get_permalink();
                 $var['seo_meta']    = ultimate_post()->get_excerpt($post_id, 1);
-                $var['excerpt']     = wp_strip_all_tags($content_data);
+                $var['excerpt']     = wp_strip_all_tags(get_the_excerpt());
                 $var['excerpt_full']= wp_strip_all_tags(get_the_excerpt());
                 $var['time']        = (int)get_the_date('U')*1000;
                 $var['timeModified']= (int)get_the_modified_date('U')*1000;

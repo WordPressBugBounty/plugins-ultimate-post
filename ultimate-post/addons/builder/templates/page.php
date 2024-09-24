@@ -28,7 +28,12 @@ if ( wp_is_block_theme() ) {
 
 do_action( 'ultp_before_content' );
 
-$page_id = ultimate_post()->builder_check_conditions('return');
+global $ultp_page_builder_id;
+if ( $ultp_page_builder_id ) {
+    $page_id = $ultp_page_builder_id;
+} else {
+    $page_id = ultimate_post()->builder_check_conditions('return_p');
+}
 
 $width = $page_id ? ( get_post_meta($page_id, '__container_width', true) ? get_post_meta($page_id, '__container_width', true) : '1140' ) : '1140';
 $sidebar = $page_id ? get_post_meta($page_id, '__builder_sidebar', true) : '';

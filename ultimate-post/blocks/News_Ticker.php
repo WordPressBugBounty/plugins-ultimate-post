@@ -36,6 +36,8 @@ class News_Ticker {
             'tickImgRadius' => (object)['lg' =>(object)['top' => "30",'bottom' => "30",'left' => "30",'right' => "30", 'unit' =>'px']],
             'tickBodySpace' => (object)['lg'=>'21'],
             // Body Time Badge Style
+            'timeBadgeType' => 'days_ago',
+            'timeBadgeDateFormat' =>  'M j, Y',
             'tickTimeBadge' => 'Time Badge',
             'timeBadgeColor' => '#fff',
             'timeBadgeBg' => (object)['openColor' => 1, 'type' => 'color', 'color' => '#444'],
@@ -146,7 +148,7 @@ class News_Ticker {
         $attr['TickNavStyle'] = sanitize_html_class( $attr['TickNavStyle'] );
         $attr['TickNavIconStyle'] = sanitize_html_class( $attr['TickNavIconStyle'] );
         $attr['tickerType'] = sanitize_html_class( $attr['tickerType'] );
-        $attr['headingText'] = sanitize_html_class( $attr['headingText'] );
+        $attr['headingText'] = wp_kses($attr['headingText'], ultimate_post()->ultp_allowed_html_tags());
         $attr['typeAnimation'] = sanitize_html_class( $attr['typeAnimation'] );
         $attr['tickerAnimation'] = sanitize_html_class( $attr['tickerAnimation'] );
         $attr['tickerDirectionVer'] = sanitize_html_class( $attr['tickerDirectionVer'] );
@@ -196,7 +198,13 @@ class News_Ticker {
                                                 $post_loop .= '<span style="'.$typeStyle.'" class="title-text" data-text="'.$title.'">'.$title.'</span>';
                                                 $post_loop .= '</a>';
                                             if ($attr['tickTimeShow'] && ($attr['tickerType'] != 'typewriter' ) ) {
-                                                $post_loop .= '<span class="ultp-ticker-timebadge">'.human_time_diff(get_the_time('U'),current_time('U')).' ago</span>';
+                                                $post_loop .= '<span class="ultp-ticker-timebadge">';
+                                                    if ( $attr['timeBadgeType'] == "date" ) {
+                                                        $dateData = get_the_date(ultimate_post()->get_format($attr["timeBadgeDateFormat"]));
+                                                    } else {
+                                                        $dateData = human_time_diff(get_the_time('U'),current_time('U')).' ago';
+                                                    }
+                                                $post_loop .= $dateData.'</span>';
                                             }
                                         $post_loop .= '</div>';
                                     $post_loop .= '</li>';
