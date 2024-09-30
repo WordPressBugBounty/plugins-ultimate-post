@@ -126,6 +126,8 @@ class Styles {
 			$this->ultp_delete_post_callback(str_replace('//', '__', $params['fseTempId']), '');
 		}
 		try {
+			$upload_dir_url = wp_upload_dir();
+			$dir = trailingslashit($upload_dir_url['basedir']) . 'ultimate-post/';
 			if ( $has_block ) {
 				
 				$ultp_block_css = $this->set_top_css($params['block_css']);
@@ -146,8 +148,6 @@ class Styles {
 					update_post_meta($post_id, '_ultp_css', $ultp_block_css);
 				}
 				ultimate_post()->set_setting('save_version', wp_rand(1, 1000));
-				$upload_dir_url = wp_upload_dir();
-				$dir = trailingslashit($upload_dir_url['basedir']) . 'ultimate-post/';
 				$filename = "ultp-css-{$post_id}.css";
 
 				WP_Filesystem( false, $upload_dir_url['basedir'], true );
