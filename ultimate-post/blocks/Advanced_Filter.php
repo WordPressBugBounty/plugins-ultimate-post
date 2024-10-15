@@ -13,7 +13,7 @@ class Advanced_Filter {
 
 	private $pro_select_types = array(
 		'adv_sort',
-		'custom_tax'
+		'custom_tax',
 	);
 
 	public $order = array(
@@ -49,8 +49,8 @@ class Advanced_Filter {
 			'name' => 'Random',
 		),
 		// array(
-		// 	'id'   => 'post__in',
-		// 	'name' => 'Post In',
+		// 'id'   => 'post__in',
+		// 'name' => 'Post In',
 		// ),
 		array(
 			'id'   => 'comment_count',
@@ -202,28 +202,28 @@ class Advanced_Filter {
 	public function get_button_data( $type, $ids, $post_types = '', $allText = 'All' ) {
 		$res = array();
 
-		if (in_array('_all', $ids)) {
+		if ( in_array( '_all', $ids ) ) {
 			$res['_all'] = $allText;
 			// $ids = array_filter($ids, function ($item) {
-			// 	return $item != '_all';
+			// return $item != '_all';
 			// });
 		}
 
-		$ids = implode(',', $ids);
+		$ids = implode( ',', $ids );
 
 		switch ( $type ) {
 			case 'adv_sort':
-				$adv_sort_id = explode(',', $ids);
-				foreach($this->adv_sort as $adv) {
-					foreach($adv_sort_id as $id) {
-						if ($adv['id'] === $id) {
-							$res[$id] = $adv['name'];
+				$adv_sort_id = explode( ',', $ids );
+				foreach ( $this->adv_sort as $adv ) {
+					foreach ( $adv_sort_id as $id ) {
+						if ( $adv['id'] === $id ) {
+							$res[ $id ] = $adv['name'];
 						}
 					}
 				}
 				break;
 			case 'category':
-				if ( !empty( $ids ) && $ids !== "_all" ) {
+				if ( ! empty( $ids ) && $ids !== '_all' ) {
 					$categories = get_categories(
 						array(
 							'per_page' => -1,
@@ -237,7 +237,7 @@ class Advanced_Filter {
 				}
 				break;
 			case 'tags':
-				if ( !empty( $ids ) && $ids !== "_all" ) {
+				if ( ! empty( $ids ) && $ids !== '_all' ) {
 					$tags = get_tags(
 						array(
 							'per_page' => -1,
@@ -251,7 +251,7 @@ class Advanced_Filter {
 				}
 				break;
 			case 'author':
-				if ( !empty( $ids ) && $ids !== "_all" ) {
+				if ( ! empty( $ids ) && $ids !== '_all' ) {
 					$authors = get_users(
 						array(
 							'per_page' => -1,
@@ -259,7 +259,7 @@ class Advanced_Filter {
 							'include'  => $ids,
 						),
 					);
-	
+
 					foreach ( $authors as $author ) {
 						$res[ $author->ID ] = $author->display_name;
 					}
@@ -272,10 +272,10 @@ class Advanced_Filter {
 				}
 				break;
 			case 'order_by':
-				$orders = explode(',', $ids);
+				$orders = explode( ',', $ids );
 				foreach ( $this->order_by as $order_by ) {
-					foreach($orders as $order) {
-						if ($order_by['id'] === $order) {
+					foreach ( $orders as $order ) {
+						if ( $order_by['id'] === $order ) {
 							$res[ $order ] = $order_by['name'];
 						}
 					}
@@ -416,7 +416,7 @@ class Advanced_Filter {
 
 				if ( $post_types == '' ) :
 					return $data;
-endif;
+				endif;
 
 				$post_types = json_decode( $post_types );
 
@@ -447,18 +447,17 @@ endif;
 
 	public function select_content( $attr ) {
 		$block_name = 'filter-select';
-		$is_active     = ultimate_post()->is_lc_active();
+		$is_active  = ultimate_post()->is_lc_active();
 		$attr       = wp_parse_args( $attr, $this->get_select_attributes() );
 
-		if (! $is_active && in_array( $attr['type'], $this->pro_select_types ) ) {
+		if ( ! $is_active && in_array( $attr['type'], $this->pro_select_types ) ) {
 			return '';
 		}
 
 		$post_types = isset( $attr['postTypes'] ) ? $attr['postTypes'] : '';
 
-		$attr['blockId'] = ultimate_post()->sanitize_attr($attr, "blockId", 'sanitize_html_class', 'missing_block_id');
-		$attr['allText'] = ultimate_post()->sanitize_attr($attr, "allText", 'sanitize_text_field', 'missing_block_id');
-
+		$attr['blockId'] = ultimate_post()->sanitize_attr( $attr, 'blockId', 'sanitize_html_class', 'missing_block_id' );
+		$attr['allText'] = ultimate_post()->sanitize_attr( $attr, 'allText', 'sanitize_text_field', 'missing_block_id' );
 
 		if ( 'inline' === $attr['filterStyle'] ) {
 			$inline_values = json_decode( $attr['filterValues'], true );
@@ -492,7 +491,7 @@ endif;
 					$tax  = '';
 				}
 				?>
-				<div <?php echo $btn_wrapper_attrs; ?> <?php echo $tax; ?> data-selected="<?php echo $key; ?>" data-type="<?php echo $attr['type']; ?>">
+				<div <?php echo $btn_wrapper_attrs; ?> <?php echo sanitize_text_field( $tax ); ?> data-selected="<?php echo sanitize_text_field( $key ); ?>" data-type="<?php echo esc_attr( $attr['type'] ); ?>">
 					<?php echo $name; ?>
 				</div>
 			<?php endforeach ?>
@@ -532,7 +531,7 @@ endif;
 				<?php
 					$tax = isset( $item['taxonomy'] ) ? 'data-tax="' . $item['taxonomy'] . '"' : '';
 				?>
-					<li class="ultp-filter-select__dropdown-inner" <?php echo $tax; ?> data-id="<?php echo $item['id']; ?>">
+					<li class="ultp-filter-select__dropdown-inner" <?php echo sanitize_text_field( $tax ); ?> data-id="<?php echo sanitize_text_field( $item['id'] ); ?>">
 						<?php echo esc_html( $item['name'] ); ?>
 					</li>
 				<?php endforeach; ?>
@@ -550,7 +549,7 @@ endif;
 
 	public function search_content( $attr ) {
 		$block_name = 'filter-search-adv';
-		$is_active     = ultimate_post()->is_lc_active();
+		$is_active  = ultimate_post()->is_lc_active();
 
 		if ( ! $is_active ) {
 			return '';
@@ -558,9 +557,8 @@ endif;
 
 		$attr = wp_parse_args( $attr, $this->get_search_attributes() );
 
-		$attr['blockId'] = ultimate_post()->sanitize_attr($attr, "blockId", 'sanitize_html_class', 'missing_block_id');
-		$attr['placeholder'] = ultimate_post()->sanitize_attr($attr, "placeholder", 'sanitize_text_field');
-
+		$attr['blockId']     = ultimate_post()->sanitize_attr( $attr, 'blockId', 'sanitize_html_class', 'missing_block_id' );
+		$attr['placeholder'] = ultimate_post()->sanitize_attr( $attr, 'placeholder', 'sanitize_text_field' );
 
 		$wrapper_attrs = get_block_wrapper_attributes(
 			array(
@@ -576,7 +574,7 @@ endif;
 			<div class="ultp-filter-search-input">
 				<input
 					type="search"
-					placeholder="<?php echo $attr['placeholder']; ?>"
+					placeholder="<?php echo sanitize_text_field($attr['placeholder']); ?>"
 				/>
 				<span class="ultp-filter-search-input-icon">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 47.05 47.05"><path stroke="rgba(0,0,0,0)" strokeMiterlimit="10" d="m43.051 45.948-9.618-9.616a20.183 20.183 0 1 1 2.9-2.9l9.617 9.616a2.05 2.05 0 1 1-2.9 2.9Zm-22.367-9.179A16.084 16.084 0 1 0 4.6 20.684a16.1 16.1 0 0 0 16.084 16.085Z"/></svg>
@@ -593,13 +591,13 @@ endif;
 		// $is_active     = ultimate_post()->is_lc_active();
 		$attr = wp_parse_args( $attr, $this->get_clear_attributes() );
 
-		$attr['blockId'] = ultimate_post()->sanitize_attr($attr, "blockId", 'sanitize_html_class', 'missing_block_id');
-		$attr['clearButtonText'] = ultimate_post()->sanitize_attr($attr, "clearButtonText", 'sanitize_text_field');
+		$attr['blockId']         = ultimate_post()->sanitize_attr( $attr, 'blockId', 'sanitize_html_class', 'missing_block_id' );
+		$attr['clearButtonText'] = ultimate_post()->sanitize_attr( $attr, 'clearButtonText', 'sanitize_text_field' );
 
 		$wrapper_attrs = get_block_wrapper_attributes(
 			array(
-				'class' => 'ultp-block-' . $attr['blockId'] . ' ultp-filter-clear ultp-filter-clear-button ',
-				'data-blockid' => $attr['blockId']
+				'class'        => 'ultp-block-' . $attr['blockId'] . ' ultp-filter-clear ultp-filter-clear-button ',
+				'data-blockid' => $attr['blockId'],
 			)
 		);
 
@@ -612,7 +610,6 @@ endif;
 
 		ob_start();
 		?>
-
 
 		<div class="ultp-block-<?php echo $attr['blockId']; ?>-wrapper">
 			<div <?php echo $selected_filter_wrapper_attr; ?>>
