@@ -18,11 +18,11 @@ class Notice {
 	 *
 	 * @since v.1.0.0
 	 */
-    private $notice_version = 'v416';
+    private $notice_version = 'v4116';
 
     public function __construct() {
         add_filter( 'ultp_dashboard_notice', array( $this, 'dashboard_notice_callback' ) );
-        add_action( 'admin_notices', array( $this, 'ultp_installation_notice_callback' ) );
+        add_action( 'admin_notices', array( $this, 'ultp_installation_notice_callback' ), 0 );
 		add_action( 'admin_init', array( $this, 'set_dismiss_notice_callback' ) );
 	}
 
@@ -51,12 +51,25 @@ class Notice {
     public function dashboard_notice_callback() {
         return array(
             array(
-                'key' => 'ultp_summer_sale_24',
-                'start' => '25-06-2024',
-                'end' => '20-07-2024',
+                'key' => 'ultp_halloween_sale_24',
+                'start' => '21-10-2024',
+                'end'   => '28-10-2024',
                 // 'type' => 'banner',
                 // 'content' => ULTP_URL.'assets/img/dashboard_banner/black_friday_free.jpg',
                 'type' => 'content',
+                'force' => true,
+                'url' => ultimate_post()->get_premium_link('', 'dashboard_db_banner'),
+                'visibility' => !ultimate_post()->is_lc_active(),
+                'priority' => 50,
+                'repeat_interval' => '',
+            ),
+            array(
+                'key' => 'ultp_halloween_sale_24_banner',
+                'start' => '29-10-2024',
+                'end'   => '02-11-2024',
+                'type' => 'banner',
+                'content' => ULTP_URL.'assets/img/dashboard_banner/halloween_100.jpg',
+                // 'type' => 'content',
                 'force' => true,
                 'url' => ultimate_post()->get_premium_link('', 'dashboard_db_banner'),
                 'visibility' => !ultimate_post()->is_lc_active(),
@@ -118,7 +131,7 @@ class Notice {
                         if ( ! isset( $_GET['disable_postx_notice_' . $notice_key] ) ) {    // @codingStandardsIgnoreLine
                             switch ( $notice['type'] ) {
                                 case 'banner': ?>
-                                    <div class="wc-install ultp-free-notice">
+                                    <div class="ultp-notice-wrapper notice wc-install ultp-free-notice">
                                         <div class="wc-install-body ultp-image-banner">
                                             <a class="wc-dismiss-notice" href="<?php echo esc_url( add_query_arg( array( 'disable_postx_notice_' . $notice_key => 'yes', 'ultp_dashboard_nonce' => $ultp_dashboard_nonce ) ) ); ?>">Dismiss</a>
                                             <a class="ultp-btn-image" target="_blank" href="<?php echo esc_url($notice['url']); ?>">
@@ -130,7 +143,7 @@ class Notice {
                                 break;
                                 case 'content':
                                     $icon = ULTP_URL . 'assets/img/logo-sm.svg';
-                                    $url = 'https://www.wpxpo.com/postx/pricing/?utm_source=db-postx-global&utm_medium=summer-sale&utm_campaign=postx-dashboard';
+                                    $url = 'https://www.wpxpo.com/postx/pricing/?utm_source=db-postx-global&utm_medium=halloween-sale&utm_campaign=postx-dashboard';
                                     ?>
                                         <div class="ultp-notice-wrapper notice data_collection_notice"> 
                                             <?php
@@ -142,7 +155,8 @@ class Notice {
                                             ?>
                                             
                                             <div class="ultp-notice-content-wrapper">
-                                                <div class="">Sizzling Summer Sale is<strong> LIVE!</strong> Beat the heat with upto <strong>50% DISCOUNT</strong> on PostX Pro</div>
+                                                <!-- <div class="">Sizzling Summer Sale is<strong> LIVE!</strong> Beat the heat with upto <strong>50% DISCOUNT</strong> on PostX Pro</div> -->
+                                                <div class="">Halloween Discount Alert: Enjoy <strong>up to 50% OFF on PostX -</strong> the only Gutenberg site builder you’ll ever need…</div>
                                                 <div class="ultp-notice-buttons"> 
                                                     <a class="ultp-notice-btn button button-primary" href="<?php echo esc_url( $url ); ?>" target="_blank"> Upgrade to Pro </a>
                                                     <a href=<?php echo esc_url( add_query_arg( array( 'disable_postx_notice_' . $notice_key => 'yes', 'ultp_dashboard_nonce' => $ultp_dashboard_nonce ) ) ); ?> class="ultp-notice-dont-save-money" > I don’t want to save money </a>
@@ -173,13 +187,21 @@ class Notice {
             .ultp-notice-wrapper {
                 border: 1px solid #c3c4c7;
                 border-left: 3px solid #037fff;
-                margin-bottom: 15px;
+                margin: 15px 0px !important;
                 display: flex;
                 align-items: center;
                 background: #F7F9FF;
                 width: 100%;
                 padding: 10px 0px;
                 position: relative;
+                box-sizing: border-box;
+            }
+            .ultp-notice-wrapper.notice, .ultp-free-notice.wc-install.notice {
+                margin: 10px 0px;
+                width: calc( 100% - 20px );
+            }
+            .wrap .ultp-notice-wrapper.notice, .wrap .ultp-free-notice.wc-install {
+                width: 100%;
             }
             .ultp-notice-icon {
                 margin-left: 15px;
@@ -223,8 +245,9 @@ class Notice {
                 display: flex;
                 align-items: center;
                 background: #fff;
-                margin-top: 40px;
-                width: calc(100% - 50px);
+                margin-top: 20px;
+                width: 100%;
+                box-sizing: border-box;
                 border: 1px solid #ccd0d4;
                 padding: 4px;
                 border-radius: 4px;
