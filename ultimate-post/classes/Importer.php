@@ -92,6 +92,9 @@ class Importer {
      * @since 4.0.0
 	*/
     public function install_required_plugin_callback() {
+        if ( !current_user_can('install_plugins') ) {
+            return wp_send_json_success('You are not allowed to install plugin');
+        }
         if ( !wp_verify_nonce( sanitize_key( wp_unslash($_REQUEST['wpnonce']) ), 'ultp-nonce') ) {
             return '';
         }

@@ -18,6 +18,9 @@ class Shortcode {
         $id = is_numeric( $id ) ? (float) $id : false;
 
         if ($id) {
+            if ( class_exists('SitePress') ) {
+                $id = apply_filters( 'wpml_object_id', $id, 'ultp_templates', true );
+            }
             $content = '';
             $pre_content = '';
             $content_post = get_post($id);

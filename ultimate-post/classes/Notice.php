@@ -18,7 +18,7 @@ class Notice {
 	 *
 	 * @since v.1.0.0
 	 */
-    private $notice_version = 'v4116';
+    private $notice_version = 'v4117';
 
     public function __construct() {
         add_filter( 'ultp_dashboard_notice', array( $this, 'dashboard_notice_callback' ) );
@@ -51,9 +51,9 @@ class Notice {
     public function dashboard_notice_callback() {
         return array(
             array(
-                'key' => 'ultp_halloween_sale_24',
-                'start' => '21-10-2024',
-                'end'   => '28-10-2024',
+                'key' => 'ultp_blackfriday_sale_24',
+                'start' => '13-11-2024',
+                'end'   => '17-11-2024',
                 // 'type' => 'banner',
                 // 'content' => ULTP_URL.'assets/img/dashboard_banner/black_friday_free.jpg',
                 'type' => 'content',
@@ -64,11 +64,11 @@ class Notice {
                 'repeat_interval' => '',
             ),
             array(
-                'key' => 'ultp_halloween_sale_24_banner',
-                'start' => '29-10-2024',
-                'end'   => '02-11-2024',
+                'key' => 'ultp_blackfriday_sale_24_banner',
+                'start' => '18-11-2024',
+                'end'   => '12-12-2024',
                 'type' => 'banner',
-                'content' => ULTP_URL.'assets/img/dashboard_banner/halloween_100.jpg',
+                'content' => ULTP_URL.'assets/img/dashboard_banner/postx_black_24.jpg',
                 // 'type' => 'content',
                 'force' => true,
                 'url' => ultimate_post()->get_premium_link('', 'dashboard_db_banner'),
@@ -143,7 +143,7 @@ class Notice {
                                 break;
                                 case 'content':
                                     $icon = ULTP_URL . 'assets/img/logo-sm.svg';
-                                    $url = 'https://www.wpxpo.com/postx/pricing/?utm_source=db-postx-global&utm_medium=halloween-sale&utm_campaign=postx-dashboard';
+                                    $url = 'https://www.wpxpo.com/postx/pricing/?utm_source=db-postx-global&utm_medium=blackfriday-sale&utm_campaign=postx-dashboard';
                                     ?>
                                         <div class="ultp-notice-wrapper notice data_collection_notice"> 
                                             <?php
@@ -156,7 +156,10 @@ class Notice {
                                             
                                             <div class="ultp-notice-content-wrapper">
                                                 <!-- <div class="">Sizzling Summer Sale is<strong> LIVE!</strong> Beat the heat with upto <strong>50% DISCOUNT</strong> on PostX Pro</div> -->
-                                                <div class="">Halloween Discount Alert: Enjoy <strong>up to 50% OFF on PostX -</strong> the only Gutenberg site builder you’ll ever need…</div>
+                                                <div class="">
+                                                    <strong>Black Friday Deal Alert: </strong>
+                                                    PostX on Sale - Enjoy <strong>up to 55% OFF</strong> on the powerful site builder.
+                                                </div>
                                                 <div class="ultp-notice-buttons"> 
                                                     <a class="ultp-notice-btn button button-primary" href="<?php echo esc_url( $url ); ?>" target="_blank"> Upgrade to Pro </a>
                                                     <a href=<?php echo esc_url( add_query_arg( array( 'disable_postx_notice_' . $notice_key => 'yes', 'ultp_dashboard_nonce' => $ultp_dashboard_nonce ) ) ); ?> class="ultp-notice-dont-save-money" > I don’t want to save money </a>
