@@ -199,6 +199,8 @@ class Post_Module_2{
             'paginationAjax' => true,
             'paginationText' =>  'Previous|Next',
             'loadMoreText' =>  'Load More',
+            'defQueryTax' => array(),
+            'advRelation' => 'AND',
             
             /*============================
                 Dynamic Content
@@ -432,9 +434,9 @@ class Post_Module_2{
                         $bigloop = '<div class="ultp-big-post-module2">'.$bigloop.'</div>';
                         $post_loop = $bigloop.'<div class="ultp-small-post-module2">'.$post_loop.'</div>';
 
-                        if ( $attr['advPaginationEnable'] && ($attr['paginationType'] == 'loadMore')) {
-                            $wraper_after .= '<span class="ultp-loadmore-insert-before"></span>';
-                        }
+                        // if ( $attr['advPaginationEnable'] && ($attr['paginationType'] == 'loadMore')) {
+                        //     $wraper_after .= '<span class="ultp-loadmore-insert-before"></span>';
+                        // }
                         
                     $wraper_after .= '</div>';//ultp-block-items-wrap
                     $wraper_after .= $pagi_block_html;

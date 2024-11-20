@@ -16,6 +16,8 @@ class Post_Grid_2{
             'previewImg' =>  '',
             'advFilterEnable' => false,
             'advPaginationEnable' => false,
+            'defQueryTax' => array(),
+            'advRelation' => 'AND',
             //--------------------------
             //      Query Setting
             //--------------------------
@@ -387,9 +389,9 @@ class Post_Grid_2{
                         if($attr['queryUnique']) {
                             $post_loop .= "<span style='display: none;' class='ultp-current-unique-posts' data-ultp-unique-ids= ".wp_json_encode($unique_ID)." data-current-unique-posts= ".wp_json_encode($current_unique_posts)."> </span>";
                         }
-                        if ( ($attr['paginationShow'] || $attr['advPaginationEnable']) && ($attr['paginationType'] == 'loadMore')) {
-                            $wraper_after .= '<span class="ultp-loadmore-insert-before"></span>';
-                        }
+                        // if ( ($attr['paginationShow'] || $attr['advPaginationEnable']) && ($attr['paginationType'] == 'loadMore')) {
+                        //     $wraper_after .= '<span class="ultp-loadmore-insert-before"></span>';
+                        // }
                     $wraper_after .= '</div>';//ultp-block-items-wrap
                     
                     // Load More

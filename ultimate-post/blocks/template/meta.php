@@ -25,13 +25,13 @@ if ( $attr['metaShow'] ) {
     $meta = json_decode($meta);
     $meta = is_array($meta) ? $meta : [];
     
-    $authorImgOnly = in_array('metaAuthor', $meta) ? '<span class="ultp-block-author"><img loading="lazy" class="ultp-meta-author-img" src="'.$avatar.'" alt="'.__("By","ultimate-post").'" /></span>' : '';
+    $authorImgOnly = in_array('metaAuthor', $meta) ? '<span class="ultp-block-author ultp-block-meta-element"><img loading="lazy" class="ultp-meta-author-img" src="'.$avatar.'" alt="'.__("By","ultimate-post").'" /></span>' : '';
 
-    $authorImg     = in_array('metaAuthor', $meta) ? '<span class="ultp-block-author"><img loading="lazy" class="ultp-meta-author-img" src="'.$avatar.'" alt="'.__("By","ultimate-post").'" />'.$attr['metaAuthorPrefix'].'<a class="'. (empty($author_link) ? 'ultp-meta-author-no-link' : '') .'" href="'.($attr['authorLink']?$author_link:'javascript:void(0)').'">'.$display_name .'</a></span>' : '';
+    $authorImg     = in_array('metaAuthor', $meta) ? '<span class="ultp-block-author ultp-block-meta-element"><img loading="lazy" class="ultp-meta-author-img" src="'.$avatar.'" alt="'.__("By","ultimate-post").'" />'.$attr['metaAuthorPrefix'].'<a class="'. (empty($author_link) ? 'ultp-meta-author-no-link' : '') .'" href="'.($attr['authorLink']?$author_link:'javascript:void(0)').'">'.$display_name .'</a></span>' : '';
 
-    $authorIcon    = in_array('metaAuthor', $meta) ? '<span class="ultp-block-author">'.ultimate_post()->get_svg_icon('user').'<a class="'. (empty($author_link) ? 'ultp-meta-author-no-link' : '') .'" href="'.($attr['authorLink']?$author_link:'javascript:void(0)').'">'.$display_name.'</a></span>' : '';
+    $authorIcon    = in_array('metaAuthor', $meta) ? '<span class="ultp-block-author ultp-block-meta-element">'.ultimate_post()->get_svg_icon('user').'<a class="'. (empty($author_link) ? 'ultp-meta-author-no-link' : '') .'" href="'.($attr['authorLink']?$author_link:'javascript:void(0)').'">'.$display_name.'</a></span>' : '';
 
-    $authorBy      = in_array('metaAuthor', $meta) ? '<span class="ultp-block-author">'.$attr['metaAuthorPrefix'].'<a class="'. (empty($author_link) ? 'ultp-meta-author-no-link' : '') .'" href="'.($attr['authorLink']?$author_link:'javascript:void(0)').'">'.$display_name.'</a></span>' : '';
+    $authorBy      = in_array('metaAuthor', $meta) ? '<span class="ultp-block-author ultp-block-meta-element">'.$attr['metaAuthorPrefix'].'<a class="'. (empty($author_link) ? 'ultp-meta-author-no-link' : '') .'" href="'.($attr['authorLink']?$author_link:'javascript:void(0)').'">'.$display_name.'</a></span>' : '';
     
     // Author Filter Hook
     $authorImgOnly = apply_filters( 'postx_loop_author_image_only', $authorImgOnly, $user_id, $post_id, isset($attr["className"]) ? $attr["className"] : '');
@@ -39,18 +39,18 @@ if ( $attr['metaShow'] ) {
     $authorIcon = apply_filters( 'postx_loop_author_icon', $authorIcon, $user_id, $post_id, isset($attr["className"]) ? $attr["className"] : '');
     $authorBy = apply_filters( 'postx_loop_author_by', $authorBy, $user_id, $post_id, isset($attr["className"]) ? $attr["className"] : '');
 
-    $date          = in_array('metaDate', $meta) ? '<span class="ultp-block-date">'.$time.'</span>' : '';
-    $dateIcon      = in_array('metaDate', $meta) ? '<span class="ultp-block-date">'.ultimate_post()->get_svg_icon('calendar').$time.'</span>' : '';
-    $dateModified          = in_array('metaDateModified', $meta) ? '<span class="ultp-block-date">'.$timeModified.'</span>' : '';
-    $dateModifiedIcon      = in_array('metaDateModified', $meta) ? '<span class="ultp-block-date">'.ultimate_post()->get_svg_icon('calendar').$timeModified.'</span>' : '';
-    $comments      = in_array('metaComments', $meta) ? '<span class="ultp-post-comment">'.$comment.esc_html__(" comments", "ultimate-post").'</span>' : '';
-    $commentsIcon  = in_array('metaComments', $meta) ? '<span class="ultp-post-comment">'.ultimate_post()->get_svg_icon('comment').$comment.'</span>' : '';
-    $views         = in_array('metaView', $meta) ? '<span class="ultp-post-view">'.$view.esc_html__(" views", "ultimate-post").'</span>' : '';
-    $viewIcon      = in_array('metaView', $meta) ? '<span class="ultp-post-view">'.ultimate_post()->get_svg_icon('eye').$view.'</span>' : '';
-    $postTime      = in_array('metaTime', $meta) ? '<span class="ultp-post-time">'.$post_time.esc_html__(" ago", "ultimate-post").'</span>' : '';
-    $postTimeIcon  = in_array('metaTime', $meta) ? '<span class="ultp-post-time">'.ultimate_post()->get_svg_icon('clock').$post_time.esc_html__(" ago", "ultimate-post").'</span>' : '';
-    $reading       = in_array('metaRead', $meta) ? '<span class="ultp-post-read">'.$reading_time.'</span>' : '';
-    $readingIcon   = in_array('metaRead', $meta) ? '<span class="ultp-post-read">'.ultimate_post()->get_svg_icon('book').$reading_time.'</span>' : '';
+    $date          = in_array('metaDate', $meta) ? '<span class="ultp-block-date ultp-block-meta-element">'.$time.'</span>' : '';
+    $dateIcon      = in_array('metaDate', $meta) ? '<span class="ultp-block-date ultp-block-meta-element">'.ultimate_post()->get_svg_icon('calendar').$time.'</span>' : '';
+    $dateModified          = in_array('metaDateModified', $meta) ? '<span class="ultp-block-date ultp-block-meta-element">'.$timeModified.'</span>' : '';
+    $dateModifiedIcon      = in_array('metaDateModified', $meta) ? '<span class="ultp-block-date ultp-block-meta-element">'.ultimate_post()->get_svg_icon('calendar').$timeModified.'</span>' : '';
+    $comments      = in_array('metaComments', $meta) ? '<span class="ultp-post-comment ultp-block-meta-element">'.$comment.esc_html__(" comments", "ultimate-post").'</span>' : '';
+    $commentsIcon  = in_array('metaComments', $meta) ? '<span class="ultp-post-comment ultp-block-meta-element">'.ultimate_post()->get_svg_icon('comment').$comment.'</span>' : '';
+    $views         = in_array('metaView', $meta) ? '<span class="ultp-post-view ultp-block-meta-element">'.$view.esc_html__(" views", "ultimate-post").'</span>' : '';
+    $viewIcon      = in_array('metaView', $meta) ? '<span class="ultp-post-view ultp-block-meta-element">'.ultimate_post()->get_svg_icon('eye').$view.'</span>' : '';
+    $postTime      = in_array('metaTime', $meta) ? '<span class="ultp-post-time ultp-block-meta-element">'.$post_time.esc_html__(" ago", "ultimate-post").'</span>' : '';
+    $postTimeIcon  = in_array('metaTime', $meta) ? '<span class="ultp-post-time ultp-block-meta-element">'.ultimate_post()->get_svg_icon('clock').$post_time.esc_html__(" ago", "ultimate-post").'</span>' : '';
+    $reading       = in_array('metaRead', $meta) ? '<span class="ultp-post-read ultp-block-meta-element">'.$reading_time.'</span>' : '';
+    $readingIcon   = in_array('metaRead', $meta) ? '<span class="ultp-post-read ultp-block-meta-element">'.ultimate_post()->get_svg_icon('book').$reading_time.'</span>' : '';
 
     $post_loop .= '<div class="ultp-block-meta ultp-block-meta-'.$attr['metaSeparator'].' ultp-block-meta-'.$attr['metaStyle'].'">';
         if ($attr['metaStyle'] == 'noIcon') { $post_loop .= $authorBy.$date.$dateModified.$comments.$views.$reading.$postTime; }

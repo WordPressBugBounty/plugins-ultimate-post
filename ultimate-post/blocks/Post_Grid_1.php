@@ -14,6 +14,8 @@ class Post_Grid_1{
             'previewImg' =>  '',
             'advFilterEnable' => false,
             'advPaginationEnable' => false,
+            'defQueryTax' => array(),
+            'advRelation' => 'AND',
             /*============================
                 Layout
             ============================*/
@@ -318,10 +320,10 @@ class Post_Grid_1{
                                                     $block_img_id = $post_thumb_id ? $post_thumb_id : ($attr['fallbackEnable'] && isset($attr['fallbackImg']['id']) ? $attr['fallbackImg']['id'] : '');
                                                     // Post Image
                                                     if($post_thumb_id || ($attr['fallbackEnable'] && $block_img_id)) {
-                                                        $post_loop .=  ultimate_post()->get_image($block_img_id , $imgSize, '', $title, $attr['imgSrcset'], $attr['imgLazy']);
+                                                        $post_loop .=  ultimate_post()->get_image($block_img_id , $imgSize, 'ultp-block-image-content', $title, $attr['imgSrcset'], $attr['imgLazy']);
                                                     } else {
                                                         $video = ultimate_post()->get_youtube_id($post_video);
-                                                        $post_loop .= '<img  src="'.($video ? 'https://img.youtube.com/vi/'.$video.'/0.jpg' : $dummy_url).'" alt="dummy-img" />';
+                                                        $post_loop .= '<img class="'.($video ? 'ultp-block-video-content' : 'ultp-block-image-content').'" src="'.($video ? 'https://img.youtube.com/vi/'.$video.'/0.jpg' : $dummy_url).'" alt="dummy-img" />';
                                                     }
                                                 $post_loop .= '</a>';
                                                 if($post_video){
@@ -397,9 +399,9 @@ class Post_Grid_1{
                         if($attr['queryUnique']) {
                             $post_loop .= "<span style='display: none;' class='ultp-current-unique-posts' data-ultp-unique-ids= ".wp_json_encode($unique_ID)." data-current-unique-posts= ".wp_json_encode($current_unique_posts)."> </span>";
                         }
-                        if ( ($attr['paginationShow'] || $attr['advPaginationEnable']) && ($attr['paginationType'] == 'loadMore')) {
-                            $wraper_after .= '<span class="ultp-loadmore-insert-before"></span>';
-                        }
+                        // if ( ($attr['paginationShow'] || $attr['advPaginationEnable']) && ($attr['paginationType'] == 'loadMore')) {
+                        //     $wraper_after .= '<span class="ultp-loadmore-insert-before"></span>';
+                        // }
                     $wraper_after .= '</div>';//ultp-block-items-wrap
                     
                     // Load More

@@ -193,6 +193,8 @@ class Post_Grid_4{
             'queryNumPosts' =>  (object)['lg'=>3],
             'queryNumber2' => 4,
             'notFirstLoad' => false,
+            'defQueryTax' => array(),
+            'advRelation' => 'AND',
 
             /*============================
                 Dynamic Content
@@ -406,9 +408,9 @@ class Post_Grid_4{
                             $post_loop .= "<span style='display: none;' class='ultp-current-unique-posts' data-ultp-unique-ids= ".wp_json_encode($unique_ID)." data-current-unique-posts= ".wp_json_encode($current_unique_posts)."> </span>";
                         }
 
-                    if ( $attr['advPaginationEnable'] && ($attr['paginationType'] == 'loadMore')) {
-                        $wraper_after .= '<span class="ultp-loadmore-insert-before"></span>';
-                    }
+                    // if ( $attr['advPaginationEnable'] && ($attr['paginationType'] == 'loadMore')) {
+                    //     $wraper_after .= '<span class="ultp-loadmore-insert-before"></span>';
+                    // }
     
                     $wraper_after .= '</div>';//ultp-block-items-wrap
               

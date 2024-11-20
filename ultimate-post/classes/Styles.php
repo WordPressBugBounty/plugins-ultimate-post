@@ -128,6 +128,8 @@ class Styles {
 		try {
 			$upload_dir_url = wp_upload_dir();
 			$dir = trailingslashit($upload_dir_url['basedir']) . 'ultimate-post/';
+			$upload_dir_url = wp_upload_dir();
+			$dir = trailingslashit($upload_dir_url['basedir']) . 'ultimate-post/';
 			if ( $has_block ) {
 				
 				$ultp_block_css = $this->set_top_css($params['block_css']);
@@ -463,6 +465,35 @@ class Styles {
      * @return NULL
     */
 	public function render_block_callback($block_content, $block) {
+		if ( isset($block['blockName']) ) {
+			if (
+				$block['blockName'] == "ultimate-post/menu" ||
+				$block['blockName'] == "ultimate-post/menu-item"
+			) {
+				if ( $block['blockName'] == "ultimate-post/menu" ) {
+					$start = '_ultp_mn_ic_';
+					$end = '_ultp_mn_ic_end_';
+				} else if ( $block['blockName'] == "ultimate-post/menu-item" ) {
+					$start = '_ultp_mi_ic_';
+					$end = '_ultp_mi_ic_end_';
+				}
+				$pattern	= '/'.$start.'(.*?)'.$end.'/';
+				preg_match_all($pattern, $block_content, $matches);
+				if ( is_array($matches[1]) ) {
+					foreach ($matches[1] as $m) {
+						if ( $m ) {
+							$block_content = str_replace($start.$m.$end, ultimate_post()->get_svg_icon($m), $block_content);
+						}
+					}
+				}
+			}
+			if (
+				$block['blockName'] == "ultimate-post/mega-menu" &&
+				!ultimate_post()->is_lc_active()
+			) {
+				return '';
+			}
+		}
 		if ( 
 			!is_admin() &&
 			isset($block['blockName']) &&

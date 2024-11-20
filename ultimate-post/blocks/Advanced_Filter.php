@@ -133,6 +133,27 @@ class Advanced_Filter {
 		),
 	);
 
+	private function filter_select_options( $options, $filter ) {
+		$res = array();
+		$map = array();
+
+		foreach ( $options as $option ) {
+			$map[ $option['id'] ] = $option['name'];
+		}
+
+		foreach ( $filter as $f ) {
+
+			if ( isset( $map[ $f ] ) ) {
+				$res[] = array(
+					'id'   => strtolower( $f ),
+					'name' => $map[ $f ],
+				);
+			}
+		}
+
+		return $res;
+	}
+
 	/**
 	 * Advanced_Filter constructor.
 	 */
@@ -142,12 +163,16 @@ class Advanced_Filter {
 
 	public function get_select_attributes() {
 		return array(
-			'advanceId'    => '',
-			'blockId'      => '',
-			'advanceCss'   => '',
-			'filterStyle'  => 'dropdown',
-			'filterValues' => '["_all"]',
-			'allText'      => 'All',
+			'advanceId'           => '',
+			'blockId'             => '',
+			'advanceCss'          => '',
+			'filterStyle'         => 'dropdown',
+			'filterValues'        => '["_all"]',
+			'dropdownOptionsType' => 'all',
+			'dropdownOptions'     => '["_all"]',
+			'allText'             => 'All',
+			'sPlaceholderText'    => 'Search...',
+			'searchEnabled'       => false,
 		);
 	}
 
@@ -313,122 +338,164 @@ class Advanced_Filter {
 		return $res;
 	}
 
-	public function get_select_data( $type, $all_text, $post_types = '' ) {
+	public function get_select_data( $type, $all_text, $post_types = '', $specific = array(), $mode = 'all' ) {
+
+		$all               = null;
+		$filtered_specific = array();
+
+		if ( in_array( '_all', $specific ) || 'all' === $mode ) {
+			$all = array(
+				'id'   => '_all',
+				'name' => $all_text,
+			);
+		}
+
+		$filtered_specific = in_array( '_all', $specific ) ? array_filter(
+			$specific,
+			function ( $item ) {
+				return '_all' !== $item;
+			}
+		) : $specific;
+
 		switch ( $type ) {
+
 			case 'category':
-				$categories = get_categories(
-					array(
-						'per_page' => -1,
-					)
-				);
-				$categories = array_map(
-					function ( $category ) {
-						return array(
-							'id'   => $category->slug,
-							'name' => $category->name,
-						);
-					},
-					$categories
-				);
-				$categories = array_merge(
-					array(
+				$categories = array();
+
+				if ( 'all' === $mode || ( 'specific' === $mode && count( $filtered_specific ) > 0 ) ) {
+					$categories = get_categories(
 						array(
-							'id'   => '_all',
-							'name' => $all_text,
-						),
-					),
+							'per_page' => -1,
+							'include'  => $filtered_specific,
+							'orderby'  => 'include',
+						)
+					);
+
+					$categories = array_map(
+						function ( $category ) {
+							return array(
+								'id'   => $category->slug,
+								'name' => $category->name,
+							);
+						},
+						$categories
+					);
+				}
+
+				$categories = ! empty( $all ) ? array_merge(
+					array( $all ),
 					$categories
-				);
+				) : $categories;
+
 				return $categories;
+
 			case 'tags':
-				$tags = get_tags(
-					array(
-						'per_page' => -1,
+				$tags = array();
 
-					)
-				);
-				$tags = array_map(
-					function ( \WP_Term $tag ) {
-						return array(
-							'id'   => $tag->slug,
-							'name' => $tag->name,
-						);
-					},
-					$tags
-				);
-				$tags = array_merge(
-					array(
+				if ( 'all' === $mode || ( 'specific' === $mode && count( $filtered_specific ) > 0 ) ) {
+					$tags = get_tags(
 						array(
-							'id'   => '_all',
-							'name' => $all_text,
-						),
-					),
+							'per_page' => -1,
+							'include'  => $filtered_specific,
+						)
+					);
+					$tags = array_map(
+						function ( \WP_Term $tag ) {
+							return array(
+								'id'   => $tag->slug,
+								'name' => $tag->name,
+							);
+						},
+						$tags
+					);
+				}
+
+				$tags = ! empty( $all ) ? array_merge(
+					array( $all ),
 					$tags
-				);
+				) : $tags;
 				return $tags;
-			case 'author':
-				$authors = get_users(
-					array(
-						'per_page' => -1,
-						// 'role__in' => array( 'author' ),
-					)
-				);
-				$authors = array_map(
-					function ( $author ) {
-						return array(
-							'id'   => $author->ID,
-							'name' => $author->display_name,
-						);
-					},
-					$authors
-				);
-				$authors = array_merge(
-					array(
-						array(
-							'id'   => '_all',
-							'name' => $all_text,
-						),
-					),
-					$authors
-				);
-				return $authors;
-			case 'order':
-				return $this->order;
-			case 'order_by':
-				return $this->order_by;
-			case 'adv_sort':
-				return array_merge(
-					array(
-						array(
-							'id'   => '_all',
-							'name' => $all_text,
-						),
-					),
-					$this->adv_sort
-				);
-			case 'custom_tax':
-				$data = array(
-					array(
-						'id'   => '_all',
-						'name' => __( 'All', 'ultimate-post' ),
-					),
-				);
 
-				if ( $post_types == '' ) :
-					return $data;
-				endif;
+			case 'author':
+				$authors = array();
+
+				if ( 'all' === $mode || ( 'specific' === $mode && count( $filtered_specific ) > 0 ) ) {
+
+					$authors = get_users(
+						array(
+							'per_page' => -1,
+							'include'  => $filtered_specific,
+						)
+					);
+
+					$authors = array_map(
+						function ( $author ) {
+							return array(
+								'id'   => $author->ID,
+								'name' => $author->display_name,
+							);
+						},
+						$authors
+					);
+				}
+
+				$authors = ! empty( $all ) ? array_merge(
+					array( $all ),
+					$authors
+				) : $authors;
+				return $authors;
+
+			case 'order':
+				$filtered_specific = array_map( 'strtoupper', $filtered_specific );
+
+				return 'specific' === $mode ?
+				$this->filter_select_options( $this->order, $filtered_specific )
+				: $this->order;
+
+			case 'order_by':
+				return 'specific' === $mode ?
+				$this->filter_select_options( $this->order_by, $filtered_specific )
+				: $this->order_by;
+
+			case 'adv_sort':
+				$data = 'specific' === $mode ?
+				$this->filter_select_options( $this->adv_sort, $filtered_specific )
+				: $this->adv_sort;
+
+				$data = ! empty( $all ) ? array_merge( array( $all ), $this->adv_sort ) : $data;
+
+				return $data;
+
+			case 'custom_tax':
+				if ( $post_types == '' ) {
+					return array();
+				}
 
 				$post_types = json_decode( $post_types );
 
+				$data = array();
+
 				foreach ( $post_types as $post_type ) {
-					$taxonomies = get_object_taxonomies( $post_type );
+					$taxonomies = get_object_taxonomies( sanitize_text_field( $post_type ) );
 					foreach ( $taxonomies as $taxonomy ) {
-						$terms = get_terms(
-							array(
-								'taxonomy'   => $taxonomy,
-								'hide_empty' => false,
-							)
-						);
+						$terms = array();
+
+						if ( 'specific' === $mode && count( $filtered_specific ) > 0 ) {
+							foreach ( $filtered_specific as $s ) {
+								$res = get_term_by( 'slug', $s, $taxonomy );
+								if ( ! empty( $res ) ) {
+									$terms[] = $res;
+								}
+							}
+						} else {
+							$terms = get_terms(
+								array(
+									'taxonomy'   => $taxonomy,
+									'hide_empty' => false,
+								)
+							);
+						}
+
 						foreach ( $terms as $term ) {
 							$data[] = array(
 								'id'       => $term->slug,
@@ -438,6 +505,8 @@ class Advanced_Filter {
 						}
 					}
 				}
+
+				$data = ! empty( $all ) ? array_merge( array( $all ), $data ) : $data;
 
 				return $data;
 			default:
@@ -485,13 +554,13 @@ class Advanced_Filter {
 				<?php
 				if ( is_array( $value ) ) {
 					$name = $value['name'];
-					$tax  = isset( $value['taxonomy'] ) ? 'data-tax="' . $value['taxonomy'] . '"' : '';
+					$tax  = isset( $value['taxonomy'] ) ? 'data-tax="' . esc_attr( $value['taxonomy'] ) . '"' : '';
 				} else {
 					$name = $value;
 					$tax  = '';
 				}
 				?>
-				<div <?php echo $btn_wrapper_attrs; ?> <?php echo sanitize_text_field( $tax ); ?> data-selected="<?php echo sanitize_text_field( $key ); ?>" data-type="<?php echo esc_attr( $attr['type'] ); ?>">
+				<div <?php echo $btn_wrapper_attrs; ?> <?php echo $tax; ?> data-selected="<?php echo esc_attr( $key ); ?>" data-type="<?php echo esc_attr( $attr['type'] ); ?>">
 					<?php echo $name; ?>
 				</div>
 			<?php endforeach ?>
@@ -501,12 +570,31 @@ class Advanced_Filter {
 			$content = ob_get_clean();
 			return $content;
 		} elseif ( 'dropdown' === $attr['filterStyle'] ) {
-			$data = $this->get_select_data( $attr['type'], $attr['allText'], $post_types );
+
+			$mode     = 'all';
+			$specific = array();
+
+			if ( 'specific' === $attr['dropdownOptionsType'] && isset( $attr['dropdownOptions'] ) ) {
+				$specific_data = json_decode( stripslashes( $attr['dropdownOptions'] ) );
+				$mode          = 'specific';
+				if ( is_array( $specific_data ) ) {
+					$specific = array_map(
+						function ( $item ) {
+							return sanitize_text_field( $item );
+						},
+						$specific_data
+					);
+				}
+			}
+
+			$data = $this->get_select_data( $attr['type'], $attr['allText'], $post_types, $specific, $mode );
+
+			$def_value = ! empty( current( $data ) ) ? current( $data ) : null;
 
 			$wrapper_attrs = get_block_wrapper_attributes(
 				array(
 					'class'         => 'ultp-block-' . $attr['blockId'] . ' ultp-filter-select',
-					'data-selected' => array_key_exists( 0, $data ) ? $data[0]['id'] : 0,
+					'data-selected' => isset( $def_value['id'] ) ? $def_value['id'] : 0,
 					'data-type'     => $attr['type'],
 					'data-blockId'  => $attr['blockId'],
 					'aria-expanded' => 'false',
@@ -519,7 +607,7 @@ class Advanced_Filter {
 			<div <?php echo $wrapper_attrs; ?>>
 				<div class="ultp-filter-select-field ultp-filter-select__parent">
 					<span class="ultp-filter-select-field-selected ultp-filter-select__parent-inner">
-				<?php echo esc_html( $data[0]['name'] ); ?>
+				<?php echo esc_html( isset( $def_value['name'] ) ? $def_value['name'] : '' ); ?>
 					</span>
 					<span class="ultp-filter-select-field-icon">
 						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34.1 19.95"><path d="M17.05 19.949.601 3.499a2.05 2.05 0 0 1 2.9-2.9l13.551 13.55L30.603.599a2.05 2.05 0 0 1 2.9 2.9Z"/></svg>
@@ -527,14 +615,24 @@ class Advanced_Filter {
 				</div>
 				<ul style="display: none;" class="ultp-filter-select-options ultp-filter-select__dropdown">
 
-			<?php foreach ( $data as $item ) : ?>
-				<?php
-					$tax = isset( $item['taxonomy'] ) ? 'data-tax="' . $item['taxonomy'] . '"' : '';
-				?>
-					<li class="ultp-filter-select__dropdown-inner" <?php echo sanitize_text_field( $tax ); ?> data-id="<?php echo sanitize_text_field( $item['id'] ); ?>">
-						<?php echo esc_html( $item['name'] ); ?>
-					</li>
-				<?php endforeach; ?>
+					<?php
+					if ( isset( $attr['searchEnabled'] ) && $attr['searchEnabled'] ) :
+						?>
+						<input 
+							type="search" 
+							class="ultp-filter-select-search" 
+							placeholder="<?php echo esc_attr( isset( $attr['sPlaceholderText'] ) ? $attr['sPlaceholderText'] : '' ); ?>" 
+						/>
+					<?php endif; ?>
+
+					<?php foreach ( $data as $item ) : ?>
+						<?php
+							$tax = isset( $item['taxonomy'] ) ? 'data-tax="' . esc_attr( $item['taxonomy'] ) . '"' : '';
+						?>
+						<li class="ultp-filter-select__dropdown-inner" <?php echo $tax; ?> data-id="<?php echo esc_attr( $item['id'] ); ?>">
+							<?php echo esc_html( $item['name'] ); ?>
+						</li>
+					<?php endforeach; ?>
 
 				</ul>
 			</div>
@@ -544,7 +642,7 @@ class Advanced_Filter {
 			return $content;
 		}
 
-		return 'Unknown filter style';
+		return '';
 	}
 
 	public function search_content( $attr ) {
@@ -574,7 +672,7 @@ class Advanced_Filter {
 			<div class="ultp-filter-search-input">
 				<input
 					type="search"
-					placeholder="<?php echo sanitize_text_field($attr['placeholder']); ?>"
+					placeholder="<?php echo esc_attr( $attr['placeholder'] ); ?>"
 				/>
 				<span class="ultp-filter-search-input-icon">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 47.05 47.05"><path stroke="rgba(0,0,0,0)" strokeMiterlimit="10" d="m43.051 45.948-9.618-9.616a20.183 20.183 0 1 1 2.9-2.9l9.617 9.616a2.05 2.05 0 1 1-2.9 2.9Zm-22.367-9.179A16.084 16.084 0 1 0 4.6 20.684a16.1 16.1 0 0 0 16.084 16.085Z"/></svg>

@@ -4,7 +4,7 @@ Tags: post grid, gutenberg blocks, magazine, news, blog plugin
 Requires at least: 5.0    
 Tested up to: 6.6
 Requires PHP: 5.6
-Stable tag: 4.1.17
+Stable tag: 4.1.18
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -268,6 +268,16 @@ It is a Gutenberg plugin it works great with WordPress version 5.x.x or more. An
 11. With the help of the Elementor and Saved Template addons, you can use any of the post blocks of PostX to any pages while editing with Elementor builder.
 
 == Changelog ==
+= 4.1.18 – 20 November 2024 =
+* New: Menu block
+* New: Mega Menu block
+* New: Choose specific dropdown options for select filters
+* New: Multiple blocks for the same types of select filter is now possible ( for Category, Tags and Custom Taxonomy filters)
+* New: Can define the condition between multiple filters (AND/OR)
+* New: Search input in Select Filter dropdown to quickly search available options
+* Fix: Ajax pagination now properly modifies the URL and can be shared.
+* Fix: Broken load more spacing in front-end
+
 = 4.1.17 – 14 November 2024 =
 * Fix: WPML support for Saved Template addon.
 

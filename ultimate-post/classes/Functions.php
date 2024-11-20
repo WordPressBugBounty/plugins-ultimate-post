@@ -629,6 +629,12 @@ class Functions{
         
         if (is_array($tax_value) && count($tax_value) > 0) {
             $relation = isset($attr['queryRelation']) ? $attr['queryRelation'] : 'OR';
+
+            // Adv Filter Query Relation Override
+            if (isset($attr['advFilterEnable']) && $attr['advFilterEnable'] === true && isset($attr['advRelation'])) {
+                $relation = 'AND' === $attr['advRelation'] || 'OR' === $attr['advRelation'] ? $attr['advRelation'] : $relation;
+            }
+
             $var = array('relation'=>$relation);
             foreach ($tax_value as $val) {
                 $tax_name = $attr['queryTax'];
@@ -704,6 +710,11 @@ class Functions{
             }
             $archive_query['posts_per_page'] = isset($attr['queryNumber']) ? $attr['queryNumber'] : 1;
             $archive_query['paged'] = isset($attr['paged']) ? $attr['paged'] : 1;
+
+            $archive_query['paged'] = ! wp_doing_ajax() && isset( $_GET[ $attr['blockId'] . '_page' ] ) && is_numeric( $_GET[ $attr['blockId'] . '_page' ] ) ? 
+            intval($_GET[ $attr['blockId'] . '_page' ]) : 
+            $archive_query['paged'];
+
             if (isset($attr['queryOffset']) && $attr['queryOffset'] ) {
                 $offset = $this->get_offset($attr['queryOffset'], $archive_query);
                 $archive_query = array_merge($archive_query, $offset);
@@ -803,12 +814,19 @@ class Functions{
             $query_number = isset($attr['queryNumber']) ? $attr['queryNumber'] : 3;
         }
 
+        $paged = isset($attr['paged']) ? $attr['paged'] : 1;
+        $paged = ! wp_doing_ajax() && 
+                    isset( $_GET[ $attr['blockId'] . '_page' ] ) && 
+                    is_numeric( $_GET[ $attr['blockId'] . '_page' ] ) ? 
+                        intval($_GET[ $attr['blockId'] . '_page' ]) : 
+                        $paged;
+
         $query_args = array(
             'posts_per_page'    => $query_number,
             'post_type'         => $post_type == 'archiveBuilder' ? 'post' : $post_type,
             'orderby'           => isset($attr['queryOrderBy']) ? $attr['queryOrderBy'] : 'date',
             'order'             => isset($attr['queryOrder']) ? $attr['queryOrder'] : 'desc',
-            'paged'             => isset($attr['paged']) ? $attr['paged'] : 1,
+            'paged'             => $paged,
             'post_status'       => 'publish'
         );
 
@@ -990,6 +1008,88 @@ class Functions{
             }
         }
 
+        // Advanced Filter Select Dropdown Default value 
+        // only on initial page load
+        if (
+            ! wp_doing_ajax() &&
+            isset($attr['advFilterEnable']) && 
+            $attr['advFilterEnable'] === true && 
+            isset($attr['defQueryTax']) && 
+            count($attr['defQueryTax']) > 0
+        ) {
+            $tax_query = array( 
+                'relation' => 
+                    isset($attr['advRelation']) && 
+                        ('AND' === $attr['advRelation'] || 'OR' === $attr['advRelation']) 
+                    ? $attr['advRelation'] : 'AND'
+            );
+            $is_valid = false;
+
+            foreach ($attr['defQueryTax'] as $_ => $defQueryTaxValue) {
+                $term = explode('###', $defQueryTaxValue);
+
+                // Validation
+                if (
+                    ! in_array($term[0], array('category', 'tags', 'author', 'custom_tax'), true) ||
+                    '_all' === $term[1] ||
+                    empty( $term[1] )
+                ) {
+                    continue;
+                }
+
+                if ('author' === $term[0]) {
+
+                    if ( ! is_numeric( $term[1] ) ) {
+                        continue;
+                    }
+
+                    $query_args['author__in'] = $term[1];
+                } 
+
+                elseif( 'custom_tax' === $term[0] && isset( $attr['queryType'] ) ) {
+                    $post_type = sanitize_key($attr['queryType']);
+                    $slug = sanitize_key($term[1]);
+
+                    // These are not custom post type
+                    if ( in_array($post_type, array('posts', 'customPosts'), true) ) {
+                        continue;
+                    }
+
+                    $taxonomy = $this->get_taxonomy_by_term_slug( $post_type, $slug );
+
+                    if (! empty($taxonomy)) {
+                        $q = array(
+                            'field' => 'slug',
+                            'taxonomy' => $taxonomy,
+                            'terms' => $slug
+                        );
+
+                        $tax_query[] = $q;
+                        $is_valid = true;
+                    }
+                }
+                
+                else {
+                    if ( ! is_numeric( $term[1] ) ) {
+                        continue;
+                    }
+
+                    $q = array(
+                        'field' => 'term_id',
+                        'taxonomy' => 'tags' === $term[0] ? 'post_tag' : 'category',
+                        'terms' => $term[1]
+                    );
+
+                    $tax_query[] = $q;
+                    $is_valid = true;
+                }
+            }
+
+            if ($is_valid) {
+                $query_args['tax_query'] = $tax_query;
+            }
+        }
+
         $query_args['wpnonce'] = wp_create_nonce( 'ultp-nonce' );
         
         return apply_filters('ultp_frontend_query', $query_args);
@@ -1120,11 +1220,17 @@ class Functions{
      * @param | pages (NUMBER) | Pagination Nav (STRING) | Pagination Text |
 	 * @return STRING
 	 */
-    public function pagination($pages = '', $paginationNav = '', $paginationText = '', $paginationAjax = true, $baseUrl = '') {
+    public function pagination($pages = '', $paginationNav = '', $paginationText = '', $paginationAjax = true, $baseUrl = '', $blockId) {
         $html = '';
         $showitems = 3;
         $paged = is_front_page() ? get_query_var('page') : get_query_var('paged');
         $paged = $paged ? $paged : 1;
+
+        $paged = ! wp_doing_ajax() && 
+                isset( $_GET[ $blockId . '_page' ] ) && 
+                is_numeric( $_GET[ $blockId . '_page' ] ) ? 
+                    intval($_GET[ $blockId . '_page' ]) : $paged;
+
         if ($pages == '') {
             global $wp_query;
             $pages = $wp_query->max_num_pages;
@@ -2414,4 +2520,26 @@ class Functions{
         return false;
     }
 
+
+    /**
+     * Checks all the taxonomy of a post type for a given slug. Returns the taxonomy
+     * if it exists.
+     * @since v.4.1.16
+     * @param string $post_type
+     * @param string $slug
+     * 
+     * @return string|null
+     */
+    public function get_taxonomy_by_term_slug($post_type, $slug) {
+        $taxonomies = get_object_taxonomies( $post_type );
+        foreach ( $taxonomies as $taxonomy ) {
+            $res = get_term_by( 'slug', $slug, $taxonomy );
+
+            if ( ! empty( $res ) ) {
+                return $taxonomy;
+            }
+        }
+
+        return null;
+    }
 }

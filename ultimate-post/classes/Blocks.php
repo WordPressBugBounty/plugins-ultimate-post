@@ -554,7 +554,10 @@ class Blocks {
         }
         else if( $attr['paginationType'] == 'pagination' ) {
             $wraper_after .= '<div class="ultp-pagination-wrap'.($attr["paginationAjax"] ? " ultp-pagination-ajax-action" : "").'" data-paged="1" data-blockid="'.$attr['blockId'].'" data-postid="'.$postId.'" data-pages="'.$pageNum.'" data-blockname="'.$blockRaw.'" '.ultimate_post()->get_builder_attr($attr['queryType']). $datasets .'>';
-                $wraper_after .= ultimate_post()->pagination($pageNum, $attr['paginationNav'], $attr['paginationText'], $attr["paginationAjax"], isset($_SERVER['HTTP_REFERER'])?esc_url_raw($_SERVER['HTTP_REFERER']):'');
+
+            $wraper_after .= ultimate_post()->pagination(
+                $pageNum, $attr['paginationNav'], $attr['paginationText'], $attr["paginationAjax"], isset($_SERVER['HTTP_REFERER'])?esc_url_raw($_SERVER['HTTP_REFERER']):'', $attr['blockId']);
+
             $wraper_after .= '</div>';
         }
         wp_reset_query();

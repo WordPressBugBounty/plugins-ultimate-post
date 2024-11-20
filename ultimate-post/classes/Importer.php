@@ -98,6 +98,9 @@ class Importer {
         if ( !wp_verify_nonce( sanitize_key( wp_unslash($_REQUEST['wpnonce']) ), 'ultp-nonce') ) {
             return '';
         }
+        if ( !current_user_can('install_plugins') ) {
+            return wp_send_json_success('You are not allowed to install plugin');
+        }
     
         if ( ! function_exists( 'get_plugins' ) ) {
             require_once ABSPATH . 'wp-admin/includes/plugin.php';

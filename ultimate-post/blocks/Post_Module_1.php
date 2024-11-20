@@ -192,6 +192,8 @@ class Post_Module_1{
             'paginationAjax' => true,
             'paginationText' =>  'Previous|Next',
             'loadMoreText' =>  'Load More',
+            'defQueryTax' => array(),
+            'advRelation' => 'AND',
             // 'queryNumPosts' =>  (object)['lg'=>5],
             // 'queryNumber2' => 6,
             // 'notFirstLoad' => false,
@@ -429,9 +431,9 @@ class Post_Module_1{
                         $bigloop = '<div class="ultp-big-post-module1">'.$bigloop.'</div>';
                         $post_loop = $bigloop.'<div class="ultp-small-post-module1">'.$post_loop.'</div>';
 
-                        if ( $attr['advPaginationEnable'] && ($attr['paginationType'] == 'loadMore')) {
-                            $wraper_after .= '<span class="ultp-loadmore-insert-before"></span>';
-                        }
+                        // if ( $attr['advPaginationEnable'] && ($attr['paginationType'] == 'loadMore')) {
+                        //     $wraper_after .= '<span class="ultp-loadmore-insert-before"></span>';
+                        // }
 
                     $wraper_after .= '</div>';//ultp-block-items-wrap
                     

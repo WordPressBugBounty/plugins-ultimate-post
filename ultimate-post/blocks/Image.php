@@ -108,7 +108,7 @@ class Image {
         $darkImg = [
             'enable'=> $attr['darkImgEnable'],
             'url'=> isset($darkImageArr['url']) ? $darkImageArr['url'] : ULTP_URL.'assets/img/ultp-placeholder.jpg',
-            'srcset' => $attr['imgSrcset'] ? ' srcset="'.esc_attr(wp_get_attachment_image_srcset($darkImageArr['id'])).'"' : ''
+            'srcset' => ( $attr['imgSrcset'] && isset($darkImageArr['id']) ) ? ' srcset="'.esc_attr(wp_get_attachment_image_srcset($darkImageArr['id'])).'"' : ''
         ];
 
         $attr['className'] = isset($attr['className']) && $attr['className'] ? preg_replace('/[^A-Za-z0-9_ -]/', '', $attr['className']) : '';

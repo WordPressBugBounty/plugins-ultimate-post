@@ -500,7 +500,7 @@ class REST_API {
                 ));
                 foreach ($terms as $term) {
                     $data[] = array(
-                        'id' => $term->slug,
+                        'id'   => $term->slug,
                         'name' => $term->name
                     );
                 }

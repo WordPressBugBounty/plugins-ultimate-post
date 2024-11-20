@@ -185,6 +185,8 @@ class Post_Grid_5{
             'queryNumPosts' =>  (object)['lg'=>4],
             'queryNumber2' => 6,
             'notFirstLoad' => false,
+            'defQueryTax' => array(),
+            'advRelation' => 'AND',
 
             /*============================
                 Dynamic Content
@@ -393,9 +395,9 @@ class Post_Grid_5{
                         }
 
                     
-                    if ( $attr['advPaginationEnable'] && ($attr['paginationType'] == 'loadMore')) {
-                        $wraper_after .= '<span class="ultp-loadmore-insert-before"></span>';
-                    }
+                    // if ( $attr['advPaginationEnable'] && ($attr['paginationType'] == 'loadMore')) {
+                    //     $wraper_after .= '<span class="ultp-loadmore-insert-before"></span>';
+                    // }
     
                     $wraper_after .= '</div>';//ultp-block-items-wrap
 

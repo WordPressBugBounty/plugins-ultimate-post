@@ -159,7 +159,7 @@ class Post_List_1{
                 Read More Style
             ============================*/
             'readMoreText' =>  '',
-            'readMoreIcon' =>  '',
+            'readMoreIcon' =>  'rightArrowLg',
             
             /*============================
                 Separator Style
@@ -187,6 +187,8 @@ class Post_List_1{
             // Pagination block compatibility
             // --------------------------------
             'advPaginationEnable' => false,
+            'defQueryTax' => array(),
+            'advRelation' => 'AND',
 
             /*============================
                 Dynamic Content
@@ -401,7 +403,9 @@ class Post_List_1{
                                         }
 
                                         $post_loop .= $dcContent[2];
-
+                                        // echo "<pre>";
+                                        // print_r($attr);
+                                        // echo "</pre>";
                                         // Read More
                                         if ($attr['readMore']) {
                                             $post_loop .= '<div class="ultp-block-readmore"><a aria-label="'.$title.'" href="'.$titlelink.'" '.($attr['openInTab'] ? 'target="_blank"' : '').'>'.($attr['readMoreText'] ? $attr['readMoreText'] : esc_html__( "Read More", "ultimate-post" )).ultimate_post()->get_svg_icon($attr['readMoreIcon']).'</a></div>';
@@ -428,9 +432,9 @@ class Post_List_1{
                         if($attr['queryUnique']) {
                             $post_loop .= "<span style='display: none;' class='ultp-current-unique-posts' data-ultp-unique-ids= ".wp_json_encode($unique_ID)." data-current-unique-posts= ".wp_json_encode($current_unique_posts)."> </span>";
                         }
-                        if ( ($attr['paginationShow'] || $attr['advPaginationEnable'] )  && ($attr['paginationType'] == 'loadMore')) {
-                            $wraper_after .= '<span class="ultp-loadmore-insert-before"></span>';
-                        }
+                        // if ( ($attr['paginationShow'] || $attr['advPaginationEnable'] )  && ($attr['paginationType'] == 'loadMore')) {
+                        //     $wraper_after .= '<span class="ultp-loadmore-insert-before"></span>';
+                        // }
                     $wraper_after .= '</div>';//ultp-block-items-wrap
                     
                     // Load More

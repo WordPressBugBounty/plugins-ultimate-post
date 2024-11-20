@@ -112,7 +112,7 @@ class Post_List_3{
             'metaPosition' =>  'top',
             'metaStyle' =>  'icon',
             'authorLink' =>  true,
-            'metaSeparator' =>  '',
+            'metaSeparator' =>  'dot',
             'metaList' =>  '["metaAuthor","metaDate","metaRead"]',
             'metaMinText' =>  'min read',
             'metaAuthorPrefix' =>  'By',
@@ -188,6 +188,8 @@ class Post_List_3{
             // Pagination block compatibility
             // --------------------------------
             'advPaginationEnable' => false,
+            'defQueryTax' => array(),
+            'advRelation' => 'AND',
 
             /*============================
                 Dynamic Content
@@ -390,9 +392,9 @@ class Post_List_3{
                         if($attr['queryUnique']) {
                             $post_loop .= "<span style='display: none;' class='ultp-current-unique-posts' data-ultp-unique-ids= ".wp_json_encode($unique_ID)." data-current-unique-posts= ".wp_json_encode($current_unique_posts)."> </span>";
                         }
-                        if ( ($attr['paginationShow'] || $attr['advPaginationEnable'] )  && ($attr['paginationType'] == 'loadMore')) {
-                            $wraper_after .= '<span class="ultp-loadmore-insert-before"></span>';
-                        }
+                        // if ( ($attr['paginationShow'] || $attr['advPaginationEnable'] )  && ($attr['paginationType'] == 'loadMore')) {
+                        //     $wraper_after .= '<span class="ultp-loadmore-insert-before"></span>';
+                        // }
 
                     $wraper_after .= '</div>'; //ultp-block-items-wrap
                     
