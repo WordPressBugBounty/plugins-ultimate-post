@@ -4,7 +4,7 @@ Tags: post grid, gutenberg blocks, magazine, news, blog plugin
 Requires at least: 5.0    
 Tested up to: 6.6
 Requires PHP: 5.6
-Stable tag: 4.1.19
+Stable tag: 4.1.20
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -266,6 +266,10 @@ It is a Gutenberg plugin it works great with WordPress version 5.x.x or more. An
 9. The Gutenberg Table of Contents blocks is a complete solution multiple design, features and customization options.
 10. The Scrolling Breaking News Ticker is finely crafted for all types of News Magazine sites with lots of variations and customization options.
 11. With the help of the Elementor and Saved Template addons, you can use any of the post blocks of PostX to any pages while editing with Elementor builder.
+
+== Changelog ==
+= 4.1.20 – 3 December 2024 =
+* Fix: Sticky Row settings improve usability 
 
 == Changelog ==
 = 4.1.19 – 3 December 2024 =
