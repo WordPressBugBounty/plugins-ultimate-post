@@ -338,24 +338,42 @@ class Advanced_Filter {
 		return $res;
 	}
 
+	/**
+	 * Inserts all option depending on condition
+	 *
+	 * @param array  $arr array.
+	 * @param array  $item all item.
+	 * @param int    $idx all item idx.
+	 * @param string $mode mode.
+	 * @return void
+	 */
+	private function maybe_insert_all_option( &$arr, &$item, $idx, $mode ) {
+		if ( 'all' === $mode ) {
+			array_unshift( $arr, $item );
+		} elseif ( ! empty( $item ) && false !== $idx ) {
+			array_splice( $arr, $idx, 0, array( $item ) );
+		}
+	}
+
 	public function get_select_data( $type, $all_text, $post_types = '', $specific = array(), $mode = 'all' ) {
 
 		$all               = null;
-		$filtered_specific = array();
+		$all_idx           = array_search( '_all', $specific, true );
+		$filtered_specific = $specific;
 
-		if ( in_array( '_all', $specific ) || 'all' === $mode ) {
+		if ( false !== $all_idx || 'all' === $mode ) {
 			$all = array(
 				'id'   => '_all',
 				'name' => $all_text,
 			);
-		}
 
-		$filtered_specific = in_array( '_all', $specific ) ? array_filter(
-			$specific,
-			function ( $item ) {
-				return '_all' !== $item;
-			}
-		) : $specific;
+			$filtered_specific = array_filter(
+				$specific,
+				function ( $item ) {
+					return '_all' !== $item;
+				}
+			);
+		}
 
 		switch ( $type ) {
 
@@ -382,10 +400,7 @@ class Advanced_Filter {
 					);
 				}
 
-				$categories = ! empty( $all ) ? array_merge(
-					array( $all ),
-					$categories
-				) : $categories;
+				$this->maybe_insert_all_option( $categories, $all, $all_idx, $mode );
 
 				return $categories;
 
@@ -410,10 +425,8 @@ class Advanced_Filter {
 					);
 				}
 
-				$tags = ! empty( $all ) ? array_merge(
-					array( $all ),
-					$tags
-				) : $tags;
+				$this->maybe_insert_all_option( $tags, $all, $all_idx, $mode );
+
 				return $tags;
 
 			case 'author':
@@ -439,10 +452,8 @@ class Advanced_Filter {
 					);
 				}
 
-				$authors = ! empty( $all ) ? array_merge(
-					array( $all ),
-					$authors
-				) : $authors;
+				$this->maybe_insert_all_option( $authors, $all, $all_idx, $mode );
+
 				return $authors;
 
 			case 'order':
@@ -462,12 +473,12 @@ class Advanced_Filter {
 				$this->filter_select_options( $this->adv_sort, $filtered_specific )
 				: $this->adv_sort;
 
-				$data = ! empty( $all ) ? array_merge( array( $all ), $this->adv_sort ) : $data;
+				$this->maybe_insert_all_option( $data, $all, $all_idx, $mode );
 
 				return $data;
 
 			case 'custom_tax':
-				if ( $post_types == '' ) {
+				if ( '' == $post_types ) {
 					return array();
 				}
 
@@ -506,7 +517,7 @@ class Advanced_Filter {
 					}
 				}
 
-				$data = ! empty( $all ) ? array_merge( array( $all ), $data ) : $data;
+				$this->maybe_insert_all_option( $data, $all, $all_idx, $mode );
 
 				return $data;
 			default:
@@ -549,7 +560,7 @@ class Advanced_Filter {
 			ob_start();
 			?>
 
-			<div class="ultp-block-<?php echo $attr['blockId']; ?>-wrapper">
+			<div class="ultp-block-<?php echo esc_attr( $attr['blockId'] ); ?>-wrapper">
 			<?php foreach ( $data as $key => $value ) : ?>
 				<?php
 				if ( is_array( $value ) ) {

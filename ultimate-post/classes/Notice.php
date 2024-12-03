@@ -18,7 +18,7 @@ class Notice {
 	 *
 	 * @since v.1.0.0
 	 */
-    private $notice_version = 'v4117';
+    private $notice_version = 'v4119';
 
     public function __construct() {
         add_filter( 'ultp_dashboard_notice', array( $this, 'dashboard_notice_callback' ) );
@@ -64,7 +64,7 @@ class Notice {
                 'repeat_interval' => '',
             ),
             array(
-                'key' => 'ultp_blackfriday_sale_24_banner',
+                'key' => 'ultp_blackfriday_sale_24_banner_v2',
                 'start' => '18-11-2024',
                 'end'   => '12-12-2024',
                 'type' => 'banner',

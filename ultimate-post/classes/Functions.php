@@ -1220,7 +1220,7 @@ class Functions{
      * @param | pages (NUMBER) | Pagination Nav (STRING) | Pagination Text |
 	 * @return STRING
 	 */
-    public function pagination($pages = '', $paginationNav = '', $paginationText = '', $paginationAjax = true, $baseUrl = '', $blockId) {
+    public function pagination($pages = '', $paginationNav = '', $paginationText = '', $paginationAjax = true, $baseUrl = '', $blockId = '') {
         $html = '';
         $showitems = 3;
         $paged = is_front_page() ? get_query_var('page') : get_query_var('paged');
