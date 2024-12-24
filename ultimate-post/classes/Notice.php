@@ -18,7 +18,7 @@ class Notice {
 	 *
 	 * @since v.1.0.0
 	 */
-    private $notice_version = 'v4119';
+    private $notice_version = 'v4121';
 
     public function __construct() {
         add_filter( 'ultp_dashboard_notice', array( $this, 'dashboard_notice_callback' ) );
@@ -64,11 +64,24 @@ class Notice {
                 'repeat_interval' => '',
             ),
             array(
-                'key' => 'ultp_blackfriday_sale_24_banner_v2',
-                'start' => '18-11-2024',
-                'end'   => '12-12-2024',
+                'key' => 'ultp_holiday_24_banner',
+                'start' => '24-12-2024',
+                'end'   => '01-01-2025',
                 'type' => 'banner',
-                'content' => ULTP_URL.'assets/img/dashboard_banner/postx_black_24.jpg',
+                'content' => ULTP_URL.'assets/img/dashboard_banner/postx_holiday.jpg',
+                // 'type' => 'content',
+                'force' => true,
+                'url' => ultimate_post()->get_premium_link('', 'dashboard_db_banner'),
+                'visibility' => !ultimate_post()->is_lc_active(),
+                'priority' => 50,
+                'repeat_interval' => '',
+            ),
+            array(
+                'key' => 'ultp_holiday_24_banner_v2',
+                'start' => '02-01-2025',
+                'end'   => '10-01-2025',
+                'type' => 'banner',
+                'content' => ULTP_URL.'assets/img/dashboard_banner/postx_holiday.jpg',
                 // 'type' => 'content',
                 'force' => true,
                 'url' => ultimate_post()->get_premium_link('', 'dashboard_db_banner'),
