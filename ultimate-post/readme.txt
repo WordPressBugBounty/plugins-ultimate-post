@@ -4,7 +4,7 @@ Tags: post grid, gutenberg blocks, magazine, news, blog plugin
 Requires at least: 5.0    
 Tested up to: 6.7
 Requires PHP: 5.6
-Stable tag: 4.1.21
+Stable tag: 4.1.22
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -13,10 +13,6 @@ PostX is the #1 WordPress Blog Magazine Plugin to create any kind of News, Magaz
 == Description ==
 
 PostX, the best WordPress News plugin is designed to display posts in a post grid, post lists, & post slider layouts and build complete News, Magazine sites, and any kind of Blog.
-
-🎁 Enjoy **up to 50% Discount** on PostX this **Holiday** - Build the Perfect WordPress Site for Way Less🤩
-
-👉 [Grab Now](https://www.wpxpo.com/postx/pricing/?utm_source=postx-org&utm_medium=offer&utm_campaign=holiday_org)
 
 [youtube https://www.youtube.com/watch?v=FYgSe7kgb6M]
 
@@ -265,13 +261,19 @@ It is a Gutenberg plugin it works great with WordPress version 5.x.x or more. An
 11. With the help of the Elementor and Saved Template addons, you can use any of the post blocks of PostX to any pages while editing with Elementor builder.
 
 == Changelog ==
+= 4.1.22 – 9 January 2025 =
+* Fix: Dynamic Content setting issue
+* Fix: YouTube Embed is not working inside Saved Template and Builder Pages
+* Fix: Posts not found message added in advanced filter
+* Fix: Blocks in search page excludes post types given in Search Block
+
+
 = 4.1.21 – 24 December 2024 =
 * Fix: Mega Menu Block style issue
 
 = 4.1.20 – 3 December 2024 =
 * Fix: Sticky Row settings improve usability
 
-== Changelog ==
 = 4.1.19 – 3 December 2024 =
 * New: Sticky Row
 * Fix: Default value in Advance filter dropdown was not correctly set in some instances.

@@ -793,6 +793,14 @@ class Functions{
             // from v.3.0.7 - for search builder
             if(is_search()){
                 $archive_query['orderby'] = 'relevance';
+                if ( isset($_GET['ultp_exclude']) ) {       // Added support for search block exclude
+                    $ultp_exclude = json_decode(stripslashes($_GET['ultp_exclude']), true);
+                    if ( is_array($ultp_exclude) ) {
+                        $all_types = get_post_types( array( 'public' => true ), 'names' );
+                        $post_type = array_diff($all_types, $ultp_exclude);
+                        $archive_query['post_type'] = $post_type;
+                    }
+                }
             }
 
             return apply_filters('ultp_archive_query', $archive_query);
@@ -1669,6 +1677,8 @@ class Functions{
         if($builder_type == 'divi' || $builder_type == 'elementor') {
             $content = apply_filters('the_content', $content);
         } else {
+            global $wp_embed;
+            $content = $wp_embed->autoembed( $content );
             $content = do_blocks($content);
             $content = do_shortcode($content);
         }

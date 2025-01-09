@@ -1134,6 +1134,10 @@
                     grid.addClass("ultp-loading-active");
                 },
                 success: function (response) {
+                    grid.closest('.wp-block-ultimate-post-post-grid-parent')?.find('.ultp-not-found-message')?.remove();
+                    if ( response?.data?.filteredData?.blocks === '' && response?.data?.filteredData?.notFound ) {
+                        grid.closest('.wp-block-ultimate-post-post-grid-parent').append('<div class="ultp-not-found-message" role="alert">'+response?.data?.filteredData?.notFound+'</div>');
+                    }
                     grid.find(".ultp-block-items-wrap").html(
                         response?.data?.filteredData?.blocks
                     );
@@ -1603,7 +1607,10 @@
             }
             if (goSearch) {
                 if (e.key == "Enter" && $(this).val().length > 2) {
-                    window.open(`${ultp_data_frontend.home_url}/?s=${$(this).val()}`, tabTarget);
+                    const el = $(`.wp-block-ultimate-post-advanced-search.ultp-block-${blockId}`).find('.ultp-search-frontend');
+                    let exclude = (typeof el.data('searchposttype') !== 'string') && el.data('searchposttype')?.length > 0 && el?.data('searchposttype');
+                    exclude = exclude.length ? `&ultp_exclude=${JSON.stringify(exclude.map(e => { return e.value }))}` : '';
+                    window.open(`${ultp_data_frontend.home_url}/?s=${$(this).val()}${exclude}`, tabTarget);
                 }
             }
         });
@@ -1618,7 +1625,10 @@
                 tabTarget = "_blank";
             }
             if (goSearch) {
-                window.open(`${ultp_data_frontend.home_url}/?s=${$(this).closest('.ultp-searchform-content').find('.ultp-searchres-input').val()}`, tabTarget);
+                const el = $(`.wp-block-ultimate-post-advanced-search.ultp-block-${blockId}`).find('.ultp-search-frontend');
+                let exclude = (typeof el.data('searchposttype') !== 'string') && el.data('searchposttype')?.length > 0 && el?.data('searchposttype');
+                exclude = exclude.length ? `&ultp_exclude=${JSON.stringify(exclude.map(e => { return e.value }))}` : '';
+                window.open(`${ultp_data_frontend.home_url}/?s=${$(this).closest('.ultp-searchform-content').find('.ultp-searchres-input').val()}${exclude}`, tabTarget);
             } else {
                 $(`.result-data.ultp-block-${blockId}`).addClass('popup-active');
             }

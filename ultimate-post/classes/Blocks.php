@@ -512,6 +512,7 @@ class Blocks {
 
                     $toReturn = [
                         'blocks' => $objectBlock->content($attr, true),
+                        'notFound' => isset($attr['notFoundMessage']) ? $attr['notFoundMessage'] : '',
                         'pagination' => $this->pagination_for_filter($attr, $postId, $blockRaw, $filter_attributes),
                         'paginationType' => $attr['paginationType'],
                         'paginationShow' => $attr['paginationShow']
