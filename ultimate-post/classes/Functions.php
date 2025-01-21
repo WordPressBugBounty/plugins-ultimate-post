@@ -824,6 +824,7 @@ class Functions{
 
         $paged = isset($attr['paged']) ? $attr['paged'] : 1;
         $paged = ! wp_doing_ajax() && 
+                    isset($attr['blockId']) &&
                     isset( $_GET[ $attr['blockId'] . '_page' ] ) && 
                     is_numeric( $_GET[ $attr['blockId'] . '_page' ] ) ? 
                         intval($_GET[ $attr['blockId'] . '_page' ]) : 
@@ -1257,13 +1258,13 @@ class Functions{
         if (1 != $pages) {
             $html .= '<ul class="ultp-pagination">';            
                 $display_none = 'style="display:none"';
-                if ($pages > 1) {
+                if ($paged > 1 || $paginationAjax && $pages > 1) {
                     $html .= '<li class="ultp-prev-page-numbers" '.($paged == 1 ? $display_none : "").'><a href="'.$this->generatePaginationUrl($paged-1, $baseUrl).'">'.ultimate_post()->get_svg_icon('leftAngle2').' '.($paginationNav == 'textArrow' ? $prev_text : "").'</a></li>';
                 }
                 if ($pages > 3) {
                     $html .= '<li class="ultp-first-pages" '.($paged < 2 ? $display_none : "").' data-current="1"><a href="'.$this->generatePaginationUrl(1, $baseUrl).'">1</a></li>';
                 }
-                if ($pages > 4) {
+                if ($paged > 3 || $paginationAjax && $pages > 4) {
                     $html .= '<li class="ultp-first-dot"'.($paged == 1 ? $display_none : "").'><a href="#">...</a></li>';
                 }
                 foreach ($data as $i) {
@@ -1274,11 +1275,11 @@ class Functions{
                         $html .= ($paged == $i) ? '<li class="ultp-center-item pagination-active" data-current="'.$i.'"><a href="'.$this->generatePaginationUrl($i, $baseUrl).'">'.$i.'</a></li>':'<li class="ultp-center-item" data-current="'.$i.'" '.( ( $pages > 4 && $paged == 2 && $i == 1 && !$paginationAjax ) ? $display_none : "").'><a href="'.$this->generatePaginationUrl($i, $baseUrl).'">'.$i.'</a></li>';
                     }
                 }
-                if ($pages > 4) {
+                if($pages != ($paged + 2) || $paginationAjax && $pages > 4){
                     $html .= '<li class="ultp-last-dot" '.($pages <= $paged + 1 ? $display_none : "").'><a href="#">...</a></li>';
                 }
                 if ($pages > 3) {
-                    $html .= '<li class="ultp-last-pages" data-current="'.$pages.'"><a href="'.$this->generatePaginationUrl($pages, $baseUrl).'">'.$pages.'</a></li>';
+                    $html .= '<li class="ultp-last-pages'.($paged == $pages ? ' pagination-active' : '').'" data-current="'.$pages.'"><a href="'.$this->generatePaginationUrl($pages, $baseUrl).'">'.$pages.'</a></li>';
                 }
                 if ($paged != $pages) {
                     $html .= '<li class="ultp-next-page-numbers"><a href="'.$this->generatePaginationUrl($paged + 1, $baseUrl).'">'.($paginationNav == 'textArrow' ? $next_text : "").ultimate_post()->get_svg_icon('rightAngle2').'</a></li>';

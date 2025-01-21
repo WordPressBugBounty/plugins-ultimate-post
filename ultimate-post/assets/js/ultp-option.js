@@ -43,7 +43,7 @@
             // handle color picker
             $('.ultp-color-picker').wpColorPicker({
                 change: function(e, ui){
-                    $(this).closest('.ultp-settings-field').find('.ultp-color-code').val(e.target.value)
+                    $(this).closest('.ultp-settings-field').find('.ultp-color-code').val(ui.color.toString())
                 }
             });
             $('.ultp-color-code').bind("change keyup input",function() {

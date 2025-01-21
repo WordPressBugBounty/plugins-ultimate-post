@@ -120,7 +120,9 @@ class Taxonomy {
                             $_style_color = ((in_array($attr['layout'], [1,4,5]) && $value['color'] && $attr["customTaxTitleColor"] ) ? ' style="color:'.$value['color'].';"' : '');
                             $_style_title_bg = ((in_array($attr['layout'], [7,8]) && $value['color'] && $attr["customTaxTitleColor"] ) ? ' style="background:'.$value['color'].';"' : '');
                             $post_loop .= '<li class="ultp-block-item ultp-taxonomy-item">';
-                                $style = in_array($attr['layout'], [2,3,6,7,8]) ? 'style="'.($value['image'] ? 'background-image: url('.$value['image'][ $attr['imgCrop']].')' : 'background-color:'.$value['color']).'"' : '';
+                                
+                            $style = in_array($attr['layout'], [2,3,6,7,8]) ? 'style="'.($value['image'] ? 'background-image: url('.$value['image'][ $attr['imgCrop']].')' : '').'"' : '';
+                                
                                 $name = ($attr['titleShow'] && $value['name']) ? '<'.$attr['titleTag'].' class="ultp-taxonomy-name" '.$_style_color.'>'.$value['name'].'</'.$attr['titleTag'].'>' : '';
                                 $count = ($attr['countShow'] && $value['count']) ? '<span class="ultp-taxonomy-count" '.$_style_color.'>'.$value['count'].'</span>' : '';
                                 $excerpt = ($attr['excerptShow'] && $value['desc']) ? '<div class="ultp-taxonomy-desc">'.$value['desc'].'</div>' : '';
