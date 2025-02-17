@@ -58,80 +58,6 @@ class Advanced_Filter {
 		),
 	);
 
-	public $adv_sort = array(
-		array(
-			'id'   => 'popular_post_1_day_view',
-			'name' => 'Popular Posts (1 Day - Views)',
-		),
-		array(
-			'id'   => 'popular_post_7_days_view',
-			'name' => 'Popular Posts (7 Days - Views)',
-		),
-		array(
-			'id'   => 'popular_post_30_days_view',
-			'name' => 'Popular Posts (30 Days - Views)',
-		),
-		array(
-			'id'   => 'popular_post_all_times_view',
-			'name' => 'Popular Posts (All Time - Views)',
-		),
-		array(
-			'id'   => 'random_post',
-			'name' => 'Random Posts',
-		),
-		array(
-			'id'   => 'random_post_7_days',
-			'name' => 'Random Posts (7 Days)',
-		),
-		array(
-			'id'   => 'random_post_30_days',
-			'name' => 'Random Posts (30 Days)',
-		),
-		array(
-			'id'   => 'latest_post_published',
-			'name' => 'Latest Posts - Published Date',
-		),
-		array(
-			'id'   => 'latest_post_modified',
-			'name' => 'Latest Posts - Last Modified Date',
-		),
-		array(
-			'id'   => 'oldest_post_published',
-			'name' => 'Oldest Posts - Published Date',
-		),
-		array(
-			'id'   => 'oldest_post_modified',
-			'name' => 'Oldest Posts - Last Modified Date',
-		),
-		array(
-			'id'   => 'alphabet_asc',
-			'name' => 'Alphabetical ASC',
-		),
-		array(
-			'id'   => 'alphabet_desc',
-			'name' => 'Alphabetical DESC',
-		),
-		array(
-			'id'   => 'sticky_posts',
-			'name' => 'Sticky Post',
-		),
-		array(
-			'id'   => 'most_comment',
-			'name' => 'Most Comments',
-		),
-		array(
-			'id'   => 'most_comment_1_day',
-			'name' => 'Most Comments (1 Day)',
-		),
-		array(
-			'id'   => 'most_comment_7_days',
-			'name' => 'Most Comments (7 Days)',
-		),
-		array(
-			'id'   => 'most_comment_30_days',
-			'name' => 'Most Comments (30 Days)',
-		),
-	);
 
 	private function filter_select_options( $options, $filter ) {
 		$res = array();
@@ -158,7 +84,85 @@ class Advanced_Filter {
 	 * Advanced_Filter constructor.
 	 */
 	public function __construct() {
+
 		add_action( 'init', array( $this, 'register' ) );
+	}
+
+	private function get_adv_filter_options() {
+		return array(
+			array(
+				'id'   => 'popular_post_1_day_view',
+				'name' => __('Popular Posts (1 Day - Views)', 'ultimate-post'),
+			),
+			array(
+				'id'   => 'popular_post_7_days_view',
+				'name' => __('Popular Posts (7 Days - Views)', 'ultimate-post'),
+			),
+			array(
+				'id'   => 'popular_post_30_days_view',
+				'name' => __('Popular Posts (30 Days - Views)', 'ultimate-post'),
+			),
+			array(
+				'id'   => 'popular_post_all_times_view',
+				'name' => __('Popular Posts (All Time - Views)', 'ultimate-post'),
+			),
+			array(
+				'id'   => 'random_post',
+				'name' => __('Random Posts', 'ultimate-post'),
+			),
+			array(
+				'id'   => 'random_post_7_days',
+				'name' => __('Random Posts (7 Days)', 'ultimate-post'),
+			),
+			array(
+				'id'   => 'random_post_30_days',
+				'name' => __('Random Posts (30 Days)', 'ultimate-post'),
+			),
+			array(
+				'id'   => 'latest_post_published',
+				'name' => __('Latest Posts - Published Date', 'ultimate-post'),
+			),
+			array(
+				'id'   => 'latest_post_modified',
+				'name' => __('Latest Posts - Last Modified Date', 'ultimate-post'),
+			),
+			array(
+				'id'   => 'oldest_post_published',
+				'name' => __('Oldest Posts - Published Date', 'ultimate-post'),
+			),
+			array(
+				'id'   => 'oldest_post_modified',
+				'name' => __('Oldest Posts - Last Modified Date', 'ultimate-post'),
+			),
+			array(
+				'id'   => 'alphabet_asc',
+				'name' => __('Alphabetical ASC', 'ultimate-post'),
+			),
+			array(
+				'id'   => 'alphabet_desc',
+				'name' => __('Alphabetical DESC', 'ultimate-post'),
+			),
+			array(
+				'id'   => 'sticky_posts',
+				'name' => __('Sticky Post', 'ultimate-post'),
+			),
+			array(
+				'id'   => 'most_comment',
+				'name' => __('Most Comments', 'ultimate-post'),
+			),
+			array(
+				'id'   => 'most_comment_1_day',
+				'name' => __('Most Comments (1 Day)', 'ultimate-post'),
+			),
+			array(
+				'id'   => 'most_comment_7_days',
+				'name' => __('Most Comments (7 Days)', 'ultimate-post'),
+			),
+			array(
+				'id'   => 'most_comment_30_days',
+				'name' => __('Most Comments (30 Days)', 'ultimate-post'),
+			),
+		);
 	}
 
 	public function get_select_attributes() {
@@ -236,10 +240,12 @@ class Advanced_Filter {
 
 		$ids = implode( ',', $ids );
 
+		$adv_sort = $this->get_adv_filter_options();
+
 		switch ( $type ) {
 			case 'adv_sort':
 				$adv_sort_id = explode( ',', $ids );
-				foreach ( $this->adv_sort as $adv ) {
+				foreach ( $adv_sort as $adv ) {
 					foreach ( $adv_sort_id as $id ) {
 						if ( $adv['id'] === $id ) {
 							$res[ $id ] = $adv['name'];
@@ -375,6 +381,8 @@ class Advanced_Filter {
 			);
 		}
 
+		$adv_sort = $this->get_adv_filter_options();
+
 		switch ( $type ) {
 
 			case 'category':
@@ -384,6 +392,7 @@ class Advanced_Filter {
 					$categories = get_categories(
 						array(
 							'per_page' => -1,
+
 							'include'  => $filtered_specific,
 							'orderby'  => 'include',
 						)
@@ -438,6 +447,7 @@ class Advanced_Filter {
 						array(
 							'per_page' => -1,
 							'include'  => $filtered_specific,
+							'role__not_in' => ['subscriber', 'translator'],
 						)
 					);
 
@@ -470,8 +480,8 @@ class Advanced_Filter {
 
 			case 'adv_sort':
 				$data = 'specific' === $mode ?
-				$this->filter_select_options( $this->adv_sort, $filtered_specific )
-				: $this->adv_sort;
+				$this->filter_select_options( $adv_sort, $filtered_specific )
+				: $adv_sort;
 
 				$this->maybe_insert_all_option( $data, $all, $all_idx, $mode );
 

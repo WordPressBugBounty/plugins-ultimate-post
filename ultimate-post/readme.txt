@@ -2,9 +2,9 @@
 Contributors: wpxpo, anik4e, jakirhasan
 Tags: post grid, gutenberg blocks, magazine, news, blog plugin
 Requires at least: 5.0    
-Tested up to: 6.7
+Tested up to: 6.7.2
 Requires PHP: 5.6
-Stable tag: 4.1.23
+Stable tag: 4.1.24
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -261,6 +261,18 @@ It is a Gutenberg plugin it works great with WordPress version 5.x.x or more. An
 11. With the help of the Elementor and Saved Template addons, you can use any of the post blocks of PostX to any pages while editing with Elementor builder.
 
 == Changelog ==
+= 4.1.24 – 17 February 2025 =
+* Fix: Advanced Filter translation issue
+* Fix: Advanced Filter issue with FSE Theme
+* Fix: Author Filter valid author data issue
+* Fix: PostX Block Toolbar layout popup issue
+* Fix: Initial setup broken issue in Mozila Firefox
+* Update: Improved arrow position settings for Post Slider 2
+* Update: Table of Contents Block performance improvement
+* Update: Added Web URL disable setting for Post Comment Block
+* Update: Introduced active navigation style settings for Mega Menu Block
+
+
 = 4.1.23 – 21 January 2025 =
 * Fix: Non-Ajax pagination issue
 * Fix: Progress bar color value accuracy issue
@@ -284,268 +296,5 @@ It is a Gutenberg plugin it works great with WordPress version 5.x.x or more. An
 = 4.1.19 – 3 December 2024 =
 * New: Sticky Row
 * Fix: Default value in Advance filter dropdown was not correctly set in some instances.
-
-= 4.1.18 – 20 November 2024 =
-* New: Menu block
-* New: Mega Menu block
-* New: Choose specific dropdown options for select filters
-* New: Multiple blocks for the same types of select filter is now possible ( for Category, Tags and Custom Taxonomy filters)
-* New: Can define the condition between multiple filters (AND/OR)
-* New: Search input in Select Filter dropdown to quickly search available options
-* Fix: Ajax pagination now properly modifies the URL and can be shared.
-* Fix: Broken load more spacing in front-end
-
-= 4.1.17 – 14 November 2024 =
-* Fix: WPML support for Saved Template addon.
-
-= 4.1.16 – 16 October 2024 =
-* Fix: Advanced Filter Block issues raised by patchstack site.
-
-= 4.1.15 – 15 October 2024 =
-* Fix: Block render issue with Gutenberg plugin
-
-= 4.1.14 – 30 September 2024 =
-* Fix: CSS file delete issue
-* Fix: Broken Link in Image Block
-
-= 4.1.12 – 24 September 2024 =
-* Update: Site Builder performance optimization
-
-= 4.1.11 – 2 September 2024 =
-* Update: Speed Optimization
-
-= 4.1.10 – 13 August 2024 =
-* Fix: CSS render issue in widget area
-
-= 4.1.9 – 12 August 2024 =
-* New: Dynamic Content Add-on
-* Fix: Compatibility with Block Visibility plugin
-* Fix: Empty author link issue in Grid blocks
-* Fix: Global styles not saving with the post
-* Fix: Poor Block icon visibility when a block selected in list view and quick appender
-* Fix: Broken toolbar style when "Top Toolbar" is enabled
-
-= 4.1.8 – 6 August 2024 =
-* Fix: Block CSS render issue in FSE theme
-* Fix: Issue with creating pattern of PostX plugin block
-
-= 4.1.7 – 25 July 2024 =
-* Fix: Block is not rendering in widget area
-* Fix: Templatekits and Builder Condition is not working properly
-
-= 4.1.6 – 26 June 2024 =
-* Update: Margin/Padding setting field improvement
-* Fix: Block settings field is now synced with responsive view
-
-= 4.1.5 – 11 June 2024 =
-* Fix: Small category visibility issue in Post List #4 block
-* Update: All grid blocks query options and spacing settings
-
-= 4.1.4 – 10 June 2024 =
-* Update: Block setting panel ui improvement
-
-= 4.1.3 – 28 May 2024 =
-* Fix: Readmore button issue in Post Grid #1 block
-
-= 4.1.2 – 27 May 2024 =
-* Fix: Custom Font Addon issue with file uploading
-* Update: Improved settings selection for blocks with Images
-
-= 4.1.1 – 22 May 2024 =
-* Update: Updated Setup Wizard
-
-= 4.1.0 – 19 May 2024 =
-* New: Advanced Post Pagination block
-* New: Advanced Post Filter block
-* Update: Revamped block settings
-
-= 4.0.4 – 24 April 2024 =
-* Fix: Pattern block is not working inside Row/Column block
-
-= 4.0.3 – 22 April 2024 =
-* New: Sports Template - SP Portal
-* New: Blog Template - Qubit
-* New: Gaming Template - Grand Gaming
-* New: Saved Template duplicate option added
-* Fix: Post query not working properly for sticky posts
-* Fix: Video Popup issue from daily-moition video source
-* Fix: Responsive device option in working properly in settings panel
-* Fix: Multiselect field issue in Front End Post Submission addon settings 
-* Fix: Broken design of Post Slider 2 block when previewing in mobile device on editor
-* New: Option added to show either featured video or featured image when both are attached to a post in Post Featured Image/Video block
-
-= 4.0.2 – 3 April 2024 =
-* Fix: Block attribute sanitize and escaping, issue raised by patchstack site and Dmitrii from cleantalk site.
-* Fix: Below Spacing issue in Post Slider 1 block
-* Fix: Image overlay issue after disabling navigation in Next Previous Block 
-* Fix: Dot hover color and count with issue in Taxonomy block
-* Fix: Small and large post excerpt individual settings in Post Module 2 block
-* Fix: Large image spacing issue in Post Module 1 block
-* Fix: Large and small item category appearance issue in Post List 2 block
-* New: Image srcset and custom size option added in Post Featured Image and Image Block
-* New: News Template - NFTNews
-* New: Blog Template - FitTalk
-* New: Magazine Template - Magazino
-
-= 4.0.1 – 27 March 2024 =
-* Fix: Additional css class field option is not working
-* Fix: PHP warning in Dark Logo
-
-= 4.0.0 – 25 March 2024 =
-* New: Starter Sites
-* New: News Site Templates 
-* New: Magazine Site Templates
-* New: Travel Blog Templates
-* New: Fashion Blog Templates
-* New: Global Setting for controlling site color and typography
-* New: Social Icon block
-* New: Dark Light Switcher block
-
-= 3.2.4 – 12 March 2024 =
-* Fix: REST API capability updated
-* Fix: Data sanitize and escaping issue
-
-= 3.2.3 – 04 March 2024 =
-* Fix: Single page template css is not being saved properly on Full Site Editing theme 
-
-= 3.2.2 – 05 February 2024 =
-* Fix: Custom Font variation saving issue
-
-= 3.2.1 – 15 January 2024 =
-* Fix: Taxonomy letter spacing issue in Post Slider #2 block.
-* Update: Performance Improved
-* Update: Pagination support for Query Source custom selections and specific posts.
-
-= 3.2.0 – 25 December 2023 =
-* Fix: PostX Taxonomy Blocks rendering issue on single posts
-* Fix: PostX Breadcrumb Block attribute issue
-* Fix: Specific SVG logo optimization issue
-
-= 3.1.9 – 26 November 2023 =
-* Fix: Post Content Block link Color issue
-
-= 3.1.8 – 23 November 2023 =
-* Fix: Front End Post Submission Compatibility with FSE themes 
-
-= 3.1.7 – 23 November 2023 =
-* Fix: Post Breadcrumb Home text translating issue 
-* Fix: Compatibility with Kadence Testimonial Block
-* Fix: Post Grid 3 Block Loadmore issue in the Frontend
-* Fix: Added Polish language support in the ChatGPT Addon
-* Fix: Single Post Builder post repetition issue in Loadmore 
-* Fix: PostX Compatibility with PHP 8.1.12 and WordPress 6.4.1
-* Update: PostX Blocks automatically displayed YouTube thumbnails as featured images
-* Update: Common color and typography settings for the Post Social Share and Advanced Post Meta Site Builder blocks
-
-= 3.1.6 – 14 November 2023 =
-* Fix: Row/Column Block Column justify alignment responsiveness
-* Fix: PostX Banner conflict with Memcache & Object Cache Plugins 
-* Fix: Compatibility of PostX WPBakery Addon with WPBakery Page Builder
-
-= 3.1.5 – 18 October 2023 =
-* Fix: Compatibility of PostX Site Builder with Divi and Elementor builders
-* Fix: Single Post Builder conflict within the taxonomy related quick query and pagination.
-* Fix: Post repetition issue in Single Post Builder within other blocks, with Pagination and Filter
-* Update: Added z-index setting option in column block for more precise control over element layering
-
-= 3.1.4 – 11 October 2023 =
-* Fix: Pagination issue when duplicating the block into another page
-
-= 3.1.3 – 8 October 2023 =
-* Fix: List Block defualt order/unorder list style issue with Divi theme
-* Fix: Releated post repetition issue with Pagination and Filter 
-* Fix: Post Comments Block Popuplar Theme compatibility issue
-* Fix: Data sanitize and escaping issue Fixed
-* Fix: Footer builder Theme compatibility issue
-* Fix: Save Template style issue With Elementor 
-* Fix: Viewport issue inside Header builder 
-* Fix: Category specific color issue
-* Fix: Search Block Firefox browser issue
-
-= 3.1.2 – 21 September 2023 =
-* Fix: Pagination issue.
-
-= 3.1.1 – 18 September 2023 =
-* Fix: Row , Button Group , List - PostX blocks compatibility issue with Firefox browser
-* Fix: Next Previous button issue in pagination
-* Fix: Broken border radius in Post Grid 1 and Post Module 1 block
-* Update: Improvement in pagination, loadMore and filter ajax actions
-
-= 3.1.0 – 10 September 2023 =
-* Fix: PostX Search Block box shadow issue
-* Fix: Post Social Share Blocks RTL Support issue
-* Fix: Taxonomy Block icon issue in Design Library
-* Update: Link options added in Button Group Block
-* Update: Child hide option added in Post Breadcrumb Block
-* Update: Post Type Exclude option added in Search - PostX Block
-* Update: Japanese Date format added in Advanced Post Meta block
-
-= 3.0.9 – 4 September 2023 =
-* New: Header Builder
-* New: Footer Builder
-* New: 404 Page Builder
-
-= 3.0.8 – 29 Aug 2023 =
-* New: FSE theme support
-* Fix: PHP warning in multiTaxonomy query
-* Fix: Search Icon Alignment & left/right position Issue Fixed
-
-= 3.0.7 – 14 Aug 2023 =
-* New: Dynamic Search Block 
-* New: List Block Bullet Alignment Option Added
-* New: Archive Title Block Prefix on Top Option Added
-* Fix: Taxonomy Fallback Image Issue
-* Fix: Saved Template Option Should be Minimize Even if You Click Outside
-* Fix: Video Popup ESC button Issue
-* Fix: Post Grid 2 Loadmore is showing instead of Pagination Issue
-* Fix: Translating Filter Issue
-* Fix: Color Picker Broken Issue
-* Fix: PostX & PostX Pro Plugin Name Inconsistency Issue
-* Fix: Table of Content Open Close Issue
-* Fix: Post Grid 3: Layout 5 Typography Issue
-* Fix: Blocks Fullwidth issue inside block editor
-
-= 3.0.6 – 31th July 2023 =
-* Fix: Data escaping issue
-
-= 3.0.5 – 27th July 2023 =
-* New: Bricks Builder Addon Added
-
-= 3.0.4 – 18th July 2023 =
-* Fix: ChatGPT icon issue
-* Fix: Condition label issue in site builder
-
-= 3.0.3 – 12th July 2023 =
-* Fix: Color field issue
-* Fix: Templatekits issue
-* Fix: String translations issue
-
-= 3.0.2 – 10th July 2023 =
-* Fix: License page issue for new user
-* Fix: PHP Warning inside builder
-
-= 3.0.1 – 9th July 2023 =
-* Update: Fix Initial Setup issue
-
-= 3.0.0 – 9th July 2023 =
-* Update: Dashboard UI
-
-= 2.9.15 – 6th July 2023 =
-* New: Oxygen Builder Addon Added
-
-= 2.9.14 – 4 July 2023 =
-* New: WPBakery Page Builder Addon Added
-
-= 2.9.13 – 26 June 2023 =
-* New: Banner Removed From Dashboard
-
-= 2.9.12 – 25 June 2023 =
-* New: Beaver Builder Builder Addon Added
-
-= 2.9.11 – 22 June 2023 =
-* New: Divi Builder Addon
-
-= 2.9.10 – 19 June 2023 =
-* New: ChatGPT Addon
 
 [See changelog for all versions](https://bitbucket.org/wpstabon/ultimate-post/raw/pro_update/changelog.txt).

@@ -308,7 +308,7 @@ class ULTP_Initialization {
             return;
         }
         if ( $plugin == 'ultimate-post/ultimate-post.php' ) {
-            if ( wp_doing_ajax() || is_network_admin() || isset($_GET['activate-multi']) ) {
+            if ( wp_doing_ajax() || is_network_admin() || isset($_GET['activate-multi']) || isset($_POST['action']) && 'activate-selected' ==  $_POST['action']) {
                 return;
             }
             if ( ultimate_post()->get_setting('init_setup') != 'yes' ) {

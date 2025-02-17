@@ -372,6 +372,7 @@ z-index: 9999;
 }
 .ultp-templatekit-wrap .ultp-templatekit-list-container {
 	width: -webkit-fill-available;
+	width: -moz-available;
 	position: relative;
 }
 .ultp-templatekit-layout-search-container {
