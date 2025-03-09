@@ -70,7 +70,13 @@ class Advanced_Search {
     public function content($attr, $noAjax) {
         $wraper_before = $wraper_after = $content = $popup_content = '';
         $block_name = 'advanced-search';
-        $is_active = ultimate_post()->is_lc_active(); 
+        
+        $lc_expired = false; 
+        if(isset($attr['blockPubDate']) && $attr['blockPubDate'] != 'empty') {
+            $lc_expired = ultimate_post()->is_lc_expired($attr['blockPubDate']);
+        }
+
+        $is_active = ultimate_post()->is_lc_active() && !($lc_expired); 
 
         if ( $is_active ) {
             $attr = wp_parse_args($attr, $this->get_attributes());

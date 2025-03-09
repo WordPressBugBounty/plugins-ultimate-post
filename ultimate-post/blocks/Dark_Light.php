@@ -34,7 +34,15 @@ class Dark_Light {
     }
 
     public function content($attr) {
-        if ( ultimate_post()->is_lc_active() ) {
+        
+        $lc_expired = false; 
+        if(isset($attr['blockPubDate']) && $attr['blockPubDate'] != 'empty') {
+            $lc_expired = ultimate_post()->is_lc_expired($attr['blockPubDate']);
+        }
+
+        $is_active = ultimate_post()->is_lc_active() && !($lc_expired); 
+
+        if ( $is_active ) {
             $attr = wp_parse_args($attr, $this->get_attributes());
 
             $attr['className'] = isset($attr['className']) && $attr['className'] ? preg_replace('/[^A-Za-z0-9_ -]/', '', $attr['className']) : '';

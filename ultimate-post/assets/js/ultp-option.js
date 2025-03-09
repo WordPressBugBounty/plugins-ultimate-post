@@ -220,7 +220,7 @@
         }
     });
 
-    $('.ultp-add-media').click(() => {
+    $('.ultp-add-media').on('click', function(){
         let videoView = jQuery('.ultp-video-src > source');
         let ultpFeatVideo = wp.media({
             title: 'Insert Video',

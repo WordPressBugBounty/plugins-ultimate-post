@@ -1566,6 +1566,19 @@ class Functions{
         return false;
     }
 
+    
+    /**
+	 * Check License Status
+     * 
+     * @since v.4.1.25
+	 * @return BOOLEAN | Is pro license active or not
+	 */
+    public function is_lc_expired($date) {
+        if (function_exists('ultimate_post_pro')) {
+            return strtotime($date) > strtotime(get_option('edd_ultp_license_expire'));
+        }
+        return false;
+    }
 
     /**
 	 * Get SEO Meta

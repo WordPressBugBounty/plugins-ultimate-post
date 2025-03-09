@@ -6,7 +6,7 @@
     // Social Share window
     // *************************************
     $(".ultp-post-share-item a").each(function() {
-        $(this).click(function() {
+        $(this).on('click', function() {
             // For Share window opening
             let share_url = $(this).attr("url");
             let width = 800;
@@ -39,7 +39,7 @@
         })
     })
     // remove sticky behavior when footer is visible
-    $(window).scroll(function() {
+    $(window).on('scroll', function() {
         if ($(window).scrollTop() + window.innerHeight >= $('footer')?.offset()?.top) {
             $('.wp-block-ultimate-post-post_share .ultp-block-wrapper .ultp-disable-sticky-footer').addClass("remove-sticky");
         } else {
@@ -67,12 +67,12 @@
     // *************************************
     // Table of Contents
     // *************************************
-    $(".ultp-toc-backtotop").click(function(e) {
+    $(".ultp-toc-backtotop").on('click', function(e) {
         e.preventDefault();
         $("html, body").animate({ scrollTop: 0 }, "slow");
     });
     
-    $(window).scroll(function() {
+    $(window).on('scroll', function() {
         scrollTopButton(); 
     });
 
@@ -87,17 +87,17 @@
     }
     scrollTopButton();
 
-    $(".ultp-collapsible-open").click(function(e) {
+    $(".ultp-collapsible-open").on('click', function(e) {
         $(this).closest('.ultp-collapsible-toggle').removeClass('ultp-toggle-collapsed');
         $(this).parents('.ultp-block-toc').find('.ultp-block-toc-body').show();
     });
 
-    $(".ultp-collapsible-hide").click(function(e) {
+    $(".ultp-collapsible-hide").on('click', function(e) {
         $(this).closest('.ultp-collapsible-toggle').addClass('ultp-toggle-collapsed');
         $(this).parents('.ultp-block-toc').find('.ultp-block-toc-body').hide();
     });
     
-    $(".ultp-toc-lists li a").click(function() {
+    $(".ultp-toc-lists li a").on('click', function() {
         $([document.documentElement, document.body]).animate({
             scrollTop: $($(this).attr('href')).offset().top - 50
         }, 500);
@@ -944,7 +944,7 @@
     //  Video Scroll
     // *************************************
     let isSticky = true;
-    $(window).scroll(function() {
+    $(window).on('scroll', function() {
         let windowHeight = $(this).scrollTop();
         $('.wp-block-ultimate-post-post-image').each(function(){
             let contentSelector = $(this).find('.ultp-builder-video video , .ultp-builder-video iframe');
@@ -1825,7 +1825,7 @@
     /*************************************
        Tab Block
     *************************************/
-    $('.ultp-tabs-content[data-show="click"] .ultp-tab-item-label').click(function(e) {
+    $('.ultp-tabs-content[data-show="click"] .ultp-tab-item-label').on('click', function(e) {
         handleTabItem($(this));
     });
     $('.ultp-tabs-content[data-show="hover"] .ultp-tab-item-label').hover(function(e) {
@@ -2270,7 +2270,7 @@
                     const elementWidth = rowSelector.outerWidth();
                     const elementPosition = rowSelector.offset().top;
                     const elementPositionLeft = rowSelector.offset().left;
-                    $(window).scroll(function(){
+                    $(window).on('scroll', function(){
                         if(rowSelector.hasClass('row_sticky')) {
                             if(!rowSelector.hasClass('alignfull') && rowSelector.hasClass('stickyTopActive')) {
                                 rowSelector.css({

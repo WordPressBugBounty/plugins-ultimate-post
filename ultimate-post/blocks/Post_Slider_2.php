@@ -157,8 +157,14 @@ class Post_Slider_2 {
             $paged = is_front_page() ? get_query_var('page') : get_query_var('paged');
             $attr['paged'] = $paged ? $paged : 1;
         }
-        $is_active = ultimate_post()->is_lc_active(); 
         
+        $lc_expired = false; 
+        if(isset($attr['blockPubDate']) && $attr['blockPubDate'] != 'empty') {
+            $lc_expired = ultimate_post()->is_lc_expired($attr['blockPubDate']);
+        }
+
+        $is_active = ultimate_post()->is_lc_active() && !($lc_expired); 
+
         if ( $is_active ) {
             $block_name = 'post-slider-2';
             $wraper_before = $wraper_after = $post_loop = '';

@@ -35,7 +35,7 @@
 		$menusToCollapse = $activeMenus.not($menuToAvoid);
 		$menusToCollapse.removeClass('active').find('> ul').hide();
 	}
-	$(window).resize(function () {
+	$(window).on('resize', function() {
 		clearTimeout(resizeTimeout);
 		resizeTimeout = setTimeout(function () {
 			adjustFlexMenu();

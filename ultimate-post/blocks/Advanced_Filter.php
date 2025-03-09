@@ -92,19 +92,19 @@ class Advanced_Filter {
 		return array(
 			array(
 				'id'   => 'popular_post_1_day_view',
-				'name' => __('Popular Posts (1 Day - Views)', 'ultimate-post'),
+				'name' => __('Trending Today', 'ultimate-post'),
 			),
 			array(
 				'id'   => 'popular_post_7_days_view',
-				'name' => __('Popular Posts (7 Days - Views)', 'ultimate-post'),
+				'name' => __('This Week’s Popular Posts', 'ultimate-post'),
 			),
 			array(
 				'id'   => 'popular_post_30_days_view',
-				'name' => __('Popular Posts (30 Days - Views)', 'ultimate-post'),
+				'name' => __('Top Posts of the Month', 'ultimate-post'),
 			),
 			array(
 				'id'   => 'popular_post_all_times_view',
-				'name' => __('Popular Posts (All Time - Views)', 'ultimate-post'),
+				'name' => __('All-Time Favorites', 'ultimate-post'),
 			),
 			array(
 				'id'   => 'random_post',
@@ -259,7 +259,7 @@ class Advanced_Filter {
 						array(
 							'per_page' => -1,
 							'include'  => $ids,
-						),
+						)
 					);
 
 					foreach ( $categories as $category ) {
@@ -273,7 +273,7 @@ class Advanced_Filter {
 						array(
 							'per_page' => -1,
 							'include'  => $ids,
-						),
+						)
 					);
 
 					foreach ( $tags as $tag ) {
@@ -288,7 +288,7 @@ class Advanced_Filter {
 							'per_page' => -1,
 							'role__in' => array( 'author' ),
 							'include'  => $ids,
-						),
+						)
 					);
 
 					foreach ( $authors as $author ) {
