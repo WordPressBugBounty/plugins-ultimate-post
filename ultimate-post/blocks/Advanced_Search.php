@@ -156,7 +156,7 @@ class Advanced_Search {
         $dt = is_search() ? get_search_query(true) : '';
         $searchForm = '';
         $searchForm .= '<div class="ultp-searchform-content ultp-searchform-'.$searchFormStyle.'">';
-        $searchForm .= '<div class="ultp-search-inputwrap"> <input type="text" value="'.$dt.'" class="ultp-searchres-input"  placeholder="'.$attr['searchInputPlaceholder'].'"/> <span class="ultp-search-clear" data-blockid="'.$attr["blockId"].'">'.ultimate_post()->get_svg_icon('close_line').'</span> </div>';
+        $searchForm .= '<div class="ultp-search-inputwrap"> <input type="text" value="'.esc_attr( $dt ). '" class="ultp-searchres-input"  placeholder="'.esc_attr($attr['searchInputPlaceholder']).'"/> <span class="ultp-search-clear" data-blockid="'.$attr["blockId"].'">'.ultimate_post()->get_svg_icon('close_line').'</span> </div>';
             $searchForm .= $this->renderSearchButton(false, $attr['searchBtnText'], $attr['searchBtnIcon'] ,$attr['searchButtonText']);
         $searchForm .= '</div>';
         return $searchForm;

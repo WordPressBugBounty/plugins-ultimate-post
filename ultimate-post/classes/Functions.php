@@ -1575,7 +1575,11 @@ class Functions{
 	 */
     public function is_lc_expired($date) {
         if (function_exists('ultimate_post_pro')) {
-            return strtotime($date) > strtotime(get_option('edd_ultp_license_expire'));
+            if(get_option('edd_ultp_license_expire') == "lifetime") {
+                return false;
+            } else {
+                return strtotime($date) > strtotime(get_option('edd_ultp_license_expire'));
+            }
         }
         return false;
     }
