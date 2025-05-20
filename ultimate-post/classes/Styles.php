@@ -468,7 +468,8 @@ class Styles {
 		if ( isset($block['blockName']) ) {
 			if (
 				$block['blockName'] == "ultimate-post/menu" ||
-				$block['blockName'] == "ultimate-post/menu-item"
+				$block['blockName'] == "ultimate-post/menu-item" ||
+				$block['blockName'] == "ultimate-post/accordion-item" 
 			) {
 				if ( $block['blockName'] == "ultimate-post/menu" ) {
 					$start = '_ultp_mn_ic_';
@@ -476,6 +477,9 @@ class Styles {
 				} else if ( $block['blockName'] == "ultimate-post/menu-item" ) {
 					$start = '_ultp_mi_ic_';
 					$end = '_ultp_mi_ic_end_';
+				} else if($block['blockName'] == "ultimate-post/accordion-item") {
+					$start = '_ultp_aci_ic_';
+					$end = '_ultp_aci_ic_end_';
 				}
 				$pattern	= '/'.$start.'(.*?)'.$end.'/';
 				preg_match_all($pattern, $block_content, $matches);

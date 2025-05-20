@@ -1758,10 +1758,10 @@ class Functions{
                         if ( !empty($hf_archive) ) {
                             foreach($hf_archive as $k => $v) {
                                 if ( strpos($v, 'include/'.$type.'/'.$c_page) !== false ) {
-                                    $temp = $this->builder_check_conditions('return_h', [$c_page => [$key => [str_replace($type."/", "", $v)]]]);
+                                    $temp = $this->builder_check_conditions('return_'.$type, [$c_page => [$key => [str_replace($type."/", "", $v)]]]);
                                     $page_id = $temp ? $temp : $page_id;
                                 } else if (strpos($v, 'exclude/'.$type.'/'.$c_page) !== false) {
-                                    $temp = $this->builder_check_conditions('return_f', [$c_page => [$key => [str_replace("exclude/".$type, "include", $v)]]]);
+                                    $temp = $this->builder_check_conditions('return_'.$type, [$c_page => [$key => [str_replace("exclude/".$type, "include", $v)]]]);
                                     $page_id = $temp ? '' : $page_id;
                                 }
                             }
@@ -1813,6 +1813,23 @@ class Functions{
                             ) {
                                 if ( 'publish' == get_post_status($key) ) {
                                     $page_id = $key;
+                                }
+                            } 
+                            // Default Front / Home page Header Footer Compatibility
+                            else if (is_array($val) && 'publish' == get_post_status($key) && ($type == 'return_header' ||  $type == 'return_footer')) {
+                                $base_include = 'include/singular/' . $obj->post_type;
+                                $base_exclude = 'exclude/singular/' . $obj->post_type;
+                                $specific_include = $base_include . '/' . $obj->ID;
+                                $specific_exclude = $base_exclude . '/' . $obj->ID;
+
+                                if (in_array($specific_include, $val)) {
+                                    $page_id = $key;
+                                } elseif (in_array($specific_exclude, $val)) {
+                                    $page_id = '';
+                                } elseif (in_array($base_include, $val)) {
+                                    $page_id = $key;
+                                } elseif (in_array($base_exclude, $val)) {
+                                    $page_id = '';
                                 }
                             }
                         }
@@ -2487,7 +2504,14 @@ class Functions{
             'q'          => array(
                 'cite' => true,
             ),
-            'strong'     => array(),
+            'strong'     => array(
+                'class' => true,
+                'style' => true,
+            ),
+            'mark'     => array(
+                'class' => true,
+                'style' => true,
+            ),
         );
 
         return array_merge($allowed, $extras);

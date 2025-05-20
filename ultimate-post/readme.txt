@@ -4,7 +4,7 @@ Tags: post grid, post list, post slider, ajax filter, post filter
 Requires at least: 5.0    
 Tested up to: 6.7.2
 Requires PHP: 5.6
-Stable tag: 4.1.27
+Stable tag: 4.1.28
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -268,6 +268,12 @@ It is a Gutenberg plugin it works great with WordPress version 5.x.x or more. An
 11. With the help of the Elementor and Saved Template addons, you can use any of the post blocks of PostX to any pages while editing with Elementor builder.
 
 == Changelog ==
+= 4.1.28 – 20 May 2025 =
+* Fix: Header block highlight color issue in frontend
+* Fix: Header Footer Builder condition issue
+* Fix: Post Slider 2 image attribute issue
+* Fix: Post Grid 1 Separator gap and style issue
+
 = 4.1.27 – 8 April 2025 =
 * Fix: Dynamic Content attribute issue
 * Fix: Dynamic Content Toolbar dropdown icon broken issue
@@ -318,4 +324,4 @@ It is a Gutenberg plugin it works great with WordPress version 5.x.x or more. An
 * New: Sticky Row
 * Fix: Default value in Advance filter dropdown was not correctly set in some instances.
 
-[See changelog for all versions](https://bitbucket.org/wpstabon/ultimate-post/raw/pro_update/changelog.txt).
+[See changelog for all versions](https://bitbucket.org/wpstabon/ultimate-post/raw/master/changelog.txt).

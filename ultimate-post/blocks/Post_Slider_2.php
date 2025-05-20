@@ -230,23 +230,20 @@ class Post_Slider_2 {
                                     $post_loop .= '<div class="ultp-block-slider-wrap">';
 
                                         $post_loop .= '<div class="ultp-block-image-inner">';
-                                            if ( $attr['imageShow'] ) {
-                                                if ( $post_thumb_id || $attr['fallbackEnable'] ) {
-                                                    $post_loop .= '<div class="ultp-block-image '.($attr["imgOverlay"] ? ' ultp-block-image-overlay ultp-block-image-'.$attr["imgOverlayType"].' ultp-block-image-'.$attr["imgOverlayType"].$idx : '' ).'">';
-                                                        $post_loop .= '<a href="'.$titlelink.'" '.($attr['openInTab'] ? 'target="_blank"' : '').'>';
-                                                        // Post Image Id
-                                                        $block_img_id = $post_thumb_id ? $post_thumb_id : ($attr['fallbackEnable'] && isset($attr['fallbackImg']['id']) ? $attr['fallbackImg']['id'] : '');
-                                                        // Post Image 
-                                                        if($post_thumb_id || ($attr['fallbackEnable'] && $block_img_id)) {
-                                                            $post_loop .= ultimate_post()->get_image($block_img_id, $attr['imgCrop'], '', $title, $attr['imgSrcset'], $attr['imgLazy']);
-                                                        } else {
-                                                            $post_loop .= '<img  src="'.$dummy_url.'" alt="dummy-img" />';
-                                                        }
-                                                    $post_loop .= '</a></div>'; //.ultp-block-image    
-                                                }
+                                            if ( $post_thumb_id || $attr['fallbackEnable'] ) {
+                                                $post_loop .= '<div class="ultp-block-image '.($attr["imgOverlay"] ? ' ultp-block-image-overlay ultp-block-image-'.$attr["imgOverlayType"].' ultp-block-image-'.$attr["imgOverlayType"].$idx : '' ).'">';
+                                                    $post_loop .= '<a href="'.$titlelink.'" '.($attr['openInTab'] ? 'target="_blank"' : '').'>';
+                                                    // Post Image Id
+                                                    $block_img_id = $post_thumb_id ? $post_thumb_id : ($attr['fallbackEnable'] && isset($attr['fallbackImg']['id']) ? $attr['fallbackImg']['id'] : '');
+                                                    // Post Image 
+                                                    if($post_thumb_id || ($attr['fallbackEnable'] && $block_img_id)) {
+                                                        $post_loop .= ultimate_post()->get_image($block_img_id, $attr['imgCrop'], '', $title, $attr['imgSrcset'], $attr['imgLazy']);
+                                                    } else {
+                                                        $post_loop .= '<img  src="'.$dummy_url.'" alt="dummy-img" />';
+                                                    }
+                                                $post_loop .= '</a></div>'; //.ultp-block-image    
                                             }
                                         $post_loop .= '</div>'; //.ultp-block-image-inner                  
-
                                         $post_loop .= '<div class="ultp-block-content ultp-block-content-'.$attr['contentVerticalPosition'].' ultp-block-content-'.$attr['contentHorizontalPosition'].'">';
                                             $post_loop .= '<div class="ultp-block-content-inner">';
                                                 

@@ -49,7 +49,7 @@ class Post_Grid_1{
                 General Setting
             ============================*/
             'gridStyle' =>  'style1',
-            'columns' =>  (object)['lg' =>'3'],
+            'columns' =>  (object)['lg' =>'3', 'sm' =>'2', 'xs' =>'1'],
             'titleShow' =>  true,
             'titleStyle' =>  'none',
             'headingShow' =>  true,
@@ -280,9 +280,14 @@ class Post_Grid_1{
                         $wraper_before .= '</div>';
                     }
 
-                    $colClass = ($attr['gridStyle'] == 'style1' || $attr['gridStyle'] == 'style2') ? 'ultp-block-column-'.json_decode(wp_json_encode($attr['columns']), True)['lg'] : '';
+                    $grid_responsive = ($attr['gridStyle']  == 'style1' || $attr['gridStyle'] == 'style2') ? 'ultp-grid1-responsive' : '';
+                    $colClass = ($attr['gridStyle']  == 'style1' || $attr['gridStyle'] == 'style2') ? 'ultp-block-column-'.json_decode(wp_json_encode($attr['columns']), True)['lg'] : '';
+                    
+                    $columns = json_decode(wp_json_encode($attr['columns']), true);
+                    $colClassSm = ($attr['gridStyle'] === 'style1' || $attr['gridStyle'] === 'style2') && isset($columns['sm']) ? 'ultp-sm-column-' . $columns['sm'] : '1';
+                    $colClassXs = ($attr['gridStyle'] === 'style1' || $attr['gridStyle'] === 'style2') && isset($columns['xs'])  ? 'ultp-xs-column-' . $columns['xs'] : '1';
 
-                    $wraper_before .= '<div class="ultp-block-items-wrap ultp-block-row ultp-pg1a-'.$attr['gridStyle'].' '.sanitize_html_class( $colClass ).' ultp-'.$attr['layout'].'">';
+                    $wraper_before .= '<div class="ultp-block-items-wrap ultp-block-row ultp-pg1a-'.$attr['gridStyle'].' '.$grid_responsive.' '.sanitize_html_class( $colClass ).' '.sanitize_html_class( $colClassSm ).' '.sanitize_html_class( $colClassXs ).' ultp-'.$attr['layout'].'">';
                     $idx = ($attr['paginationShow'] && ($attr['paginationType'] == 'loadMore')) ? ( $noAjax ? 1 : 0 ) : 0;
                         while ( $recent_posts->have_posts() ): $recent_posts->the_post();
 
