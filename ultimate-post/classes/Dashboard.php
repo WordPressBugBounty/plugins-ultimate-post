@@ -1,11 +1,12 @@
 <?php
+namespace ULTP;
+
 /**
  * All Dashboard handler
  * @package ULTP\Dashboard
  * @since 4.1.11
 */
 
-namespace ULTP;
 defined('ABSPATH') || exit;
 
 /*

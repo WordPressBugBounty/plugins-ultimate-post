@@ -1,5 +1,4 @@
 <?php
-
 namespace ULTP;
 
 if ( ! defined( 'ABSPATH' ) ) {

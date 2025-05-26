@@ -1,5 +1,4 @@
 <?php
-
 namespace ULTP\blocks;
 
 use WP_Taxonomy;

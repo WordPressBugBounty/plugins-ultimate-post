@@ -2463,10 +2463,21 @@
           .each(function () {
             const theA = $(this);
             const currentUrl = window.location.href;
+            let isActive = false;
+            const targetUrl = theA[0].href;
+            if (currentUrl.endsWith("/") && !targetUrl.endsWith("/")) {
+              const normalizedTargetUrl = targetUrl + "/";
+              if (
+                currentUrl.replace("https:", "http:") ==
+                normalizedTargetUrl.replace("https:", "http:")
+              ) {
+                isActive = true;
+              }
+            }
             if (
               currentUrl.replace("https:", "http:") ==
-                theA[0].href.replace("https:", "http:") ||
-              currentUrl?.includes(theA[0].href)
+                targetUrl.replace("https:", "http:") ||
+              isActive
             ) {
               theA
                 .closest(
@@ -3046,53 +3057,51 @@
   function handleAccordionBlock() {
     if ($(".wp-block-ultimate-post-accordion").length > 0) {
       $(".wp-block-ultimate-post-accordion").each(function () {
-        const mainSelector = $(this);
         const iniselect = $(this).data("active");
         const autoCollapse = $(this).data("autocollapse");
         const accordionItem = $(this)
           .children()
           .children(".wp-block-ultimate-post-accordion-item");
-        accordionItem.each(function (idx) {
-          const acItem = $(this);
-          if (idx == iniselect) {
-            $(this).addClass("active active-accordion");
-            acItem
-              .find(".ultp-accordion-item__content")
-              .css({ display: "block" });
-          } else {
-            $(this).removeClass("active active-accordion");
-          }
-          $(this)
-            .children(".ultp-accordion-item")
-            .children(".ultp-accordion-item__navigation")
-            .on("click", function () {
-              const accordioClosestItem = $(this)
-                .parent()
-                .parent(".wp-block-ultimate-post-accordion-item");
-              const content = accordioClosestItem.find(
-                ".ultp-accordion-item__content"
-              );
-              if (content.is(":visible")) {
-                content.stop(true, true).slideUp(300, function () {
-                  accordioClosestItem.removeClass("active active-accordion");
-                });
-              } else {
-                if (autoCollapse) {
-                  mainSelector
-                    .find(".ultp-accordion-item__content:visible")
-                    .stop(true, true)
-                    .slideUp(300, function () {
-                      mainSelector
-                        .find(".wp-block-ultimate-post-accordion-item")
-                        .removeClass("active active-accordion");
-                      accordioClosestItem.addClass("active active-accordion");
-                    });
+          accordionItem.each(function (idx) {
+            const acItem = $(this);
+            // For initial Select
+            if (idx == iniselect) {
+              $(this).addClass("active active-accordion");
+              acItem
+                .find(".ultp-accordion-item__content").first()
+                .css({ display: "block" });
+            } else {
+              $(this).removeClass("active active-accordion");
+            }
+            // on Click
+            $(this)
+              .children(".ultp-accordion-item")
+              .children(".ultp-accordion-item__navigation")
+              .on("click", function () {
+                const accordioClosestItem = $(this)
+                  .parent()
+                  .parent(".wp-block-ultimate-post-accordion-item");
+                const content = accordioClosestItem.find(".ultp-accordion-item__content").first();
+                const currentAccordion = accordioClosestItem.parent().parent('.wp-block-ultimate-post-accordion');
+                if (content.is(":visible")) {
+                  content.stop(true, true).slideUp(300, function () {
+                    accordioClosestItem.removeClass("active active-accordion");
+                  });
+                } else {
+                  if (autoCollapse) {
+                      currentAccordion
+                      .find(".ultp-accordion-item__content:visible").first()
+                      .stop(true, true)
+                      .slideUp(300, function () {
+                        accordioClosestItem.siblings().removeClass("active active-accordion");
+                        accordioClosestItem.addClass("active active-accordion");
+                      });
+                  }
+                  accordioClosestItem.addClass("active active-accordion");
+                  content.stop(true, true).slideDown(300);
                 }
-                accordioClosestItem.addClass("active active-accordion");
-                content.stop(true, true).slideDown(300);
-              }
-            });
-        });
+              });
+          });
       });
     }
   }

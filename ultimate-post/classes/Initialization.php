@@ -518,6 +518,8 @@ class ULTP_Initialization {
             'taxonomy'          => 'yes',
             'wrapper'           => 'yes',
             'news_ticker'       => 'yes',
+            'accordion'         => 'yes',
+            'star_rating'       => 'yes',
             'builder_advance_post_meta' => 'yes',
             'builder_archive_title'     => 'yes',
             'builder_author_box'        => 'yes',

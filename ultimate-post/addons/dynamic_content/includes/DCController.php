@@ -1,5 +1,4 @@
 <?php
-
 namespace ULTP;
 
 use WP_REST_Response;
