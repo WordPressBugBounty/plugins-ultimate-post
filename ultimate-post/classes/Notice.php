@@ -88,6 +88,32 @@ class Notice {
                 'visibility' => !ultimate_post()->is_lc_active(),
                 'priority' => 50,
                 'repeat_interval' => '',
+            ),
+            array(
+                'key' => 'ultp_summer_25_banner_v1',
+                'start' => '23-06-2025',
+                'end'   => '05-07-2025',
+                'type' => 'banner',
+                'content' => ULTP_URL.'assets/img/dashboard_banner/summer_sale_v1_2025.jpg',
+                // 'type' => 'content',
+                'force' => true,
+                'url' => ultimate_post()->get_premium_link('', 'dashboard_db_banner'),
+                'visibility' => !ultimate_post()->is_lc_active(),
+                'priority' => 50,
+                'repeat_interval' => '',
+            ),
+            array(
+                'key' => 'ultp_summer_25_banner_v2',
+                'start' => '06-07-2025',
+                'end'   => '09-07-2025',
+                'type' => 'banner',
+                'content' => ULTP_URL.'assets/img/dashboard_banner/summer_sale_v2_2025.jpg',
+                // 'type' => 'content',
+                'force' => true,
+                'url' => ultimate_post()->get_premium_link('', 'dashboard_db_banner'),
+                'visibility' => !ultimate_post()->is_lc_active(),
+                'priority' => 50,
+                'repeat_interval' => '',
             )
         );
     }
