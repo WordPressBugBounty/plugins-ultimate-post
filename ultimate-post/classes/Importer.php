@@ -7,6 +7,9 @@
  */
 namespace ULTP;
 
+use ULTP\Includes\Durbin\DurbinClient;
+use ULTP\Includes\Durbin\Xpo;
+
 defined('ABSPATH') || exit;
 
 /**
@@ -183,7 +186,7 @@ class Importer {
                 'timeout' => 120,
                 'body' => array(
                     'type' => 'site_posts',
-                    'license' => get_option('edd_ultp_license_key'),
+                    'license' => Xpo::get_lc_key(),
                     'ultp_ver' => ULTP_VER,
                 )
             )
@@ -242,7 +245,7 @@ class Importer {
                 'method' => 'POST',
                 'timeout' => 120,
                 'body' => array(
-                    'license' => get_option('edd_ultp_license_key'),
+                    'license' => Xpo::get_lc_key(),
                     'ultp_ver' => ULTP_VER,
                 )
             )
@@ -616,9 +619,7 @@ class Importer {
             }
         }
         if ( $get_newsletter == 'yes' ) {
-            require_once ULTP_PATH.'classes/Deactive.php';
-            $obj = new \ULTP\Deactive();
-            $obj->send_plugin_data('postx_starter_pack', '');
+            DurbinClient::send( DurbinClient::ACTIVATE_ACTION );
         }
 
         return rest_ensure_response([
@@ -641,7 +642,7 @@ class Importer {
             $import_single = array(
                 'id'   => $id, 
                 'type' => 'single',
-                'license' => get_option('edd_ultp_license_key'),
+                'license' => Xpo::get_lc_key(),
                 'ultp_ver' => ULTP_VER,
             );
             $response = wp_remote_get(

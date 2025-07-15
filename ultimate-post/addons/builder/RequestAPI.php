@@ -401,7 +401,7 @@ class RequestAPI {
             $import_single = array(
                 'id'   => $id, 
                 'type' => 'single',
-                'license' => get_option('edd_ultp_license_key'),
+                'license' => Xpo::get_lc_key(),
             );
             $response = wp_remote_get(
                 $api_endpoint.'/wp-json/importer/single', 

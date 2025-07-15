@@ -78,6 +78,28 @@
 #toplevel_page_ultp-settings a[href="admin.php?page=go_postx_pro"]:hover {
     color: #2BCC3B;
 }
+
+#toplevel_page_ultp-settings .wp-submenu a[href*="ultp-pro"] {
+	display:none;
+}
+#toplevel_page_ultp-settings .wp-submenu a.ultp-go-pro {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	color: white;
+	background-color: #86a62c;
+	margin-inline: 10px;
+	border-radius: 6px;
+	margin-top: 6px;
+	padding-block: 6px;
+	box-shadow: none;
+	white-space: nowrap;
+	transition: background-color 200ms ease;
+}
+#toplevel_page_ultp-settings .wp-submenu a.ultp-go-pro:hover {
+	background-color: #7c9731;
+	color: white;
+}
 /* =========================
 	Button
 ============================ */
