@@ -231,6 +231,7 @@ class Post_Module_1{
 
         $bigloop = '';
         $block_name = 'post-module-1';
+        $vid_icon_redirect = true;
         $wraper_before = $wraper_after = $post_loop = '';
         $attr['queryNumber'] = ultimate_post()->get_post_number(5, $attr['queryNumber'], $attr['queryNumPosts']);
         $recent_posts = new \WP_Query( ultimate_post()->get_query( $attr ) );
@@ -330,9 +331,6 @@ class Post_Module_1{
                                                     $post_loop .= '<img  src="'.($video ? 'https://img.youtube.com/vi/'.$video.'/0.jpg' : $dummy_url).'" alt="dummy-img" />';
                                                 }
                                                 $post_loop .= '</a>';
-                                                if($post_video){
-                                                    $post_loop .= '<div enableAutoPlay="'.$attr['popupAutoPlay'].'" class="ultp-video-icon">'.ultimate_post()->get_svg_icon('play_line').'</div>';
-                                                }
                                             } else {
                                                 if ($attr['layout'] == 'layout2' || $attr['layout'] == 'layout3' || $attr['layout'] == 'layout5') {
                                                     $post_loop .= '<a href="'.$titlelink.'" '.($attr['openInTab'] ? 'target="_blank"' : '').'>';
@@ -346,15 +344,16 @@ class Post_Module_1{
                                                         $post_loop .= '<img  src="'.($video ? 'https://img.youtube.com/vi/'.$video.'/0.jpg' : $dummy_url).'" alt="dummy-img" />';
                                                     }
                                                     $post_loop .= '</a>';
-                                                    if($post_video){
-                                                        $post_loop .= '<div enableAutoPlay="'.$attr['popupAutoPlay'].'" class="ultp-video-icon">'.ultimate_post()->get_svg_icon('play_line').'</div>';
-                                                    }
                                                 }
                                             }
                                             if (($attr['catPosition'] != 'aboveTitle') && ($idx == 0 || $attr['showSmallCat']) && $attr['catShow'] ) {
                                                 $post_loop .= '<div class="ultp-category-img-grid">'.$category.'</div>';
                                             }
+                                            if($post_video){
+                                            include ULTP_PATH.'blocks/template/video_icon.php';
+                                        }
                                         $post_loop .= '</div>';
+                                        
                                     }
                                     $post_loop .= '<div class="ultp-block-content">';
 

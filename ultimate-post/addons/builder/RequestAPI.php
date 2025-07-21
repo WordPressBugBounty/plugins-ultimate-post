@@ -7,6 +7,8 @@
  */
 namespace ULTP;
 
+use ULTP\Includes\Durbin\Xpo;
+
 defined('ABSPATH') || exit;
 
 /**

@@ -228,6 +228,8 @@ class Post_Grid_7{
         }
 
         $block_name = 'post-grid-7';
+        $vid_icon_redirect = true; // Its used for video icon do not remove it
+        
         $wraper_before = $wraper_after = $post_loop = '';
         $recent_posts = new \WP_Query( ultimate_post()->get_query( $attr ) );
         $pageNum = ultimate_post()->get_page_number($attr, $recent_posts->found_posts);
@@ -331,16 +333,16 @@ class Post_Grid_7{
                                                 }
                                             }
                                             $post_loop .= '</a>';
-                                            if($post_video){
-                                                $post_loop .= '<div enableAutoPlay="'.$attr['popupAutoPlay'].'" class="ultp-video-icon">'.ultimate_post()->get_svg_icon('play_line').'</div>';
-                                            }
                                             if (($attr['catPosition'] != 'aboveTitle') && ($idx == 0 || $attr['showSmallCat'] || ($idx == 3 && $attr['layout'] == 'layout4')) && $attr['catShow'] ) {
                                                 $post_loop .= '<div class="ultp-category-img-grid">'.$category.'</div>';
                                             }
                                         $post_loop .= '</div>';
+                                        if($post_video){
+                                            include ULTP_PATH.'blocks/template/video_icon.php';
+                                        }
                                     } else {
                                         if($post_video){
-                                            $post_loop .= '<div enableAutoPlay="'.$attr['popupAutoPlay'].'" class="ultp-video-icon">'.ultimate_post()->get_svg_icon('play_line').'</div>';
+                                            include ULTP_PATH.'blocks/template/video_icon.php';
                                         }
                                         $post_loop .= '<div class="ultp-block-image ultp-block-empty-image"></div>';
                                     }

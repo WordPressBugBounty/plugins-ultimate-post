@@ -217,6 +217,9 @@ class Post_Grid_1{
         
         // Current Post Id For Pagiantion
         $curr_post_id = '';
+        
+        $vid_icon_redirect = false;
+
         if(is_single()){
             $curr_post_id = get_the_ID();
         }
@@ -330,9 +333,14 @@ class Post_Grid_1{
                                                         $video = ultimate_post()->get_youtube_id($post_video);
                                                         $post_loop .= '<img class="'.($video ? 'ultp-block-video-content' : 'ultp-block-image-content').'" src="'.($video ? 'https://img.youtube.com/vi/'.$video.'/0.jpg' : $dummy_url).'" alt="dummy-img" />';
                                                     }
+                                                    if($post_video && !($attr['enablePopup']) && $attr['layout'] !== 'layout2') {
+                                                        $post_loop .= '<div class="ultp-block-video-content" style="display: none;" >';
+                                                        $post_loop .= ultimate_post()->get_embeded_video($post_video, true, true, false, true, true, false, true, array());
+                                                        $post_loop .= '</div>';
+                                                    }
                                                 $post_loop .= '</a>';
                                                 if($post_video){
-                                                    $post_loop .= '<div enableAutoPlay="'.$attr['popupAutoPlay'].'" class="ultp-video-icon">'.ultimate_post()->get_svg_icon('play_line').'</div>';
+                                                    include ULTP_PATH.'blocks/template/video_icon.php';
                                                 }
                                             if (($attr['catPosition'] != 'aboveTitle') && $attr['catShow'] ) {
                                                 $post_loop .= '<div class="ultp-category-img-grid">'.$category.'</div>';

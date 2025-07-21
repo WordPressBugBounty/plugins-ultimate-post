@@ -307,23 +307,39 @@ class Post_List_1{
                                 $current_unique_posts[] = $post_id;
                             }
 
+
+
                             $post_loop .= '<'.$attr['contentTag'].' class="ultp-block-item post-id-'.$post_id.'">';
                                 $post_loop .= '<div class="ultp-block-content-wrap">';
                                     $post_loop .= '<div class="ultp-block-entry-content">';
 
                                     $post_loop .= $dcContent[9];
 
+
+
                                     if(($attr['gridStyle'] == 'style3' && $idx == 0) && (($post_thumb_id || $attr['fallbackEnable']) && $attr['showImage'])) {
+
+                                            echo "Test";
+
+
                                         $post_loop .= '<div class="ultp-block-image ultp-block-image-'.$attr['imgAnimation'].($attr["imgOverlay"] ? ' ultp-block-image-overlay ultp-block-image-'.$attr["imgOverlayType"].' ultp-block-image-'.$attr["imgOverlayType"].$idx : '' ).'">';
                                             $post_loop .= '<a href="'.$titlelink.'" '.($attr['openInTab'] ? 'target="_blank"' : '').'>';
                                             // Post Image Id
                                             $block_img_id = $post_thumb_id ? $post_thumb_id : ($attr['fallbackEnable'] && isset($attr['fallbackImg']['id']) ? $attr['fallbackImg']['id'] : '');
+                                            
+
                                             // Post Image 
                                             if($post_thumb_id || ($attr['fallbackEnable'] && $block_img_id)) {
                                                 $post_loop .=  ultimate_post()->get_image($block_img_id, $attr['imgCrop'], '', $title, $attr['imgSrcset'], $attr['imgLazy']);
                                             } else {
                                                 $video = ultimate_post()->get_youtube_id($post_video);
                                                 $post_loop .= '<img  src="'.($video ? 'https://img.youtube.com/vi/'.$video.'/0.jpg' : $dummy_url).'" alt="dummy-img" />';
+                                            }
+
+                                            if($post_video && !($attr['enablePopup'])) {
+                                                $post_loop .= '<div class="ultp-block-video-content" style="display: none;" >';
+                                                $post_loop .= ultimate_post()->get_embeded_video($post_video, true, true, false, true, true, false, true, array());
+                                                $post_loop .= '</div>';
                                             }
                                             $post_loop .= '</a>';
                                             if (($attr['catPosition'] != 'aboveTitle') && $attr['catShow'] ) {
@@ -381,8 +397,13 @@ class Post_List_1{
                                                     $post_loop .= '<img  src="'.($video ? 'https://img.youtube.com/vi/'.$video.'/0.jpg' : $dummy_url).'" alt="dummy-img" />';
                                             }
                                             $post_loop .= '</a>';
+                                            if($post_video && !($attr['enablePopup'])) {
+                                                $post_loop .= '<div class="ultp-block-video-content" style="display: none;" >';
+                                                $post_loop .= ultimate_post()->get_embeded_video($post_video, true, true, false, true, true, false, true, array());
+                                                $post_loop .= '</div>';
+                                            }
                                             if($post_video){
-                                                $post_loop .= '<div enableAutoPlay="'.$attr['popupAutoPlay'].'" class="ultp-video-icon">'.ultimate_post()->get_svg_icon('play_line').'</div>';
+                                                include ULTP_PATH.'blocks/template/video_icon.php';
                                             }
                                             if(($attr['catPosition'] != 'aboveTitle') && $attr['catShow'] ) {
                                                 $post_loop .= '<div class="ultp-category-img-grid">'.$category.'</div>';

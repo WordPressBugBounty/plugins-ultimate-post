@@ -320,8 +320,13 @@ class Post_List_3{
                                                 $post_loop .= '<img  src="'.($video ? 'https://img.youtube.com/vi/'.$video.'/0.jpg' : $dummy_url).'" alt="dummy-img" />';
                                             }
                                             $post_loop .= '</a>';
+                                            if($post_video && !($attr['enablePopup'])) {
+                                                $post_loop .= '<div class="ultp-block-video-content" style="display: none;" >';
+                                                $post_loop .= ultimate_post()->get_embeded_video($post_video, true, true, false, true, true, false, true, array());
+                                                $post_loop .= '</div>';
+                                            }
                                             if($post_video){
-                                                $post_loop .= '<div enableAutoPlay="'.$attr['popupAutoPlay'].'" class="ultp-video-icon">'.ultimate_post()->get_svg_icon('play_line').'</div>';
+                                                include ULTP_PATH.'blocks/template/video_icon.php';
                                             }
                                             if (($attr['catPosition'] != 'aboveTitle') && $attr['catShow'] ) {
                                                 $post_loop .= '<div class="ultp-category-img-grid">'.$category.'</div>';

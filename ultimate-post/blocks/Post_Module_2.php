@@ -234,6 +234,7 @@ class Post_Module_2{
         }
 
         $block_name = 'post-module-2';
+        $vid_icon_redirect = true;
         $wraper_before = $wraper_after = $post_loop = '';
         $attr['queryNumber'] = ultimate_post()->get_post_number(5, $attr['queryNumber'], $attr['queryNumPosts']);
         $recent_posts = new \WP_Query( ultimate_post()->get_query( $attr ) );
@@ -346,16 +347,13 @@ class Post_Module_2{
                                                     $post_loop .= '</a>';
                                                 }
                                                 if($post_video){
-                                                    $post_loop .= '<div enableAutoPlay="'.$attr['popupAutoPlay'].'" class="ultp-video-icon">'.ultimate_post()->get_svg_icon('play_line').'</div>';
+                                                    include ULTP_PATH.'blocks/template/video_icon.php';
                                                 }
                                             }
                                             if (($attr['catPosition'] != 'aboveTitle') && ($idx == 0 || $attr['showSmallCat']) && $attr['catShow'] ) {
                                                 $post_loop .= '<div class="ultp-category-img-grid">'.$category.'</div>';
                                             }
                                         $post_loop .= '</div>';
-                                        if($post_video && $idx == 0){
-                                            $post_loop .= '<div enableAutoPlay="'.$attr['popupAutoPlay'].'" class="ultp-video-icon">'.ultimate_post()->get_svg_icon('play_line').'</div>';
-                                        }
                                     }
                                     $post_loop .= '<div class="ultp-block-content">';
 
@@ -415,6 +413,9 @@ class Post_Module_2{
                                         $post_loop .= $dcContent[0];
 
                                     $post_loop .= '</div>';
+                                    if($post_video && $idx == 0){
+                                        include ULTP_PATH.'blocks/template/video_icon.php';
+                                    }
                                 $post_loop .= '</div>';
                                 if($post_video && $attr['enablePopup'] &&  ($attr['layout'] != 'layout1' && $attr['layout'] != 'layout4' || $idx == 0)) {
                                     include ULTP_PATH.'blocks/template/video_popup.php';
