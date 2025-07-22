@@ -234,7 +234,7 @@ class Post_Module_2{
         }
 
         $block_name = 'post-module-2';
-        $vid_icon_redirect = true;
+        $vid_icon_redirect = true; // Its used for video icon do not remove it
         $wraper_before = $wraper_after = $post_loop = '';
         $attr['queryNumber'] = ultimate_post()->get_post_number(5, $attr['queryNumber'], $attr['queryNumPosts']);
         $recent_posts = new \WP_Query( ultimate_post()->get_query( $attr ) );

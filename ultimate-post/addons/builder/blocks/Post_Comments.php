@@ -139,7 +139,12 @@ class Post_Comments{
                 'echo'              => true,
             );
 
-            $comments = get_comments(array( 'post_id' => get_the_ID() ));
+            $moderation_enable = get_option('comment_moderation');
+            $comments = get_comments(
+            array( 
+                'post_id' => get_the_ID(),                 
+                'status'  => $moderation_enable ? 'approve' : 'all', 
+            ));
 
             $wrapper_before .= '<div '.($attr['advanceId'] ? 'id="'.$attr['advanceId'].'" ':'').' class="wp-block-ultimate-post-'.$block_name.' ultp-block-'.$attr["blockId"].( $attr["className"] ?' '.$attr["className"]:'').''.( $attr["align"] ? ' align' .$attr["align"]:'').'">';
                 $wrapper_before .= '<div class="ultp-block-wrapper  ultp-block-comments ultp-comments-'.$attr['layout'].'">';

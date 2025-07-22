@@ -218,7 +218,7 @@ class Post_Grid_1{
         // Current Post Id For Pagiantion
         $curr_post_id = '';
         
-        $vid_icon_redirect = false;
+        $vid_icon_redirect = false; // Its used for video icon do not remove it
 
         if(is_single()){
             $curr_post_id = get_the_ID();
