@@ -318,10 +318,6 @@ class Post_List_1{
 
 
                                     if(($attr['gridStyle'] == 'style3' && $idx == 0) && (($post_thumb_id || $attr['fallbackEnable']) && $attr['showImage'])) {
-
-                                            echo "Test";
-
-
                                         $post_loop .= '<div class="ultp-block-image ultp-block-image-'.$attr['imgAnimation'].($attr["imgOverlay"] ? ' ultp-block-image-overlay ultp-block-image-'.$attr["imgOverlayType"].' ultp-block-image-'.$attr["imgOverlayType"].$idx : '' ).'">';
                                             $post_loop .= '<a href="'.$titlelink.'" '.($attr['openInTab'] ? 'target="_blank"' : '').'>';
                                             // Post Image Id
@@ -424,10 +420,6 @@ class Post_List_1{
                                         }
 
                                         $post_loop .= $dcContent[2];
-                                        // echo "<pre>";
-                                        // print_r($attr);
-                                        // echo "</pre>";
-                                        // Read More
                                         if ($attr['readMore']) {
                                             $post_loop .= '<div class="ultp-block-readmore"><a aria-label="'.$title.'" href="'.$titlelink.'" '.($attr['openInTab'] ? 'target="_blank"' : '').'>'.($attr['readMoreText'] ? $attr['readMoreText'] : esc_html__( "Read More", "ultimate-post" )).ultimate_post()->get_svg_icon($attr['readMoreIcon']).'</a></div>';
                                         }

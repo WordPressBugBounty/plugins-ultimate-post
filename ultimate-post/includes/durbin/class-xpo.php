@@ -235,6 +235,26 @@ class Xpo {
 				'medium'   => 'upgrade-pro',
 				'campaign' => 'postx-dashboard',
 			),
+			'final_hour_sale' => array(
+				'source'   => 'db-postx-notice-text',
+				'medium'   => 'final-hour-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			'massive_sale' => array(
+				'source'   => 'db-postx-notice-logo',
+				'medium'   => 'massive-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			'flash_sale' => array(
+				'source'   => 'db-postx-notice-text',
+				'medium'   => 'flash-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			'exclusive_deals' => array(
+				'source'   => 'db-postx-notice-logo',
+				'medium'   => 'exclusive-deals',
+				'campaign' => 'postx-dashboard',
+			),
 		);
 
 		// Step 1: Get parameters

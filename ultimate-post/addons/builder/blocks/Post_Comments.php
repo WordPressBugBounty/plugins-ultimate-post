@@ -108,9 +108,9 @@ class Post_Comments{
             $comments_args = array(
                 'comment_field' => '<div class="comment-form-comment ultp-comment-input ultp-field-control">' .$comment_label.'<textarea class="hi" id="comment" name="comment" placeholder="'.$attr["inputPlaceHolder"].'" cols="45" rows="8" aria-required="true"></textarea></div>',
                 'fields' => apply_filters( 'comment_form_default_fields', array(
-                        'author' =>'<div class="ultp-field-control ultp-comment-name">'.$auth_label.'<input id="author" placeholder="Your Name (No Keywords)" name="author" type="text" value="' . esc_attr( $commenter['comment_author'] ) . '" size="30"' . $aria_req . ' /></div>',
-                        'email'=> '<div class="ultp-field-control ultp-comment-email">'.$email_label.'<input id="email" placeholder="your-real-email@example.com" name="email" type="text" value="' . esc_attr( $commenter['comment_author_email'] ).'" size="30"' . $aria_req . ' /></div>',
-                        'url' => '<div class="ultp-field-control ultp-comment-website">'.$url_label.'<input id="url" name="url" placeholder="http://your-site-name.com" type="text" value="' . esc_attr( $commenter['comment_author_url'] ) . '" size="30" /></div>',
+                        'author' =>'<div class="ultp-field-control ultp-comment-name">'.$auth_label.'<input id="author" placeholder="Your name" name="author" type="text" value="' . esc_attr( $commenter['comment_author'] ) . '" size="30"' . $aria_req . ' /></div>',
+                        'email'=> '<div class="ultp-field-control ultp-comment-email">'.$email_label.'<input id="email" placeholder="your.email@example.com" name="email" type="text" value="' . esc_attr( $commenter['comment_author_email'] ).'" size="30"' . $aria_req . ' /></div>',
+                        'url' => '<div class="ultp-field-control ultp-comment-website">'.$url_label.'<input id="url" name="url" placeholder="https://yourwebsite.com" type="text" value="' . esc_attr( $commenter['comment_author_url'] ) . '" size="30" /></div>',
                         'cookies'=> $cookies_label
                     )
                 ),

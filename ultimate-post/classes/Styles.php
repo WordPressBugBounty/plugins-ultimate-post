@@ -91,7 +91,7 @@ class Styles {
 					'methods'  => 'POST',
 					'callback' => array($this, 'postx_presets_callback'),
 					'permission_callback' => function () {
-						return current_user_can('edit_posts');
+						return current_user_can('manage_options'); // Admins only
 					},
 					'args' => array()
 				)
@@ -250,9 +250,9 @@ class Styles {
 	*/
 	public function postx_presets_callback($server) {
 		$post = $server->get_params();
-		$type = isset($post['type']) ? $post['type'] : '';
-		$key = isset($post['key']) ? $post['key'] : '';
-		$data = isset($post['data']) ? $post['data'] : '';
+    	$type = isset($post['type']) ? sanitize_text_field($post['type']) : '';
+    	$key  = isset($post['key']) ? sanitize_text_field($post['key']) : '';
+    	$data = isset($post['data']) ? $post['data'] : '';
 
 		if ( $type ) {
 			if ( $type == 'set' ) {

@@ -244,19 +244,73 @@ class Notice {
 
 		$content_notices = array(
 			array(
-				'key'        => 'ultp_dashboard_content_notice2',
-				'start'      => '2024-06-23 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
-				'end'        => '2024-07-05 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
+				'key'        => 'ultp_content_notice_summer_sale_1',
+				'start'      => '2025-08-04 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
+				'end'        => '2025-08-14 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
 				'url'        => Xpo::generate_utm_link(
 					array(
-						'utmKey' => 'summer_db',
+						'utmKey' => 'final_hour_sale',
 					)
 				),
+				'icon'		=> ULTP_URL . 'assets/img/logo-sm.svg',
 				'visibility' => ! Xpo::is_lc_active(),
+				'content_heading'    => __( 'Final Hour Sales Alert:', 'ultimate-post' ),
+				'content_subheading' => __( 'PostX on Sale - Get %s on this dynamic Gutenberg Builder! ', 'ultimate-post' ),
+				'discount_content'   => 'up to 45% OFF',
+				'is_discount_logo'   => false,
+			),
+			array(
+				'key'        => 'ultp_content_notice_summer_sale_2',
+				'start'      => '2025-08-18 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
+				'end'        => '2025-08-29 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
+				'url'        => Xpo::generate_utm_link(
+					array(
+						'utmKey' => 'massive_sale',
+					)
+				),
+				'icon'		=> ULTP_URL . 'assets/img/notice_logo/green_50_offer.svg',
+				'visibility' => ! Xpo::is_lc_active(),
+				'content_heading'    => __( 'Massive Sales Alert:', 'ultimate-post' ),
+				'content_subheading' => __( '<strong> PostX </strong> on Sale - Get %s on this dynamic Gutenberg Builder! ', 'ultimate-post' ),
+				'discount_content'   => 'up to 50% OFF',
+				'border_color'       => '#000',
+				'is_discount_logo'   => true,
+			),
+			array(
+				'key'        => 'ultp_content_notice_summer_sale_3',
+				'start'      => '2025-09-01 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
+				'end'        => '2025-09-17 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
+				'url'        => Xpo::generate_utm_link(
+					array(
+						'utmKey' => 'flash_sale',
+					)
+				),
+				'icon'		=> ULTP_URL . 'assets/img/logo-sm.svg',
+				'visibility' => ! Xpo::is_lc_active(),
+				'content_heading'    => __( 'Grab the Flash Sale Offer:', 'ultimate-post' ),
+				'content_subheading' => __( 'Sale on PostX - Enjoy %s on this complete Gutenberg Builder!', 'ultimate-post' ),
+				'discount_content'   => 'up to 45% OFF',
+				'is_discount_logo'   => false,
+			),
+			array(
+				'key'        => 'ultp_content_notice_summer_sale_4',
+				'start'      => '2025-09-21 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
+				'end'        => '2025-09-30 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
+				'url'        => Xpo::generate_utm_link(
+					array(
+						'utmKey' => 'exclusive_deals',
+					)
+				),
+				'icon'		=> ULTP_URL . 'assets/img/notice_logo/red_50_offer.svg',
+				'visibility' => ! Xpo::is_lc_active(),
+				'content_heading'    => __( 'Exclusive Sale is Live:', 'ultimate-post' ),
+				'content_subheading' => __( '<strong> PostX </strong> on Sale - Enjoy %s on this complete Gutenberg Builder!', 'ultimate-post' ),
+				'discount_content'   => 'up to 50% OFF',
+				'border_color'       => '#000',
+				'is_discount_logo'   => true,
 			),
 		);
 
-		$icon          = ULTP_URL . 'assets/img/logo-sm.svg';
 		$ultp_db_nonce = wp_create_nonce( 'ultp-dashboard-nonce' );
 
 		foreach ( $content_notices as $key => $notice ) {
@@ -264,7 +318,7 @@ class Notice {
 			if ( isset( $_GET['disable_ultp_notice'] ) && $notice_key === $_GET['disable_ultp_notice'] ) {
 				return;
 			}
-
+			$border_color = $notice['border_color'];
 			$current_time = gmdate( 'U' );
 			$notice_start = gmdate('U', strtotime($notice['start']));
 			$notice_end = gmdate('U', strtotime($notice['end']));
@@ -292,40 +346,27 @@ class Notice {
 					);
 
 					?>
-					<div class="ultp-notice-wrapper notice data_collection_notice"> 
+					<div class="ultp-notice-wrapper notice data_collection_notice" style="<?php echo ! empty( $border_color ) ? 'border-left: 3px solid ' . esc_attr( $border_color ) . ';' : ''; ?>">
 						<?php
-						if ( isset( $icon ) ) {
+						if (isset( $notice['icon'] ) && strlen($notice['icon']) > 0) {
 							?>
-								<div class="ultp-notice-icon"> <img src="<?php echo esc_url( $icon ); ?>"/>  </div>
+								<div class="ultp-notice-icon"> <img src="<?php echo esc_url( $notice['icon'] ); ?>"/>  </div>
 							<?php
 						}
 						?>
-						
 						<div class="ultp-notice-content-wrapper">
 							<div class="">
-								<strong><?php esc_html_e( 'Black Friday Deal Alert:', 'ultimate-post' ); ?> </strong>
+								<strong><?php echo esc_html( $notice['content_heading'] ); ?> </strong>
 								<?php
-								printf(
-									/* translators: %s: Discount percentage */
-									esc_html__( 'PostX on Sale - Enjoy %s on the powerful site builder.', 'ultimate-post' ),
-									'<strong>' . esc_html__( 'up to 55% OFF', 'ultimate-post' ) . '</strong>'
-								);
-								?>
+									printf(
+										wp_kses_post( $notice['content_subheading'] ),
+										'<strong>' . esc_html( $notice['discount_content'] ) . '</strong>'
+									);
+                                ?>
 							</div>
-							<div class="ultp-notice-buttons"> 
-								<a class="ultp-notice-btn button button-primary" href="<?php echo esc_url( $url ); ?>" target="_blank">
-									<?php esc_html_e( 'Upgrade to Pro', 'ultimate-post' ); ?>
-								</a>
-								<a href=
-								<?php
-								echo esc_url(
-									add_query_arg(
-										$query_args
-									)
-								);
-								?>
-								class="ultp-notice-dont-save-money">
-									<?php esc_html_e( 'I don’t want to save money', 'ultimate-post' ); ?>
+							<div class="ultp-notice-buttons">
+								<a class="ultp-notice-btn button button-primary <?php echo ( isset( $notice['is_discount_logo'] ) && $notice['is_discount_logo'] ) ? "btn-outline" : ""; ?>" style="<?php echo ( isset( $notice['is_discount_logo'] ) && $notice['is_discount_logo'] ) ? 'color: #2271b1; border-color: #2271b1;' : ''; ?>" href="<?php echo esc_url( $url ); ?>" target="_blank">
+									<strong><?php isset( $notice['is_discount_logo'] ) && $notice['is_discount_logo'] ? esc_html_e( 'CLAIM YOUR DISCOUNT!', 'ultimate-post' ) : esc_html_e( 'UPGRADE TO PRO', 'ultimate-post' ); ?></strong>
 								</a>
 							</div>
 						</div>
@@ -366,6 +407,7 @@ class Notice {
 				padding: 10px 0px;
 				position: relative;
 				box-sizing: border-box;
+				border-radius: 4px;
 			}
 			.ultp-notice-wrapper.notice, .ultp-free-notice.wc-install.notice {
 				margin: 10px 0px;
@@ -393,6 +435,9 @@ class Notice {
 				display: flex;
 				align-items: center;
 				gap: 15px;
+			}
+			.ultp-notice-btn.btn-outline {
+				background: transparent !important;
 			}
 			.ultp-notice-dont-save-money {
 				font-size: 12px;
