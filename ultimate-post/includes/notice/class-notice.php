@@ -38,7 +38,7 @@ class Notice {
 		add_action( 'rest_api_init', array( $this, 'register_rest_route' ) );
 
 		// Woocommerce Install Action
-		add_action( 'wp_ajax_ultp_install', array( $this, 'install_activate_plugin' ) );
+		// add_action( 'wp_ajax_ultp_install', array( $this, 'install_activate_plugin' ) ); // this ajax not called anywhere in future need to removed, that is arise patchstack security issue
 	}
 
 
@@ -84,14 +84,17 @@ class Notice {
 	public function hello_bar_callback( \WP_REST_Request $request ) {
 		$request_params = $request->get_params();
 		$type           = isset( $request_params['type'] ) ? $request_params['type'] : '';
-
-		if ( 'hello_bar' === $type ) {
-			Xpo::set_transient_without_cache( 'ultp_helloBar', 'hide', 1296000 );
+		$duration       = isset( $request_params['duration'] ) ? $request_params['duration'] : null;
+		$status = 'failed';
+		if ( 'hello_bar' === $type && $duration ) {
+			$status = 'success';
+			Xpo::set_transient_without_cache( 'ultp_helloBar', 'hide', $duration );
 		}
 
 		return new \WP_REST_Response(
 			array(
 				'success' => true,
+				'status' => $status,
 				'message' => __( 'Hello Bar Action performed', 'ultimate-post' ),
 			),
 			200
@@ -138,7 +141,7 @@ class Notice {
 	 * @return void
 	 */
 	public function admin_notices_callback() {
-		// $this->other_plugin_install_notice_callback( 'required' );
+		// $this->other_plugin_install_notice_callback( 'required' ); this function not used any where in future need to removed
 		$this->ultp_dashboard_notice_callback();
 		$this->ultp_dashboard_durbin_notice_callback();
 	}
@@ -291,6 +294,8 @@ class Notice {
 				'content_subheading' => __( 'Sale on PostX - Enjoy %s on this complete Gutenberg Builder!', 'ultimate-post' ),
 				'discount_content'   => 'up to 45% OFF',
 				'is_discount_logo'   => false,
+				'border_color'       => '#0322ff',
+				'bg_color'       => '#0322ff',
 			),
 			array(
 				'key'        => 'ultp_content_notice_summer_sale_4',
@@ -318,7 +323,8 @@ class Notice {
 			if ( isset( $_GET['disable_ultp_notice'] ) && $notice_key === $_GET['disable_ultp_notice'] ) {
 				return;
 			}
-			$border_color = $notice['border_color'];
+			$border_color = isset($notice['border_color']) && $notice['border_color'] ? $notice['border_color'] : '';
+			$bg_color = isset($notice['bg_color']) && $notice['bg_color'] ? $notice['bg_color'] : '';
 			$current_time = gmdate( 'U' );
 			$notice_start = gmdate('U', strtotime($notice['start']));
 			$notice_end = gmdate('U', strtotime($notice['end']));
@@ -350,7 +356,7 @@ class Notice {
 						<?php
 						if (isset( $notice['icon'] ) && strlen($notice['icon']) > 0) {
 							?>
-								<div class="ultp-notice-icon"> <img src="<?php echo esc_url( $notice['icon'] ); ?>"/>  </div>
+								<div class="ultp-notice-icon <?php echo isset($notice['is_discount_logo']) && $notice['is_discount_logo'] ? 'ultp-discount-logo': '' ?>"> <img src="<?php echo esc_url( $notice['icon'] ); ?>"/>  </div>
 							<?php
 						}
 						?>
@@ -365,8 +371,8 @@ class Notice {
                                 ?>
 							</div>
 							<div class="ultp-notice-buttons">
-								<a class="ultp-notice-btn button button-primary <?php echo ( isset( $notice['is_discount_logo'] ) && $notice['is_discount_logo'] ) ? "btn-outline" : ""; ?>" style="<?php echo ( isset( $notice['is_discount_logo'] ) && $notice['is_discount_logo'] ) ? 'color: #2271b1; border-color: #2271b1;' : ''; ?>" href="<?php echo esc_url( $url ); ?>" target="_blank">
-									<strong><?php isset( $notice['is_discount_logo'] ) && $notice['is_discount_logo'] ? esc_html_e( 'CLAIM YOUR DISCOUNT!', 'ultimate-post' ) : esc_html_e( 'UPGRADE TO PRO', 'ultimate-post' ); ?></strong>
+								<a class="ultp-notice-btn button button-primary <?php echo ( isset( $notice['is_discount_logo'] ) && $notice['is_discount_logo'] ) ? "btn-outline" : "btn-normal"; ?>"  href="<?php echo esc_url( $url ); ?>" target="_blank" style="<?php echo ! empty( $bg_color ) ? 'background-color:' . esc_attr( $bg_color ) . ' !important; border-color:' . esc_attr( $bg_color )  .';' : ''; ?>" >
+									<?php isset( $notice['is_discount_logo'] ) && $notice['is_discount_logo'] ? esc_html_e( 'CLAIM YOUR DISCOUNT!', 'ultimate-post' ) : esc_html_e( 'Upgrade to Pro &nbsp;➤', 'ultimate-post' ); ?>
 								</a>
 							</div>
 						</div>
@@ -417,11 +423,16 @@ class Notice {
 				width: 100%;
 			}
 			.ultp-notice-icon {
-				margin-left: 15px;
+				margin-left: 10px;
 			}
 			.ultp-notice-icon img {
 				max-width: 42px;
 				width: 100%;
+			}
+			.ultp-discount-logo img {
+				max-width: unset !important;
+				height: 70px;
+				width: 70px;
 			}
 			.ultp-notice-content-wrapper {
 				display: flex;
@@ -429,15 +440,42 @@ class Notice {
 				gap: 8px;
 				font-size: 14px;
 				line-height: 20px;
-				margin-left: 15px;
+				margin-left: 10px;
 			}
 			.ultp-notice-buttons {
 				display: flex;
 				align-items: center;
 				gap: 15px;
 			}
+			.ultp-notice-buttons .ultp-notice-btn {
+				color: #fff;
+				background-color: #037fff !important;
+				border: 1px solid #037fff;
+				border-radius: 5px;
+				font-size: 14px;
+				font-weight: 600;
+				text-transform: uppercase;
+			}
+			.ultp-notice-btn:hover {
+				border-color: #037fff !important;
+			}
+			.ultp-notice-btn.btn-normal {
+				text-decoration: none;
+				padding: 0px 13px;
+			}
+
 			.ultp-notice-btn.btn-outline {
-				background: transparent !important;
+				    color: #037fff;
+					padding: 5px 10px;
+					background: transparent !important;
+					display: block;
+					line-height: 20px;
+					text-decoration: none !important;
+			}
+			.ultp-notice-btn.btn-outline:hover,
+			.ultp-notice-btn.btn-outline:focus {
+				color: #037fff;
+				border-color: #037fff;
 			}
 			.ultp-notice-dont-save-money {
 				font-size: 12px;
@@ -843,7 +881,7 @@ class Notice {
 		}
 
 		$this->install_notice_css();
-		$this->install_notice_js();
+		// $this->install_notice_js(); this other_plugin_install_notice_callback function not use any where
 		?>
 			<div class="ultp-pro-notice ultp-wc-install wc-install">
 				<img width="100" src="<?php echo esc_url( ULTP_URL . 'assets/img/woocommerce.png' ); ?>" alt="logo" />
@@ -1205,31 +1243,32 @@ class Notice {
 	public function install_notice_js() {
 		?>
 		<script type="text/javascript">
-			jQuery(document).ready(function($) {
-				'use strict';
-				$(document).on('click', '.wc-install-btn.ultp-install-btn', function(e) {
-					e.preventDefault();
-					const $that = $(this);
-					console.log($that.attr('data-plugin-slug'));
-					$.ajax({
-						type: 'POST',
-						url: ajaxurl,
-						data: {
-							install_plugin: $that.attr('data-plugin-slug'),
-							action: 'ultp_install'
-						},
-						beforeSend: function() {
-							$that.parents('.wc-install').addClass('loading');
-						},
-						success: function(response) {
-							window.location.reload()
-						},
-						complete: function() {
-							// $that.parents('.wc-install').removeClass('loading');
-						}
-					});
-				});
-			});
+			// this js not used in future need to remove
+			// jQuery(document).ready(function($) {
+			// 	'use strict';
+			// 	$(document).on('click', '.wc-install-btn.ultp-install-btn', function(e) {
+			// 		e.preventDefault();
+			// 		const $that = $(this);
+			// 		console.log($that.attr('data-plugin-slug'));
+			// 		$.ajax({
+			// 			type: 'POST',
+			// 			url: ajaxurl,
+			// 			data: {
+			// 				install_plugin: $that.attr('data-plugin-slug'),
+			// 				action: 'ultp_install'
+			// 			},
+			// 			beforeSend: function() {
+			// 				$that.parents('.wc-install').addClass('loading');
+			// 			},
+			// 			success: function(response) {
+			// 				window.location.reload()
+			// 			},
+			// 			complete: function() {
+			// 				// $that.parents('.wc-install').removeClass('loading');
+			// 			}
+			// 		});
+			// 	});
+			// });
 		</script>
 		<?php
 	}

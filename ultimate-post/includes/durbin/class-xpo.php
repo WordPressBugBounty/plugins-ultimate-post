@@ -236,22 +236,22 @@ class Xpo {
 				'campaign' => 'postx-dashboard',
 			),
 			'final_hour_sale' => array(
-				'source'   => 'db-postx-notice-text',
+				'source'   => 'db-postx-notice-logo',
 				'medium'   => 'final-hour-sale',
 				'campaign' => 'postx-dashboard',
 			),
 			'massive_sale' => array(
-				'source'   => 'db-postx-notice-logo',
+				'source'   => 'db-postx-notice-text',
 				'medium'   => 'massive-sale',
 				'campaign' => 'postx-dashboard',
 			),
 			'flash_sale' => array(
-				'source'   => 'db-postx-notice-text',
+				'source'   => 'db-postx-notice-logo',
 				'medium'   => 'flash-sale',
 				'campaign' => 'postx-dashboard',
 			),
 			'exclusive_deals' => array(
-				'source'   => 'db-postx-notice-logo',
+				'source'   => 'db-postx-notice-text',
 				'medium'   => 'exclusive-deals',
 				'campaign' => 'postx-dashboard',
 			),

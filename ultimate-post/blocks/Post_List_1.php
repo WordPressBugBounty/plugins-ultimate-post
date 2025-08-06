@@ -334,7 +334,7 @@ class Post_List_1{
 
                                             if($post_video && !($attr['enablePopup'])) {
                                                 $post_loop .= '<div class="ultp-block-video-content" style="display: none;" >';
-                                                $post_loop .= ultimate_post()->get_embeded_video($post_video, true, true, false, true, true, false, true, array());
+                                                $post_loop .= ultimate_post()->get_embeded_video($post_video, false, true, false, true, true, false, true, array());
                                                 $post_loop .= '</div>';
                                             }
                                             $post_loop .= '</a>';
@@ -395,7 +395,7 @@ class Post_List_1{
                                             $post_loop .= '</a>';
                                             if($post_video && !($attr['enablePopup'])) {
                                                 $post_loop .= '<div class="ultp-block-video-content" style="display: none;" >';
-                                                $post_loop .= ultimate_post()->get_embeded_video($post_video, true, true, false, true, true, false, true, array());
+                                                $post_loop .= ultimate_post()->get_embeded_video($post_video, false, true, false, true, true, false, true, array());
                                                 $post_loop .= '</div>';
                                             }
                                             if($post_video){
