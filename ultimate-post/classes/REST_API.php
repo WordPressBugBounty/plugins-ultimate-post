@@ -192,14 +192,23 @@ class REST_API {
         $request_type = isset($post['type'])?ultimate_post()->ultp_rest_sanitize_params($post['type']):'';
         $condition_type = isset($post['condition'])?ultimate_post()->ultp_rest_sanitize_params($post['condition']):'';
         $term_type = isset($post['term'])?ultimate_post()->ultp_rest_sanitize_params( $post['term'] ):'';
+        // get post type
+        $get_multiple_post_type = isset($post['postType']) ? ultimate_post()->ultp_rest_sanitize_params($post['postType'])  : array();
+        $multiple_post_type = is_array($get_multiple_post_type) ?  $get_multiple_post_type : json_decode($get_multiple_post_type, true);
+        $split = explode('###', $condition_type);
+        $post_type_condition = array();
+        if($split[0] == 'customPostType' && count($multiple_post_type)) {
+            $post_type_condition = get_object_taxonomies($multiple_post_type);
+        }
+
         switch ($request_type) {
             case 'posts':
             case 'allpost':
             case 'postExclude':
                 $post_type = array('post');
-                if ($request_type == 'allpost') {
+                if ($request_type == 'allpost' || $condition_type == 'customPostType') {
                     $post_type = array_keys(ultimate_post()->get_post_type());
-                } else if ($request_type == 'postExclude') {
+                } else if ($request_type == 'postExclude' && $condition_type != 'customPostType') {
                     $post_type = array($condition_type);
                 }
                 $args = array(
@@ -248,6 +257,11 @@ class REST_API {
             case 'taxvalue':
                 $split = explode('###', $condition_type);
                 $condition = $split[1] != 'multiTaxonomy' ? array($split[1]) : get_object_taxonomies($split[0]);
+
+                if($post_type_condition && count($post_type_condition)) {
+                    $condition = $post_type_condition;
+                }
+
                 $args = array(
                     'taxonomy'  => $condition,
                     'fields'    => 'all',
@@ -276,6 +290,9 @@ class REST_API {
 
             case 'taxExclude':
                 $condition = get_object_taxonomies($condition_type);
+                if($post_type_condition && count($post_type_condition)) {
+                    $condition = $post_type_condition;
+                }
                 $args = array(
                     'taxonomy'  => $condition,
                     'fields'    => 'all',

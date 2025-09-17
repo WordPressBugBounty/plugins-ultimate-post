@@ -393,13 +393,22 @@ class Blocks {
             $exclude_post_id = isset($_POST['exclude']) ? sanitize_text_field($_POST['exclude']) : '';
 
             $is_adv = isset($_POST['isAdv'])? ultimate_post()->ultp_rest_sanitize_params($_POST['isAdv']) : false;
-            $filterValue = isset($_POST['filterValue']) ? 
-                (
-                    is_array($_POST['filterValue']) ?
-                        ultimate_post()->ultp_rest_sanitize_params( $_POST['filterValue'] ) :
-                        sanitize_text_field($_POST['filterValue'])
-                ) :
-                '';
+
+            $filterValue = array();
+
+            if (isset($_POST['filterValue'])) {
+                if (is_array($_POST['filterValue'])) {
+                    $filterValue = ultimate_post()->ultp_rest_sanitize_params($_POST['filterValue']);
+                } else {
+                    $decoded = json_decode($_POST['filterValue']);
+                    if (is_array($decoded)) {
+                        $filterValue = ultimate_post()->ultp_rest_sanitize_params($decoded);
+                    } else if($decoded) {
+                        $filterValue = sanitize_text_field($_POST['filterValue']);
+                    }
+                }
+            }
+
 
             $filterType  = isset($_POST['filterType'])? sanitize_text_field($_POST['filterType']):'';
             $filterShow  = isset($_POST['filterShow']) ? sanitize_text_field($_POST['filterShow']) : false;
@@ -424,7 +433,6 @@ class Blocks {
 
             $ultp_uniqueIds = isset($_POST['ultpUniqueIds']) ? json_decode(stripslashes(sanitize_text_field($_POST['ultpUniqueIds'])), true) : [];
             $ultp_current_unique_posts = isset($_POST['ultpCurrentUniquePosts']) ? json_decode(stripslashes(sanitize_text_field($_POST['ultpCurrentUniquePosts'])), true) : [];
-            
             if( $widgetBlockId ) {
                 $blocks = parse_blocks(get_option('widget_block')[$widgetBlockId]['content']);
                 $this->pagination_content_return($blocks, $paged, $blockId, $blockRaw, $blockName, $builder, '', $filterValue, $filterType, $ultp_uniqueIds, $ultp_current_unique_posts, $widgetBlockId, '', $adv_filter_data);

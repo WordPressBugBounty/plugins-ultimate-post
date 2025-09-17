@@ -638,6 +638,11 @@ class Functions {
 	public function get_query( $attr ) {
 		$builder   = isset( $attr['builder'] ) ? $attr['builder'] : '';
 		$post_type = isset( $attr['queryType'] ) ? $attr['queryType'] : 'post';
+		$get_post_type = isset($attr['queryPostType']) ? $attr['queryPostType'] : '';
+		if($post_type != 'archiveBuilder' && !empty($get_post_type)  && $post_type == 'customPostType') {
+			$post_type = $get_post_type;
+		}
+
 		if ( $post_type == 'archiveBuilder' && ( $builder || $this->is_builder( $builder ) ) ) {
 			$archive_query = array();
 			if ( $builder ) {
@@ -804,7 +809,7 @@ class Functions {
 
 		$query_args = array(
 			'posts_per_page' => $query_number,
-			'post_type'      => $post_type == 'archiveBuilder' ? 'post' : $post_type,
+			'post_type'      => is_array( $post_type ) && ! empty( $post_type ) ? $post_type : ( 'archiveBuilder' == $post_type ? 'post' : ( is_string( $post_type ) ? is_array(json_decode( $post_type )) ? json_decode( $post_type ) : $post_type   : $post_type ) ),
 			'orderby'        => isset( $attr['queryOrderBy'] ) ? $attr['queryOrderBy'] : 'date',
 			'order'          => isset( $attr['queryOrder'] ) ? $attr['queryOrder'] : 'desc',
 			'paged'          => $paged,
@@ -1063,7 +1068,7 @@ class Functions {
 				$query_args['tax_query'] = $tax_query;
 			}
 		}
-
+		// $query_args['test'] = is_array( $post_type ) && ! empty( $post_type ) ? $post_type : ( 'archiveBuilder' === $post_type ? 'post' : ( is_string( $post_type ) ? json_decode( $post_type ) : $post_type ) );
 		$query_args['wpnonce'] = wp_create_nonce( 'ultp-nonce' );
 
 		return apply_filters( 'ultp_frontend_query', $query_args );

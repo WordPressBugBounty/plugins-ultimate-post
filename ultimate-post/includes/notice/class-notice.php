@@ -909,7 +909,7 @@ class Notice {
 	 * @return STRING | Redirect URL
 	 */
 	public function install_activate_plugin() {
-		if ( ! isset( $_POST['install_plugin'] ) ) {
+		if ( ! isset( $_POST['install_plugin'] ) || ! current_user_can( 'manage_options' ) ) {
 			return wp_send_json_error( esc_html__( 'Invalid request.', 'ultimate-post' ) );
 		}
 		$plugin_slug = sanitize_text_field( wp_unslash( $_POST['install_plugin'] ) );

@@ -226,6 +226,7 @@ class Post_List_1{
         $attr['queryNumber'] = ultimate_post()->get_post_number(6, $attr['queryNumber'], $attr['queryNumPosts']);
         $recent_posts = new \WP_Query( ultimate_post()->get_query( $attr ) );
         $pageNum = ultimate_post()->get_page_number($attr, $recent_posts->found_posts);
+        $vid_icon_redirect = false; // Its used for video icon do not remove it
         // Dummy Img Url
         $dummy_url = ULTP_URL.'assets/img/ultp-fallback-img.png';
         // Current Post Id For Pagination

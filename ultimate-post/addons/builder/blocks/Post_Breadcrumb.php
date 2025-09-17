@@ -70,11 +70,23 @@ class Post_Breadcrumb {
                     if (is_category() || is_single() || is_tag() || is_author()) {
                         if (is_category()) {
                             $cat = get_queried_object();
-                            $parent_cat_id = $cat->parent;
-                            if($parent_cat_id) {
-                                $content .= $seperator.'<li><a href="'.get_term_link( $parent_cat_id).'">'.get_the_category_by_ID($parent_cat_id).'</a></li>';
+                            if (isset($cat) && is_object($cat)) {
+                                $parents = [];
+                                $parent_id = $cat->parent;
+                                while ($parent_id) {
+                                    $parent = get_category($parent_id);
+                                    if ($parent && $parent->term_id != 0) {
+                                        array_unshift($parents, $parent); // Add to the beginning
+                                        $parent_id = $parent->parent;
+                                    } else {
+                                        break;
+                                    }
+                                }
+                                foreach ($parents as $parent_cat) {
+                                    $content .= $separator.'<li><a href="'.esc_url(get_term_link($parent_cat->term_id, 'category')).'">'.esc_html($parent_cat->name).'</a></li>';
+                                }
                             }
-                            $content .= $seperator.'<li>'.single_cat_title('', false).'</li>';
+                            $content .= $separator.'<li>'.single_cat_title('', false).'</li>';
                         }
                         if (is_tag()) {
                             $content .= $seperator.'<li>'.single_tag_title('', false).'</li>';
