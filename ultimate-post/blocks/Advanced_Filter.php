@@ -9,12 +9,21 @@ defined( 'ABSPATH' ) || exit;
  * Class Advanced_Filter
  */
 class Advanced_Filter {
-
+	/**
+	 * Types of pro select filters supported by the advanced filter.
+	 *
+	 * @var array
+	 */
 	private $pro_select_types = array(
 		'adv_sort',
 		'custom_tax',
 	);
 
+	/**
+	 * Order Value for select
+	 *
+	 * @var array
+	 */
 	public $order = array(
 		array(
 			'id'   => 'DESC',
@@ -26,6 +35,11 @@ class Advanced_Filter {
 		),
 	);
 
+	/**
+	 * Order by Value for select
+	 *
+	 * @var array
+	 */
 	public $order_by = array(
 		array(
 			'id'   => 'date',
@@ -57,7 +71,13 @@ class Advanced_Filter {
 		),
 	);
 
-
+	/**
+	 * Filter_select_options
+	 *
+	 * @param MIXED | $options (ARRAY).
+	 * @param  mixed | $filter (ARRAY).
+	 * @return array
+	 */
 	private function filter_select_options( $options, $filter ) {
 		$res = array();
 		$map = array();
@@ -83,87 +103,97 @@ class Advanced_Filter {
 	 * Advanced_Filter constructor.
 	 */
 	public function __construct() {
-
-		add_action( 'init', array( $this, 'register' ) );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		add_action( 'init', array( $this, 'register' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
+	/**
+	 * Get_adv_filter_options
+	 *
+	 * @return array
+	 */
 	private function get_adv_filter_options() {
 		return array(
 			array(
 				'id'   => 'popular_post_1_day_view',
-				'name' => __('Trending Today', 'ultimate-post'),
+				'name' => __( 'Trending Today', 'ultimate-post' ),
 			),
 			array(
 				'id'   => 'popular_post_7_days_view',
-				'name' => __('This Week’s Popular Posts', 'ultimate-post'),
+				'name' => __( 'This Week’s Popular Posts', 'ultimate-post' ),
 			),
 			array(
 				'id'   => 'popular_post_30_days_view',
-				'name' => __('Top Posts of the Month', 'ultimate-post'),
+				'name' => __( 'Top Posts of the Month', 'ultimate-post' ),
 			),
 			array(
 				'id'   => 'popular_post_all_times_view',
-				'name' => __('All-Time Favorites', 'ultimate-post'),
+				'name' => __( 'All-Time Favorites', 'ultimate-post' ),
 			),
 			array(
 				'id'   => 'random_post',
-				'name' => __('Random Posts', 'ultimate-post'),
+				'name' => __( 'Random Posts', 'ultimate-post' ),
 			),
 			array(
 				'id'   => 'random_post_7_days',
-				'name' => __('Random Posts (7 Days)', 'ultimate-post'),
+				'name' => __( 'Random Posts (7 Days)', 'ultimate-post' ),
 			),
 			array(
 				'id'   => 'random_post_30_days',
-				'name' => __('Random Posts (30 Days)', 'ultimate-post'),
+				'name' => __( 'Random Posts (30 Days)', 'ultimate-post' ),
 			),
 			array(
 				'id'   => 'latest_post_published',
-				'name' => __('Latest Posts - Published Date', 'ultimate-post'),
+				'name' => __( 'Latest Posts - Published Date', 'ultimate-post' ),
 			),
 			array(
 				'id'   => 'latest_post_modified',
-				'name' => __('Latest Posts - Last Modified Date', 'ultimate-post'),
+				'name' => __( 'Latest Posts - Last Modified Date', 'ultimate-post' ),
 			),
 			array(
 				'id'   => 'oldest_post_published',
-				'name' => __('Oldest Posts - Published Date', 'ultimate-post'),
+				'name' => __( 'Oldest Posts - Published Date', 'ultimate-post' ),
 			),
 			array(
 				'id'   => 'oldest_post_modified',
-				'name' => __('Oldest Posts - Last Modified Date', 'ultimate-post'),
+				'name' => __( 'Oldest Posts - Last Modified Date', 'ultimate-post' ),
 			),
 			array(
 				'id'   => 'alphabet_asc',
-				'name' => __('Alphabetical ASC', 'ultimate-post'),
+				'name' => __( 'Alphabetical ASC', 'ultimate-post' ),
 			),
 			array(
 				'id'   => 'alphabet_desc',
-				'name' => __('Alphabetical DESC', 'ultimate-post'),
+				'name' => __( 'Alphabetical DESC', 'ultimate-post' ),
 			),
 			array(
 				'id'   => 'sticky_posts',
-				'name' => __('Sticky Post', 'ultimate-post'),
+				'name' => __( 'Sticky Post', 'ultimate-post' ),
 			),
 			array(
 				'id'   => 'most_comment',
-				'name' => __('Most Comments', 'ultimate-post'),
+				'name' => __( 'Most Comments', 'ultimate-post' ),
 			),
 			array(
 				'id'   => 'most_comment_1_day',
-				'name' => __('Most Comments (1 Day)', 'ultimate-post'),
+				'name' => __( 'Most Comments (1 Day)', 'ultimate-post' ),
 			),
 			array(
 				'id'   => 'most_comment_7_days',
-				'name' => __('Most Comments (7 Days)', 'ultimate-post'),
+				'name' => __( 'Most Comments (7 Days)', 'ultimate-post' ),
 			),
 			array(
 				'id'   => 'most_comment_30_days',
-				'name' => __('Most Comments (30 Days)', 'ultimate-post'),
+				'name' => __( 'Most Comments (30 Days)', 'ultimate-post' ),
 			),
 		);
 	}
 
+	/**
+	 * Get_select_attributes
+	 *
+	 * @return array
+	 */
 	public function get_select_attributes() {
 		return array(
 			'advanceId'           => '',
@@ -176,9 +206,15 @@ class Advanced_Filter {
 			'allText'             => 'All',
 			'sPlaceholderText'    => 'Search...',
 			'searchEnabled'       => false,
+			'inlineMultiSelect'   => true,
 		);
 	}
 
+	/**
+	 * Get_search_attributes
+	 *
+	 * @return array
+	 */
 	public function get_search_attributes() {
 		return array(
 			'advanceId'   => '',
@@ -188,6 +224,11 @@ class Advanced_Filter {
 		);
 	}
 
+	/**
+	 * Get_clear_attributes
+	 *
+	 * @return array
+	 */
 	public function get_clear_attributes() {
 		return array(
 			'advanceId'           => '',
@@ -227,17 +268,28 @@ class Advanced_Filter {
 		);
 	}
 
-	public function get_button_data( $type, $ids, $post_types = '', $allText = 'All' ) {
+	/**
+	 * Get_button_data
+	 *
+	 * @param  mixed $type string.
+	 * @param  mixed $ids string.
+	 * @param  mixed $post_types string.
+	 * @param  mixed $allText string.
+	 * @param  mixed $option string.
+	 * @return array
+	 */
+	public function get_button_data( $type, $data_ids, $post_types = '', $allText = 'All', $option = '' ) {
+
 		$res = array();
 
-		if ( in_array( '_all', $ids ) ) {
+		if ( in_array( '_all', $data_ids ) ) {
 			$res['_all'] = $allText;
 			// $ids = array_filter($ids, function ($item) {
 			// return $item != '_all';
 			// });
 		}
 
-		$ids = implode( ',', $ids );
+		$ids = implode( ',', $data_ids );
 
 		$adv_sort = $this->get_adv_filter_options();
 
@@ -285,7 +337,7 @@ class Advanced_Filter {
 					$authors = get_users(
 						array(
 							'per_page' => -1,
-							'role__in' => array( 'author' ),
+							'role__in' => array( 'administrator', 'editor', 'author', 'contributor' ),
 							'include'  => $ids,
 						)
 					);
@@ -328,10 +380,22 @@ class Advanced_Filter {
 							)
 						);
 						foreach ( $terms as $term ) {
-							$res[ $term->slug ] = array(
-								'name'     => $term->name,
-								'taxonomy' => $taxonomy,
-							);
+							$should_add = true;
+							if ( 'specific' === $option ) {
+								$should_add = false;
+								if ( is_array( $data_ids ) ) {
+									$should_add = in_array( $term->slug, $data_ids, true );
+								} elseif ( is_string( $data_ids ) ) {
+									$data_ids_arr = array_filter( array_map( 'trim', explode( ',', $data_ids ) ), 'strlen' );
+									$should_add   = in_array( $term->slug, $data_ids_arr, true );
+								}
+							}
+							if ( $should_add ) {
+								$res[ $term->slug ] = array(
+									'name'     => $term->name,
+									'taxonomy' => $taxonomy,
+								);
+							}
 						}
 					}
 				}
@@ -444,9 +508,9 @@ class Advanced_Filter {
 
 					$authors = get_users(
 						array(
-							'per_page' => -1,
-							'include'  => $filtered_specific,
-							'role__not_in' => ['subscriber', 'translator'],
+							'per_page'     => -1,
+							'include'      => $filtered_specific,
+							'role__not_in' => array( 'subscriber', 'translator' ),
 						)
 					);
 
@@ -555,7 +619,7 @@ class Advanced_Filter {
 				return '';
 			}
 
-			$data = $this->get_button_data( $attr['type'], $inline_values, $post_types, $attr['allText'] );
+			$data = $this->get_button_data( $attr['type'], $inline_values, $post_types, $attr['allText'], $attr['dropdownOptionsType'] );
 
 			$btn_wrapper_attrs = get_block_wrapper_attributes(
 				array(
@@ -568,9 +632,12 @@ class Advanced_Filter {
 
 			ob_start();
 			?>
+			<div class="ultp-block-<?php echo esc_attr( $attr['blockId'] ); ?>-wrapper" data-multiselect="<?php echo isset( $attr['inlineMultiSelect'] ) && $attr['inlineMultiSelect'] ? 'true' : 'false'; ?>"	>
 
-			<div class="ultp-block-<?php echo esc_attr( $attr['blockId'] ); ?>-wrapper">
-			<?php foreach ( $data as $key => $value ) : ?>
+			<?php
+
+			foreach ( $data as $key => $value ) :
+				?>
 				<?php
 				if ( is_array( $value ) ) {
 					$name = $value['name'];
@@ -665,6 +732,12 @@ class Advanced_Filter {
 		return '';
 	}
 
+	/**
+	 * Search_content
+	 *
+	 * @param  mixed $attr array.
+	 * @return string
+	 */
 	public function search_content( $attr ) {
 		$block_name = 'filter-search-adv';
 		$is_active  = ultimate_post()->is_lc_active();
@@ -704,6 +777,12 @@ class Advanced_Filter {
 		return $content;
 	}
 
+	/**
+	 * Clear_content
+	 *
+	 * @param  mixed $attr array.
+	 * @return array
+	 */
 	public function clear_content( $attr ) {
 		$block_name = 'filter-clear';
 		// $is_active     = ultimate_post()->is_lc_active();

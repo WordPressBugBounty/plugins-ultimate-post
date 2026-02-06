@@ -23,8 +23,8 @@ class Button {
 
 			// [ $text, $url ] = \ULTP\DCService::get_dc_content_for_rich_text( $attr );
 			$dc_text_val = \ULTP\DCService::get_dc_content_for_rich_text( $attr );
-			$text = isset($dc_text_val['0']) ? $dc_text_val['0'] : ''; 
-			$url = isset($dc_text_val['1']) ? $dc_text_val['1'] : ''; 
+			$text        = isset( $dc_text_val['0'] ) ? $dc_text_val['0'] : '';
+			$url         = isset( $dc_text_val['1'] ) ? $dc_text_val['1'] : '';
 
 			// Replacing URL with dynamic content
 			if ( ! empty( $url ) ) {

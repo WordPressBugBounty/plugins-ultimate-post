@@ -1,10 +1,10 @@
 === Post Grid Gutenberg Blocks for News, Magazines, Blog Websites - PostX ===
 Contributors: wpxpo, anik4e, jakirhasan
 Tags: post grid, post list, post slider, ajax filter, post filter
-Requires at least: 5.0    
-Tested up to: 6.8.1
+Requires at least: 5.0
+Tested up to: 6.9
 Requires PHP: 5.6
-Stable tag: 4.1.38
+Stable tag: 5.0.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -268,11 +268,49 @@ It is a Gutenberg plugin it works great with WordPress version 5.x.x or more. An
 11. With the help of the Elementor and Saved Template addons, you can use any of the post blocks of PostX to any pages while editing with Elementor builder.
 
 == Changelog ==
-= 4.1.38 – 17 August 2025 =
-* Fix: Improved Breadcrumb block
-* Fix: Sticky post and post count query issue
-* Fix: Query reset issue with filter and pagination
-* Fix: Multiple post type support on Query Builder
+= 5.0.6 – 2 February 2026 =
+* Fix: Post Grid 5 layout broken
+* Fix: License page Upgrade to pro issue
+* Fix: Advanced Filter block default order
+* Fix: Post Share Count vulnerability patch
+* Fix: Author filter block author value issue
+* Fix: Gallery and Taxonomy block responsive issue
+* Fix: Server requests secured against vulnerabilities
+* Fix: Advanced Filter block inline settings enhancements
+* Fix: Single select for Category, Tags, and Custom Taxonomy filter block
+
+= 5.0.5 – 22 December 2025 =
+* Fix: Menu icon issue
+
+= 5.0.4 – 17 December 2025 = 
+* Fix: Svg icon color issue
+* Fix: Wordpress 6.9 compatibility
+* Fix: Toolbar deprecation issue 
+* Fix: Starter site font family issue
+* Fix: Dynamic Content patchstack issue
+* Fix: Post grid block font size unit issue
+* Fix: Scroll to top after click block Navigation
+* Fix: Post Block pagination patchstack issue
+
+= 5.0.3 – 25 November 2025 =
+* New: YouTube Gallery block
+
+= 5.0.1 – 05 November 2025 =
+* Fix: Dashboard menu broken issue 
+* Fix: Image block caption setting issue
+* Fix: Accordion block rendering issue on frontend
+
+= 5.0.0 – 04 November 2025 =
+* New: Tab block
+* New: Gallery Block
+* New: Replace All Svg Icon with new Icon Pack
+* New: Post List, Grid Block transferable option added
+* New: Block Settings Panel with new updated Field
+* Update: Dashboard UI and Setup wizard
+* Fix: Deprecated warning issue
+
+= 4.1.40 – 29 October 2025 =
+* Fix: WowOptin template compatibility improved with PostX Starter Pack
 
 = 4.1.37 – 6 August 2025 =
 * Fix: Plugin installation access control issue

@@ -6,10 +6,10 @@ $adv_filter_dataset = ultimate_post()->get_adv_data_attrs( $attr );
 
 $pagi_block_html = '';
 
-$paged = ! wp_doing_ajax() && 
-		isset( $_GET[ $attr['blockId'] . '_page' ] ) && 
-		is_numeric( $_GET[ $attr['blockId'] . '_page' ] ) ? 
-			intval($_GET[ $attr['blockId'] . '_page' ]) : '1';
+$paged = ! wp_doing_ajax() &&
+		isset( $_GET[ $attr['blockId'] . '_page' ] ) &&
+		is_numeric( $_GET[ $attr['blockId'] . '_page' ] ) ?
+			intval( $_GET[ $attr['blockId'] . '_page' ] ) : '1';
 
 // Pagination
 if ( $attr['advPaginationEnable'] && ( $attr['paginationType'] == 'pagination' ) ) {
@@ -31,7 +31,7 @@ if ( $attr['advPaginationEnable'] && ( $attr['paginationType'] == 'pagination' )
 
 	$pagi_block_html .= '<div' . $pagi_class . ultimate_post()->get_builder_attr( $attr['queryType'] ) . $adv_filter_dataset . $f_pagi_datasets . '>';
 
-	$pagi_block_html .= ultimate_post()->pagination( $pageNum, $attr['paginationNav'], $attr['paginationText'], $attr['paginationAjax'], '',  $attr['blockId'] );
+	$pagi_block_html .= ultimate_post()->pagination( $pageNum, $attr['paginationNav'], $attr['paginationText'], $attr['paginationAjax'], '', $attr['blockId'] );
 
 	$pagi_block_html .= '</div>';
 }

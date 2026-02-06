@@ -1,448 +1,475 @@
 <?php
 namespace ULTP\blocks;
 
-defined('ABSPATH') || exit;
+defined( 'ABSPATH' ) || exit;
 
-class Post_Grid_1{
-    public function __construct() {
-        add_action('init', array($this, 'register'));
-    }
-    public function get_attributes() {
+class Post_Grid_1 {
+	public function __construct() {
+		add_action( 'init', array( $this, 'register' ) );
+	}
+	public function get_attributes() {
 
-        return array(
-            'blockId' =>  '',
-            'previewImg' =>  '',
-            'advFilterEnable' => false,
-            'advPaginationEnable' => false,
-            'defQueryTax' => array(),
-            'advRelation' => 'AND',
-            /*============================
-                Layout
-            ============================*/
-            'layout' =>  'layout1',
-            /*============================
-                Query Setting
-            ============================*/
-            'queryQuick' =>  '',
-            'queryNumPosts' =>  (object)['lg'=>6],
-            'queryNumber' => 4,
-            'queryType' =>  'post',
-            'queryTax' =>  'category',
-            'queryTaxValue' =>  '[]',
-            'queryRelation' =>  'OR',
-            'queryOrderBy' =>  'date',
-            'metaKey' =>  'custom_meta_key',
-            'queryOrder' =>  'desc',
-            // Include Remove from Version 2.5.4
-            'queryInclude' =>  '',
-            'queryExclude' =>  '[]',
-            'queryAuthor' =>  '[]',
-            'queryOffset' =>  '0',
-            'queryExcludeTerm' =>  '[]',
-            'queryExcludeAuthor' =>  '[]',
-            'querySticky' =>  true,
-            'queryUnique' =>  '',
-            'queryPosts' =>  '[]',
-            'queryCustomPosts' =>  '[]',
-            'querySearch' =>  '',
-            /*============================
-                General Setting
-            ============================*/
-            'gridStyle' =>  'style1',
-            'columns' =>  (object)['lg' =>'3', 'sm' =>'2', 'xs' =>'1'],
-            'titleShow' =>  true,
-            'titleStyle' =>  'none',
-            'headingShow' =>  true,
-            'excerptShow' =>  true,
-            'catShow' =>  true,
-            'metaShow' => true,
-            'showImage' => true,
-            'filterShow' =>  false,
-            'paginationShow' =>  true,
-            'readMore' => false,
-            'equalHeight' =>  true,
-            'contentTag' =>  'div',
-            'openInTab' =>  false,
-            'notFoundMessage' =>  'No Post Found',
+		return array(
+			'blockId'             => '',
+			'previewImg'          => '',
+			'advFilterEnable'     => false,
+			'advPaginationEnable' => false,
+			'defQueryTax'         => array(),
+			'advRelation'         => 'AND',
+			/*
+			============================
+				Layout
+			============================*/
+			'layout'              => 'layout1',
+			/*
+			============================
+				Query Setting
+			============================*/
+			'queryQuick'          => '',
+			'queryNumPosts'       => (object) array( 'lg' => 6 ),
+			'queryNumber'         => 4,
+			'queryType'           => 'post',
+			'queryTax'            => 'category',
+			'queryTaxValue'       => '[]',
+			'queryRelation'       => 'OR',
+			'queryOrderBy'        => 'date',
+			'metaKey'             => 'custom_meta_key',
+			'queryOrder'          => 'desc',
+			// Include Remove from Version 2.5.4
+			'queryInclude'        => '',
+			'queryExclude'        => '[]',
+			'queryAuthor'         => '[]',
+			'queryOffset'         => '0',
+			'queryExcludeTerm'    => '[]',
+			'queryExcludeAuthor'  => '[]',
+			'querySticky'         => true,
+			'queryUnique'         => '',
+			'queryPosts'          => '[]',
+			'queryCustomPosts'    => '[]',
+			'querySearch'         => '',
+			/*
+			============================
+				General Setting
+			============================*/
+			'gridStyle'           => 'style1',
+			'columns'             => (object) array(
+				'lg' => '3',
+				'sm' => '2',
+				'xs' => '1',
+			),
+			'titleShow'           => true,
+			'titleStyle'          => 'none',
+			'headingShow'         => true,
+			'excerptShow'         => true,
+			'catShow'             => true,
+			'metaShow'            => true,
+			'showImage'           => true,
+			'filterShow'          => false,
+			'paginationShow'      => true,
+			'readMore'            => false,
+			'equalHeight'         => true,
+			'contentTag'          => 'div',
+			'openInTab'           => false,
+			'notFoundMessage'     => 'No Post Found',
 
-            /*============================
-                Heading Setting/Style
-            ============================*/
-            'headingText' =>  'Post Grid #1',
-            'headingURL' =>  '',
-            'headingBtnText' =>   'View More',
-            'headingStyle' =>  'style1',
-            'headingTag' =>  'h2',
-            'headingAlign' =>   'left',
-            'subHeadingShow' =>  false,
-            'subHeadingText' =>  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer ut sem augue. Sed at felis ut enim dignissim sodales.',
-            
-            /*============================
-                Title Setting/Style
-            ============================*/
-            'titleTag' =>  'h3',
-            'titlePosition' =>  true,
-            'titleLength' =>  0,
+			/*
+			============================
+				Heading Setting/Style
+			============================*/
+			'headingText'         => 'Post Grid #1',
+			'headingURL'          => '',
+			'headingBtnText'      => 'View More',
+			'headingStyle'        => 'style1',
+			'headingTag'          => 'h2',
+			'headingAlign'        => 'left',
+			'subHeadingShow'      => false,
+			'subHeadingText'      => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer ut sem augue. Sed at felis ut enim dignissim sodales.',
 
-            /*============================
-                Content Setting/Style
-            ============================*/
-            'showSeoMeta' =>  false,
-            'showFullExcerpt' =>  false,
-            'excerptLimit' =>  10,
-            
-            /*============================
-                Category Setting/Style
-            ============================*/
-            'maxTaxonomy'=>  '30',
-            'taxonomy' =>  'category',
-            'catStyle' =>  'classic',
-            'catPosition' =>  'aboveTitle',
-            'customCatColor' =>  false,
-            'seperatorLink' =>  admin_url( 'edit-tags.php?taxonomy=category' ),
-            'onlyCatColor' =>  false,
-            
-            /*============================
-                Meta Setting/Style
-            ============================*/
-            'metaPosition' =>  'top',
-            'metaStyle' =>  'icon',
-            'authorLink' =>  true,
-            'metaSeparator' =>  'dot',
-            'metaList' =>  '["metaAuthor","metaDate","metaRead"]',
-            'metaMinText' =>  'min read',
-            'metaAuthorPrefix' =>  'By',
-            'metaDateFormat' =>  'M j, Y',
-            
-            /*============================
-                Image Style
-            ============================*/
-            'imgAnimation' =>  'opacity',
-            'imgCrop' =>  (ultimate_post()->get_setting('disable_image_size') == 'yes' ? 'full' : 'ultp_layout_landscape'),
-            'imgCropSmall' =>  (ultimate_post()->get_setting('disable_image_size') == 'yes' ? 'full' : 'ultp_layout_square'),
-            'imgOverlay' =>  false,
-            'imgOverlayType' =>  'default',
-            'fallbackEnable' =>  true,
-            'fallbackImg' =>  '',
-            'imgSrcset' =>  false,
-            'imgLazy' =>  false,
+			/*
+			============================
+				Title Setting/Style
+			============================*/
+			'titleTag'            => 'h3',
+			'titlePosition'       => true,
+			'titleLength'         => 0,
 
-            /*============================
-                Video Style
-            ============================*/
-            'vidIconEnable' =>  true,
-            'popupAutoPlay' =>  true,
-            'iconSize' =>  (object)['lg'=>'80', 'sm'=> '50', 'xs'=> '50', 'unit' => 'px'],
-            // by default should be off
-            'enablePopup' =>  false,
-            'enablePopupTitle' =>  true,
-            
-            /*============================
-                Separator Style
-            ============================*/            
-            'separatorShow' =>  true,
-            
-            /*============================
-                Read More Style
-            ============================*/
-            'readMoreText' =>  '',
-            'readMoreIcon' =>  'rightArrowLg',
-           
-            /*============================
-                Filter Setting/Style
-            ============================*/
-            'filterBelowTitle' =>  false,
-            // 'filterAlign' =>  (object)['lg' =>''],
-            'filterType' =>  'category',
-            'filterText' =>  'all',
-            'filterValue' =>  '[]',
- 
-            'filterMobile' =>   true,
-            'filterMobileText' =>  'More',
+			/*
+			============================
+				Content Setting/Style
+			============================*/
+			'showSeoMeta'         => false,
+			'showFullExcerpt'     => false,
+			'excerptLimit'        => 10,
 
-            /*============================
-                Pagination Setting/Style
-            ============================*/
-            'paginationType' =>  'pagination',
-            'loadMoreText' =>  'Load More',
-            'paginationText' =>  'Previous|Next',
-            'paginationNav' =>  'textArrow',
-            'paginationAjax' =>  true,
-            'navPosition' =>  'topRight',
+			/*
+			============================
+				Category Setting/Style
+			============================*/
+			'maxTaxonomy'         => '30',
+			'taxonomy'            => 'category',
+			'catStyle'            => 'classic',
+			'catPosition'         => 'aboveTitle',
+			'customCatColor'      => false,
+			'seperatorLink'       => admin_url( 'edit-tags.php?taxonomy=category' ),
+			'onlyCatColor'        => false,
 
-            /*============================
-                Wrapper Style
-            ============================*/
-            'advanceId' =>  '',
-            'advanceZindex' =>  '',
-            'hideExtraLarge' =>  false,
-            'hideTablet' =>  false,
-            'hideMobile' =>  false,
-            'advanceCss' =>  '',
-            'currentPostId' =>  '',
+			/*
+			============================
+				Meta Setting/Style
+			============================*/
+			'metaPosition'        => 'top',
+			'metaStyle'           => 'icon',
+			'authorLink'          => true,
+			'metaSeparator'       => 'dot',
+			'metaList'            => '["metaAuthor","metaDate","metaRead"]',
+			'metaMinText'         => 'min read',
+			'metaAuthorPrefix'    => 'By',
+			'metaDateFormat'      => 'M j, Y',
 
-            /*============================
-                Dynamic Content
-            ============================*/
-            'dcEnabled' => false,
-            'dcFields' => array(),
-            'dcSize' => 9
-        );
-    }
+			/*
+			============================
+				Image Style
+			============================*/
+			'imgAnimation'        => 'opacity',
+			'imgCrop'             => ( ultimate_post()->get_setting( 'disable_image_size' ) == 'yes' ? 'full' : 'ultp_layout_landscape' ),
+			'imgCropSmall'        => ( ultimate_post()->get_setting( 'disable_image_size' ) == 'yes' ? 'full' : 'ultp_layout_square' ),
+			'imgOverlay'          => false,
+			'imgOverlayType'      => 'default',
+			'fallbackEnable'      => true,
+			'fallbackImg'         => '',
+			'imgSrcset'           => false,
+			'imgLazy'             => false,
 
-    public function register() {
-        register_block_type( 'ultimate-post/post-grid-1',
-            array(
-                'editor_script' => 'ultp-blocks-editor-script',
-                'editor_style'  => 'ultp-blocks-editor-css',
-                'render_callback' =>  array($this, 'content')
-            )
-        );
-    }
+			/*
+			============================
+				Video Style
+			============================*/
+			'vidIconEnable'       => true,
+			'popupAutoPlay'       => true,
+			'iconSize'            => (object) array(
+				'lg'   => '80',
+				'sm'   => '50',
+				'xs'   => '50',
+				'unit' => 'px',
+			),
+			// by default should be off
+			'enablePopup'         => false,
+			'enablePopupTitle'    => true,
 
-    public function content($attr, $noAjax) {
-        $attr = wp_parse_args($attr, $this->get_attributes());
-        global $unique_ID;
+			/*
+			============================
+				Separator Style
+			============================*/
+			'separatorShow'       => true,
 
-        if (!$noAjax) {
-            $paged = is_front_page() ? get_query_var('page') : get_query_var('paged');
-            $attr['paged'] = $paged ? $paged : 1;
-        }
-        if($attr['queryUnique'] && isset($attr['savedQueryUnique'])) {
-            $unique_ID = $attr['savedQueryUnique'];
-        }
-        $block_name = 'post-grid-1';
-        $wraper_before = $wraper_after = $post_loop = '';
-        $attr['queryNumber'] = ultimate_post()->get_post_number(4, $attr['queryNumber'], $attr['queryNumPosts']);
-        
-        // Current Post Id For Pagiantion
-        $curr_post_id = '';
-        
-        $vid_icon_redirect = false; // Its used for video icon do not remove it
+			/*
+			============================
+				Read More Style
+			============================*/
+			'readMoreText'        => '',
+			'readMoreIcon'        => 'rightArrowLg',
 
-        if(is_single()){
-            $curr_post_id = get_the_ID();
-        }
-        $recent_posts = new \WP_Query( ultimate_post()->get_query( $attr ) );
-        $pageNum = ultimate_post()->get_page_number($attr, $recent_posts->found_posts);
-        // Dummy Img Url
-        $dummy_url = ULTP_URL.'assets/img/ultp-fallback-img.png';
-        
-        // Loadmore and Unique content 
-        if($attr['queryUnique'] && isset($attr['loadMoreQueryUnique']) && $attr['paginationShow'] && ($attr['paginationType'] == 'loadMore')) {
-            $unique_ID = $attr['loadMoreQueryUnique'];
-            $current_unique_posts = $attr['ultp_current_unique_posts'];
-        }
+			/*
+			============================
+				Filter Setting/Style
+			============================*/
+			'filterBelowTitle'    => false,
+			// 'filterAlign' =>  (object)['lg' =>''],
+			'filterType'          => 'category',
+			'filterText'          => 'all',
+			'filterValue'         => '[]',
 
-        $attr['className'] = isset($attr['className']) && $attr['className'] ? preg_replace('/[^A-Za-z0-9_ -]/', '', $attr['className']) : '';
-        $attr['align'] = isset($attr['align']) && $attr['align'] ? preg_replace('/[^A-Za-z0-9_ -]/', '', $attr['align']) : '';
-        $attr['advanceId'] = isset($attr['advanceId']) ? sanitize_html_class( $attr['advanceId'] ) : '';
-        $attr['blockId'] = isset($attr['blockId']) ? sanitize_html_class( $attr['blockId'] ) : '';
-        $attr['contentTag'] = in_array( $attr['contentTag'],  ultimate_post()->ultp_allowed_block_tags() ) ? $attr['contentTag'] : 'div';
-        $attr['gridStyle'] = sanitize_html_class( $attr['gridStyle'] );
-        $attr['layout'] = sanitize_html_class( $attr['layout'] );
-        $attr['imgAnimation'] = sanitize_html_class( $attr['imgAnimation'] );
-        $attr['imgOverlayType'] = sanitize_html_class( $attr['imgOverlayType'] );
-        $attr['popupAutoPlay'] =  $attr['popupAutoPlay'] == true ;
-        $attr['readMoreText'] = wp_kses($attr['readMoreText'], ultimate_post()->ultp_allowed_html_tags());
+			'filterMobile'        => true,
+			'filterMobileText'    => 'More',
 
-        if ($recent_posts->have_posts()) {
-            
-            // Pagination Block Html
-            include ULTP_PATH . 'blocks/template/pagination_block.php';
+			/*
+			============================
+				Pagination Setting/Style
+			============================*/
+			'paginationType'      => 'pagination',
+			'loadMoreText'        => 'Load More',
+			'paginationText'      => 'Previous|Next',
+			'paginationNav'       => 'textArrow',
+			'paginationAjax'      => true,
+			'navPosition'         => 'topRight',
 
-            $wraper_before .= '<div '.($attr['advanceId']?'id="'.$attr['advanceId'].'" ':'').' class="ultp-post-grid-block wp-block-ultimate-post-'.$block_name.' ultp-block-'.$attr["blockId"].''.( $attr["align"] ? ' align' .$attr["align"]:'').''.($attr["className"] ? ' '.$attr["className"]:''). '">';
-                $wraper_before .= '<div class="ultp-block-wrapper">';
+			/*
+			============================
+				Wrapper Style
+			============================*/
+			'advanceId'           => '',
+			'advanceZindex'       => '',
+			'hideExtraLarge'      => false,
+			'hideTablet'          => false,
+			'hideMobile'          => false,
+			'advanceCss'          => '',
+			'currentPostId'       => '',
 
-                    // Loading
-                    $wraper_before .= ultimate_post()->postx_loading();
+			/*
+			============================
+				Dynamic Content
+			============================*/
+			'dcEnabled'           => false,
+			'dcFields'            => array(),
+			'dcSize'              => 9,
+		);
+	}
 
-                    if ($attr['headingShow'] || $attr['filterShow'] || $attr['paginationShow']) {
-                        $wraper_before .= '<div class="ultp-heading-filter">';
-                            $wraper_before .= '<div class="ultp-heading-filter-in">';
-                                
-                                // Heading
-                                include ULTP_PATH.'blocks/template/heading.php';
-                                
-                                if ($attr['filterShow'] || $attr['paginationShow']) {
-                                    $wraper_before .= '<div class="ultp-filter-navigation">';
+	public function register() {
+		register_block_type(
+			'ultimate-post/post-grid-1',
+			array(
+				'editor_script'   => 'ultp-blocks-editor-script',
+				'editor_style'    => 'ultp-blocks-editor-css',
+				'render_callback' => array( $this, 'content' ),
+			)
+		);
+	}
 
-                                        // Filter
-                                        if($attr['filterShow'] && $attr['queryType'] != 'posts' && $attr['queryType'] != 'customPosts') {
-                                            include ULTP_PATH.'blocks/template/filter.php';
-                                        }
+	public function content( $attr, $noAjax ) {
+		$attr = wp_parse_args( $attr, $this->get_attributes() );
+		global $unique_ID;
 
-                                        // Navigation
-                                        if ($attr['paginationShow'] && ($attr['paginationType'] == 'navigation') && ($attr['navPosition'] == 'topRight')) {
-                                            include ULTP_PATH.'blocks/template/navigation-before.php';
-                                        }
-                                    $wraper_before .= '</div>';
-                                }
+		if ( ! $noAjax ) {
+			$paged         = is_front_page() ? get_query_var( 'page' ) : get_query_var( 'paged' );
+			$attr['paged'] = $paged ? $paged : 1;
+		}
+		if ( $attr['queryUnique'] && isset( $attr['savedQueryUnique'] ) ) {
+			$unique_ID = $attr['savedQueryUnique'];
+		}
+		$block_name          = 'post-grid-1';
+		$wraper_before       = $wraper_after = $post_loop = '';
+		$attr['queryNumber'] = ultimate_post()->get_post_number( 4, $attr['queryNumber'], $attr['queryNumPosts'] );
 
-                            $wraper_before .= '</div>';
-                        $wraper_before .= '</div>';
-                    }
+		// Current Post Id For Pagiantion
+		$curr_post_id = '';
 
-                    $grid_responsive = ($attr['gridStyle']  == 'style1' || $attr['gridStyle'] == 'style2') ? 'ultp-grid1-responsive' : '';
-                    $colClass = ($attr['gridStyle']  == 'style1' || $attr['gridStyle'] == 'style2') ? 'ultp-block-column-'.json_decode(wp_json_encode($attr['columns']), True)['lg'] : '';
-                    
-                    $columns = json_decode(wp_json_encode($attr['columns']), true);
-                    $colClassSm = ($attr['gridStyle'] === 'style1' || $attr['gridStyle'] === 'style2') && isset($columns['sm']) ? 'ultp-sm-column-' . $columns['sm'] : '1';
-                    $colClassXs = ($attr['gridStyle'] === 'style1' || $attr['gridStyle'] === 'style2') && isset($columns['xs'])  ? 'ultp-xs-column-' . $columns['xs'] : '1';
+		$vid_icon_redirect = false; // Its used for video icon do not remove it
 
-                    $wraper_before .= '<div class="ultp-block-items-wrap ultp-block-row ultp-pg1a-'.$attr['gridStyle'].' '.$grid_responsive.' '.sanitize_html_class( $colClass ).' '.sanitize_html_class( $colClassSm ).' '.sanitize_html_class( $colClassXs ).' ultp-'.$attr['layout'].'">';
-                    $idx = ($attr['paginationShow'] && ($attr['paginationType'] == 'loadMore')) ? ( $noAjax ? 1 : 0 ) : 0;
-                        while ( $recent_posts->have_posts() ): $recent_posts->the_post();
+		if ( is_single() ) {
+			$curr_post_id = get_the_ID();
+		}
+		$recent_posts = new \WP_Query( ultimate_post()->get_query( $attr ) );
+		$pageNum      = ultimate_post()->get_page_number( $attr, $recent_posts->found_posts );
+		// Dummy Img Url
+		$dummy_url = ULTP_URL . 'assets/img/ultp-fallback-img.png';
 
-                            $dcContent = array_fill( 0, $attr['dcSize'], '' );
+		// Loadmore and Unique content
+		if ( $attr['queryUnique'] && isset( $attr['loadMoreQueryUnique'] ) && $attr['paginationShow'] && ( $attr['paginationType'] == 'loadMore' ) ) {
+			$unique_ID            = $attr['loadMoreQueryUnique'];
+			$current_unique_posts = $attr['ultp_current_unique_posts'];
+		}
 
-                            if (ultimate_post()->is_dc_active($attr)) {
-                                $dcContent = \ULTP\DCService::get_dc_content_for_block($attr, $dcContent);
-                            }
-                            
-                            include ULTP_PATH.'blocks/template/data.php';
+		$attr['className']      = isset( $attr['className'] ) && $attr['className'] ? preg_replace( '/[^A-Za-z0-9_ -]/', '', $attr['className'] ) : '';
+		$attr['align']          = isset( $attr['align'] ) && $attr['align'] ? preg_replace( '/[^A-Za-z0-9_ -]/', '', $attr['align'] ) : '';
+		$attr['advanceId']      = isset( $attr['advanceId'] ) ? sanitize_html_class( $attr['advanceId'] ) : '';
+		$attr['blockId']        = isset( $attr['blockId'] ) ? sanitize_html_class( $attr['blockId'] ) : '';
+		$attr['contentTag']     = in_array( $attr['contentTag'], ultimate_post()->ultp_allowed_block_tags() ) ? $attr['contentTag'] : 'div';
+		$attr['gridStyle']      = sanitize_html_class( $attr['gridStyle'] );
+		$attr['layout']         = sanitize_html_class( $attr['layout'] );
+		$attr['imgAnimation']   = sanitize_html_class( $attr['imgAnimation'] );
+		$attr['imgOverlayType'] = sanitize_html_class( $attr['imgOverlayType'] );
+		$attr['popupAutoPlay']  = $attr['popupAutoPlay'] == true;
+		$attr['readMoreText']   = wp_kses( $attr['readMoreText'], ultimate_post()->ultp_allowed_html_tags() );
 
-                            include ULTP_PATH.'blocks/template/category.php';
+		if ( $recent_posts->have_posts() ) {
 
-                            if ($attr['queryUnique']) {
-                                $unique_ID[$attr['queryUnique']][] = $post_id;
-                                $current_unique_posts[] = $post_id;
-                            }
-                            $divStyle = '';
-                            if ($post_thumb_id && $attr['showImage']) {
-                                $divStyle = 'background-image:url('.get_the_post_thumbnail_url($post_id, $attr['imgCrop']).')';
-                            }
-                            $post_loop .= '<'.$attr['contentTag'].' class="ultp-block-item post-id-'.$post_id.'">';
-                                $post_loop .= '<div class="ultp-block-content-wrap">';
+			// Pagination Block Html
+			include ULTP_PATH . 'blocks/template/pagination_block.php';
 
-                                    $post_loop .= $dcContent[8];
+			$wraper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="ultp-post-grid-block wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '' . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '">';
+				$wraper_before .= '<div class="ultp-block-wrapper">';
 
-                                    if(($post_thumb_id || $attr['fallbackEnable']) && $attr['showImage'] && $attr['layout'] != 'layout2') {
-                                        $post_loop .= '<div class="ultp-block-image ultp-block-image-'.$attr['imgAnimation'].($attr["imgOverlay"] ? ' ultp-block-image-overlay ultp-block-image-'.$attr["imgOverlayType"].' ultp-block-image-'.$attr["imgOverlayType"].$idx : '' ).'">';
-                                            $post_loop .= '<a href="'.$titlelink.'" '.($attr['openInTab'] ? 'target="_blank"' : '').'>';
-                                                $imgSize = (($attr['gridStyle'] == 'style1') ||
-                                                    ($attr['gridStyle'] == 'style2' && $idx == 0) ||
-                                                    ($attr['gridStyle'] == 'style3' && $idx%3 == 0) ||
-                                                    ($attr['gridStyle'] == 'style4' && ($idx == 0 || $idx == 1))) ? $attr['imgCrop'] : $attr['imgCropSmall'];
-                                                    // Post Img Id
-                                                    $block_img_id = $post_thumb_id ? $post_thumb_id : ($attr['fallbackEnable'] && isset($attr['fallbackImg']['id']) ? $attr['fallbackImg']['id'] : '');
-                                                    // Post Image
-                                                    if($post_thumb_id || ($attr['fallbackEnable'] && $block_img_id)) {
-                                                        $post_loop .=  ultimate_post()->get_image($block_img_id , $imgSize, 'ultp-block-image-content', $title, $attr['imgSrcset'], $attr['imgLazy']);
-                                                    } else {
-                                                        $video = ultimate_post()->get_youtube_id($post_video);
-                                                        $post_loop .= '<img class="'.($video ? 'ultp-block-video-content' : 'ultp-block-image-content').'" src="'.($video ? 'https://img.youtube.com/vi/'.$video.'/0.jpg' : $dummy_url).'" alt="dummy-img" />';
-                                                    }
-                                                    if($post_video && !($attr['enablePopup']) && $attr['layout'] !== 'layout2') {
-                                                        $post_loop .= '<div class="ultp-block-video-content" style="display: none;" >';
-                                                        $post_loop .= ultimate_post()->get_embeded_video($post_video, false, true, false, true, true, false, true, array());
-                                                        $post_loop .= '</div>';
-                                                    }
-                                                $post_loop .= '</a>';
-                                                if($post_video){
-                                                    include ULTP_PATH.'blocks/template/video_icon.php';
-                                                }
-                                            if (($attr['catPosition'] != 'aboveTitle') && $attr['catShow'] ) {
-                                                $post_loop .= '<div class="ultp-category-img-grid">'.$category.'</div>';
-                                            }
-                                        $post_loop .= '</div>';
-                                    }
-                                    if ($attr['layout'] === 'layout2' ) { $post_loop .= '<div class="ultp-block-content-image" style='.$divStyle.'></div>';}
-                                    $post_loop .= '<div class="ultp-block-content">';
+					// Loading
+					$wraper_before .= ultimate_post()->postx_loading();
 
-                                        $post_loop .= $dcContent[7];
-                                        
-                                        // Category
-                                        if (($attr['catPosition'] == 'aboveTitle') && $attr['catShow']) {
-                                            $post_loop .= $category;
-                                        }
+			if ( $attr['headingShow'] || $attr['filterShow'] || $attr['paginationShow'] ) {
+				$wraper_before     .= '<div class="ultp-heading-filter">';
+					$wraper_before .= '<div class="ultp-heading-filter-in">';
 
-                                        $post_loop .= $dcContent[6];
+						// Heading
+						include ULTP_PATH . 'blocks/template/heading.php';
 
-                                        // Title
-                                        if ($title && $attr['titleShow'] && $attr['titlePosition'] == 1) {
-                                            include ULTP_PATH.'blocks/template/title.php';
-                                        }
+				if ( $attr['filterShow'] || $attr['paginationShow'] ) {
+					$wraper_before .= '<div class="ultp-filter-navigation">';
 
-                                        $post_loop .= $dcContent[5];
-                                        
-                                        // Meta
-                                        if ($attr['metaPosition'] =='top' ) {
-                                            include ULTP_PATH.'blocks/template/meta.php';
-                                        }
+						// Filter
+					if ( $attr['filterShow'] && $attr['queryType'] != 'posts' && $attr['queryType'] != 'customPosts' ) {
+						include ULTP_PATH . 'blocks/template/filter.php';
+					}
 
-                                        $post_loop .= $dcContent[4];
-                                        
-                                        // Title
-                                        if ($title && $attr['titleShow'] && $attr['titlePosition'] == 0) {
-                                            include ULTP_PATH.'blocks/template/title.php';
-                                        }
+						// Navigation
+					if ( $attr['paginationShow'] && ( $attr['paginationType'] == 'navigation' ) && ( $attr['navPosition'] == 'topRight' ) ) {
+									include ULTP_PATH . 'blocks/template/navigation-before.php';
+					}
+									$wraper_before .= '</div>';
+				}
 
-                                        $post_loop .= $dcContent[3];
+					$wraper_before     .= '</div>';
+						$wraper_before .= '</div>';
+			}
 
-                                        // Excerpt
-                                        if ($attr['excerptShow']) {
-                                            $post_loop .= '<div class="ultp-block-excerpt">'.ultimate_post()->get_excerpt($post_id, $attr['showSeoMeta'], $attr['showFullExcerpt'], $attr['excerptLimit']).'</div>';
-                                        }
+					$grid_responsive = ( $attr['gridStyle'] == 'style1' || $attr['gridStyle'] == 'style2' ) ? 'ultp-grid1-responsive' : '';
+					$colClass        = ( $attr['gridStyle'] == 'style1' || $attr['gridStyle'] == 'style2' ) ? 'ultp-block-column-' . json_decode( wp_json_encode( $attr['columns'] ), true )['lg'] : '';
 
-                                        $post_loop .= $dcContent[2];
+					$columns    = json_decode( wp_json_encode( $attr['columns'] ), true );
+					$colClassSm = ( $attr['gridStyle'] === 'style1' || $attr['gridStyle'] === 'style2' ) && isset( $columns['sm'] ) ? 'ultp-sm-column-' . $columns['sm'] : '1';
+					$colClassXs = ( $attr['gridStyle'] === 'style1' || $attr['gridStyle'] === 'style2' ) && isset( $columns['xs'] ) ? 'ultp-xs-column-' . $columns['xs'] : '1';
 
-                                        // Read More
-                                        if ( $attr['readMore'] ) {
-                                            $post_loop .= '<div class="ultp-block-readmore"><a aria-label="'.$title.'" href="'.$titlelink.'" '.($attr['openInTab'] ? 'target="_blank"' : '').'>'.($attr['readMoreText'] ? $attr['readMoreText'] : esc_html__( "Read More", "ultimate-post" )).ultimate_post()->get_svg_icon($attr['readMoreIcon']).'</a></div>';
-                                        }
+					$wraper_before .= '<div class="ultp-block-items-wrap ultp-block-row ultp-pg1a-' . $attr['gridStyle'] . ' ' . $grid_responsive . ' ' . sanitize_html_class( $colClass ) . ' ' . sanitize_html_class( $colClassSm ) . ' ' . sanitize_html_class( $colClassXs ) . ' ultp-' . $attr['layout'] . '">';
+					$idx            = ( $attr['paginationShow'] && ( $attr['paginationType'] == 'loadMore' ) ) ? ( $noAjax ? 1 : 0 ) : 0;
+			while ( $recent_posts->have_posts() ) :
+				$recent_posts->the_post();
 
-                                        $post_loop .= $dcContent[1];
+				$dcContent = array_fill( 0, $attr['dcSize'], '' );
 
-                                        // Meta
-                                        if ($attr['metaPosition'] =='bottom' ) {
-                                            include ULTP_PATH.'blocks/template/meta.php';
-                                        }
+				if ( ultimate_post()->is_dc_active( $attr ) ) {
+					$dcContent = \ULTP\DCService::get_dc_content_for_block( $attr, $dcContent );
+				}
 
-                                        $post_loop .= $dcContent[0];
+				include ULTP_PATH . 'blocks/template/data.php';
 
-                                    $post_loop .= '</div>';
-                                $post_loop .= '</div>';
-                                if($post_video && $attr['enablePopup'] && $attr['layout'] !== 'layout2') {
-                                    include ULTP_PATH.'blocks/template/video_popup.php';
-                                }
-                            $post_loop .= '</'.$attr['contentTag'].'>';
-                            $idx ++;
-                        endwhile;
-                        if($attr['queryUnique']) {
-                            $post_loop .= "<span style='display: none;' class='ultp-current-unique-posts' data-ultp-unique-ids= ".wp_json_encode($unique_ID)." data-current-unique-posts= ".wp_json_encode($current_unique_posts)."> </span>";
-                        }
-                        // if ( ($attr['paginationShow'] || $attr['advPaginationEnable']) && ($attr['paginationType'] == 'loadMore')) {
-                        //     $wraper_after .= '<span class="ultp-loadmore-insert-before"></span>';
-                        // }
-                    $wraper_after .= '</div>';//ultp-block-items-wrap
-                    
-                    // Load More
-                    if ($attr['paginationShow'] && ($attr['paginationType'] == 'loadMore')) {
-                        include ULTP_PATH.'blocks/template/loadmore.php';
-                    }
+				include ULTP_PATH . 'blocks/template/category.php';
 
-                    // Navigation
-                    if ($attr['paginationShow'] && ($attr['paginationType'] == 'navigation') && ($attr['navPosition'] != 'topRight')) {
-                        include ULTP_PATH.'blocks/template/navigation-after.php';
-                    }
+				if ( $attr['queryUnique'] ) {
+					$unique_ID[ $attr['queryUnique'] ][] = $post_id;
+					$current_unique_posts[]              = $post_id;
+				}
+				$divStyle = '';
+				if ( $post_thumb_id && $attr['showImage'] ) {
+					$divStyle = 'background-image:url(' . get_the_post_thumbnail_url( $post_id, $attr['imgCrop'] ) . ')';
+				}
+				$post_loop     .= '<' . $attr['contentTag'] . ' class="ultp-block-item post-id-' . $post_id . '">';
+					$post_loop .= '<div class="ultp-block-content-wrap">';
 
-                    // Pagination
-                    if ($attr['paginationShow'] && ($attr['paginationType'] == 'pagination')) {
-                        include ULTP_PATH.'blocks/template/pagination.php';
-                    }
+						$post_loop .= $dcContent[8];
 
-                $wraper_after .= '</div>';
-                $wraper_after .= $pagi_block_html;
-            $wraper_after .= '</div>';
-            
-            wp_reset_query();
-            
-        }else {
-            $wraper_before .= ultimate_post()->get_no_result_found_html( $attr['notFoundMessage'] );
-        }
+				if ( ( $post_thumb_id || $attr['fallbackEnable'] ) && $attr['showImage'] && $attr['layout'] != 'layout2' ) {
+						$post_loop      .= '<div class="ultp-block-image ultp-block-image-' . $attr['imgAnimation'] . ( $attr['imgOverlay'] ? ' ultp-block-image-overlay ultp-block-image-' . $attr['imgOverlayType'] . ' ultp-block-image-' . $attr['imgOverlayType'] . $idx : '' ) . '">';
+							$post_loop  .= '<a href="' . $titlelink . '" ' . ( $attr['openInTab'] ? 'target="_blank"' : '' ) . '>';
+								$imgSize = ( ( $attr['gridStyle'] == 'style1' ) ||
+									( $attr['gridStyle'] == 'style2' && $idx == 0 ) ||
+									( $attr['gridStyle'] == 'style3' && $idx % 3 == 0 ) ||
+									( $attr['gridStyle'] == 'style4' && ( $idx == 0 || $idx == 1 ) ) ) ? $attr['imgCrop'] : $attr['imgCropSmall'];
+									// Post Img Id
+									$block_img_id = $post_thumb_id ? $post_thumb_id : ( $attr['fallbackEnable'] && isset( $attr['fallbackImg']['id'] ) ? $attr['fallbackImg']['id'] : '' );
+									// Post Image
+					if ( $post_thumb_id || ( $attr['fallbackEnable'] && $block_img_id ) ) {
+						$post_loop .= ultimate_post()->get_image( $block_img_id, $imgSize, 'ultp-block-image-content', $title, $attr['imgSrcset'], $attr['imgLazy'] );
+					} else {
+						$video      = ultimate_post()->get_youtube_id( $post_video );
+						$post_loop .= '<img class="' . ( $video ? 'ultp-block-video-content' : 'ultp-block-image-content' ) . '" src="' . ( $video ? 'https://img.youtube.com/vi/' . $video . '/0.jpg' : $dummy_url ) . '" alt="dummy-img" />';
+					}
+					if ( $post_video && ! ( $attr['enablePopup'] ) && $attr['layout'] !== 'layout2' ) {
+						$post_loop .= '<div class="ultp-block-video-content" style="display: none;" >';
+						$post_loop .= ultimate_post()->get_embeded_video( $post_video, false, true, false, true, true, false, true, array() );
+						$post_loop .= '</div>';
+					}
+								$post_loop .= '</a>';
+					if ( $post_video ) {
+									include ULTP_PATH . 'blocks/template/video_icon.php';
+					}
+					if ( ( $attr['catPosition'] != 'aboveTitle' ) && $attr['catShow'] ) {
+						$post_loop .= '<div class="ultp-category-img-grid">' . $category . '</div>';
+					}
+											$post_loop .= '</div>';
+				}
+				if ( $attr['layout'] === 'layout2' ) {
+					$post_loop .= '<div class="ultp-block-content-image" style=' . $divStyle . '></div>';}
+						$post_loop .= '<div class="ultp-block-content">';
 
-        return $noAjax ? $post_loop : $wraper_before.$post_loop.$wraper_after;
-    }
+							$post_loop .= $dcContent[7];
 
+							// Category
+				if ( ( $attr['catPosition'] == 'aboveTitle' ) && $attr['catShow'] ) {
+					$post_loop .= $category;
+				}
+
+							$post_loop .= $dcContent[6];
+
+							// Title
+				if ( $title && $attr['titleShow'] && $attr['titlePosition'] == 1 ) {
+					include ULTP_PATH . 'blocks/template/title.php';
+				}
+
+							$post_loop .= $dcContent[5];
+
+							// Meta
+				if ( $attr['metaPosition'] == 'top' ) {
+					include ULTP_PATH . 'blocks/template/meta.php';
+				}
+
+							$post_loop .= $dcContent[4];
+
+							// Title
+				if ( $title && $attr['titleShow'] && $attr['titlePosition'] == 0 ) {
+					include ULTP_PATH . 'blocks/template/title.php';
+				}
+
+							$post_loop .= $dcContent[3];
+
+							// Excerpt
+				if ( $attr['excerptShow'] ) {
+					$post_loop .= '<div class="ultp-block-excerpt">' . ultimate_post()->get_excerpt( $post_id, $attr['showSeoMeta'], $attr['showFullExcerpt'], $attr['excerptLimit'] ) . '</div>';
+				}
+
+							$post_loop .= $dcContent[2];
+
+							// Read More
+				if ( $attr['readMore'] ) {
+					$post_loop .= '<div class="ultp-block-readmore"><a aria-label="' . $title . '" href="' . $titlelink . '" ' . ( $attr['openInTab'] ? 'target="_blank"' : '' ) . '>' . ( $attr['readMoreText'] ? $attr['readMoreText'] : esc_html__( 'Read More', 'ultimate-post' ) ) . ultimate_post()->get_svg_icon( $attr['readMoreIcon'] ) . '</a></div>';
+				}
+
+							$post_loop .= $dcContent[1];
+
+							// Meta
+				if ( $attr['metaPosition'] == 'bottom' ) {
+					include ULTP_PATH . 'blocks/template/meta.php';
+				}
+
+							$post_loop .= $dcContent[0];
+
+						$post_loop .= '</div>';
+					$post_loop     .= '</div>';
+				if ( $post_video && $attr['enablePopup'] && $attr['layout'] !== 'layout2' ) {
+								include ULTP_PATH . 'blocks/template/video_popup.php';
+				}
+										$post_loop .= '</' . $attr['contentTag'] . '>';
+										++$idx;
+						endwhile;
+			if ( $attr['queryUnique'] ) {
+				$post_loop .= "<span style='display: none;' class='ultp-current-unique-posts' data-ultp-unique-ids= " . wp_json_encode( $unique_ID ) . ' data-current-unique-posts= ' . wp_json_encode( $current_unique_posts ) . '> </span>';
+			}
+						// if ( ($attr['paginationShow'] || $attr['advPaginationEnable']) && ($attr['paginationType'] == 'loadMore')) {
+						// $wraper_after .= '<span class="ultp-loadmore-insert-before"></span>';
+						// }
+					$wraper_after .= '</div>';// ultp-block-items-wrap
+
+					// Load More
+			if ( $attr['paginationShow'] && ( $attr['paginationType'] == 'loadMore' ) ) {
+				include ULTP_PATH . 'blocks/template/loadmore.php';
+			}
+
+					// Navigation
+			if ( $attr['paginationShow'] && ( $attr['paginationType'] == 'navigation' ) && ( $attr['navPosition'] != 'topRight' ) ) {
+				include ULTP_PATH . 'blocks/template/navigation-after.php';
+			}
+
+					// Pagination
+			if ( $attr['paginationShow'] && ( $attr['paginationType'] == 'pagination' ) ) {
+				include ULTP_PATH . 'blocks/template/pagination.php';
+			}
+
+				$wraper_after .= '</div>';
+				$wraper_after .= $pagi_block_html;
+			$wraper_after     .= '</div>';
+
+			wp_reset_query();
+
+		} else {
+			$wraper_before .= ultimate_post()->get_no_result_found_html( $attr['notFoundMessage'] );
+		}
+
+		return $noAjax ? $post_loop : $wraper_before . $post_loop . $wraper_after;
+	}
 }

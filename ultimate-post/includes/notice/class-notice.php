@@ -188,51 +188,112 @@ class Notice {
 				),
 				'visibility' => ! Xpo::is_lc_active(),
 			),
+			array(
+				'key'        => 'ultp_black_friday_25_banner_v1',
+				'start'      => '2025-11-05 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
+				'end'        => '2025-11-14 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
+				'banner_src' => ULTP_URL . 'assets/img/dashboard_banner/2025_postx_black_friday_banner_v1.png',
+				'url'        => Xpo::generate_utm_link(
+					array(
+						'utmKey' => 'summer_db',
+					)
+				),
+				'visibility' => ! Xpo::is_lc_active(),
+			),
+			array(
+				'key'        => 'ultp_black_friday_25_banner_v2',
+				'start'      => '2025-11-26 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
+				'end'        => '2025-12-03 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
+				'banner_src' => ULTP_URL . 'assets/img/dashboard_banner/2025_postx_black_friday_banner_v2.png',
+				'url'        => Xpo::generate_utm_link(
+					array(
+						'utmKey' => 'summer_db',
+					)
+				),
+				'visibility' => ! Xpo::is_lc_active(),
+			),
+			// ...existing code...
+			array(
+				'key'        => 'ultp_new_year_26_banner_v1',
+				'start'      => '2026-01-01 00:00 Asia/Dhaka',
+				'end'        => '2026-01-06 23:59 Asia/Dhaka',
+				'banner_src' => ULTP_URL . 'assets/img/dashboard_banner/2026_postx_new_year_banner_v1.png',
+				'url'        => Xpo::generate_utm_link(
+					array(
+						'utmKey' => 'new_year_sale',
+					)
+				),
+				'visibility' => ! Xpo::is_lc_active(),
+			),
+			array(
+				'key'        => 'ultp_new_year_26_banner_v2',
+				'start'      => '2026-01-17 00:00 Asia/Dhaka',
+				'end'        => '2026-01-22 23:59 Asia/Dhaka',
+				'banner_src' => ULTP_URL . 'assets/img/dashboard_banner/2026_postx_new_year_banner_v2.png',
+				'url'        => Xpo::generate_utm_link(
+					array(
+						'utmKey' => 'new_year_sale',
+					)
+				),
+				'visibility' => ! Xpo::is_lc_active(),
+			),
+			array(
+				'key'        => 'ultp_new_year_26_banner_v3',
+				'start'      => '2026-02-02 00:00 Asia/Dhaka',
+				'end'        => '2026-02-07 23:59 Asia/Dhaka',
+				'banner_src' => ULTP_URL . 'assets/img/dashboard_banner/2026_postx_new_year_banner_v3.png',
+				'url'        => Xpo::generate_utm_link(
+					array(
+						'utmKey' => 'new_year_sale',
+					)
+				),
+				'visibility' => ! Xpo::is_lc_active(),
+			),
+			// ...existing code...
 		);
-
 		foreach ( $banner_notices as $key => $notice ) {
 			$notice_key = isset( $notice['key'] ) ? $notice['key'] : $this->notice_version;
 			if ( isset( $_GET['disable_ultp_notice'] ) && $notice_key === $_GET['disable_ultp_notice'] ) {
-				return;
-			}
+				continue;
+			} else {
+				$current_time = gmdate( 'U' );
+				$notice_start = gmdate('U', strtotime($notice['start']));
+				$notice_end = gmdate('U', strtotime($notice['end']));
+				if ( $current_time >= $notice_start && $current_time <= $notice_end && $notice['visibility'] ) {
 
-			$current_time = gmdate( 'U' );
-			$notice_start = gmdate('U', strtotime($notice['start']));
-			$notice_end = gmdate('U', strtotime($notice['end']));
-			if ( $current_time >= $notice_start && $current_time <= $notice_end && $notice['visibility'] ) {
+					$notice_transient = Xpo::get_transient_without_cache( 'ultp_get_pro_notice_' . $notice_key );
 
-				$notice_transient = Xpo::get_transient_without_cache( 'ultp_get_pro_notice_' . $notice_key );
-
-				if ( 'off' !== $notice_transient ) {
-					if ( ! $this->notice_js_css_applied ) {
-						$this->ultp_banner_notice_css();
-						$this->notice_js_css_applied = true;
-					}
-					$query_args = array(
-						'disable_ultp_notice' => $notice_key,
-						'ultp_db_nonce'       => $ultp_db_nonce,
-					);
-					if ( isset( $notice['repeat_interval'] ) && $notice['repeat_interval'] ) {
-						$query_args['ultp_interval'] = $notice['repeat_interval'];
-					}
-					?>
-					<div class="ultp-notice-wrapper notice wc-install ultp-free-notice">
-						<div class="wc-install-body ultp-image-banner">
-							<a class="wc-dismiss-notice" href="
-							<?php
-							echo esc_url(
-								add_query_arg(
-									$query_args
-								)
-							);
-							?>
-							"><?php esc_html_e( 'Dismiss', 'ultimate-post' ); ?></a>
-							<a class="ultp-btn-image" target="_blank" href="<?php echo esc_url( $notice['url'] ); ?>">
-								<img loading="lazy" src="<?php echo esc_url( $notice['banner_src'] ); ?>" alt="Discount Banner"/>
-							</a>
+					if ( 'off' !== $notice_transient ) {
+						if ( ! $this->notice_js_css_applied ) {
+							$this->ultp_banner_notice_css();
+							$this->notice_js_css_applied = true;
+						}
+						$query_args = array(
+							'disable_ultp_notice' => $notice_key,
+							'ultp_db_nonce'       => $ultp_db_nonce,
+						);
+						if ( isset( $notice['repeat_interval'] ) && $notice['repeat_interval'] ) {
+							$query_args['ultp_interval'] = $notice['repeat_interval'];
+						}
+						?>
+						<div class="ultp-notice-wrapper notice wc-install ultp-free-notice">
+							<div class="wc-install-body ultp-image-banner">
+								<a class="wc-dismiss-notice" href="
+								<?php
+								echo esc_url(
+									add_query_arg(
+										$query_args
+									)
+								);
+								?>
+								"><?php esc_html_e( 'Dismiss', 'ultimate-post' ); ?></a>
+								<a class="ultp-btn-image" target="_blank" href="<?php echo esc_url( $notice['url'] ); ?>">
+									<img loading="lazy" src="<?php echo esc_url( $notice['banner_src'] ); ?>" alt="Discount Banner"/>
+								</a>
+							</div>
 						</div>
-					</div>
-					<?php
+						<?php
+					}
 				}
 			}
 		}
@@ -314,6 +375,93 @@ class Notice {
 				'border_color'       => '#000',
 				'is_discount_logo'   => true,
 			),
+			array(
+				'key'        => 'ultp_content_notice_black_friday_sale_v1',
+				'start'      => '2025-11-15 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
+				'end'        => '2025-11-25 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
+				'url'        => Xpo::generate_utm_link(
+					array(
+						'utmKey' => 'summer_db',
+					)
+				),
+				'icon'		=> ULTP_URL . 'assets/img/notice_logo/black_friday_60_offer.svg',
+				'visibility' => ! Xpo::is_lc_active(),
+				'content_heading'    => __( 'Booming Black Friday Deals:', 'ultimate-post' ),
+				'content_subheading' => __( 'PostX offers are live - Enjoy  %s on this news-magazine site builder', 'ultimate-post' ),
+				'discount_content'   => 'up to 60% OFF',
+				// 'border_color'       => '#000',
+				'is_discount_logo'   => true,
+			),
+			array(
+				'key'        => 'ultp_content_notice_black_friday_sale_v2',
+				'start'      => '2025-12-04 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
+				'end'        => '2025-12-10 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
+				'url'        => Xpo::generate_utm_link(
+					array(
+						'utmKey' => 'summer_db',
+					)
+				),
+				'icon'		=> ULTP_URL . 'assets/img/notice_logo/black_friday_60_offer.svg',
+				'visibility' => ! Xpo::is_lc_active(),
+				'content_heading'    => __( 'Black Friday Sales Alert:', 'ultimate-post' ),
+				'content_subheading' => __( 'PostX is on Sale - Enjoy %s on this news-magazine site builder', 'ultimate-post' ),
+				'discount_content'   => 'up to 60% OFF',
+				// 'border_color'       => '#000',
+				'is_discount_logo'   => true,
+			),
+			// Savings Banner 01
+			array(
+				'key'        => 'ultp_content_notice_new_year_sale_01',
+				'start'      => '2026-01-09 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
+				'end'        => '2026-01-14 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
+				'url'        => Xpo::generate_utm_link(
+					array(
+						'utmKey' => 'new_year_sale',
+					)
+				),
+				'icon'		=> ULTP_URL . 'assets/img/notice_logo/new_year_sale_55_offer.svg',
+				'visibility' => ! Xpo::is_lc_active(),
+				'content_heading'    => __( 'New Year Sales Offers:', 'ultimate-post' ),
+				'content_subheading' => __( 'PostX offers are live - Enjoy %s on this news-magazine site builder!', 'ultimate-post' ),
+				'discount_content'   => 'up to 55% OFF',
+				'is_discount_logo'   => true,
+			),
+
+			// Savings Banner 02
+			array(
+				'key'        => 'ultp_content_notice_new_year_sale_02',
+				'start'      => '2026-01-25 00:00 Asia/Dhaka',
+				'end'        => '2026-01-30 23:59 Asia/Dhaka',
+				'url'        => Xpo::generate_utm_link(
+					array(
+						'utmKey' => 'new_year_sale',
+					)
+				),
+				'icon'		=> ULTP_URL . 'assets/img/notice_logo/new_year_sale_55_offer.svg',
+				'visibility' => ! Xpo::is_lc_active(),
+				'content_heading'    => __( 'New Year Sales Alert:', 'ultimate-post' ),
+				'content_subheading' => __( 'PostX is on Sale - Enjoy %s on this news-magazine site builder!', 'ultimate-post' ),
+				'discount_content'   => 'up to 55% OFF',
+				'is_discount_logo'   => true,
+			),
+
+			// Savings Banner 03
+			array(
+				'key'        => 'ultp_content_notice_new_year_sale_03',
+				'start'      => '2026-02-10 00:00 Asia/Dhaka',
+				'end'        => '2026-02-15 23:59 Asia/Dhaka',
+				'url'        => Xpo::generate_utm_link(
+					array(
+						'utmKey' => 'new_year_sale',
+					)
+				),
+				'icon'		=> ULTP_URL . 'assets/img/notice_logo/new_year_sale_55_offer.svg',
+				'visibility' => ! Xpo::is_lc_active(),
+				'content_heading'    => __( 'Fresh New Year Deals:', 'ultimate-post' ),
+				'content_subheading' => __( 'PostX is on Sale - Enjoy %s on this news-magazine site builder!', 'ultimate-post' ),
+				'discount_content'   => 'up to 55% OFF',
+				'is_discount_logo'   => true,
+			),
 		);
 
 		$ultp_db_nonce = wp_create_nonce( 'ultp-dashboard-nonce' );
@@ -321,72 +469,73 @@ class Notice {
 		foreach ( $content_notices as $key => $notice ) {
 			$notice_key = isset( $notice['key'] ) ? $notice['key'] : $this->notice_version;
 			if ( isset( $_GET['disable_ultp_notice'] ) && $notice_key === $_GET['disable_ultp_notice'] ) {
-				return;
-			}
-			$border_color = isset($notice['border_color']) && $notice['border_color'] ? $notice['border_color'] : '';
-			$bg_color = isset($notice['bg_color']) && $notice['bg_color'] ? $notice['bg_color'] : '';
-			$current_time = gmdate( 'U' );
-			$notice_start = gmdate('U', strtotime($notice['start']));
-			$notice_end = gmdate('U', strtotime($notice['end']));
-			if ( $current_time >= $notice_start && $current_time <= $notice_end && $notice['visibility'] ) {
+				continue;
+			} else {
+				$border_color = isset($notice['border_color']) && $notice['border_color'] ? $notice['border_color'] : '';
+				$bg_color = isset($notice['bg_color']) && $notice['bg_color'] ? $notice['bg_color'] : '';
+				$current_time = gmdate( 'U' );
+				$notice_start = gmdate('U', strtotime($notice['start']));
+				$notice_end = gmdate('U', strtotime($notice['end']));
+				if ( $current_time >= $notice_start && $current_time <= $notice_end && $notice['visibility'] ) {
 
-				$notice_transient = Xpo::get_transient_without_cache( 'ultp_get_pro_notice_' . $notice_key );
+					$notice_transient = Xpo::get_transient_without_cache( 'ultp_get_pro_notice_' . $notice_key );
 
-				if ( 'off' !== $notice_transient ) {
-					if ( ! $this->notice_js_css_applied ) {
-						$this->ultp_banner_notice_css();
-						$this->notice_js_css_applied = true;
-					}
-					$query_args = array(
-						'disable_ultp_notice' => $notice_key,
-						'ultp_db_nonce'       => $ultp_db_nonce,
-					);
-					if ( isset( $notice['repeat_interval'] ) && $notice['repeat_interval'] ) {
-						$query_args['ultp_interval'] = $notice['repeat_interval'];
-					}
-
-					$url = isset( $notice['url'] ) ? $notice['url'] : Xpo::generate_utm_link(
-						array(
-							'utmKey' => 'summer_db',
-						)
-					);
-
-					?>
-					<div class="ultp-notice-wrapper notice data_collection_notice" style="<?php echo ! empty( $border_color ) ? 'border-left: 3px solid ' . esc_attr( $border_color ) . ';' : ''; ?>">
-						<?php
-						if (isset( $notice['icon'] ) && strlen($notice['icon']) > 0) {
-							?>
-								<div class="ultp-notice-icon <?php echo isset($notice['is_discount_logo']) && $notice['is_discount_logo'] ? 'ultp-discount-logo': '' ?>"> <img src="<?php echo esc_url( $notice['icon'] ); ?>"/>  </div>
-							<?php
+					if ( 'off' !== $notice_transient ) {
+						if ( ! $this->notice_js_css_applied ) {
+							$this->ultp_banner_notice_css();
+							$this->notice_js_css_applied = true;
 						}
-						?>
-						<div class="ultp-notice-content-wrapper">
-							<div class="">
-								<strong><?php echo esc_html( $notice['content_heading'] ); ?> </strong>
-								<?php
-									printf(
-										wp_kses_post( $notice['content_subheading'] ),
-										'<strong>' . esc_html( $notice['discount_content'] ) . '</strong>'
-									);
-                                ?>
-							</div>
-							<div class="ultp-notice-buttons">
-								<a class="ultp-notice-btn button button-primary <?php echo ( isset( $notice['is_discount_logo'] ) && $notice['is_discount_logo'] ) ? "btn-outline" : "btn-normal"; ?>"  href="<?php echo esc_url( $url ); ?>" target="_blank" style="<?php echo ! empty( $bg_color ) ? 'background-color:' . esc_attr( $bg_color ) . ' !important; border-color:' . esc_attr( $bg_color )  .';' : ''; ?>" >
-									<?php isset( $notice['is_discount_logo'] ) && $notice['is_discount_logo'] ? esc_html_e( 'CLAIM YOUR DISCOUNT!', 'ultimate-post' ) : esc_html_e( 'Upgrade to Pro &nbsp;➤', 'ultimate-post' ); ?>
-								</a>
-							</div>
-						</div>
-						<a href=
-						<?php
-						echo esc_url(
-							add_query_arg(
-								$query_args
+						$query_args = array(
+							'disable_ultp_notice' => $notice_key,
+							'ultp_db_nonce'       => $ultp_db_nonce,
+						);
+						if ( isset( $notice['repeat_interval'] ) && $notice['repeat_interval'] ) {
+							$query_args['ultp_interval'] = $notice['repeat_interval'];
+						}
+
+						$url = isset( $notice['url'] ) ? $notice['url'] : Xpo::generate_utm_link(
+							array(
+								'utmKey' => 'summer_db',
 							)
 						);
+
 						?>
-						class="ultp-notice-close"><span class="ultp-notice-close-icon dashicons dashicons-dismiss"> </span></a>
-					</div>
-					<?php
+						<div class="ultp-notice-wrapper notice data_collection_notice" style="<?php echo ! empty( $border_color ) ? 'border-left: 3px solid ' . esc_attr( $border_color ) . ';' : ''; ?>">
+							<?php
+							if (isset( $notice['icon'] ) && strlen($notice['icon']) > 0) {
+								?>
+									<div class="ultp-notice-icon <?php echo isset($notice['is_discount_logo']) && $notice['is_discount_logo'] ? 'ultp-discount-logo': '' ?>"> <img src="<?php echo esc_url( $notice['icon'] ); ?>"/>  </div>
+								<?php
+							}
+							?>
+							<div class="ultp-notice-content-wrapper">
+								<div class="">
+									<strong><?php echo esc_html( $notice['content_heading'] ); ?> </strong>
+									<?php
+										printf(
+											wp_kses_post( $notice['content_subheading'] ),
+											'<strong>' . esc_html( $notice['discount_content'] ) . '</strong>'
+										);
+									?>
+								</div>
+								<div class="ultp-notice-buttons">
+									<a class="ultp-notice-btn button button-primary <?php echo ( isset( $notice['is_discount_logo'] ) && $notice['is_discount_logo'] ) ? "btn-outline" : "btn-normal"; ?>"  href="<?php echo esc_url( $url ); ?>" target="_blank" style="<?php echo ! empty( $bg_color ) ? 'background-color:' . esc_attr( $bg_color ) . ' !important; border-color:' . esc_attr( $bg_color )  .';' : ''; ?>" >
+										<?php isset( $notice['is_discount_logo'] ) && $notice['is_discount_logo'] ? esc_html_e( 'CLAIM YOUR DISCOUNT!', 'ultimate-post' ) : esc_html_e( 'Upgrade to Pro &nbsp;➤', 'ultimate-post' ); ?>
+									</a>
+								</div>
+							</div>
+							<a href=
+							<?php
+							echo esc_url(
+								add_query_arg(
+									$query_args
+								)
+							);
+							?>
+							class="ultp-notice-close"><span class="ultp-notice-close-icon dashicons dashicons-dismiss"> </span></a>
+						</div>
+						<?php
+					}
 				}
 			}
 		}
@@ -507,10 +656,11 @@ class Notice {
 				border-radius: 4px;
 				border-left: 3px solid #037fff;
 				line-height: 0;
-			}   
+			}
 			.ultp-free-notice.wc-install img {
-				margin-right: 0; 
+				margin-right: 0;
 				max-width: 100%;
+				width: 100%;
 			}
 			.ultp-free-notice .wc-install-body {
 				-ms-flex: 1;

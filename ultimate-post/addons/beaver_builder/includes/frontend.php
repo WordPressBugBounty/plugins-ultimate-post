@@ -14,10 +14,10 @@
 			}
 			wp_reset_postdata();
 		}
-	} else {
-		if ( isset( $_GET['fl_builder'] ) ) { //phpcs:ignore
+	} elseif ( isset( $_GET['fl_builder'] ) ) {
+		//phpcs:ignore
 			echo '<p style="text-align:center;">' . sprintf( esc_html__( 'Pick a Template from your saved ones. Or create a template from: %s.', 'ultimate-post' ) . ' ', '<strong><i>' . esc_html__( 'Dashboard > PostX > Saved Templates', 'ultimate-post' ) . '</i></strong>' ) . '</p>'; //phpcs:ignore
-		}
+
 	}
 	?>
 </div>

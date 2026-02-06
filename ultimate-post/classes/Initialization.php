@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Initialization Action.
  *
  * @package ULTP\ULTP_Initialization
  * @since v.1.1.0
  */
+
 namespace ULTP;
 
 defined( 'ABSPATH' ) || exit;
@@ -13,13 +15,19 @@ use ULTP\Includes\Durbin\Xpo;
 
 /**
  * Initialization class.
+ *
+ * Handles plugin initialization for Ultimate Post.
+ *
+ * @package ULTP\Initialization
+ * @since 4.0.0
  */
 class ULTP_Initialization {
 
 	/**
 	 * Setup class.
 	 *
-	 * @since v.1.1.0
+	 * @since 4.0.0
+	 * @return void No return value.
 	 */
 	public function __construct() {
 
@@ -27,27 +35,27 @@ class ULTP_Initialization {
 		$this->requires();
 		$this->include_addons();
 
-		add_filter( 'admin_body_class', array( $this, 'add_admin_body_class' ) );  // add body class in editor
-		add_filter( 'body_class', array( $this, 'add_body_class' ) );  // add body class in front end
+		add_filter( 'admin_body_class', array( $this, 'add_admin_body_class' ) );  // add body class in editor.
+		add_filter( 'body_class', array( $this, 'add_body_class' ) );  // add body class in front end.
 
 		add_action( 'wp', array( $this, 'popular_posts_tracker_callback' ) );
 		add_action( 'after_setup_theme', array( $this, 'add_image_size' ) );
-		add_filter( 'block_categories_all', array( $this, 'register_category_callback' ), 999999999, 2 );  // Block Category Register
+		add_filter( 'block_categories_all', array( $this, 'register_category_callback' ), 999999999, 2 );  // Block Category Register.
 
-		add_filter( 'safe_style_css', array( $this, 'ultp_handle_safe_style_css' ) );  // support for css used in svg icon
-		add_filter( 'wp_kses_allowed_html', array( $this, 'ultp_handle_allowed_html' ), 99, 2 );   // support for svg icon used in list, row, icon block
+		add_filter( 'safe_style_css', array( $this, 'ultp_handle_safe_style_css' ) );  // support for css used in svg icon.
+		add_filter( 'wp_kses_allowed_html', array( $this, 'ultp_handle_allowed_html' ), 99, 2 );   // support for svg icon used in list, row, icon block.
 
-		add_action( 'enqueue_block_editor_assets', array( $this, 'register_block_scripts_editor_area' ) );    // Only editor
-		add_action( 'admin_enqueue_scripts', array( $this, 'register_option_panel_scripts_callback' ) );    // Option Panel
+		add_action( 'enqueue_block_editor_assets', array( $this, 'register_block_scripts_editor_area' ) );    // Only editor.
+		add_action( 'admin_enqueue_scripts', array( $this, 'register_option_panel_scripts_callback' ) );    // Option Panel.
 		register_activation_hook( ULTP_PATH . 'ultimate-post.php', array( $this, 'plugin_activation_hook' ) );
-		add_action( 'activated_plugin', array( $this, 'ultp_plugin_activation' ) ); // Plugin Activation Call
+		add_action( 'activated_plugin', array( $this, 'ultp_plugin_activation' ) ); // Plugin Activation Call.
 	}
 
 	/**
-	 * Check Compatibility
+	 * Check plugin compatibility.
 	 *
 	 * @since v.1.0.0
-	 * @return NULL
+	 * @return void
 	 */
 	public function compatibility_check() {
 		require_once ULTP_PATH . 'classes/Compatibility.php';
@@ -55,10 +63,10 @@ class ULTP_Initialization {
 	}
 
 	/**
-	 * Necessary Requires Class
+	 * Load all required classes.
 	 *
 	 * @since v.1.0.0
-	 * @return NULL
+	 * @return void No return value.
 	 */
 	public function requires() {
 		require_once ULTP_PATH . 'classes/Styles.php';
@@ -87,10 +95,10 @@ class ULTP_Initialization {
 	}
 
 	/**
-	 * Include Addons Directory
+	 * Include all addons from the addons directory.
 	 *
 	 * @since v.1.0.0
-	 * @return NULL
+	 * @return void
 	 */
 	public function include_addons() {
 		$addons_dir = array_filter( glob( ULTP_PATH . 'addons/*' ), 'is_dir' );
@@ -107,10 +115,11 @@ class ULTP_Initialization {
 
 
 	/**
-	 * Add Admin Body_class
+	 * Add admin body class in editor.
 	 *
 	 * @since v.3.1.6
-	 * @return NULL
+	 * @param STRING $classes The existing admin body classes.
+	 * @return STRING Modified admin body classes.
 	 */
 	public function add_admin_body_class( $classes ) {
 		$classes .= ' postx-admin-page ';
@@ -118,10 +127,11 @@ class ULTP_Initialization {
 	}
 
 	/**
-	 * Theme Switch Callback
+	 * Add body class in front end.
 	 *
 	 * @since v.3.1.6
-	 * @return NULL
+	 * @param ARRAY $classes The existing body classes.
+	 * @return ARRAY Modified body classes.
 	 */
 	public function add_body_class( $classes ) {
 		$classes[] = 'postx-page';
@@ -129,15 +139,16 @@ class ULTP_Initialization {
 	}
 
 	/**
-	 * Post View Counter for Every Post
+	 * Post view counter for every post.
 	 *
 	 * @since v.1.0.0
-	 * @param NUMBER | Post ID
-	 * @return NULL
+	 * @param INT $post_id The post ID.
+	 * @return NULL No return value.
 	 */
 	public function popular_posts_tracker_callback( $post_id ) {
 		if ( ! is_single() ) {
-			return; }
+			return;
+		}
 		global $post;
 		$post_id  = isset( $post->ID ) ? $post->ID : '';
 		$isEnable = apply_filters( 'ultp_view_cookies', true );
@@ -153,12 +164,11 @@ class ULTP_Initialization {
 		}
 	}
 
-
 	/**
-	 * Set Image Size
+	 * Set image sizes for the plugin.
 	 *
 	 * @since v.1.0.0
-	 * @return NULL
+	 * @return void No return value.
 	 */
 	public function add_image_size() {
 		$size_disable = ultimate_post()->get_setting( 'disable_image_size' );
@@ -170,13 +180,13 @@ class ULTP_Initialization {
 		}
 	}
 
-
 	/**
-	 * Block Categories Initialization
+	 * Block categories initialization.
 	 *
 	 * @since v.1.0.0
-	 * @param $categories(ARRAY) | $post (ARRAY)
-	 * @return NULL
+	 * @param ARRAY $categories The block categories.
+	 * @param ARRAY $post The post object.
+	 * @return ARRAY Modified block categories.
 	 */
 	public function register_category_callback( $categories, $post ) {
 		$attr = array(
@@ -193,10 +203,11 @@ class ULTP_Initialization {
 	}
 
 	/**
-	 * Add support for css to use svg
+	 * Add support for CSS to use SVG.
 	 *
 	 * @since 4.0.0
-	 * @return styles
+	 * @param ARRAY $styles The allowed CSS styles.
+	 * @return ARRAY Modified allowed CSS styles.
 	 */
 	public function ultp_handle_safe_style_css( $styles ) {
 		if ( ! is_multisite() && ! current_user_can( 'edit_posts' ) ) {
@@ -206,19 +217,20 @@ class ULTP_Initialization {
 			$styles,
 			array(
 				'opacity',
-			// for SVG gradients.
-			// 'stop-opacity',
-			// 'stop-color',
+				// for SVG gradients.
+				// 'stop-opacity',
+				// 'stop-color',
 			)
 		);
 	}
 
-
 	/**
-	 * Add support for html tag to use svg
+	 * Add support for HTML tags to use SVG.
 	 *
 	 * @since 4.0.0
-	 * @return supported_tags
+	 * @param ARRAY  $tags The allowed HTML tags.
+	 * @param STRING $context The context for allowed HTML.
+	 * @return ARRAY Modified allowed HTML tags.
 	 */
 	public function ultp_handle_allowed_html( $tags, $context ) {
 		if ( 'post' !== $context && ! is_multisite() && ! current_user_can( 'edit_posts' ) ) {
@@ -306,12 +318,12 @@ class ULTP_Initialization {
 		return $tags;
 	}
 
-
 	/**
-	 * Theme Switch Callback
+	 * Plugin activation callback.
 	 *
 	 * @since v.1.1.0
-	 * @return NULL
+	 * @param STRING $plugin The plugin file path.
+	 * @return NULL No return value.
 	 */
 	public function ultp_plugin_activation( $plugin ) {
 		if ( wp_doing_ajax() ) {
@@ -323,24 +335,23 @@ class ULTP_Initialization {
 			}
 			if ( ultimate_post()->get_setting( 'init_setup' ) != 'yes' ) {
 				ultimate_post()->set_setting( 'init_setup', 'yes' );
-                exit( wp_safe_redirect( admin_url( 'admin.php?page=ultp-setup-wizard' ) ) ); //phpcs:ignore
+				exit(wp_safe_redirect(admin_url('admin.php?page=ultp-setup-wizard'))); //phpcs:ignore
 			} else {
-                exit( wp_safe_redirect( admin_url( 'admin.php?page=ultp-settings#home' ) ) ); //phpcs:ignore
+				exit(wp_safe_redirect(admin_url('admin.php?page=ultp-settings#home'))); //phpcs:ignore
 			}
 		}
 	}
 
-
 	/**
-	 * Option Panel CSS and JS Scripts
+	 * Enqueue option panel CSS and JS scripts.
 	 *
 	 * @since v.1.0.0
-	 * @return NULL
+	 * @return void No return value.
 	 */
 	public function register_option_panel_scripts_callback() {
 		$is_active   = ultimate_post()->is_lc_active();
 		$license_key = Xpo::get_lc_key();
-        $_page = isset($_GET['page']) ? sanitize_text_field($_GET['page']) : '';    // @codingStandardsIgnoreLine
+		$_page = isset($_GET['page']) ? sanitize_text_field($_GET['page']) : '';    // @codingStandardsIgnoreLine
 		$post_type   = get_post_type();
 
 		wp_enqueue_style( 'wp-color-picker' );
@@ -427,12 +438,11 @@ class ULTP_Initialization {
 		}
 	}
 
-
 	/**
-	 * Only Backend CSS and JS Scripts
+	 * Enqueue backend CSS and JS scripts for the block editor.
 	 *
 	 * @since v.1.0.0
-	 * @return NULL
+	 * @return void No return value.
 	 */
 	public function register_block_scripts_editor_area() {
 		ultimate_post()->register_scripts_common();
@@ -509,10 +519,10 @@ class ULTP_Initialization {
 
 
 	/**
-	 * Fire When Plugin First Install
+	 * Fire when plugin is first installed.
 	 *
 	 * @since v.1.0.0
-	 * @return NULL
+	 * @return void No return value.
 	 */
 	public function plugin_activation_hook() {
 		$data        = get_option( 'ultp_options', array() );
@@ -555,6 +565,7 @@ class ULTP_Initialization {
 			'news_ticker'                 => 'yes',
 			'accordion'                   => 'yes',
 			'star_rating'                 => 'yes',
+			'youtube_gallery'         => 'yes',
 			'builder_advance_post_meta'   => 'yes',
 			'builder_archive_title'       => 'yes',
 			'builder_author_box'          => 'yes',

@@ -747,7 +747,7 @@ final class DCService {
 	 * Limits a string by word
 	 *
 	 * @param string $str
-	 * @param int $limit
+	 * @param int    $limit
 	 * @return string
 	 */
 	public static function limit_str( $str, $limit ) {

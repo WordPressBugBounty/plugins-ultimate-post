@@ -1010,7 +1010,7 @@ msgstr ""
 
 #: classes/Options.php:100
 #: assets/js/ultp_dashboard_min.js:129
-msgid "Integrations"
+msgid "Add-ons"
 msgstr ""
 
 #: classes/Options.php:101

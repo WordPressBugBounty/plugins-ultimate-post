@@ -1,26 +1,33 @@
 <?php
-namespace ULTP;
-
-use ULTP\Includes\Durbin\DurbinClient;
 
 /**
  * All Dashboard handler
  *
  * @package ULTP\Dashboard
  * @since 4.1.11
-*/
+ */
+
+namespace ULTP;
 
 defined( 'ABSPATH' ) || exit;
 
-/*
-* Caches class.
-*/
-class Dashboard {
+use ULTP\Includes\Durbin\DurbinClient;
 
-	/*
+/**
+ * Dashboard class.
+ *
+ * Handles the admin dashboard for Ultimate Post plugin.
+ *
+ * @package ULTP\Dashboard
+ * @since 4.0.0
+ */
+class Dashboard {
+	/**
 	 * Setup class.
-	 * @since 4.1.11
-	*/
+	 *
+	 * @since 4.0.0
+	 * @return void
+	 */
 	public function __construct() {
 		add_action( 'rest_api_init', array( $this, 'ultp_register_route' ) );
 	}
@@ -29,7 +36,7 @@ class Dashboard {
 	 * REST API Action
 	 *
 	 * @since 4.1.11
-	 * @return NULL
+	 * @return void
 	 */
 	public function ultp_register_route() {
 		register_rest_route(
@@ -147,13 +154,12 @@ class Dashboard {
 		);
 	}
 
-
 	/**
-	 * Save addon / blocks on/off data
+	 * Save addon/blocks on/off data.
 	 *
 	 * @since v.3.0.0
-	 * @param STRING
-	 * @return ARRAY | Inserted Post Url
+	 * @param OBJECT $server The REST server request object.
+	 * @return ARRAY. Inserted post URL and status.
 	 */
 	public function addon_block_action( $server ) {
 		$post        = $server->get_params();
@@ -172,10 +178,11 @@ class Dashboard {
 	}
 
 	/**
-	 * Save Settings of Option Panel
+	 * Save settings of option panel.
 	 *
 	 * @since v.3.0.0
-	 * @return NULL
+	 * @param OBJECT $server The REST server request object.
+	 * @return OBJECT REST response object.
 	 */
 	public function save_plugin_settings( $server ) {
 		$post = $server->get_params();
@@ -196,10 +203,11 @@ class Dashboard {
 	}
 
 	/**
-	 * Save Settings of Option Panel
+	 * Get all settings of option panel.
 	 *
 	 * @since v.3.0.0
-	 * @return NULL
+	 * @param OBJECT $server The REST server request object.
+	 * @return OBJECT REST response object.
 	 */
 	public function get_all_settings( $server ) {
 		return rest_ensure_response(
@@ -211,11 +219,11 @@ class Dashboard {
 	}
 
 	/**
-	 * Saved Template & Custom Font Actions
+	 * Saved template & custom font actions.
 	 *
 	 * @since v.3.0.0
-	 * @param STRING
-	 * @return ARRAY | Inserted Post Url
+	 * @param OBJECT $server The REST server request object.
+	 * @return ARRAY Inserted post URL and status.
 	 */
 	public function get_dashboard_callback( $server ) {
 		$post         = $server->get_params();
@@ -264,15 +272,20 @@ class Dashboard {
 							$settings = get_post_meta( get_the_ID(), '__font_settings', true );
 							foreach ( $settings as $key => $value ) {
 								if ( $value['ttf'] ) {
-									$final['ttf'] = true; }
+									$final['ttf'] = true;
+								}
 								if ( $value['svg'] ) {
-									$final['svg'] = true; }
+									$final['svg'] = true;
+								}
 								if ( $value['eot'] ) {
-									$final['eot'] = true; }
+									$final['eot'] = true;
+								}
 								if ( $value['woff'] ) {
-									$final['woff'] = true; }
+									$final['woff'] = true;
+								}
 								if ( $value['woff2'] ) {
-									$final['woff2'] = true; }
+									$final['woff2'] = true;
+								}
 							}
 							$final['font_settings'] = $settings;
 						}
@@ -287,7 +300,7 @@ class Dashboard {
 					'found'   => $the_query->found_posts,
 					'pages'   => $the_query->max_num_pages,
 				);
-			break;
+				break;
 
 			case 'action_draft':
 			case 'action_publish':
@@ -353,7 +366,7 @@ class Dashboard {
 					'success' => $success,
 					'message' => $success ? __( 'New Support Ticket has been Created.', 'ultimate-post' ) : __( 'New Support Ticket is not Created Due to Some Issues.', 'ultimate-post' ),
 				);
-			break;
+				break;
 
 			case 'helloBarAction':
 				set_transient( 'ultp_helloBar' . ULTP_HELLOBAR, 'hide', 1296000 );
@@ -361,14 +374,14 @@ class Dashboard {
 					'success' => true,
 					'message' => __( 'Notice is removed.', 'ultimate-post' ),
 				);
-			break;
+				break;
 			case 'generalDiscountAction':
 				set_transient( 'ultp_generalDiscount', 'hide', 60 * DAY_IN_SECONDS );
 				return array(
 					'success' => true,
 					'message' => __( 'Notice is removed.', 'ultimate-post' ),
 				);
-			break;
+				break;
 
 			default:
 				// code...
@@ -377,11 +390,10 @@ class Dashboard {
 	}
 
 	/**
-	 * wizard_site_status_callback
+	 * Wizard site status callback.
 	 *
-	 * * @since v.3.0.0
-	 *
-	 * @return STRING
+	 * @since v.3.0.0
+	 * @return OBJECT. REST response object.
 	 */
 	public static function wizard_site_status_callback() {
 		if ( ! ( isset( $_POST['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['wpnonce'] ) ), 'ultp-nonce' ) ) ) {
@@ -396,13 +408,11 @@ class Dashboard {
 		return rest_ensure_response( array( 'success' => true ) );
 	}
 
-
 	/**
-	 * Send Plugin Data When Initial Setup
+	 * Send plugin data when initial setup.
 	 *
-	 * * @since v.2.8.1
-	 *
-	 * @return STRING
+	 * @since v.2.8.1
+	 * @param OBJECT $server The REST server request object.
 	 */
 	public function send_initial_plugin_data_callback( $server ) {
 		$post = $server->get_params();
@@ -416,11 +426,11 @@ class Dashboard {
 	}
 
 	/**
-	 * Initial Plugin Setup Complete
+	 * Initial plugin setup complete callback.
 	 *
-	 * * @since v.2.8.1
-	 *
-	 * @return STRING
+	 * @since v.2.8.1
+	 * @param OBJECT $server The REST server request object.
+	 * @return OBJECT REST response object.
 	 */
 	public static function initial_setup_complete_callback( $server ) {
 		$post = $server->get_params();
@@ -436,13 +446,12 @@ class Dashboard {
 		);
 	}
 
-
 	/**
-	 * Delete Template Page and Handle builder, saved templates, custom font actions
+	 * Delete template page and handle builder, saved templates, custom font actions.
 	 *
-	 * @since v.2.6.6 // Shifted from RequestAPI since v4.0.3
-	 * @param STRING
-	 * @return ARRAY | Success Message
+	 * @since v.2.6.6 Shifted from RequestAPI since v4.0.3
+	 * @param OBJECT $server The REST server request object.
+	 * @return ARRAY Success message.
 	 */
 	public function template_page_action( $server ) {
 		$post     = $server->get_params();

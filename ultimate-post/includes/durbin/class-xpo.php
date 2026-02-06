@@ -207,7 +207,7 @@ class Xpo {
 			),
 			'summer_db'          => array(
 				'source'   => 'db-postx-notice',
-				'medium'   => 'summer-sale',
+				'medium'   => 'black-friday-sale',
 				'campaign' => 'postx-dashboard',
 			),
 			'plugin_dir_pro'     => array(
@@ -230,38 +230,43 @@ class Xpo {
 				'medium'   => 'left-menu-upgrade',
 				'campaign' => 'postx-dashboard',
 			),
-			'sub_menu'   => array(
+			'sub_menu'           => array(
 				'source'   => 'db-postx-submenu',
 				'medium'   => 'upgrade-pro',
 				'campaign' => 'postx-dashboard',
 			),
-			'final_hour_sale' => array(
+			'final_hour_sale'    => array(
 				'source'   => 'db-postx-notice-logo',
 				'medium'   => 'final-hour-sale',
 				'campaign' => 'postx-dashboard',
 			),
-			'massive_sale' => array(
+			'massive_sale'       => array(
 				'source'   => 'db-postx-notice-text',
 				'medium'   => 'massive-sale',
 				'campaign' => 'postx-dashboard',
 			),
-			'flash_sale' => array(
+			'flash_sale'         => array(
 				'source'   => 'db-postx-notice-logo',
 				'medium'   => 'flash-sale',
 				'campaign' => 'postx-dashboard',
 			),
-			'exclusive_deals' => array(
+			'exclusive_deals'    => array(
 				'source'   => 'db-postx-notice-text',
 				'medium'   => 'exclusive-deals',
+				'campaign' => 'postx-dashboard',
+			),
+			'new_year_sale'    => array(
+				'source'   => 'db-postx-notice-text',
+				'medium'   => 'new-year-sale',
 				'campaign' => 'postx-dashboard',
 			),
 		);
 
 		// Step 1: Get parameters
-		$base_url      = $params['url'] ?? 'https://www.wpxpo.com/postx/pricing/';
+		$base_url      = $params['url'] ?? 'https://www.wpxpo.com/postx/';
 		$utm_key       = $params['utmKey'] ?? null;
 		$affiliate     = $params['affiliate'] ?? apply_filters( 'ultp_affiliate_id', '' );
-		$hash          = $params['hash'] ?? '';
+		$hash          = $params['hash'] ?? 'pricing';
 		$custom_config = $params['config'] ?? null;
 
 		$parsed_url = parse_url( $base_url );

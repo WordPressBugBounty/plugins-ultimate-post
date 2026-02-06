@@ -35,7 +35,62 @@ final class DCController {
 				array(
 					'methods'             => 'POST',
 					'callback'            => array( $this, 'handle_dynamic_data' ),
-					'permission_callback' => '__return_true',
+					// 'permission_callback' => function () {
+					// 	return is_user_logged_in() && current_user_can( 'edit_posts' );
+					// },
+					'permission_callback' => function ( $request ) {
+						// there is an unauthenticated route for fetching user data against post, that can be used to fetch user sensitive data like user email, user password reset token hast ( user_activation_key ) , private or draft post title e.t.c as unauthenticated user.
+						$post_id = method_exists( $request, 'get_param' )
+						? intval( $request->get_param('post_id') )
+						: ( isset( $request['post_id'] ) ? intval( $request['post_id'] ) : 0 );
+
+						$data_type = method_exists( $request, 'get_param' )
+							? $request->get_param('data_type')
+							: ( isset( $request['data_type'] ) ? $request['data_type'] : '' );
+
+						// User must be logged in
+						if ( ! is_user_logged_in() ) {
+							return false;
+						}
+
+						// If no post_id, require edit_posts capability
+						if ( $post_id <= 0 ) {
+							return current_user_can( 'edit_posts' );
+						}
+
+						// Get the post
+						$post = get_post( $post_id );
+						if ( ! $post ) {
+							return false;
+						}
+
+						// Check if post is password protected
+						if ( post_password_required( $post ) ) {
+							return false;
+						}
+
+						// User must be able to edit this specific post
+						if ( ! current_user_can( 'edit_post', $post_id ) ) {
+							return false;
+						}
+
+						// For non-published posts, user must be author OR have edit_posts capability
+						if ( $post->post_status !== 'publish' ) {
+							if ( (int) $post->post_author !== get_current_user_id() && ! current_user_can( 'edit_posts' ) ) {
+								return false;
+							}
+						}
+
+						// Restrict author_info to users who can edit the author OR admins
+						if ( $data_type === 'author_info' ) {
+							$author_id = (int) $post->post_author;
+							if ( ! current_user_can( 'edit_user', $author_id ) && ! current_user_can( 'manage_options' ) ) {
+								return false;
+							}
+						}
+
+						return true;
+					},
 					'args'                => array(),
 				),
 			)
@@ -65,8 +120,8 @@ final class DCController {
 	public function handle_dynamic_data( $server ) {
 		$args      = $server->get_params();
 		$post_id   = isset( $args['post_id'] ) ? intval( $args['post_id'] ) : '';
-		$key       = isset( $args['key'] ) ? $args['key'] : '';
 		$data_type = isset( $args['data_type'] ) ? $args['data_type'] : '';
+		$key       = isset( $args['key'] ) ? $args['key'] : '';
 
 		return rest_ensure_response(
 			array(

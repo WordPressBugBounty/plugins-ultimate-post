@@ -1,4 +1,5 @@
 <?php
+
 namespace ULTP;
 
 use ULTP\Includes\Durbin\Xpo;
@@ -88,7 +89,7 @@ class Builder {
 			if ( $this->is_block_theme ) {
 				remove_action( 'wp_head', array( $this, 'ultp_header_builder_template' ) );
 			} elseif ( $this->theme_name == 'generatepress' ) {
-					require_once ULTP_PATH . 'addons/builder/templates/header.php';
+				require_once ULTP_PATH . 'addons/builder/templates/header.php';
 			} else {
 				if ( $this->theme_name != 'astra' ) {  // Astra theme issue
 					require_once ULTP_PATH . 'addons/builder/templates/header.php';
@@ -106,10 +107,11 @@ class Builder {
 					wp_enqueue_style( 'wp-block-library' );  // Gutenberg CSS issue Bricks Builder frontend
 				}
 			}
-			?> 
-				<header id="ultp-header-template" class="<?php esc_html_e( 'ultp-builderid-' . $this->header_id ); ?>">
-                    <?php echo ultimate_post()->get_post_content($this->header_id);  //phpcs:ignore  ?> 
-				</header> 
+			?>
+			<header id="ultp-header-template" class="<?php esc_html_e( 'ultp-builderid-' . $this->header_id ); ?>">
+				<?php echo ultimate_post()->get_post_content($this->header_id);  //phpcs:ignore  
+				?>
+			</header>
 			<?php
 		}
 	}
@@ -117,9 +119,10 @@ class Builder {
 		if ( $this->footer_id ) {
 
 			?>
-							<footer id="ultp-footer-template" class="<?php esc_html_e( 'ultp-builderid-' . $this->footer_id ); ?>" role="contentinfo">
-                    <?php echo ultimate_post()->get_post_content($this->footer_id) //phpcs:ignore ?>
-				</footer> 
+			<footer id="ultp-footer-template" class="<?php esc_html_e( 'ultp-builderid-' . $this->footer_id ); ?>" role="contentinfo">
+				<?php echo ultimate_post()->get_post_content($this->footer_id) //phpcs:ignore 
+				?>
+			</footer>
 			<?php
 			if ( ! $this->is_block_theme ) {
 				if ( $this->theme_name == 'astra' || $this->theme_name == 'generatepress' ) {  // Astra theme issue
@@ -225,12 +228,12 @@ class Builder {
 			<?php } ?>
 			<label><?php echo esc_html__( 'Featured Video', 'ultimate-post' ); ?></label>
 			<div class="ultp-video-input">
-				<input id="ultp-add-input" type="text" name="feature-video" value="<?php echo esc_attr( $video ); ?>" autocomplete="off"/>
+				<input id="ultp-add-input" type="text" name="feature-video" value="<?php echo esc_attr( $video ); ?>" autocomplete="off" />
 				<button class="ultp-add-media"><span class="dashicons dashicons-cloud-upload"></span></button>
 			</div>
 			<span><strong><?php echo esc_html__( 'Note: ', 'ultimate-post' ); ?></strong><?php echo esc_html__( 'Enter Youtube/ Vimeo/ Self Hosted URL', 'ultimate-post' ); ?></span>
 			<label><?php echo esc_html__( 'Featured Video Caption', 'ultimate-post' ); ?></label>
-			<input id="ultp-add-caption" type="text" name="video-caption" value="<?php echo esc_attr( $caption ); ?>" autocomplete="off"/>
+			<input id="ultp-add-caption" type="text" name="video-caption" value="<?php echo esc_attr( $caption ); ?>" autocomplete="off" />
 		</div>
 		<?php
 	}
@@ -238,14 +241,18 @@ class Builder {
 
 	function metabox_save_video_data( $post_id ) {
 		if ( ! isset( $_POST['video_meta_box_nonce'] ) ) {
-			return; }
+			return;
+		}
 		if ( ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['video_meta_box_nonce'] ) ), 'video_meta_box' ) ) {
-			return; }
+			return;
+		}
 		if ( ! isset( $_POST['feature-video'] ) ) {
-			return; }
+			return;
+		}
 		update_post_meta( $post_id, '__builder_feature_video', sanitize_text_field( $_POST['feature-video'] ) );
 		if ( ! isset( $_POST['video-caption'] ) ) {
-			return; }
+			return;
+		}
 		update_post_meta( $post_id, '__builder_feature_caption', sanitize_text_field( $_POST['video-caption'] ) );
 	}
 
@@ -260,15 +267,19 @@ class Builder {
 
 		$widget_area = wp_get_sidebars_widgets();
 		if ( isset( $widget_area['wp_inactive_widgets'] ) ) {
-			unset( $widget_area['wp_inactive_widgets'] ); }
+			unset( $widget_area['wp_inactive_widgets'] );
+		}
 		if ( isset( $widget_area['array_version'] ) ) {
-			unset( $widget_area['array_version'] ); }
+			unset( $widget_area['array_version'] );
+		}
 		?>
 
-        <input type="hidden" name="postx-type" value="<?php echo esc_attr(isset($_GET['postx_type']) ? sanitize_text_field($_GET['postx_type']) : $p_type); // @codingStandardsIgnoreLine ?>"/>   
+		<input type="hidden" name="postx-type" value="<?php echo esc_attr(isset($_GET['postx_type']) ? sanitize_text_field($_GET['postx_type']) : $p_type); // @codingStandardsIgnoreLine 
+		?>
+		" />
 		<p>
 			<label><?php echo esc_html__( 'Container Width', 'ultimate-post' ); ?></label>
-			<input type="number" style="width:100%" name="container-width" value="<?php echo esc_attr( $width ? $width : 1140 ); ?>"/>
+			<input type="number" style="width:100%" name="container-width" value="<?php echo esc_attr( $width ? $width : 1140 ); ?>" />
 		</p>
 		<p class="postx-meta-sidebar-position">
 			<label><?php echo esc_html__( 'Sidebar', 'ultimate-post' ); ?></label>
@@ -305,9 +316,11 @@ class Builder {
 
 		// For Container and Sidebar Information
 		if ( ! isset( $_POST['container_meta_box_nonce'] ) ) {
-			return; }
+			return;
+		}
 		if ( ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['container_meta_box_nonce'] ) ), 'container_meta_box' ) ) {
-			return; }
+			return;
+		}
 		if ( isset( $_POST['container-width'] ) ) {
 			update_post_meta( $post_id, '__container_width', sanitize_text_field( $_POST['container-width'] ) );
 		}

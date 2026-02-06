@@ -5,6 +5,7 @@
  * @package ULTP\Functions
  * @since v.1.0.0
  */
+
 namespace ULTP;
 
 use ULTP\Includes\Durbin\Xpo;
@@ -13,12 +14,19 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Functions class.
+ *
+ * Provides utility functions for Ultimate Post plugin.
+ *
+ * @package ULTP\Functions
+ * @since 4.0.0
  */
-
 class Functions {
 
 	/**
+	 * Funtion
+	 *
 	 * @since v.3.2.4
+	 *
 	 * Instance of the class.
 	 *
 	 * @var Functions | null
@@ -77,6 +85,8 @@ class Functions {
 	 * Set Link with the Parameters
 	 *
 	 * @since v.1.1.0
+	 * @param string $url .
+	 * @param string $tag .
 	 * @return STRING | URL with Arg
 	 */
 	public function get_premium_link( $url = null, $tag = '' ) {
@@ -93,7 +103,9 @@ class Functions {
 	 * Quick Query
 	 *
 	 * @since v.1.1.0
-	 * @return ARRAY | Query Arg
+	 * @param ARRAY $prams Quick query parameters.
+	 * @param ARRAY $args Query arguments to modify.
+	 * @return ARRAY
 	 */
 	public function get_quick_query( $prams, $args ) {
 		switch ( $prams['queryQuick'] ) {
@@ -250,10 +262,12 @@ class Functions {
 	}
 
 	/**
-	 * Get All Term ID as Array
+	 * Get All Term IDs for a Post in a Taxonomy
 	 *
 	 * @since v.2.4.12
-	 * @return ARRAY | Query Arg
+	 * @param INT|STRING $id Post ID to get terms for.
+	 * @param STRING     $type Taxonomy name (e.g. 'category', 'post_tag').
+	 * @return ARRAY
 	 */
 	public function get_terms_id( $id, $type ) {
 		$data = array();
@@ -267,17 +281,19 @@ class Functions {
 	}
 
 	/**
-	 * Get All Reusable ID
+	 * Get all reusable block IDs referenced in a post's content
 	 *
 	 * @since v.1.1.0
-	 * @return ARRAY | Query Arg
+	 * @param INT|STRING $post_id .
+	 * @return ARRAY
 	 */
 	public function get_reusable_ids( $post_id ) {
 		$reusable_id = array();
 		if ( $post_id ) {
 			$post = get_post( $post_id );
 			if ( isset( $post->post_content ) ) {
-				if ( has_blocks( $post->post_content ) &&
+				if (
+					has_blocks( $post->post_content ) &&
 					strpos( $post->post_content, 'wp:block' ) &&
 					strpos( $post->post_content, '"ref"' ) !== false
 				) {
@@ -294,10 +310,11 @@ class Functions {
 	}
 
 	/**
-	 * get directory file contents
+	 * Safely reads file contents using WordPress Filesystem API
 	 *
 	 * @since v.4.1.8
-	 * @return ARRAY | Query Arg
+	 * @param STRING $path .
+	 * @return STRING|ARRAY.
 	 */
 	public function get_path_file_contents( $path ) {
 		global $wp_filesystem;
@@ -317,10 +334,12 @@ class Functions {
 	}
 
 	/**
-	 * build css for inline printing // used for some builder
+	 * Builds and returns inline CSS for a post and its reusable blocks
 	 *
 	 * @since v.4.1.8
-	 * @return ARRAY | Query Arg
+	 * @param INT|STRING $post_id .
+	 * @param BOOLEAN    $call_common .
+	 * @return STRING|ARRAY.
 	 */
 	public function build_css_for_inline_print( $post_id, $call_common = true ) {
 		if ( $post_id ) {
@@ -366,8 +385,8 @@ class Functions {
 	 * Get Global Plugin Settings
 	 *
 	 * @since v.1.0.0
-	 * @param STRING | Key of the Option
-	 * @return ARRAY | STRING
+	 * @param STRING $key of the Option .
+	 * @return ARRAY|STRING .
 	 */
 	public function get_setting( $key = '' ) {
 		$data = $GLOBALS['ultp_settings'];
@@ -383,8 +402,8 @@ class Functions {
 	 * Set Option Settings
 	 *
 	 * @since v.1.0.0
-	 * @param STRING | Key of the Option (STRING), Value (STRING)
-	 * @return NULL
+	 * @param STRING | $key of the Option (STRING) .
+	 * @param STRING | $val Value (STRING) .
 	 */
 	public function set_setting( $key = '', $val = '' ) {
 		if ( $key != '' ) {
@@ -401,7 +420,13 @@ class Functions {
 	 * Get Image HTML
 	 *
 	 * @since v.1.0.0
-	 * @param  | URL (STRING) | size (STRING) | class (STRING) | alt (STRING)
+	 * @param STRING | $url .
+	 * @param STRING | $size .
+	 * @param STRING | $class .
+	 * @param STRING | $alt .
+	 * @param STRING | $lazy .
+	 * @param ARRAY |  $darkImg .
+	 * @param STRING | $srcset .
 	 * @return STRING
 	 */
 	public function get_image_html( $url = '', $size = 'full', $class = '', $alt = '', $lazy = '', $darkImg = array(), $srcset = '' ) {
@@ -428,7 +453,12 @@ class Functions {
 	 * Get Image HTML
 	 *
 	 * @since v.1.0.0
-	 * @param  | Attach ID (STRING) | size (STRING) | class (STRING) | alt (STRING)
+	 * @param STRING | $attach_id .
+	 * @param STRING | $size .
+	 * @param STRING | $class .
+	 * @param STRING | $alt .
+	 * @param STRING | $srcset .
+	 * @param STRING | $lazy .
 	 * @return STRING
 	 */
 	public function get_image( $attach_id, $size = 'full', $class = '', $alt = '', $srcset = '', $lazy = '' ) {
@@ -447,7 +477,8 @@ class Functions {
 	 * Get Excerpt Text
 	 *
 	 * @since v.1.0.0
-	 * @param  | Post ID (STRING) | Limit (NUMBER)
+	 * @param STRING | $post_id .
+	 * @param NUMBER | $limit .
 	 * @return STRING
 	 */
 	public function excerpt( $post_id, $limit = 55 ) {
@@ -459,7 +490,7 @@ class Functions {
 	 * Builder Attributes
 	 *
 	 * @since v.1.0.0
-	 * @param STRING type
+	 * @param STRING | $type .
 	 * @return STRING
 	 */
 	public function get_builder_attr( $type ) {
@@ -490,6 +521,12 @@ class Functions {
 	}
 
 
+	/**
+	 * Determines if the builder is enabled based on the plugin settings.
+	 *
+	 * @param STRING $builder Optional. The builder name (currently unused).
+	 * @return BOOL True if the builder is enabled, false otherwise.
+	 */
 	public function is_builder( $builder = '' ) {
 		$id = '';
 		if ( ultimate_post()->get_setting( 'ultp_builder' ) != 'false' ) {
@@ -506,7 +543,9 @@ class Functions {
 	 * Get Post Number Depending On Device
 	 *
 	 * @since v.2.5.4
-	 * @param MULTIPLE | Attribute of Posts
+	 * @param MIXED | $preDef .
+	 * @param MIXED | $prev .
+	 * @param MIXED | $current .
 	 * @return STRING
 	 */
 	public function get_post_number( $preDef, $prev, $current ) {
@@ -545,7 +584,6 @@ class Functions {
 	 * Get Post Number Depending On Device
 	 *
 	 * @since v.2.5.4
-	 * @param NULL
 	 * @return STRING | Device Type
 	 */
 	public function isDevice() {
@@ -568,7 +606,7 @@ class Functions {
 	 * Get Raw Value from Objects
 	 *
 	 * @since v.2.5.3
-	 * @param NULL
+	 * @param ARRAY | $attr .
 	 * @return STRING | Device Type
 	 */
 	public function get_value( $attr ) {
@@ -585,7 +623,7 @@ class Functions {
 	 * QueryArgs for Filter
 	 *
 	 * @since v.2.8.9
-	 * @param ARRAY | Attribute of the Query
+	 * @param ARRAY | $attr .
 	 * @return ARRAY
 	 */
 	public function getFilterQueryArgs( $attr ) {
@@ -632,7 +670,7 @@ class Functions {
 	 * Query Builder
 	 *
 	 * @since v.1.0.0
-	 * @param ARRAY | Attribute of the Query
+	 * @param ARRAY | $attr .
 	 * @return ARRAY
 	 */
 	public function get_query( $attr ) {
@@ -672,11 +710,14 @@ class Functions {
 							if ( ! empty( $all_date ) ) {
 								$arg = array();
 								if ( isset( $all_date[0] ) ) {
-									$arg['year'] = $all_date[0]; }
+									$arg['year'] = $all_date[0];
+								}
 								if ( isset( $all_date[1] ) ) {
-									$arg['month'] = $all_date[1]; }
+									$arg['month'] = $all_date[1];
+								}
 								if ( isset( $all_date[2] ) ) {
-									$arg['day'] = $all_date[2]; }
+									$arg['day'] = $all_date[2];
+								}
 								$archive_query['date_query'][] = $arg;
 							}
 						}
@@ -690,8 +731,8 @@ class Functions {
 			$archive_query['paged']          = isset( $attr['paged'] ) ? $attr['paged'] : 1;
 
 			$archive_query['paged'] = ! wp_doing_ajax() && isset( $_GET[ $attr['blockId'] . '_page' ] ) && is_numeric( $_GET[ $attr['blockId'] . '_page' ] ) ?
-			intval( $_GET[ $attr['blockId'] . '_page' ] ) :
-			$archive_query['paged'];
+				intval( $_GET[ $attr['blockId'] . '_page' ] ) :
+				$archive_query['paged'];
 
 			if ( isset( $attr['queryOffset'] ) && $attr['queryOffset'] ) {
 				$offset        = $this->get_offset( $attr['queryOffset'], $archive_query );
@@ -801,11 +842,11 @@ class Functions {
 
 		$paged = isset( $attr['paged'] ) ? $attr['paged'] : 1;
 		$paged = ! wp_doing_ajax() &&
-					isset( $attr['blockId'] ) &&
-					isset( $_GET[ $attr['blockId'] . '_page' ] ) &&
-					is_numeric( $_GET[ $attr['blockId'] . '_page' ] ) ?
-						intval( $_GET[ $attr['blockId'] . '_page' ] ) :
-						$paged;
+			isset( $attr['blockId'] ) &&
+			isset( $_GET[ $attr['blockId'] . '_page' ] ) &&
+			is_numeric( $_GET[ $attr['blockId'] . '_page' ] ) ?
+			intval( $_GET[ $attr['blockId'] . '_page' ] ) :
+			$paged;
 
 		$query_args = array(
 			'posts_per_page' => $query_number,
@@ -816,7 +857,7 @@ class Functions {
 			'post_status'    => 'publish',
 		);
 
-		// For Private Post 'private'
+		// For Private Post 'private'.
 		if ( is_user_logged_in() ) {
 			if ( current_user_can( 'editor' ) || current_user_can( 'administrator' ) ) {
 				$query_args['post_status'] = array( 'publish', 'private' );
@@ -863,7 +904,7 @@ class Functions {
 			}
 		}
 
-		// Include Remove from Version 2.5.4
+		// Include Remove from Version 2.5.4.
 		if ( isset( $attr['queryInclude'] ) && $attr['queryInclude'] ) {
 			$_include = explode( ',', $attr['queryInclude'] );
 			if ( is_array( $_include ) && count( $_include ) ) {
@@ -931,7 +972,7 @@ class Functions {
 				$query_args['post__not_in'] = isset( $query_args['post__not_in'] ) ? array_merge( $query_args['post__not_in'], $unique_ID[ $attr['queryUnique'] ] ) : $unique_ID[ $attr['queryUnique'] ];
 			}
 		}
-		// exclude current post from Post blocks // v.2.9.6
+		// exclude current post from Post blocks // v.2.9.6.
 		if ( is_single() && get_the_ID() ) {
 			$query_args['post__not_in'] = isset( $query_args['post__not_in'] ) ? array_merge( $query_args['post__not_in'], array( get_the_ID() ) ) : array( get_the_ID() );
 		}
@@ -991,8 +1032,8 @@ class Functions {
 			}
 		}
 
-		// Advanced Filter Select Dropdown Default value
-		// only on initial page load
+		// Advanced Filter Select Dropdown Default value.
+		// only on initial page load.
 		if (
 			! wp_doing_ajax() &&
 			isset( $attr['advFilterEnable'] ) &&
@@ -1002,8 +1043,8 @@ class Functions {
 		) {
 			$tax_query = array(
 				'relation' =>
-					isset( $attr['advRelation'] ) &&
-						( 'AND' === $attr['advRelation'] || 'OR' === $attr['advRelation'] )
+				isset( $attr['advRelation'] ) &&
+					( 'AND' === $attr['advRelation'] || 'OR' === $attr['advRelation'] )
 					? $attr['advRelation'] : 'AND',
 			);
 			$is_valid  = false;
@@ -1031,7 +1072,7 @@ class Functions {
 					$post_type = sanitize_key( $attr['queryType'] );
 					$slug      = sanitize_key( $term[1] );
 
-					// These are not custom post type
+					// These are not custom post type.
 					if ( in_array( $post_type, array( 'posts', 'customPosts' ), true ) ) {
 						continue;
 					}
@@ -1078,7 +1119,8 @@ class Functions {
 	 * Get Page Offset
 	 *
 	 * @since v.1.0.0
-	 * @param | Offset Number(NUMBER) | Query Arg(ARRAY)
+	 * @param NUMBER | $queryOffset Offset .
+	 * @param ARRAY |  $query_args Query .
 	 * @return ARRAY
 	 */
 	function get_offset( $queryOffset, $query_args ) {
@@ -1103,7 +1145,8 @@ class Functions {
 	 * Get Page Number
 	 *
 	 * @since v.1.0.0
-	 * @param | Attribute of the Query(ARRAY) | Post Number(ARRAY)
+	 * @param array $attr Attribute of the Query.
+	 * @param int   $post_number Post Number.
 	 * @return ARRAY
 	 */
 	public function get_page_number( $attr, $post_number ) {
@@ -1124,7 +1167,6 @@ class Functions {
 	 * Get Image Size
 	 *
 	 * @since v.1.0.0
-	 * @param | Attribute of the Query(ARRAY) | Post Number(ARRAY)
 	 * @return ARRAY
 	 */
 	public function get_image_size() {
@@ -1167,7 +1209,6 @@ class Functions {
 	 * Get All PostType Registered
 	 *
 	 * @since v.1.0.0
-	 * @param | Attribute of the Query(ARRAY) | Post Number(ARRAY)
 	 * @return ARRAY
 	 */
 	public function get_post_type() {
@@ -1180,8 +1221,11 @@ class Functions {
 	 * Get Pagination Url
 	 *
 	 * @since v.2.8.9
-	 * @param | pageNo (NUMBER) | baseUrl (STRING)
-	 * @return STRING
+	 *
+	 * @param NUMBER $pageNo  The page number for pagination.
+	 * @param STRING $baseUrl The base URL to append the pagination parameter to.
+	 *
+	 * @return STRING The generated pagination URL.
 	 */
 	public function generatePaginationUrl( $pageNo, $baseUrl ) {
 		if ( $baseUrl ) {
@@ -1195,7 +1239,12 @@ class Functions {
 	 * Get Pagination HTML
 	 *
 	 * @since v.1.0.0
-	 * @param | pages (NUMBER) | Pagination Nav (STRING) | Pagination Text |
+	 * @param INT    $pages           Number of pages.
+	 * @param STRING $paginationNav   Pagination navigation type.
+	 * @param STRING $paginationText  Pagination text.
+	 * @param BOOL   $paginationAjax  Whether to use AJAX pagination.
+	 * @param STRING $baseUrl         Base URL for pagination links.
+	 * @param STRING $blockId         Block ID for pagination.
 	 * @return STRING
 	 */
 	public function pagination( $pages = '', $paginationNav = '', $paginationText = '', $paginationAjax = true, $baseUrl = '', $blockId = '' ) {
@@ -1205,9 +1254,9 @@ class Functions {
 		$paged     = $paged ? $paged : 1;
 
 		$paged = ! wp_doing_ajax() &&
-				isset( $_GET[ $blockId . '_page' ] ) &&
-				is_numeric( $_GET[ $blockId . '_page' ] ) ?
-					intval( $_GET[ $blockId . '_page' ] ) : $paged;
+			isset( $_GET[ $blockId . '_page' ] ) &&
+			is_numeric( $_GET[ $blockId . '_page' ] ) ?
+			intval( $_GET[ $blockId . '_page' ] ) : $paged;
 
 		if ( $pages == '' ) {
 			global $wp_query;
@@ -1225,8 +1274,8 @@ class Functions {
 		$next_text = isset( $paginationText[1] ) ? esc_html( $paginationText[1] ) : __( 'Next', 'ultimate-post' );
 
 		if ( 1 != $pages ) {
-			$html            .= '<ul class="ultp-pagination">';
-				$display_none = 'style="display:none"';
+			$html        .= '<ul class="ultp-pagination">';
+			$display_none = 'style="display:none"';
 			if ( $paged > 1 || $paginationAjax && $pages > 1 ) {
 				$html .= '<li class="ultp-prev-page-numbers" ' . ( $paged == 1 ? $display_none : '' ) . '><a href="' . $this->generatePaginationUrl( $paged - 1, $baseUrl ) . '">' . ultimate_post()->get_svg_icon( 'leftAngle2' ) . ' ' . ( $paginationNav == 'textArrow' ? $prev_text : '' ) . '</a></li>';
 			}
@@ -1262,13 +1311,14 @@ class Functions {
 	 * Svg Icon Source
 	 *
 	 * @since v.1.0.0
-	 * @param string $ultp_icons
-	 * @return string
+	 * @param STRING $ultp_icons Name of the SVG icon file (without extension).
+	 * @return STRING
 	 */
 	public function get_svg_icon( $ultp_icons = '' ) {
 		$svg = '';
 		if ( $ultp_icons ) {
-			$svg = $this->get_path_file_contents( ULTP_PATH . 'assets/img/iconpack/' . $ultp_icons . '.svg' );
+			$icon = $this->svg_icon_compatibility($ultp_icons);
+			$svg = $this->get_path_file_contents( ULTP_PATH . 'assets/img/iconpack/' . $icon . '.svg' );
 		}
 		return $svg;
 	}
@@ -1277,7 +1327,7 @@ class Functions {
 	 * Get Taxonomy Lists
 	 *
 	 * @since v.1.0.0
-	 * @param STRING | Taxonomy Slug
+	 * @param STRING|ARRAY $prams Taxonomy slug or arguments array.
 	 * @return ARRAY
 	 */
 	public function taxonomy( $prams = 'category' ) {
@@ -1302,7 +1352,8 @@ class Functions {
 	 * Get Taxonomy Lists
 	 *
 	 * @since v.2.9.0
-	 * @param STRING | Taxonomy Slug
+	 * @param STRING $tax_slug Taxonomy slug.
+	 * @param INT    $number   Number of terms to retrieve.
 	 * @return ARRAY
 	 */
 	public function builder_preview( $tax_slug, $number ) {
@@ -1327,7 +1378,7 @@ class Functions {
 	 * Get Taxonomy Data Lists
 	 *
 	 * @since v.1.0.0
-	 * @param OBJECT | Taxonomy Object
+	 * @param object $terms Taxonomy Object.
 	 * @return ARRAY
 	 */
 	public function get_tax_data( $terms ) {
@@ -1487,26 +1538,25 @@ class Functions {
 
 
 	/**
-	 * Get Next Previous HTML
+	 * Get Next Previous HTML.
 	 *
 	 * @since v.1.0.0
-	 * @param OBJECT | Taxonomy Object
 	 * @return STRING
 	 */
 	public function next_prev() {
-		$html              = '';
-		$html             .= '<ul>';
-			$html         .= '<li>';
-				$html     .= '<a class="ultp-prev-action ultp-disable" href="#">';
-					$html .= ultimate_post()->get_svg_icon( 'leftAngle2' ) . '<span class="screen-reader-text">' . esc_html__( 'Previous', 'ultimate-post' ) . '</span>';
-				$html     .= '</a>';
-			$html         .= '</li>';
-			$html         .= '<li>';
-				$html     .= '<a class="ultp-next-action">';
-					$html .= ultimate_post()->get_svg_icon( 'rightAngle2' ) . '<span class="screen-reader-text">' . esc_html__( 'Next', 'ultimate-post' ) . '</span>';
-				$html     .= '</a>';
-			$html         .= '</li>';
-		$html             .= '</ul>';
+		$html  = '';
+		$html .= '<ul>';
+		$html .= '<li>';
+		$html .= '<a class="ultp-prev-action ultp-disable" href="#">';
+		$html .= ultimate_post()->get_svg_icon( 'leftAngle2' ) . '<span class="screen-reader-text">' . esc_html__( 'Previous', 'ultimate-post' ) . '</span>';
+		$html .= '</a>';
+		$html .= '</li>';
+		$html .= '<li>';
+		$html .= '<a class="ultp-next-action">';
+		$html .= ultimate_post()->get_svg_icon( 'rightAngle2' ) . '<span class="screen-reader-text">' . esc_html__( 'Next', 'ultimate-post' ) . '</span>';
+		$html .= '</a>';
+		$html .= '</li>';
+		$html .= '</ul>';
 		return $html;
 	}
 
@@ -1515,14 +1565,13 @@ class Functions {
 	 * Get Loading HTML
 	 *
 	 * @since v.1.0.0
-	 * @param NULL
 	 * @return STRING
 	 */
 	public function postx_loading() {
 		$html  = '';
 		$style = ultimate_post()->get_setting( 'preloader_style' );
 		if ( $style == 'style2' ) {
-			$html .= '<div class="ultp-loading-spinner" style="width:100%;height:100%"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>';// ultp-block-items-wrap
+			$html .= '<div class="ultp-loading-spinner" style="width:100%;height:100%"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>'; // ultp-block-items-wrap
 		} else {
 			$html .= '<div class="ultp-loading-blocks" style="width:100%;height:100%;"><div style="left: 0;top: 0;animation-delay:0s;"></div><div style="left: 21px;top: 0;animation-delay:0.125s;"></div><div style="left: 42px;top: 0;animation-delay:0.25s;"></div><div style="left: 0;top: 21px;animation-delay:0.875s;"></div><div style="left: 42px;top: 21px;animation-delay:0.375s;"></div><div style="left: 0;top: 42px;animation-delay:0.75s;"></div><div style="left: 42px;top: 42px;animation-delay:0.625s;"></div><div style="left: 21px;top: 42px;animation-delay:0.5s;"></div></div>';
 		}
@@ -1534,13 +1583,17 @@ class Functions {
 	 * Get Filter HTML
 	 *
 	 * @since v.1.0.0
-	 * @param | Filter Text (STRING) | Filter Type (STRING) | Filter Value (ARRAY) | Filter Cat (ARRAY) | Filter Tag (ARRAY) |
+	 * @param STRING       $filterText        Filter Text.
+	 * @param STRING       $filterType        Filter Type.
+	 * @param ARRAY|STRING $filterValue Filter Value.
+	 * @param STRING       $filterMobileText  Filter Mobile Text.
+	 * @param BOOL         $filterMobile        Enable Filter Mobile.
 	 * @return STRING
 	 */
 	public function filter_html( $filterText = '', $filterType = '', $filterValue = '[]', $filterMobileText = '...', $filterMobile = true ) {
-		$html    = '';
-		$html   .= '<ul ' . ( $filterMobile ? 'class="ultp-flex-menu"' : '' ) . ' data-name="' . ( $filterMobileText ? $filterMobileText : '&nbsp;' ) . '">';
-			$cat = $this->taxonomy( $filterType );
+		$html  = '';
+		$html .= '<ul ' . ( $filterMobile ? 'class="ultp-flex-menu"' : '' ) . ' data-name="' . ( $filterMobileText ? $filterMobileText : '&nbsp;' ) . '">';
+		$cat   = $this->taxonomy( $filterType );
 		if ( $filterText ) {
 			$html .= '<li class="filter-item"><a class="filter-active" data-taxonomy="" href="#">' . $filterText . '</a></li>';
 		}
@@ -1569,16 +1622,24 @@ class Functions {
 		return Xpo::is_lc_active();
 	}
 
+
+	/**
+	 * Check if a pro feature is visible based on license expiration date.
+	 *
+	 * @since v.2.4.2
+	 * @param STRING $date Date to compare with license expiration.
+	 * @return BOOL True if the pro feature is visible, false otherwise.
+	 */
 	public function is_pro_feature_visible( $date ) {
 		if ( function_exists( 'ultimate_post_pro' ) ) {
-			$license_data = get_option('edd_ultp_license_data');
-			if ( isset($license_data['expires']) ) {
+			$license_data = get_option( 'edd_ultp_license_data' );
+			if ( isset( $license_data['expires'] ) ) {
 				$expires = $license_data['expires'];
 				if ( 'lifetime' === $expires ) {
 					return true;
 				}
 				return strtotime( $date ) < strtotime( $expires );
-			} 
+			}
 			return true;
 		}
 		return false;
@@ -1588,12 +1649,15 @@ class Functions {
 	 * Get SEO Meta
 	 *
 	 * @since v.2.4.3
-	 * @param NUMBER | Post ID
-	 * @return STRING | SEO Meta Description or Excerpt
+	 * @param INT $post_id Post ID.
+	 * @param INT $show_seo_meta Show SEO meta flag.
+	 * @param INT $show_full_excerpt Show full excerpt flag.
+	 * @param INT $excerpt_limit Excerpt word limit.
+	 * @return STRING SEO Meta Description or Excerpt.
 	 */
-	public function get_excerpt( $post_id = 0, $showSeoMeta = 0, $showFullExcerpt = 0, $excerptLimit = 55 ) {
+	public function get_excerpt( $post_id = 0, $show_seo_meta = 0, $show_full_excerpt = 0, $excerpt_limit = 55 ) {
 		$html = '';
-		if ( $showSeoMeta ) {
+		if ( $show_seo_meta ) {
 			$str = '';
 			if ( function_exists( 'ultimate_post_pro' ) ) {
 				if ( ultimate_post()->get_setting( 'ultp_yoast' ) == 'true' ) {
@@ -1608,15 +1672,30 @@ class Functions {
 					$str = method_exists( ultimate_post_pro(), 'get_squirrly_meta' ) ? ultimate_post_pro()->get_squirrly_meta( $post_id ) : '';
 				}
 			}
-			$html = $str ? $str : ultimate_post()->excerpt( $post_id, $excerptLimit );
-		} elseif ( $showFullExcerpt == 0 ) {
-				$html = ultimate_post()->excerpt( $post_id, $excerptLimit );
+			$html = $str ? $str : ultimate_post()->excerpt( $post_id, $excerpt_limit );
+		} elseif ( $show_full_excerpt == 0 ) {
+			$html = ultimate_post()->excerpt( $post_id, $excerpt_limit );
 		} else {
 			$html = get_the_excerpt();
 		}
 		return $html;
 	}
 
+	/**
+	 * Get embedded video HTML.
+	 *
+	 * @since v.1.0.0
+	 * @param STRING         $url Video URL.
+	 * @param BOOL           $autoPlay Whether to autoplay the video.
+	 * @param BOOL           $loop Whether to loop the video.
+	 * @param BOOL           $mute Whether to mute the video.
+	 * @param BOOL           $playback Whether to show playback controls.
+	 * @param STRING         $preload Preload attribute value.
+	 * @param ARRAY | string $poster Poster image for the video.
+	 * @param BOOL           $inline Whether to play inline.
+	 * @param ARRAY | string $size Size for oEmbed.
+	 * @return STRING | false Video embed HTML or false on failure.
+	 */
 	public function get_embeded_video( $url, $autoPlay, $loop, $mute, $playback, $preload, $poster, $inline, $size ) {
 		$vidAutoPlay = $vidloop = $vidloop = $vidmute = $vidplayback = $vidPoster = $vidInline = '';
 
@@ -1672,7 +1751,6 @@ class Functions {
 	 * Get Public taxonomy Lists
 	 *
 	 * @since v.2.7.0
-	 * @param NULL
 	 * @return ARRAY | Taxonomy Lists as array
 	 */
 	public function get_taxonomy_list() {
@@ -1684,8 +1762,9 @@ class Functions {
 	 * Content Print
 	 *
 	 * @since v.2.7.0
-	 * @param NUMBER | Post ID
-	 * @return STRING | Content of the Post
+	 * @param int    $post_id      Post ID.
+	 * @param string $builder_type Builder type.
+	 * @return void | Content of the Post
 	 */
 	public function get_post_content( $post_id, $builder_type = '' ) {
 		$content_post = get_post( $post_id );
@@ -1705,10 +1784,15 @@ class Functions {
 	}
 
 	/**
-	 * String Part finder inside array
+	 * String Part finder inside array.
 	 *
 	 * @since v.2.7.0 updated 4.1.12
-	 * @return ARRAY | String Part
+	 *
+	 * @param STRING $part The part of the string to search for.
+	 * @param ARRAY  $data The array to search within.
+	 * @param STRING $toR  Return type: 'bool', 'value', or default (array).
+	 * @return MIXED Returns true/false, value, or array depending on $toR.
+	 * @since v.2.7.0 updated 4.1.12
 	 */
 	public function in_array_part( $part, $data, $toR = '' ) {
 		$res = array();
@@ -1734,8 +1818,9 @@ class Functions {
 	 * Builder Conditions
 	 *
 	 * @since v.2.7.0 updated 4.1.12
-	 * @param STRING | Type of Return
-	 * @return MIXED || ID or Path
+	 * @param STRING $type          Type of return value.
+	 * @param MIXED  $cus_condition Custom conditions array or value.
+	 * @return MIXED                ID or Path.
 	 */
 	public function builder_check_conditions( $type = 'return', $cus_condition = '' ) {
 		$page_id    = '';
@@ -1768,7 +1853,7 @@ class Functions {
 				}
 			}
 		} else {
-			// 404 page
+			// 404 page .
 			if ( ! empty( $conditions['404'] ) && is_404() ) {
 				foreach ( $conditions['404'] as $key => $val ) {
 					if ( 'publish' == get_post_status( $key ) ) {
@@ -1776,7 +1861,7 @@ class Functions {
 					}
 				}
 			}
-			// Singular or Front Page
+			// Singular or Front Page .
 			elseif (
 				(
 					! empty( $conditions['singular'] ) ||
@@ -1790,7 +1875,7 @@ class Functions {
 			) {
 				$obj            = get_queried_object();
 				$queried_is_obj = is_object( $obj );
-				// front page only
+				// front page only .
 				if (
 					( is_front_page() && is_home() ) ||
 					( is_home() && ! $queried_is_obj ) ||
@@ -1812,7 +1897,7 @@ class Functions {
 									$page_id = $key;
 								}
 							}
-							// Default Front / Home page Header Footer Compatibility
+							// Default Front / Home page Header Footer Compatibility .
 							elseif ( is_array( $val ) && 'publish' == get_post_status( $key ) && ( $type == 'return_header' || $type == 'return_footer' ) ) {
 								$base_include     = 'include/singular/' . $obj->post_type;
 								$base_exclude     = 'exclude/singular/' . $obj->post_type;
@@ -1832,11 +1917,11 @@ class Functions {
 						}
 					}
 				}
-				// Singular page
+				// Singular page .
 				elseif ( ! empty( $conditions['singular'] ) ) {
 					foreach ( $conditions['singular'] as $key => $val ) {
 						if ( 'publish' == get_post_status( $key ) ) {
-							// All Post Type                -----Prority 1
+							// All Post Type.                -----Prority 1 .
 							if ( $queried_is_obj ) {
 								if ( in_array( 'include/singular/' . $obj->post_type, $val ) ) {
 									$page_id = $key;
@@ -1895,7 +1980,7 @@ class Functions {
 								}
 							}
 
-							// Posts by author              -----Prority 9
+							// Posts by author              -----Prority 9 .
 							if ( in_array( 'include/singular/post_by_author', $val ) ) {
 								$page_id = $key;
 							} elseif ( in_array( 'exclude/singular/post_by_author', $val ) ) {
@@ -1907,7 +1992,7 @@ class Functions {
 								} elseif ( in_array( 'exclude/singular/post_by_author/' . $obj->post_author, $val ) ) {
 									$page_id = '';
 								}
-								// Post Type with specific id  -----Prority 10
+								// Post Type with specific id  -----Prority 10 .
 								if ( in_array( 'include/singular/' . $obj->post_type . '/' . $obj->ID, $val ) ) {
 									$page_id = $key;
 								} elseif ( in_array( 'exclude/singular/' . $obj->post_type . '/' . $obj->ID, $val ) ) {
@@ -1919,9 +2004,9 @@ class Functions {
 				}
 			}
 
-			// Archive and Search Page
+			// Archive and Search Page .
 			elseif ( ! empty( $conditions['archive'] ) ) {
-				// Search Page
+				// Search Page .
 				if ( is_search() ) {
 					foreach ( $conditions['archive'] as $key => $val ) {
 						if ( 'publish' == get_post_status( $key ) ) {
@@ -1933,7 +2018,7 @@ class Functions {
 						}
 					}
 				}
-				// Archive Page
+				// Archive Page .
 				elseif ( is_archive() ) {
 					$is_cat    = is_category();
 					$is_tag    = is_tag();
@@ -1944,28 +2029,28 @@ class Functions {
 
 					foreach ( $conditions['archive'] as $key => $val ) {
 						if ( 'publish' == get_post_status( $key ) ) {
-							// This section is for all archive page
+							// This section is for all archive page .
 							if ( in_array( 'include/archive', $val ) ) {
 								$page_id = $key;
 							} elseif ( in_array( 'exclude/archive', $val ) ) {
 								$page_id = '';
 							}
-							// For Category
+							// For Category .
 							if ( $is_cat ) {
-								// all category
+								// all category .
 								if ( in_array( 'include/archive/category', $val ) ) {
 									$page_id = $key;
 								} elseif ( in_array( 'exclude/archive/category', $val ) ) {
 									$page_id = '';
 								}
-								// specific category
+								// specific category .
 								if ( in_array( 'include/archive/category/' . $taxonomy->term_id, $val ) ) {
 									$page_id = $key;
 								} elseif ( in_array( 'exclude/archive/category/' . $taxonomy->term_id, $val ) ) {
 									$page_id = '';
 								}
 
-								// any child of category
+								// any child of category .
 								if ( in_array( 'include/archive/any_child_of_category', $val ) ) {
 									$page_id = $key;
 								} elseif ( in_array( 'exclude/archive/any_child_of_category', $val ) ) {
@@ -1984,20 +2069,20 @@ class Functions {
 									}
 								}
 
-								// all child of category
+								// all child of category .
 								if ( in_array( 'include/archive/child_of_category', $val ) ) {
 									$page_id = $key;
 								} elseif ( in_array( 'exclude/archive/child_of_category', $val ) ) {
 									$page_id = '';
 								}
-								// specific child of category
+								// specific child of category .
 								if ( in_array( 'include/archive/child_of_category/' . $taxonomy->parent, $val ) ) {
 									$page_id = $key;
 								} elseif ( in_array( 'exclude/archive/child_of_category/' . $taxonomy->parent, $val ) ) {
 									$page_id = '';
 								}
 							}
-							// For Tag
+							// For Tag .
 							elseif ( $is_tag ) {
 								if ( in_array( 'include/archive/post_tag', $val ) ) {
 									$page_id = $key;
@@ -2010,7 +2095,7 @@ class Functions {
 									$page_id = '';
 								}
 							}
-							// Other taxonomy
+							// Other taxonomy .
 							elseif ( $is_tax ) {
 								if ( in_array( 'include/archive/' . $taxonomy->taxonomy, $val ) ) {
 									$page_id = $key;
@@ -2054,7 +2139,7 @@ class Functions {
 									$page_id = '';
 								}
 							}
-							// For Date
+							// For Date.
 							elseif ( $is_date ) {
 								if ( in_array( 'include/archive/date', $val ) ) {
 									$page_id = $key;
@@ -2062,7 +2147,7 @@ class Functions {
 									$page_id = '';
 								}
 							}
-							// For Author
+							// For Author.
 							elseif ( $is_author ) {
 								if ( in_array( 'include/archive/author', $val ) ) {
 									$page_id = $key;
@@ -2088,6 +2173,7 @@ class Functions {
 	 * Get Date Default Format
 	 *
 	 * @since v.2.7.2
+	 * @param STRING $format Format type.
 	 * @return ARRAY | Default Data
 	 */
 	public function get_format( $format ) {
@@ -2104,7 +2190,6 @@ class Functions {
 	 * Common Frontend and Backend CSS and JS Scripts
 	 *
 	 * @since v.1.0.0
-	 * @return NULL
 	 */
 	public function register_scripts_common() {
 		if ( ! ( isset( $GLOBALS['wp_scripts'] ) && isset( $GLOBALS['wp_scripts']->registered ) && isset( $GLOBALS['wp_scripts']->registered['ultp-script'] ) ) ) {
@@ -2125,11 +2210,12 @@ class Functions {
 			);
 		}
 	}
+
 	/**
 	 * Get Dark Light Mode
 	 *
 	 * @since 4.0.0
-	 * @return string
+	 * @return STRING | Dark Light Mode .
 	 */
 	public function get_dl_mode() {
 		$data = get_option( 'postx_global', array() );
@@ -2144,6 +2230,7 @@ class Functions {
 	 * Get Page Post Id ( Kadence element )
 	 *
 	 * @since v.2.8.9
+	 * @param STRING|INT $blockId Block ID to search for.
 	 * @return NULL
 	 */
 	public function get_page_post_id( $blockId ) {
@@ -2169,7 +2256,7 @@ class Functions {
 	 * Get no Result found html
 	 *
 	 * @since v.2.9.0
-	 * @param STRING | No result found text
+	 * @param STRING $text No result found text.
 	 * @return STRING | Taxonomy Lists as array
 	 */
 	public function get_no_result_found_html( $text ) {
@@ -2180,7 +2267,8 @@ class Functions {
 	 * Get all Saved Templates Lists
 	 *
 	 * @since v.2.9.9
-	 * @param STRING | No result found text
+	 * @param STRING $post_type Post type to retrieve.
+	 * @param STRING $empty     Empty value for the select field.
 	 * @return STRING | Taxonomy Lists as array
 	 */
 	public function get_all_lists( $post_type = 'post', $empty = '' ) {
@@ -2204,7 +2292,7 @@ class Functions {
 	 * Get ID from the Youtube URL
 	 *
 	 * @since v.3.1.7
-	 * @param STRING | No result found text
+	 * @param STRING $url The Youtube URL .
 	 * @return STRING | Taxonomy Lists as array
 	 */
 	public function get_youtube_id( $url = '' ) {
@@ -2223,8 +2311,8 @@ class Functions {
 	 * Inspired By WordPress Core get_option
 	 *
 	 * @since v.3.1.6
-	 * @param string  $option Option Name.
-	 * @param boolean $default_value option default value.
+	 * @param STRING  $option Option Name.
+	 * @param BOOLEAN $default_value option default value.
 	 * @return mixed
 	 */
 	public function get_option_without_cache( $option, $default_value = false ) {
@@ -2256,8 +2344,8 @@ class Functions {
 	 * Inspired By WordPress Core get_transient
 	 *
 	 * @since v.3.1.6
-	 * @param string $transient Transient Name.
-	 * @return mixed
+	 * @param STRING $transient Transient Name.
+	 * @return  MIXED
 	 */
 	public function get_transient_without_cache( $transient ) {
 		$transient_option  = '_transient_' . $transient;
@@ -2282,10 +2370,10 @@ class Functions {
 	 * Inspired By WordPress Core set_transient
 	 *
 	 * @since v.3.1.6
-	 * @param string  $transient Transient Name.
-	 * @param mixed   $value Transient Value.
-	 * @param integer $expiration Time until expiration in seconds.
-	 * @return bool
+	 * @param STRING  $transient Transient Name.
+	 * @param MIXED   $value Transient Value.
+	 * @param INTEGER $expiration Time until expiration in seconds.
+	 * @return BOOL
 	 */
 	public function set_transient_without_cache( $transient, $value, $expiration = 0 ) {
 		$expiration = (int) $expiration;
@@ -2333,10 +2421,10 @@ class Functions {
 	 * Inspired By WordPress Core set_transient
 	 *
 	 * @since v.3.1.6
-	 * @param string $option option name.
-	 * @param string $value option value.
-	 * @param string $autoload whether to load WordPress startup.
-	 * @return bool
+	 * @param STRING $option option name.
+	 * @param STRING $value option value.
+	 * @param STRING $autoload whether to load WordPress startup.
+	 * @return BOOL
 	 */
 	public function add_option_without_cache( $option, $value = '', $autoload = 'yes' ) {
 		global $wpdb;
@@ -2377,12 +2465,12 @@ class Functions {
 	}
 
 	/**
-	 * permission_check_for_restapi
+	 * Permission_check_for_restapi
 	 *
 	 * @since v.3.2.4
-	 * @param $post_id string/bool
-	 * @param $cap string
-	 * @return bool
+	 * @param STRING/Bool $post_id .
+	 * @param STRING      $cap STRING .
+	 * @return BOOL
 	 */
 	public function permission_check_for_restapi( $post_id = false, $cap = '' ) {
 		$cap       = $cap ? $cap : 'edit_others_posts';
@@ -2397,7 +2485,7 @@ class Functions {
 	/**
 	 * Sanitize params
 	 *
-	 * @param $params
+	 * @param MIXED $params Parameters to sanitize.
 	 * @return array|bool|mixed|string
 	 * @since v.4.0.0
 	 */
@@ -2405,7 +2493,7 @@ class Functions {
 		if ( is_array( $params ) ) {
 			return array_map( array( $this, 'ultp_rest_sanitize_params' ), $params );
 		} elseif ( is_bool( $params ) ) {
-				return rest_sanitize_boolean( $params );
+			return rest_sanitize_boolean( $params );
 		} elseif ( is_object( $params ) ) {
 			return $params;
 		} else {
@@ -2416,13 +2504,13 @@ class Functions {
 	/**
 	 * Get Adv Filter Data Attributes
 	 *
-	 * @param array|null $attr
-	 * @param array|null $filter_attributes
+	 * @param ARRAY|NULL $attr .
+	 * @param ARRAY|NULL $filter_attributes .
 	 * @return string
 	 * @since v.3.2.5
 	 */
 	public function get_adv_data_attrs( $attr, $filter_attributes = null ) {
-		// Adv Filter Integration
+		// Adv Filter Integration.
 		$adv_filter_dataset = array();
 
 		if ( $filter_attributes ) {
@@ -2483,9 +2571,9 @@ class Functions {
 	/**
 	 * Custom Text kses
 	 *
-	 * @param $params
-	 * @return array|bool|mixed|string
 	 * @since v.4.0.2
+	 * @param MIXED $extras .
+	 * @return ARRAY|BOOL|MIXED|STRING
 	 */
 	public function ultp_allowed_html_tags( $extras = array() ) {
 		$allowed = array(
@@ -2522,8 +2610,9 @@ class Functions {
 	/**
 	 * Allowed Block Tags
 	 *
-	 * @return array
 	 * @since v.4.0.2
+	 * @param STRING $search Optional. Tag name to check.
+	 * @return ARRAY|BOOL Returns array of allowed tags or bool if $search is provided.
 	 */
 	public function ultp_allowed_block_tags( $search = '' ) {
 		$array_lists = array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'p', 'div', 'section', 'article' );
@@ -2535,8 +2624,8 @@ class Functions {
 	 *
 	 * @since v.4.0.2
 	 *
-	 * @param array $datasets
-	 * @return string
+	 * @param ARRAY $datasets .
+	 * @return STRING
 	 */
 	public function get_formatted_datasets( &$datasets ) {
 		$res = '';
@@ -2547,19 +2636,22 @@ class Functions {
 	}
 
 	/**
-	 * Sanitizes a attributes after running necessary checks
+	 * Sanitizes attributes after running necessary checks
 	 *
 	 * @since v.4.1.0
 	 *
-	 * @param array $datasets
-	 * @return string
+	 * @param ARRAY         $attr              The attributes array to sanitize.
+	 * @param STRING        $key               The key to check in the attributes array.
+	 * @param callable|null $sanitize_callback Callback function to sanitize the value.
+	 * @param MIXED         $def_value         Default value to return if key is not set.
+	 * @return MIXED               Sanitized value or default value.
 	 */
 	public function sanitize_attr( &$attr, $key, $sanitize_callback = null, $def_value = '' ) {
 		return isset( $attr[ $key ] ) && $attr[ $key ] ?
 			(
 				$sanitize_callback ?
-					$sanitize_callback( $attr[ $key ] ) :
-					$attr[ $key ]
+				$sanitize_callback( $attr[ $key ] ) :
+				$attr[ $key ]
 			)
 			: $def_value;
 	}
@@ -2569,7 +2661,8 @@ class Functions {
 	 *
 	 * @since v.4.1.1
 	 *
-	 * @return boolean
+	 * @param ARRAY $attr The attributes to check for dynamic content.
+	 * @return BOOLEAN
 	 */
 	public function is_dc_active( &$attr ) {
 		if ( class_exists( '\ULTP\DCService' ) ) {
@@ -2584,10 +2677,10 @@ class Functions {
 	 * if it exists.
 	 *
 	 * @since v.4.1.16
-	 * @param string $post_type
-	 * @param string $slug
 	 *
-	 * @return string|null
+	 * @param STRING $post_type  The post type.
+	 * @param STRING $slug       The slug.
+	 * @return STRING|NULL       The taxonomy name or null if not found.
 	 */
 	public function get_taxonomy_by_term_slug( $post_type, $slug ) {
 		$taxonomies = get_object_taxonomies( $post_type );
@@ -2600,5 +2693,247 @@ class Functions {
 		}
 
 		return null;
+	}
+	/**
+	 * Resolve Icon Alias
+	 *
+	 * @since v.4.0.0
+	 * @param STRING $icon_name The icon name or alias to resolve.
+	 * @return STRING|FALSE Returns the resolved icon name or false if no alias found.
+	 */
+	public function svg_icon_compatibility( $icon_name = '' ) {
+		if ( empty( $icon_name ) ) {
+			return 'warning_triangle_solid';
+		}
+		// Get icon aliases mapping
+		$icon_aliases = array(
+			// Arrow aliases
+			'angle_bottom_left_line' => 'arrow_down_bottom_left_solid',
+			'angle_bottom_right_line' => 'arrow_down_bottom_right_solid',
+			'angle_top_left_line' => 'arrow_up_top_left_solid',
+			'angle_top_right_line' => 'arrow_up_top_right_solid',
+			'rightFillAngle' => 'right_triangle_angle_play_arrow_forward_solid',
+			'leftAngle2' => 'arrow_left_previous_backward_chevron_line',
+			'rightAngle2' => 'arrow_right_next_forward_chevron_line',
+			'collapse_bottom_line' => 'arrow_down_dropdown_maximize_chevron_line',
+			'arrowUp2' => 'arrow_up_dropdown_minimize_chevron_line',
+			'longArrowUp2' => 'long_arrow_up_top_increase_solid',
+			
+			// Circle arrow aliases
+			'arrow_left_circle_line' => 'arrow_left_backward_circle_line',
+			'arrow_bottom_circle_line' => 'arrow_down_bottom_downward_circle_line',
+			'arrow_right_circle_line' => 'arrow_right_forward_circle_line',
+			'arrow_top_circle_line' => 'arrow_up_top_upward_circle_line',
+			
+			// Close/Cross aliases
+			'close_circle_line' => 'cross_close_x_minimize_circle_line',
+			'close_line' => 'cross_x_close_minimize_line',
+			
+			// Direction aliases
+			'arrow_down_line' => 'arrow_down_bottom_downward_line',
+			'leftArrowLg' => 'arrow_left_backward_line',
+			'rightArrowLg' => 'arrow_left_forward_line',
+			'arrow_up_line' => 'long_arrow_up_top_increase_line',
+			
+			// Solid direction aliases
+			'down_solid' => 'arrow_down_bottom_downward_circle_solid',
+			'right_solid' => 'arrow_right_forward_circle_solid',
+			'left_solid' => 'arrow_left_backward_circle_solid',
+			'up_solid' => 'arrow_up_top_upward_circle_solid',
+			
+			// Move aliases
+			'bottom_right_line' => 'arrow_move_up_right_line',
+			'bottom_left_line' => 'arrow_move_up_left_line',
+			'top_left_angle_line' => 'arrow_move_down_left_line',
+			'top_right_line' => 'arrow_move_down_right_line',
+			
+			// Utility aliases
+			'at_line' => 'at_a_mail_line',
+			'refresh' => 'refresh_reset_cycle_loop_infinity_line',
+			'cart_line' => 'shopping_cart_line',
+			'cart_solid' => 'add_plus_shopping_cart_solid',
+			'cog_line' => 'settings_tool_function_line',
+			'cog_solid' => 'settings_tool_function_solid',
+			'clock' => 'clock_reading_time_1_line',
+			'book' => 'book_line',
+			'download_line' => 'download_1_line',
+			'download_solid' => 'download_1_solid',
+			'downlod_bottom_solid' => 'download_1_solid',
+			
+			// Visibility aliases
+			'eye' => 'view_count_show_visible_eye_open_2_line',
+			'hidden_line' => 'hidden_hide_invisible_line',
+			
+			// Location aliases
+			'home_line' => 'home_house_line',
+			'home_solid' => 'home_house_solid',
+			'location_line' => 'location_gps_map_line',
+			'location_solid' => 'location_gps_map_solid',
+			
+			// Emotion aliases
+			'love_line' => 'heart_love_wishlist_favourite_line',
+			'love_solid' => 'heart_love_wishlist_favourite_solid',
+			
+			// Media aliases
+			'play_line' => 'play_media_video_circle_line',
+			'videoplay' => 'right_triangle_angle_play_arrow_forward_solid',
+			'left_angle_solid' => 'left_triangle_angle_arrow_backward_solid',
+			
+			// Shape aliases
+			'caretArrow' => 'caret_up_top_triangle_angle_arrow_upward_solid',
+			'rectangle_solid' => 'square_rounded_solid',
+			'triangle_solid' => 'triangle_shape_solid',
+			
+			// Status aliases
+			'restriction_line' => 'restriction_no_stop_line',
+			'right_circle_line' => 'correct_save_check_circle_line',
+			'save_line' => 'correct_save_check_line',
+			'search_line' => 'search_magnify_line',
+			'search_solid' => 'search_magnify_solid',
+			
+			// Warning aliases
+			'notice_circle_solid' => 'warning_circle_solid',
+			'notice_solid' => 'warning_triangle_solid',
+			'warning_circle_line' => 'warning_circle_line',
+			'warning_triangle_line' => 'warning_triangle_line',
+			
+			// Category aliases
+			'cat1' => 'category_file_documents_1_solid',
+			'cat2' => 'category_book_line',
+			'cat3' => 'category_file_documents_2_line',
+			'cat4' => 'category_file_documents_3_line',
+			'cat5' => 'category_file_documents_3_solid',
+			'cat6' => 'category_file_documents_4_line',
+			'cat7' => 'category_book_line',
+			
+			// Comment aliases
+			'commentCount1' => 'messege_comment_1_line',
+			'commentCount2' => 'messege_comment_3_solid',
+			'commentCount3' => 'messege_comment_3_line',
+			'commentCount4' => 'messege_comment_6_line',
+			'commentCount5' => 'messege_comment_7_line',
+			'commentCount6' => 'messege_comment_8_line',
+			'comment' => 'messege_comment_4_line',
+			
+			// Date aliases
+			'date1' => 'calendar_date_4_line',
+			'date2' => 'calendar_date_1_solid',
+			'date3' => 'calendar_date_2_line',
+			'date4' => 'calendar_date_4_solid',
+			'date5' => 'calendar_date_3_line',
+			'calendar' => 'calendar_date_3_line',
+			
+			// Reading time aliases
+			'readingTime1' => 'clock_reading_time_3_line',
+			'readingTime2' => 'clock_reading_time_2_line',
+			'readingTime3' => 'book_reading_time_line',
+			'readingTime4' => 'clock_reading_time_1_line',
+			'readingTime5' => 'hourglass_timer_time_line',
+			
+			// Tag aliases
+			'tag1' => 'tag_bookmark_save_favourite_mark_discount_sale_line',
+			'tag2' => 'price_tag_label_category_sale_discount_solid',
+			'tag3' => 'price_tag_label_category_sale_discount_line',
+			'tag4' => 'price_tag_offer_sale_coupon_solid',
+			'tag5' => 'price_tag_label_category_sale_discount_line',
+			'tag6' => 'growth_increase_up_solid',
+			
+			// View count aliases
+			'viewCount1' => 'view_count_show_visible_eye_open_1_line',
+			'viewCount2' => 'view_count_show_visible_eye_open_2_line',
+			'viewCount3' => 'view_count_show_visible_eye_open_3_line',
+			'viewCount4' => 'view_count_show_visible_eye_open_4_solid',
+			'viewCount5' => 'view_count_show_visible_eye_open_5_solid',
+			'viewCount6' => 'view_count_show_visible_eye_open_5_solid',
+			
+			// Author aliases
+			'author1' => 'author_user_human_1_line',
+			'author2' => 'author_user_human_4_line',
+			'author3' => 'author_user_human_4_solid',
+			'author4' => 'author_user_human_4_line',
+			'author5' => 'author_user_human_3_solid',
+			'author6' => 'author_user_human_6_line',
+			'user' => 'author_user_human_3_line',
+			
+			// Device aliases
+			'desktop' => 'desktop_monitor_computer_line',
+			'laptop' => 'laptop_computer_line',
+			'tablet' => 'tablet_ipad_pad_line',
+			'mobile' => 'mobile_smartphone_phone_line',
+			
+			// Emoji aliases
+			'angry_line' => 'angry_emoji_line',
+			'angry_solid' => 'angry_emoji_solid',
+			'confused_line' => 'confused_emoji_line',
+			'confused_solid' => 'confused_emoji_solid',
+			'happy_line' => 'happy_emoji_line',
+			'happy_solid' => 'happy_emoji_solid',
+			'smile_line' => 'smile_emoji_line',
+			'smile_solid' => 'smile_emoji_solid',
+			
+			// Social aliases
+			'share_line' => 'social_community_line',
+			'share' => 'share_social_solid',
+			'apple_solid' => 'apple_logo_icon_solid',
+			'android_solid' => 'android_logo_icon_solid',
+			'google_solid' => 'google_logo_icon_solid',
+			'messenger' => 'messenger_logo_icon_solid',
+			'microsoft_solid' => 'microsoft_logo_icon_solid',
+			'mail' => 'mail_email_messege_solid',
+			'facebook' => 'facebook_logo_icon_solid',
+			'twitter' => 'twitter_x_logo_icon_line',
+			'link' => 'link_chains_line',
+			
+			// Misc aliases
+			'media_document' => 'media_document',
+			'arrowDown2' => 'arrow_down_dropdown_maximize_chevron_line',
+			'setting' => 'settings_tool_function_solid',
+			'upload_solid' => 'upload_1_solid',
+
+			// Empty aliases for missing icons (return empty string)
+			'correct_solid' => 'correct_save_check_circle_line',
+			'dot_solid' => 'dot_circle_solid',
+			'right_circle_solid' => 'correct_save_check_circle_solid',
+			'full_screen' => 'full_screen_corners_out_solid',
+			'zoom_in' => 'zoom_in_magnifying_glass_plus_line',
+			'zoom_out' => 'zoom_out_magnifying_glass_minus_line',
+			'gallery_indicator' => 'gallery_indicator_image_solid',
+			'ascending' => 'sort_ascending_order_solid',
+			'descending' => 'sort_descending_order_line',
+			'unlink' => 'unlink_link_break_line',
+			'rocket' => 'rocket_fly_boost_launch_pro_line',
+			'unlock' => 'unlocked_open_security_solid',
+			'connect' => 'plugin_connect_socket_integration_solid',
+			'leftAngle' => 'arrow_left_previous_backward_chevron_line',
+			'rightAngle' => 'right_triangle_angle_play_arrow_forward_line',
+			'plus2' => '',
+			'hamicon_1' => 'left_align_1_line',
+			// extra in assets\img\iconpack folder
+			'hamicon_2' => 'hemicon_2_line',
+			'hamicon_3' => 'hemicon_3_line',
+			'hamicon_4' => 'hamicon_5_line',
+			'hamicon_5' => 'hamicon_4_sloid',
+			'hamicon_6' => 'hamicon_6_line',
+			'instagram_solid' => 'instagram_logo_icon_solid',
+			'linkedin' => 'linkedin_logo_icon_solid',
+			'pause_solid' => 'pause_solid',
+			'pinterest' => 'pinterest_logo_icon_solid',
+			'reddit' => 'reddit_logo_icon_solid',
+			'skype' => 'skype_logo_icon_solid',
+			'tiktok_lite_solid' => 'tiktok_logo_icon_line',
+			'tiktok_solid' => 'tiktok_logo_icon_circle_solid',
+			'whatsapp' => 'whatsapp_logo_icon_solid',
+			'wordpress_lite_solid' => 'wordpress_logo_icon_solid',
+			'wordpress_solid' => 'wordpress_logo_icon_2_solid',
+			'wrong_solid' => 'cross_close_x_minimize_circle_solid',
+			'youtube_solid' => 'youtube_logo_icon_solid',
+			'five_star_line' => 'star_rating_line',
+			'rightAngleBold' => 'arrow_right_next_forward_chevron_line',
+			'leftAngleBold' => 'arrow_left_previous_backward_chevron_line',
+			'plus' => 'plus',
+			'reset_left_line' => 'refresh_reset_cycle_loop_infinity_line',
+		);
+		// Return resolved alias or false if not found
+		return isset( $icon_aliases[ $icon_name ] ) ? $icon_aliases[ $icon_name ] : $icon_name;
 	}
 }

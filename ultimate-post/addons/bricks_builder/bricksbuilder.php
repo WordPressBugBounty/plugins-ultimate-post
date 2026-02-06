@@ -46,7 +46,7 @@ class PostX_Bricks_Integration extends \Bricks\Element {
 		// Render element HTML
 		echo "<div {$this->render_attributes( '_root' )}>"; //phpcs:ignore
 		if ( $id ) {
-			echo ultimate_post()->build_css_for_inline_print($id, true);
+			echo ultimate_post()->build_css_for_inline_print( $id, true );
 			echo '<div class="ultp-shortcode" data-postid="' . esc_attr( $id ) . '">';
 				$args      = array(
 					'p'         => $id,
@@ -61,10 +61,8 @@ class PostX_Bricks_Integration extends \Bricks\Element {
 					wp_reset_postdata();
 				}
 				echo '</div>';
-		} else {
-			if ( strpos( 'bricks=run', $current_url ) !== false || strpos( $current_url, 'bricks/v1/render_element' ) !== false ) {
+		} elseif ( strpos( 'bricks=run', $current_url ) !== false || strpos( $current_url, 'bricks/v1/render_element' ) !== false ) {
 				echo '<p style="text-align:center; font-size: 20px;">' . sprintf( esc_html__( 'Pick a Template from your saved ones. Or create a template from: %s.', 'ultimate-post' ) . ' ', '<strong><i>' . esc_html__( 'Dashboard > PostX > Saved Templates', 'ultimate-post' ) . '</i></strong>' ) . '</p>';
-			}
 		}
 		echo '</div>';
 	}
