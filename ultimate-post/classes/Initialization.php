@@ -12,6 +12,7 @@ namespace ULTP;
 defined( 'ABSPATH' ) || exit;
 
 use ULTP\Includes\Durbin\Xpo;
+use ULTP\Includes\Notice\Notice;
 
 /**
  * Initialization class.
@@ -49,6 +50,7 @@ class ULTP_Initialization {
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_option_panel_scripts_callback' ) );    // Option Panel.
 		register_activation_hook( ULTP_PATH . 'ultimate-post.php', array( $this, 'plugin_activation_hook' ) );
 		add_action( 'activated_plugin', array( $this, 'ultp_plugin_activation' ) ); // Plugin Activation Call.
+		// new Notice();
 	}
 
 	/**
@@ -424,8 +426,8 @@ class ULTP_Initialization {
 						'is_free'           => ! $is_active,
 						'user_email'        => wp_get_current_user()->user_email,
 						'home_url'          => home_url(),
-						'generalDiscount'   => get_transient( 'ultp_generalDiscount' ),
-						'helloBar'          => Xpo::get_transient_without_cache( 'ultp_helloBar' ),
+						'generalDiscount'   => get_transient( transient: 'ultp_generalDiscount' ),
+						'helloBar'          => Notice::get_hellobar_config(),
 						'userInfo'          => array(
 							'name'  => $user_info->first_name ? $user_info->first_name . ( $user_info->last_name ? ' ' . $user_info->last_name : '' ) : $user_info->user_login,
 							'email' => $user_info->user_email,
@@ -565,7 +567,7 @@ class ULTP_Initialization {
 			'news_ticker'                 => 'yes',
 			'accordion'                   => 'yes',
 			'star_rating'                 => 'yes',
-			'youtube_gallery'         => 'yes',
+			'youtube_gallery'             => 'yes',
 			'builder_advance_post_meta'   => 'yes',
 			'builder_archive_title'       => 'yes',
 			'builder_author_box'          => 'yes',

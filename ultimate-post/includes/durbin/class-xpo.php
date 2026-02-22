@@ -158,6 +158,7 @@ class Xpo {
 	 * @return bool
 	 */
 	public static function set_transient_without_cache( $transient, $value, $expiration = 0 ) {
+
 		$expiration = (int) $expiration;
 
 		$transient_timeout = '_transient_timeout_' . $transient;
@@ -245,21 +246,43 @@ class Xpo {
 				'medium'   => 'massive-sale',
 				'campaign' => 'postx-dashboard',
 			),
-			'flash_sale'         => array(
-				'source'   => 'db-postx-notice-logo',
-				'medium'   => 'flash-sale',
-				'campaign' => 'postx-dashboard',
-			),
+			// 'flash_sale'         => array(
+			// 'source'   => 'db-postx-notice-logo',
+			// 'medium'   => 'flash-sale',
+			// 'campaign' => 'postx-dashboard',
+			// ),
 			'exclusive_deals'    => array(
 				'source'   => 'db-postx-notice-text',
 				'medium'   => 'exclusive-deals',
 				'campaign' => 'postx-dashboard',
 			),
-			'new_year_sale'    => array(
+			'new_year_sale'      => array(
 				'source'   => 'db-postx-notice-text',
 				'medium'   => 'new-year-sale',
 				'campaign' => 'postx-dashboard',
 			),
+			// Flash sale.
+			'flash_sale'         => array(
+				'source'   => 'db-postx-notice',
+				'medium'   => 'flash-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			'final_hour'         => array(
+				'source'   => 'db-postx-notice',
+				'medium'   => 'final-hour-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			'flash_sale_meta'    => array(
+				'source'   => 'db-postx-plugin-meta',
+				'medium'   => 'flash-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			'final_hour_meta'    => array(
+				'source'   => 'db-postx-plugin-meta',
+				'medium'   => 'final-hour-sale',
+				'campaign' => 'postx-dashboard',
+			),
+
 		);
 
 		// Step 1: Get parameters

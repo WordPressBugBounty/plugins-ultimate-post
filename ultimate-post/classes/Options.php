@@ -32,18 +32,17 @@ class Options {
 		add_action( 'admin_init', array( $this, 'handle_external_redirects' ) );
 		add_action( 'admin_menu', array( $this, 'menu_page_callback' ) );
 		add_action( 'in_admin_header', array( $this, 'remove_all_notices' ) );
-		add_filter( 'plugin_action_links_' . ULTP_BASE, array( $this, 'plugin_action_links_callback' ) );
 		add_filter( 'plugin_row_meta', array( $this, 'plugin_settings_meta' ), 10, 2 );
+		add_filter( 'plugin_action_links_' . ULTP_BASE, array( $this, 'plugin_action_links_callback' ) );
 	}
 
 
 	/**
-	 * Add plugin page menu meta links.
+	 * Adds extra links to the plugin row meta on the plugins page.
 	 *
-	 * @since v.1.0.0
-	 * @param ARRAY  $links The existing plugin meta links.
-	 * @param STRING $file The plugin file name.
-	 * @return ARRAY Modified plugin meta links.
+	 * @param array  $links Existing plugin meta links.
+	 * @param string $file  Plugin file path.
+	 * @return array Modified plugin meta links.
 	 */
 	public function plugin_settings_meta( $links, $file ) {
 		if ( strpos( $file, 'ultimate-post.php' ) !== false ) {
@@ -64,37 +63,72 @@ class Options {
 		return $links;
 	}
 
-
 	/**
-	 * Add settings and pro update link to plugin action links.
+	 * Adds quick action links below the plugin name.
 	 *
-	 * @since v.1.0.0
-	 * @param ARRAY $links The existing plugin action links.
-	 * @return ARRAY Modified plugin action links.
+	 * @param array $links Default plugin action links.
+	 * @return array Modified plugin action links.
 	 */
 	public function plugin_action_links_callback( $links ) {
-		$setting_link                 = array();
-		$setting_link['ultp_options'] = '<a href="' . esc_url( admin_url( 'admin.php?page=ultp-settings#startersites' ) ) . '">' . esc_html__( 'Starter Sites', 'ultimate-post' ) . '</a>';
-		$upgrade_link                 = array();
+		$offer_config = array(
+			array(
+				'start'  => '2026-02-19 00:00 Asia/Dhaka',
+				'end'    => '2026-02-23 23:59 Asia/Dhaka',
+				'text'   => __(
+					'Flash Sale - Up to 45% OFF',
+					'ultimate-post'
+				),
+				'utmKey' => 'flash_sale_meta',
+			),
+			array(
+				'start'  => '2026-02-25 00:00 Asia/Dhaka',
+				'end'    => '2026-03-01 23:59 Asia/Dhaka',
+				'text'   => __(
+					'Final Hour Sale - Up to 50% OFF',
+					'ultimate-post'
+				),
+				'utmKey' => 'final_hour_meta',
+			),
+		);
+
+		$setting_link = array(
+			'ultp_options' => '<a href="' . esc_url( admin_url( 'admin.php?page=ultp-settings#startersites' ) ) . '">' . esc_html__( 'Starter Sites', 'ultimate-post' ) . '</a>',
+		);
+
+		$upgrade_link = array();
+
+		// Free user or expired license user.
 		if ( ! defined( 'ULTP_PRO_VER' ) || Xpo::is_lc_expired() ) {
-			$url = ! defined( 'ULTP_PRO_VER' ) ? Xpo::generate_utm_link(
-				array(
-					'utmKey' => 'plugin_dir_pro',
-				)
-			) : 'https://account.wpxpo.com/checkout/?edd_license_key=' . Xpo::get_lc_key();
-			
-			// Check if current date is between November 5th and December 10th
-			$current_date = current_time( 'Y-m-d' );
-			$start_date = date( 'Y' ) . '-01-01'; // January 1st of current year
-			$end_date = date( 'Y' ) . '-02-15';   // February 15th of current year
-			$is_promotional_period = ( $current_date >= $start_date && $current_date <= $end_date );
-			if ( ! defined( 'ULTP_PRO_VER' ) ) {
-				$text = $is_promotional_period ? esc_html__( 'New Year Sale!', 'ultimate-post' ) : esc_html__( 'Switch to Pro', 'ultimate-post' );
-			} else {
+
+			$license_key = Xpo::get_lc_key() ?? '';
+
+			if ( Xpo::is_lc_expired() ) {
 				$text = esc_html__( 'Renew License', 'ultimate-post' );
+				$url  = 'https://account.wpxpo.com/checkout/?edd_license_key=' . $license_key;
+			} else {
+
+				$text = esc_html__( 'Upgrade to Pro', 'ultimate-post' );
+				$url  = Xpo::generate_utm_link();
+
+				foreach ( $offer_config as $offer ) {
+					$current_time = gmdate( 'U' );
+					$notice_start = gmdate( 'U', strtotime( $offer['start'] ) );
+					$notice_end   = gmdate( 'U', strtotime( $offer['end'] ) );
+					if ( $current_time >= $notice_start && $current_time <= $notice_end ) {
+						$url  = Xpo::generate_utm_link(
+							array(
+								'utmKey' => $offer['utmKey'],
+							)
+						);
+						$text = $offer['text'];
+						break;
+					}
+				}
 			}
-			$upgrade_link['ultp_pro'] = '<a style="color: #e83838; font-weight: bold;" target="_blank" href="' . esc_url( $url ) . '">' . $text . '</a>';
+
+			$upgrade_link['ultp_pro'] = '<a style="color: #0062ff; font-weight: bold;" target="_blank" href="' . esc_url( $url ) . '">' . esc_html( $text ) . '</a>';
 		}
+
 		return array_merge( $setting_link, $links, $upgrade_link );
 	}
 
@@ -136,7 +170,7 @@ class Options {
 			'settings'        => esc_html__( 'Settings', 'ultimate-post' ),
 		);
 		if ( defined( 'ULTP_PRO_VER' ) ) {
-			$menu_lists['license'] = esc_html__( 'License', 'ultimate-post' );
+			$menu_lists['license'] = esc_html__( 'License ', 'ultimate-post' );
 		}
 
 		foreach ( $menu_lists as $key => $val ) {
@@ -162,9 +196,9 @@ class Options {
 		$pro_link_text = '';
 
 		// Check if current date is between November 5th and December 10th
-		$current_date = current_time( 'Y-m-d' );
-		$start_date = date( 'Y' ) . '-01-01'; // January 1st of current year
-		$end_date = date( 'Y' ) . '-02-15';   // February 15th of current year
+		$current_date         = current_time( 'Y-m-d' );
+		$start_date           = date( 'Y' ) . '-01-01'; // January 1st of current year
+		$end_date             = date( 'Y' ) . '-02-15';   // February 15th of current year
 		$menu_pro_text_period = ( $current_date >= $start_date && $current_date <= $end_date );
 
 		if ( ! Xpo::is_lc_active() ) {
@@ -173,7 +207,7 @@ class Options {
 					'utmKey' => 'sub_menu',
 				)
 			);
-			$pro_link_text = $menu_pro_text_period ?  __( 'New Year Offer!', 'ultimate-post' ) :  __( 'Upgrade to Pro', 'ultimate-post' );
+			$pro_link_text = $menu_pro_text_period ? __( 'New Year Offer!', 'ultimate-post' ) : __( 'Upgrade to Pro', 'ultimate-post' );
 		} elseif ( Xpo::is_lc_expired() ) {
 			$license_key   = Xpo::get_lc_key();
 			$pro_link      = 'https://account.wpxpo.com/checkout/?edd_license_key=' . $license_key;

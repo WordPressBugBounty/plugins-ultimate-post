@@ -17,7 +17,7 @@ class Notice {
 	 *
 	 * @var string
 	 */
-	private $notice_version = 'v4132';
+	private $notice_version = 'v5132';
 
 	/**
 	 * Notice JS/CSS applied
@@ -40,7 +40,6 @@ class Notice {
 		// Woocommerce Install Action
 		// add_action( 'wp_ajax_ultp_install', array( $this, 'install_activate_plugin' ) ); // this ajax not called anywhere in future need to removed, that is arise patchstack security issue
 	}
-
 
 	/**
 	 * Registers REST API endpoints.
@@ -76,6 +75,18 @@ class Notice {
 	}
 
 	/**
+	 * Hellobar config
+	 *
+	 * @return array
+	 */
+	public static function get_hellobar_config() {
+		return array(
+			'ultp_helloBar_flash_sale_2026_1'      => Xpo::get_transient_without_cache( 'ultp_helloBar_flash_sale_2026_1' ),
+			'ultp_helloBar_final_hour_sale_2026_1' => Xpo::get_transient_without_cache( 'ultp_helloBar_final_hour_sale_2026_1' ),
+		);
+	}
+
+	/**
 	 * Handles Hello Bar dismissal action via REST API .
 	 *
 	 * @param \WP_REST_Request $request REST request object .
@@ -84,17 +95,15 @@ class Notice {
 	public function hello_bar_callback( \WP_REST_Request $request ) {
 		$request_params = $request->get_params();
 		$type           = isset( $request_params['type'] ) ? $request_params['type'] : '';
-		$duration       = isset( $request_params['duration'] ) ? $request_params['duration'] : null;
-		$status = 'failed';
-		if ( 'hello_bar' === $type && $duration ) {
-			$status = 'success';
-			Xpo::set_transient_without_cache( 'ultp_helloBar', 'hide', $duration );
+		$id             = isset( $request_params['id'] ) ? $request_params['id'] : '';
+
+		if ( 'hello_bar' === $type && ! empty( $id ) ) {
+			Xpo::set_transient_without_cache( $id, 'hide', 1296000 );
 		}
 
 		return new \WP_REST_Response(
 			array(
 				'success' => true,
-				'status' => $status,
 				'message' => __( 'Hello Bar Action performed', 'ultimate-post' ),
 			),
 			200
@@ -108,26 +117,30 @@ class Notice {
 	 */
 	public function set_dismiss_notice_callback() {
 
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['wpnonce'] ?? '' ) ), 'ultp-nonce' ) ) {
+			return;
+		}
+
+		$durbin_key = sanitize_text_field( wp_unslash( $_GET['ultp_durbin_key'] ?? '' ) );
+
 		// Durbin notice dismiss.
-		if ( isset( $_GET['ultp_durbin_key'] ) && $_GET['ultp_durbin_key'] ) {
-			$durbin_key = sanitize_text_field( $_GET['ultp_durbin_key'] );
+		if ( ! empty( $durbin_key ) ) {
 			Xpo::set_transient_without_cache( 'ultp_durbin_notice_' . $durbin_key, 'off' );
 
-			if ( isset( $_GET['ultp_get_durbin'] ) && 'get' === $_GET['ultp_get_durbin'] ) {
+			if ( 'get' === sanitize_text_field( wp_unslash( $_GET['ultp_get_durbin'] ?? '' ) ) ) {
 				DurbinClient::send( DurbinClient::ACTIVATE_ACTION );
 			}
 		}
 
-		// Install notice dismiss
-		if ( isset( $_GET['ultp_install_key'] ) && $_GET['ultp_install_key'] ) {
-			$install_key = sanitize_text_field( $_GET['ultp_install_key'] );
+		// Install notice dismiss.
+		$install_key = sanitize_text_field( wp_unslash( $_GET['ultp_install_key'] ?? '' ) );
+		if ( ! empty( $install_key ) ) {
 			Xpo::set_transient_without_cache( 'ultp_install_notice_' . $install_key, 'off' );
 		}
-
-		if ( isset( $_GET['disable_ultp_notice'] ) ) {
-			$notice_key = sanitize_text_field( $_GET['disable_ultp_notice'] );
-			if ( isset( $_GET['ultp_interval'] ) && '' != $_GET['ultp_interval'] ) {
-				$interval = (int) $_GET['ultp_interval'];
+		$notice_key = sanitize_text_field( wp_unslash( $_GET['ultp_notice'] ?? '' ) );
+		if ( ! empty( $notice_key ) ) {
+			$interval = (int) sanitize_text_field( wp_unslash( $_GET['ultp_interval'] ?? '' ) );
+			if ( ! empty( $interval ) ) {
 				Xpo::set_transient_without_cache( 'ultp_get_pro_notice_' . $notice_key, 'off', $interval );
 			} else {
 				Xpo::set_transient_without_cache( 'ultp_get_pro_notice_' . $notice_key, 'off' );
@@ -141,7 +154,6 @@ class Notice {
 	 * @return void
 	 */
 	public function admin_notices_callback() {
-		// $this->other_plugin_install_notice_callback( 'required' ); this function not used any where in future need to removed
 		$this->ultp_dashboard_notice_callback();
 		$this->ultp_dashboard_durbin_notice_callback();
 	}
@@ -152,7 +164,6 @@ class Notice {
 	 * @return void
 	 */
 	public function ultp_dashboard_notice_callback() {
-		$this->ultp_dashboard_content_notice();
 		$this->ultp_dashboard_banner_notice();
 	}
 
@@ -162,764 +173,293 @@ class Notice {
 	 * @return void
 	 */
 	public function ultp_dashboard_banner_notice() {
-		$ultp_db_nonce  = wp_create_nonce( 'ultp-dashboard-nonce' );
+		$ultp_db_nonce  = wp_create_nonce( 'ultp-nonce' );
 		$banner_notices = array(
 			array(
-				'key'        => 'ultp_summer_sale_2522',
-				'start'      => '2025-06-23 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
-				'end'        => '2025-07-05 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
-				'banner_src' => ULTP_URL . 'assets/img/dashboard_banner/summer_sale_25.png',
-				'url'        => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'summer_db',
-					)
-				),
-				'visibility' => ! Xpo::is_lc_active(),
-			),
-			array(
-				'key'        => 'ultp_summer_25_banner_v2',
-				'start'      => '2025-07-06 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
-				'end'        => '2025-07-09 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
-				'banner_src' => ULTP_URL . 'assets/img/dashboard_banner/summer_sale_v2_2025.jpg',
-				'url'        => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'summer_db',
-					)
-				),
-				'visibility' => ! Xpo::is_lc_active(),
-			),
-			array(
-				'key'        => 'ultp_black_friday_25_banner_v1',
-				'start'      => '2025-11-05 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
-				'end'        => '2025-11-14 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
-				'banner_src' => ULTP_URL . 'assets/img/dashboard_banner/2025_postx_black_friday_banner_v1.png',
-				'url'        => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'summer_db',
-					)
-				),
-				'visibility' => ! Xpo::is_lc_active(),
-			),
-			array(
-				'key'        => 'ultp_black_friday_25_banner_v2',
-				'start'      => '2025-11-26 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
-				'end'        => '2025-12-03 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
-				'banner_src' => ULTP_URL . 'assets/img/dashboard_banner/2025_postx_black_friday_banner_v2.png',
-				'url'        => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'summer_db',
-					)
-				),
-				'visibility' => ! Xpo::is_lc_active(),
-			),
-			// ...existing code...
-			array(
-				'key'        => 'ultp_new_year_26_banner_v1',
-				'start'      => '2026-01-01 00:00 Asia/Dhaka',
-				'end'        => '2026-01-06 23:59 Asia/Dhaka',
-				'banner_src' => ULTP_URL . 'assets/img/dashboard_banner/2026_postx_new_year_banner_v1.png',
-				'url'        => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'new_year_sale',
-					)
-				),
-				'visibility' => ! Xpo::is_lc_active(),
-			),
-			array(
-				'key'        => 'ultp_new_year_26_banner_v2',
-				'start'      => '2026-01-17 00:00 Asia/Dhaka',
-				'end'        => '2026-01-22 23:59 Asia/Dhaka',
-				'banner_src' => ULTP_URL . 'assets/img/dashboard_banner/2026_postx_new_year_banner_v2.png',
-				'url'        => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'new_year_sale',
-					)
-				),
-				'visibility' => ! Xpo::is_lc_active(),
-			),
-			array(
-				'key'        => 'ultp_new_year_26_banner_v3',
-				'start'      => '2026-02-02 00:00 Asia/Dhaka',
-				'end'        => '2026-02-07 23:59 Asia/Dhaka',
-				'banner_src' => ULTP_URL . 'assets/img/dashboard_banner/2026_postx_new_year_banner_v3.png',
-				'url'        => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'new_year_sale',
-					)
-				),
-				'visibility' => ! Xpo::is_lc_active(),
-			),
-			// ...existing code...
-		);
-		foreach ( $banner_notices as $key => $notice ) {
-			$notice_key = isset( $notice['key'] ) ? $notice['key'] : $this->notice_version;
-			if ( isset( $_GET['disable_ultp_notice'] ) && $notice_key === $_GET['disable_ultp_notice'] ) {
-				continue;
-			} else {
-				$current_time = gmdate( 'U' );
-				$notice_start = gmdate('U', strtotime($notice['start']));
-				$notice_end = gmdate('U', strtotime($notice['end']));
-				if ( $current_time >= $notice_start && $current_time <= $notice_end && $notice['visibility'] ) {
+				'key'                => 'ultp_flash_sale_2026_1',
+				'start'              => '2026-02-19 00:00 Asia/Dhaka',
+				'end'                => '2026-02-23 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka.
+				'countdown_duration' => 259200, // Duration in seconds.
+				'brand_color'        => '#0322ff',
 
-					$notice_transient = Xpo::get_transient_without_cache( 'ultp_get_pro_notice_' . $notice_key );
-
-					if ( 'off' !== $notice_transient ) {
-						if ( ! $this->notice_js_css_applied ) {
-							$this->ultp_banner_notice_css();
-							$this->notice_js_css_applied = true;
-						}
-						$query_args = array(
-							'disable_ultp_notice' => $notice_key,
-							'ultp_db_nonce'       => $ultp_db_nonce,
-						);
-						if ( isset( $notice['repeat_interval'] ) && $notice['repeat_interval'] ) {
-							$query_args['ultp_interval'] = $notice['repeat_interval'];
-						}
-						?>
-						<div class="ultp-notice-wrapper notice wc-install ultp-free-notice">
-							<div class="wc-install-body ultp-image-banner">
-								<a class="wc-dismiss-notice" href="
-								<?php
-								echo esc_url(
-									add_query_arg(
-										$query_args
-									)
-								);
-								?>
-								"><?php esc_html_e( 'Dismiss', 'ultimate-post' ); ?></a>
-								<a class="ultp-btn-image" target="_blank" href="<?php echo esc_url( $notice['url'] ); ?>">
-									<img loading="lazy" src="<?php echo esc_url( $notice['banner_src'] ); ?>" alt="Discount Banner"/>
-								</a>
-							</div>
-						</div>
-						<?php
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Dashboard Content Notice
-	 *
-	 * @return void
-	 */
-	public function ultp_dashboard_content_notice() {
-
-		$content_notices = array(
-			array(
-				'key'        => 'ultp_content_notice_summer_sale_1',
-				'start'      => '2025-08-04 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
-				'end'        => '2025-08-14 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
-				'url'        => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'final_hour_sale',
-					)
-				),
-				'icon'		=> ULTP_URL . 'assets/img/logo-sm.svg',
-				'visibility' => ! Xpo::is_lc_active(),
-				'content_heading'    => __( 'Final Hour Sales Alert:', 'ultimate-post' ),
-				'content_subheading' => __( 'PostX on Sale - Get %s on this dynamic Gutenberg Builder! ', 'ultimate-post' ),
-				'discount_content'   => 'up to 45% OFF',
-				'is_discount_logo'   => false,
-			),
-			array(
-				'key'        => 'ultp_content_notice_summer_sale_2',
-				'start'      => '2025-08-18 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
-				'end'        => '2025-08-29 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
-				'url'        => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'massive_sale',
-					)
-				),
-				'icon'		=> ULTP_URL . 'assets/img/notice_logo/green_50_offer.svg',
-				'visibility' => ! Xpo::is_lc_active(),
-				'content_heading'    => __( 'Massive Sales Alert:', 'ultimate-post' ),
-				'content_subheading' => __( '<strong> PostX </strong> on Sale - Get %s on this dynamic Gutenberg Builder! ', 'ultimate-post' ),
-				'discount_content'   => 'up to 50% OFF',
-				'border_color'       => '#000',
-				'is_discount_logo'   => true,
-			),
-			array(
-				'key'        => 'ultp_content_notice_summer_sale_3',
-				'start'      => '2025-09-01 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
-				'end'        => '2025-09-17 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
-				'url'        => Xpo::generate_utm_link(
+				'left_image'         => ULTP_URL . 'assets/img/dashboard_banner/2026_flash_sale_logo.png',
+				'right_image'        => ULTP_URL . 'assets/img/dashboard_banner/2026_final_hours_and_flash_sale_right_btn.png',
+				'bg_image'           => ULTP_URL . 'assets/img/dashboard_banner/2026_final_hours_and_flash_sale_bg.png',
+				'text'               => 'Hurry Before It Ends!',
+				'countdown_color'    => '#3CF357',
+				'url'                => Xpo::generate_utm_link(
 					array(
 						'utmKey' => 'flash_sale',
 					)
 				),
-				'icon'		=> ULTP_URL . 'assets/img/logo-sm.svg',
-				'visibility' => ! Xpo::is_lc_active(),
-				'content_heading'    => __( 'Grab the Flash Sale Offer:', 'ultimate-post' ),
-				'content_subheading' => __( 'Sale on PostX - Enjoy %s on this complete Gutenberg Builder!', 'ultimate-post' ),
-				'discount_content'   => 'up to 45% OFF',
-				'is_discount_logo'   => false,
-				'border_color'       => '#0322ff',
-				'bg_color'       => '#0322ff',
-			),
-			array(
-				'key'        => 'ultp_content_notice_summer_sale_4',
-				'start'      => '2025-09-21 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
-				'end'        => '2025-09-30 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
-				'url'        => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'exclusive_deals',
-					)
-				),
-				'icon'		=> ULTP_URL . 'assets/img/notice_logo/red_50_offer.svg',
-				'visibility' => ! Xpo::is_lc_active(),
-				'content_heading'    => __( 'Exclusive Sale is Live:', 'ultimate-post' ),
-				'content_subheading' => __( '<strong> PostX </strong> on Sale - Enjoy %s on this complete Gutenberg Builder!', 'ultimate-post' ),
-				'discount_content'   => 'up to 50% OFF',
-				'border_color'       => '#000',
-				'is_discount_logo'   => true,
-			),
-			array(
-				'key'        => 'ultp_content_notice_black_friday_sale_v1',
-				'start'      => '2025-11-15 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
-				'end'        => '2025-11-25 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
-				'url'        => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'summer_db',
-					)
-				),
-				'icon'		=> ULTP_URL . 'assets/img/notice_logo/black_friday_60_offer.svg',
-				'visibility' => ! Xpo::is_lc_active(),
-				'content_heading'    => __( 'Booming Black Friday Deals:', 'ultimate-post' ),
-				'content_subheading' => __( 'PostX offers are live - Enjoy  %s on this news-magazine site builder', 'ultimate-post' ),
-				'discount_content'   => 'up to 60% OFF',
-				// 'border_color'       => '#000',
-				'is_discount_logo'   => true,
-			),
-			array(
-				'key'        => 'ultp_content_notice_black_friday_sale_v2',
-				'start'      => '2025-12-04 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
-				'end'        => '2025-12-10 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
-				'url'        => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'summer_db',
-					)
-				),
-				'icon'		=> ULTP_URL . 'assets/img/notice_logo/black_friday_60_offer.svg',
-				'visibility' => ! Xpo::is_lc_active(),
-				'content_heading'    => __( 'Black Friday Sales Alert:', 'ultimate-post' ),
-				'content_subheading' => __( 'PostX is on Sale - Enjoy %s on this news-magazine site builder', 'ultimate-post' ),
-				'discount_content'   => 'up to 60% OFF',
-				// 'border_color'       => '#000',
-				'is_discount_logo'   => true,
-			),
-			// Savings Banner 01
-			array(
-				'key'        => 'ultp_content_notice_new_year_sale_01',
-				'start'      => '2026-01-09 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
-				'end'        => '2026-01-14 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
-				'url'        => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'new_year_sale',
-					)
-				),
-				'icon'		=> ULTP_URL . 'assets/img/notice_logo/new_year_sale_55_offer.svg',
-				'visibility' => ! Xpo::is_lc_active(),
-				'content_heading'    => __( 'New Year Sales Offers:', 'ultimate-post' ),
-				'content_subheading' => __( 'PostX offers are live - Enjoy %s on this news-magazine site builder!', 'ultimate-post' ),
-				'discount_content'   => 'up to 55% OFF',
-				'is_discount_logo'   => true,
-			),
 
-			// Savings Banner 02
-			array(
-				'key'        => 'ultp_content_notice_new_year_sale_02',
-				'start'      => '2026-01-25 00:00 Asia/Dhaka',
-				'end'        => '2026-01-30 23:59 Asia/Dhaka',
-				'url'        => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'new_year_sale',
-					)
-				),
-				'icon'		=> ULTP_URL . 'assets/img/notice_logo/new_year_sale_55_offer.svg',
-				'visibility' => ! Xpo::is_lc_active(),
-				'content_heading'    => __( 'New Year Sales Alert:', 'ultimate-post' ),
-				'content_subheading' => __( 'PostX is on Sale - Enjoy %s on this news-magazine site builder!', 'ultimate-post' ),
-				'discount_content'   => 'up to 55% OFF',
-				'is_discount_logo'   => true,
+				'visibility'         => ! Xpo::is_lc_active(),
 			),
-
-			// Savings Banner 03
 			array(
-				'key'        => 'ultp_content_notice_new_year_sale_03',
-				'start'      => '2026-02-10 00:00 Asia/Dhaka',
-				'end'        => '2026-02-15 23:59 Asia/Dhaka',
-				'url'        => Xpo::generate_utm_link(
+				'key'                => 'ultp_final_hour_sale_2026_1',
+				'start'              => '2026-02-25 00:00 Asia/Dhaka',
+				'end'                => '2026-03-01 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka.
+				'brand_color'        => '#0322ff',
+				'left_image'         => ULTP_URL . 'assets/img/dashboard_banner/2026_final_hours_sale_logo.png',
+				'right_image'        => ULTP_URL . 'assets/img/dashboard_banner/2026_final_hours_and_flash_sale_right_btn.png',
+				'bg_image'           => ULTP_URL . 'assets/img/dashboard_banner/2026_final_hours_and_flash_sale_bg.png',
+				'text'               => 'Hurry Before It Ends!',
+				'countdown_duration' => 172800, // Duration in seconds.
+				'countdown_color'    => '#3CF357',
+				'url'                => Xpo::generate_utm_link(
 					array(
-						'utmKey' => 'new_year_sale',
+						'utmKey' => 'final_hour',
 					)
 				),
-				'icon'		=> ULTP_URL . 'assets/img/notice_logo/new_year_sale_55_offer.svg',
-				'visibility' => ! Xpo::is_lc_active(),
-				'content_heading'    => __( 'Fresh New Year Deals:', 'ultimate-post' ),
-				'content_subheading' => __( 'PostX is on Sale - Enjoy %s on this news-magazine site builder!', 'ultimate-post' ),
-				'discount_content'   => 'up to 55% OFF',
-				'is_discount_logo'   => true,
+
+				'visibility'         => ! Xpo::is_lc_active(),
 			),
 		);
-
-		$ultp_db_nonce = wp_create_nonce( 'ultp-dashboard-nonce' );
-
-		foreach ( $content_notices as $key => $notice ) {
+		foreach ( $banner_notices as $notice ) {
 			$notice_key = isset( $notice['key'] ) ? $notice['key'] : $this->notice_version;
-			if ( isset( $_GET['disable_ultp_notice'] ) && $notice_key === $_GET['disable_ultp_notice'] ) {
+
+			if ( isset( $_GET['ultp_notice'] ) && $notice_key === sanitize_text_field(wp_unslash($_GET['ultp_notice'])) ) { // phpcs:ignore
 				continue;
-			} else {
-				$border_color = isset($notice['border_color']) && $notice['border_color'] ? $notice['border_color'] : '';
-				$bg_color = isset($notice['bg_color']) && $notice['bg_color'] ? $notice['bg_color'] : '';
-				$current_time = gmdate( 'U' );
-				$notice_start = gmdate('U', strtotime($notice['start']));
-				$notice_end = gmdate('U', strtotime($notice['end']));
-				if ( $current_time >= $notice_start && $current_time <= $notice_end && $notice['visibility'] ) {
+			}
 
-					$notice_transient = Xpo::get_transient_without_cache( 'ultp_get_pro_notice_' . $notice_key );
+			$current_time = gmdate( 'U' );
+			$notice_start = gmdate( 'U', strtotime( $notice['start'] ) );
+			$notice_end   = gmdate( 'U', strtotime( $notice['end'] ) );
+			if ( $current_time >= $notice_start && $current_time <= $notice_end && $notice['visibility'] ) {
 
-					if ( 'off' !== $notice_transient ) {
-						if ( ! $this->notice_js_css_applied ) {
-							$this->ultp_banner_notice_css();
-							$this->notice_js_css_applied = true;
+				$notice_transient = Xpo::get_transient_without_cache( 'ultp_get_pro_notice_' . $notice_key );
+
+				if ( 'off' === $notice_transient ) {
+					continue;
+				}
+
+				if ( ! $this->notice_js_css_applied ) {
+					$this->ultp_banner_notice_js();
+					$this->notice_js_css_applied = true;
+				}
+				$query_args = array(
+					'ultp_notice' => $notice_key,
+					'wpnonce'     => $ultp_db_nonce,
+				);
+				if ( isset( $notice['repeat_interval'] ) && $notice['repeat_interval'] ) {
+					$query_args['ultp_interval'] = $notice['repeat_interval'];
+				}
+				?>
+				<style>
+					@media only screen and (max-width: 1200px) {
+						.ultp-notice-wrapper.notice .ultp-banner-logo-img {
+							max-width: 230px;
 						}
-						$query_args = array(
-							'disable_ultp_notice' => $notice_key,
-							'ultp_db_nonce'       => $ultp_db_nonce,
-						);
-						if ( isset( $notice['repeat_interval'] ) && $notice['repeat_interval'] ) {
-							$query_args['ultp_interval'] = $notice['repeat_interval'];
+						.ultp-banner-grab-btn-img {
+							max-width: 130px;
 						}
+						.ultp-notice-countdown {
+							font-size: 18px;
+						}
+						.ultp-notice-banner-title {
+							font-size: 20px;
+						}
+					}
+				</style>
+				<div 
+					class="ultp-notice-wrapper notice" 
+					style="
+						height:90px;
+						border-radius: 7px 0px 0px 7px;
+						padding:0;
+						position:relative;
+						box-sizing: border-box;
+						border-left: 3px solid <?php echo esc_attr( $notice['brand_color'] ); ?>;
+						background-image: url('<?php echo esc_attr( $notice['bg_image'] ); ?>');
+				">
+					<a 
+						class="wc-dismiss-notice dashicons dashicons-no-alt" 
+						style="
+							position: absolute;
+							top: 1px;
+							right: 1px;
+							border-radius: 50%;
+							background-color: black;
+							color: white;
+							font-size: 14px;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+						"
+						aria-label="<?php esc_html_e( 'Close Banner', 'wow-table-rate-shipping' ); ?>"
+						href="<?php echo esc_url( add_query_arg( $query_args ) ); ?>">
+					</a>
 
-						$url = isset( $notice['url'] ) ? $notice['url'] : Xpo::generate_utm_link(
-							array(
-								'utmKey' => 'summer_db',
-							)
-						);
-
-						?>
-						<div class="ultp-notice-wrapper notice data_collection_notice" style="<?php echo ! empty( $border_color ) ? 'border-left: 3px solid ' . esc_attr( $border_color ) . ';' : ''; ?>">
-							<?php
-							if (isset( $notice['icon'] ) && strlen($notice['icon']) > 0) {
-								?>
-									<div class="ultp-notice-icon <?php echo isset($notice['is_discount_logo']) && $notice['is_discount_logo'] ? 'ultp-discount-logo': '' ?>"> <img src="<?php echo esc_url( $notice['icon'] ); ?>"/>  </div>
-								<?php
-							}
-							?>
-							<div class="ultp-notice-content-wrapper">
-								<div class="">
-									<strong><?php echo esc_html( $notice['content_heading'] ); ?> </strong>
-									<?php
-										printf(
-											wp_kses_post( $notice['content_subheading'] ),
-											'<strong>' . esc_html( $notice['discount_content'] ) . '</strong>'
-										);
-									?>
-								</div>
-								<div class="ultp-notice-buttons">
-									<a class="ultp-notice-btn button button-primary <?php echo ( isset( $notice['is_discount_logo'] ) && $notice['is_discount_logo'] ) ? "btn-outline" : "btn-normal"; ?>"  href="<?php echo esc_url( $url ); ?>" target="_blank" style="<?php echo ! empty( $bg_color ) ? 'background-color:' . esc_attr( $bg_color ) . ' !important; border-color:' . esc_attr( $bg_color )  .';' : ''; ?>" >
-										<?php isset( $notice['is_discount_logo'] ) && $notice['is_discount_logo'] ? esc_html_e( 'CLAIM YOUR DISCOUNT!', 'ultimate-post' ) : esc_html_e( 'Upgrade to Pro &nbsp;➤', 'ultimate-post' ); ?>
-									</a>
+					<a style="width:100%;text-decoration: none;" target="_blank" href="<?php echo esc_url( $notice['url'] ); ?>">
+						<div style="
+							display: flex;
+							justify-content: space-between;
+							align-items: center;
+							max-width: 1358px;
+							margin: 0px auto;
+							padding: 10px 15px;
+						">
+							<img class="ultp-banner-logo-img" style="" loading="lazy" src="<?php echo esc_url( $notice['left_image'] ); ?>" />
+							<div style="
+								display: flex;
+								flex-direction: column;
+								gap: 4px;
+								align-items: center;
+								justify-content: center;
+								font-weight: 700;
+								font-size: 28px;
+								color: white;
+								line-height: 32px;
+							">
+								<span class="ultp-notice-banner-title">
+									<?php echo esc_html( $notice['text'] ); ?>
+								</span>	
+								<div 
+									class="ultp-notice-countdown" 
+									style="
+										color: <?php echo esc_attr( $notice['countdown_color'] ); ?>;
+									"
+									data-notice-key="<?php echo esc_attr( $notice_key . '-countdown' ); ?>" 
+									data-duration="<?php echo esc_attr( $notice['countdown_duration'] ); ?>">
+									00:00:00:00
 								</div>
 							</div>
-							<a href=
-							<?php
-							echo esc_url(
-								add_query_arg(
-									$query_args
-								)
-							);
-							?>
-							class="ultp-notice-close"><span class="ultp-notice-close-icon dashicons dashicons-dismiss"> </span></a>
+							<img class="ultp-banner-grab-btn-img" style="" loading="lazy" src="<?php echo esc_url( $notice['right_image'] ); ?>" />
 						</div>
-						<?php
-					}
-				}
+					</a>
+				</div>
+				<?php
 			}
 		}
 	}
 
 	/**
-	 * Admin Banner CSS File
+	 * Banner JS
 	 *
-	 * @since v.1.0.7
-	 * @param NULL
-	 * @return STRING
+	 * @return void
 	 */
-	public function ultp_banner_notice_css() {
+	public function ultp_banner_notice_js() {
 		?>
-		<style id="ultp-notice-css" type="text/css">
-			.ultp-notice-wrapper {
-				border: 1px solid #c3c4c7;
-				border-left: 3px solid #037fff;
-				margin: 15px 0px !important;
-				display: flex;
-				align-items: center;
-				background: #F7F9FF;
-				width: 100%;
-				padding: 10px 0px;
-				position: relative;
-				box-sizing: border-box;
-				border-radius: 4px;
-			}
-			.ultp-notice-wrapper.notice, .ultp-free-notice.wc-install.notice {
-				margin: 10px 0px;
-				width: calc( 100% - 20px );
-			}
-			.wrap .ultp-notice-wrapper.notice, .wrap .ultp-free-notice.wc-install {
-				width: 100%;
-			}
-			.ultp-notice-icon {
-				margin-left: 10px;
-			}
-			.ultp-notice-icon img {
-				max-width: 42px;
-				width: 100%;
-			}
-			.ultp-discount-logo img {
-				max-width: unset !important;
-				height: 70px;
-				width: 70px;
-			}
-			.ultp-notice-content-wrapper {
-				display: flex;
-				flex-direction: column;
-				gap: 8px;
-				font-size: 14px;
-				line-height: 20px;
-				margin-left: 10px;
-			}
-			.ultp-notice-buttons {
-				display: flex;
-				align-items: center;
-				gap: 15px;
-			}
-			.ultp-notice-buttons .ultp-notice-btn {
-				color: #fff;
-				background-color: #037fff !important;
-				border: 1px solid #037fff;
-				border-radius: 5px;
-				font-size: 14px;
-				font-weight: 600;
-				text-transform: uppercase;
-			}
-			.ultp-notice-btn:hover {
-				border-color: #037fff !important;
-			}
-			.ultp-notice-btn.btn-normal {
-				text-decoration: none;
-				padding: 0px 13px;
-			}
+		<script type="text/javascript">
+			jQuery(function($) {
+				'use strict';
 
-			.ultp-notice-btn.btn-outline {
-				    color: #037fff;
-					padding: 5px 10px;
-					background: transparent !important;
-					display: block;
-					line-height: 20px;
-					text-decoration: none !important;
-			}
-			.ultp-notice-btn.btn-outline:hover,
-			.ultp-notice-btn.btn-outline:focus {
-				color: #037fff;
-				border-color: #037fff;
-			}
-			.ultp-notice-dont-save-money {
-				font-size: 12px;
-			}
-			.ultp-notice-close {
-				position: absolute;
-				right: 2px;
-				top: 5px;
-				text-decoration: unset;
-				color: #b6b6b6;
-				font-family: dashicons;
-				font-size: 16px;
-				font-style: normal;
-				font-weight: 400;
-				line-height: 20px;
-			}
-			.ultp-notice-close-icon {
-				font-size: 14px;
-			}
-			.ultp-free-notice.wc-install {
-				display: flex;
-				align-items: center;
-				background: #fff;
-				margin-top: 20px;
-				width: 100%;
-				box-sizing: border-box;
-				border: 1px solid #ccd0d4;
-				padding: 4px;
-				border-radius: 4px;
-				border-left: 3px solid #037fff;
-				line-height: 0;
-			}
-			.ultp-free-notice.wc-install img {
-				margin-right: 0;
-				max-width: 100%;
-				width: 100%;
-			}
-			.ultp-free-notice .wc-install-body {
-				-ms-flex: 1;
-				flex: 1;
-				position: relative;
-				padding: 10px;
-			}
-			.ultp-free-notice .wc-install-body.ultp-image-banner{
-				padding: 0px;
-			}
-			.ultp-free-notice .wc-install-body h3 {
-				margin-top: 0;
-				font-size: 24px;
-				margin-bottom: 15px;
-			}
-			.ultp-install-btn {
-				margin-top: 15px;
-				display: inline-block;
-			}
-			.ultp-free-notice .wc-install .dashicons{
-				display: none;
-				animation: dashicons-spin 1s infinite;
-				animation-timing-function: linear;
-			}
-			.ultp-free-notice.wc-install.loading .dashicons {
-				display: inline-block;
-				margin-top: 12px;
-				margin-right: 5px;
-			}
-			.ultp-free-notice .wc-install-body h3 {
-				font-size: 20px;
-				margin-bottom: 5px;
-			}
-			.ultp-free-notice .wc-install-body > div {
-				max-width: 100%;
-				margin-bottom: 10px;
-			}
-			.ultp-free-notice .button-hero {
-				padding: 8px 14px !important;
-				min-height: inherit !important;
-				line-height: 1 !important;
-				box-shadow: none;
-				border: none;
-				transition: 400ms;
-			}
-			.ultp-free-notice .ultp-btn-notice-pro {
-				background: #2271b1;
-				color: #fff;
-			}
-			.ultp-free-notice .ultp-btn-notice-pro:hover,
-			.ultp-free-notice .ultp-btn-notice-pro:focus {
-				background: #185a8f;
-			}
-			.ultp-free-notice .button-hero:hover,
-			.ultp-free-notice .button-hero:focus {
-				border: none;
-				box-shadow: none;
-			}
-			@keyframes dashicons-spin {
-				0% {
-					transform: rotate( 0deg );
-				}
-				100% {
-					transform: rotate( 360deg );
-				}
-			}
-			.ultp-free-notice .wc-dismiss-notice {
-				color: #fff;
-				background-color: #000000;
-				padding-top: 0px;
-				position: absolute;
-				right: 0;
-				top: 0px;
-				padding: 10px 10px 14px;
-				border-radius: 0 0 0 4px;
-				display: inline-block;
-				transition: 400ms;
-			}
-			.ultp-free-notice .wc-dismiss-notice:hover {
-				color:red;
-			}
-			.ultp-free-notice .wc-dismiss-notice .dashicons{
-				display: inline-block;
-				text-decoration: none;
-				animation: none;
-				font-size: 16px;
-			}
-			/* ===== Eid Banner Css ===== */
-			.ultp-free-notice .wc-install-body {
-				background: linear-gradient(90deg,rgb(0,110,188) 0%,rgb(2,17,196) 100%);
-			}
-			.ultp-free-notice p{
-				color: #fff;
-				margin: 5px 0px;
-				font-size: 16px;
-				font-weight: 300;
-				letter-spacing: 1px;
-			}
-			.ultp-free-notice p.ultp-enjoy-offer {
-				display: inline;
-				font-weight: bold;
-				
-			}
-			.ultp-free-notice .ultp-get-now {
-				font-size: 14px;
-				color: #fff;
-				background: #14a8ff;
-				padding: 8px 12px;
-				border-radius: 4px;
-				text-decoration: none;
-				margin-left: 10px;
-				position: relative;
-				top: -4px;
-				transition: 400ms;
-			}
-			.ultp-free-notice .ultp-get-now:hover{
-				background: #068fe0;
-			}
-			.ultp-free-notice .ultp-dismiss {
-				color: #fff;
-				background-color: #000964;
-				padding-top: 0px;
-				position: absolute;
-				right: 0;
-				top: 0px;
-				padding: 10px 8px 12px;
-				border-radius: 0 0 0 4px;
-				display: inline-block;
-				transition: 400ms;
-			}
-			.ultp-free-notice .ultp-dismiss:hover {
-				color: #d2d2d2;
-			}
-			/*----- ULTP_URL Into Notice ------*/
-			.notice.notice-success.ultp-notice {
-				border-left-color: #4D4DFF;
-				padding: 0;
-			}
-			.ultp-notice-container {
-				display: flex;
-			}
-			.ultp-notice-container a{
-				text-decoration: none;
-			}
-			.ultp-notice-container a:visited{
-				color: white;
-			}
-			.ultp-notice-container img {
-				height: 100px; 
-				width: 100px;
-			}
-			.ultp-notice-image {
-				padding-top: 15px;
-				padding-left: 12px;
-				padding-right: 12px;
-				background-color: #f4f4ff;
-			}
-			.ultp-notice-image img{
-				max-width: 100%;
-			}
-			.ultp-notice-content {
-				width: 100%;
-				padding: 16px;
-				display: flex;
-				flex-direction: column;
-				gap: 8px;
-			}
-			.ultp-notice-ultp-button {
-				max-width: fit-content;
-				padding: 8px 15px;
-				font-size: 16px;
-				color: white;
-				background-color: #4D4DFF;
-				border: none;
-				border-radius: 2px;
-				cursor: pointer;
-				margin-top: 6px;
-				text-decoration: none;
-			}
-			.ultp-notice-heading {
-				font-size: 18px;
-				font-weight: 500;
-				color: #1b2023;
-			}
-			.ultp-notice-content-header {
-				display: flex;
-				justify-content: space-between;
-				align-items: center;
-			}
-			.ultp-notice-close .dashicons-no-alt {
-				font-size: 25px;
-				height: 26px;
-				width: 25px;
-				cursor: pointer;
-				color: #585858;
-			}
-			.ultp-notice-close .dashicons-no-alt:hover {
-				color: red;
-			}
-			.ultp-notice-content-body {
-				font-size: 14px;
-				color: #343b40;
-			}
-			.ultp-notice-wholesalex-button:hover {
-				background-color: #6C6CFF;
-				color: white;
-			}
-			span.ultp-bold {
-				font-weight: bold;
-			}
-			a.ultp-pro-dismiss:focus {
-				outline: none;
-				box-shadow: unset;
-			}
-			.ultp-free-notice .loading, .ultp-notice .loading {
-				width: 16px;
-				height: 16px;
-				border: 3px solid #FFF;
-				border-bottom-color: transparent;
-				border-radius: 50%;
-				display: inline-block;
-				box-sizing: border-box;
-				animation: rotation 1s linear infinite;
-				margin-left: 10px;
-			}
-			a.ultp-notice-ultp-button:hover {
-				color: #fff !important;
-			}
-			@keyframes rotation {
-				0% {
-					transform: rotate(0deg);
-				}
-				100% {
-					transform: rotate(360deg);
-				}
-			}
-		</style>
+				const storagePrefix = 'ultp_notice_countdown_';
+
+				const formatCountdown = function(seconds) {
+					const days = Math.floor(seconds / 86400);
+					const hours = Math.floor((seconds % 86400) / 3600);
+					const minutes = Math.floor((seconds % 3600) / 60);
+					const secs = seconds % 60;
+
+					return String(days).padStart(2, '0') + ':' + String(hours).padStart(2, '0') + ':' + String(minutes).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+				};
+
+				const parseDurationToSeconds = function(duration) {
+					if (typeof duration === 'number' && Number.isFinite(duration) && duration > 0) {
+						return Math.floor(duration);
+					}
+
+					const durationString = String(duration || '').trim();
+					if (/^\d+$/.test(durationString)) {
+						return parseInt(durationString, 10);
+					}
+
+					return 0;
+				};
+
+				const nowInSeconds = function() {
+					return Math.floor(Date.now() / 1000);
+				};
+
+				$('.ultp-notice-countdown').each(function() {
+					const countdownElement = $(this);
+					const noticeKey = String(countdownElement.data('noticeKey') || '');
+					const duration = parseDurationToSeconds(countdownElement.data('duration'));
+
+					if (!noticeKey || duration <= 0) {
+						return;
+					}
+
+					const storageKey = storagePrefix + noticeKey;
+					let endAt = 0;
+
+					try {
+						const storedDataRaw = window.localStorage.getItem(storageKey);
+						if (storedDataRaw) {
+							const storedData = JSON.parse(storedDataRaw);
+							if (storedData && parseInt(storedData.duration, 10) === duration) {
+								endAt = parseInt(storedData.endAt, 10) || 0;
+							}
+						}
+					} catch (error) {
+						endAt = 0;
+					}
+
+					const saveTimerState = function(nextEndAt) {
+						try {
+							window.localStorage.setItem(
+								storageKey,
+								JSON.stringify({
+									endAt: nextEndAt,
+									duration: duration,
+								})
+							);
+						} catch (error) {
+							// No-op.
+						}
+					};
+
+					const resetTimer = function(currentTime) {
+						endAt = currentTime + duration;
+						saveTimerState(endAt);
+					};
+
+					const tick = function() {
+						const currentTime = nowInSeconds();
+
+						if (endAt <= currentTime) {
+							resetTimer(currentTime);
+						}
+
+						const remaining = Math.max(endAt - currentTime, 0);
+						countdownElement.text(formatCountdown(remaining));
+					};
+
+					if (endAt <= nowInSeconds()) {
+						resetTimer(nowInSeconds());
+					}
+
+					tick();
+					window.setInterval(tick, 1000);
+				});
+			});
+		</script>
 		<?php
 	}
+
 
 	/**
 	 * The Durbin Html
 	 *
-	 * @return STRING | HTML
+	 * @return void
 	 */
 	public function ultp_dashboard_durbin_notice_callback() {
 		$durbin_key = 'ultp_durbin_dc1';
+
 		if (
-			isset( $_GET['ultp_durbin_key'] ) ||
-			'off' === Xpo::get_transient_without_cache( 'ultp_durbin_notice_' . $durbin_key ) ||
-			defined( 'ULTP_PRO_VER' )
+			isset( $_GET['ultp_durbin_key'] ) || // phpcs:ignore
+			'off' === Xpo::get_transient_without_cache( 'ultp_durbin_notice_' . $durbin_key )
 		) {
 			return;
 		}
 
 		if ( ! $this->notice_js_css_applied ) {
-			$this->ultp_banner_notice_css();
 			$this->notice_js_css_applied = true;
 		}
+
+		$ultp_db_nonce = wp_create_nonce( 'ultp-nonce' );
+
 		?>
 		<style>
 				.ultp-consent-box {
@@ -930,10 +470,12 @@ class Notice {
 					border-radius: 4px;
 					background-color: #fff;
 					position: relative;
+					width: 100%;
+					box-sizing: border-box;
 				}
 				.ultp-consent-content {
 					display: flex;
-					justify-content: space-between;
+					justify-content: flex-start;
 					align-items: flex-end;
 					gap: 26px;
 				}
@@ -968,458 +510,58 @@ class Notice {
 			<div class="ultp-consent-box ultp-notice-wrapper notice data_collection_notice">
 			<div class="ultp-consent-content">
 			<div class="ultp-consent-text">
-			<div class="ultp-consent-text-first"><?php esc_html_e( 'Want to help make PostX even more awesome?', 'ultimate-post' ); ?></div>
+			<div class="ultp-consent-text-first"><?php esc_html_e( 'Want to help make PostX even more awesome?', 'wow-table-rate-shipping' ); ?></div>
 			<div class="ultp-consent-text-last">
-					<?php esc_html_e( 'Allow us to collect diagnostic data and usage information. see ', 'ultimate-post' ); ?>
-			<a href="https://www.wpxpo.com/data-collection-policy/" target="_blank" ><?php esc_html_e( 'what we collect.', 'ultimate-post' ); ?></a>
+					<?php esc_html_e( 'Allow us to collect diagnostic data and usage information. see ', 'wow-table-rate-shipping' ); ?>
+			<a href="https://www.wpxpo.com/data-collection-policy/" target="_blank" ><?php esc_html_e( 'what we collect.', 'wow-table-rate-shipping' ); ?></a>
 			</div>
 			</div>
 			<a
-									class="ultp-consent-accept"
-									href=
+					class="ultp-consent-accept"
+					href=
 					<?php
 									echo esc_url(
 										add_query_arg(
 											array(
 												'ultp_durbin_key' => $durbin_key,
-												'ultp_get_durbin'  => 'get',
+												'ultp_get_durbin' => 'get',
+												'wpnonce' => $ultp_db_nonce,
 											)
 										)
 									);
 					?>
 									class="ultp-notice-close"
-			><?php esc_html_e( 'Accept & Close', 'ultimate-post' ); ?></a>
+			><?php esc_html_e( 'Accept & Close', 'wow-table-rate-shipping' ); ?></a>
 			</div>
 			<a href=
-					<?php
-								echo esc_url(
-									add_query_arg(
-										array(
-											'ultp_durbin_key' => $durbin_key,
-										)
+				<?php
+							echo esc_url(
+								add_query_arg(
+									array(
+										'ultp_durbin_key' => $durbin_key,
+										'wpnonce'         => $ultp_db_nonce,
 									)
-								);
-					?>
-								class="ultp-notice-close"
+								)
+							);
+				?>
+				class="ultp-notice-close"
+				style="
+					position: absolute;
+					right: 2px;
+					top: 5px;
+					text-decoration: unset;
+					color: #b6b6b6;
+					font-family: dashicons;
+					font-size: 16px;
+					font-style: normal;
+					font-weight: 400;
+					line-height: 20px;
+				"
 			>
-				<span class="ultp-notice-close-icon dashicons dashicons-dismiss"> </span></a>
+				<span 
+				style="font-size: 14px;"
+				class="ultp-notice-close-icon dashicons dashicons-dismiss"> </span></a>
 			</div>
-		<?php
-	}
-
-
-
-	/**
-	 * Woocommerce Notice HTML
-	 *
-	 * @since v.1.0.0
-	 * @return STRING | HTML
-	 */
-	public function other_plugin_install_notice_callback( $type = '' ) {
-		$install_key_tran = 'woocommerce';
-		$plugin_slug      = 'woocommerce';
-		if ( 'required' !== $type ) {
-			if ( isset( $_GET['ultp_install_key'] ) ||
-				'off' === Xpo::get_transient_without_cache( 'ultp_install_notice_' . $install_key_tran, )
-			) {
-				return;
-			}
-		}
-
-		if ( function_exists( 'get_woocommerce_currency_symbol' ) ) {
-			return;
-		}
-
-		$this->install_notice_css();
-		// $this->install_notice_js(); this other_plugin_install_notice_callback function not use any where
-		?>
-			<div class="ultp-pro-notice ultp-wc-install wc-install">
-				<img width="100" src="<?php echo esc_url( ULTP_URL . 'assets/img/woocommerce.png' ); ?>" alt="logo" />
-				<div class="ultp-install-body">
-					<h3><?php esc_html_e( 'Welcome to PostX.', 'ultimate-post' ); ?></h3>
-					<p><?php esc_html_e( 'PostX is a WooCommerce-based plugin. So you need to installed & activate WooCommerce to start using PostX.', 'ultimate-post' ); ?></p>
-					<div class="ultp-install-btn-wrap">
-						<a class="wc-install-btn ultp-install-btn button button-primary" data-plugin-slug="<?php echo esc_attr( $plugin_slug ); ?>" href="#"><span class="dashicons dashicons-image-rotate"></span><?php file_exists( WP_PLUGIN_DIR . '/woocommerce/woocommerce.php' ) ? esc_html_e( ' Activate WooCommerce', 'ultimate-post' ) : esc_html_e( ' Install WooCommerce', 'ultimate-post' ); ?></a>
-						<?php if ( 'required' !== $type ) : ?>
-							<a href="<?php echo esc_url( add_query_arg( array( 'ultp_install_key' => $install_key_tran ) ) ); ?>" class="ultp-install-cancel wc-dismiss-notice">
-								<?php esc_html_e( 'Discard', 'ultimate-post' ); ?>
-							</a>
-						<?php endif; ?>
-					</div>
-					<div id="installation-msg"></div>
-				</div>
-			</div>
-		<?php
-	}
-
-	/**
-	 * Plugin Install and Active Action
-	 *
-	 * @since v.1.6.8
-	 * @return STRING | Redirect URL
-	 */
-	public function install_activate_plugin() {
-		if ( ! isset( $_POST['install_plugin'] ) || ! current_user_can( 'manage_options' ) ) {
-			return wp_send_json_error( esc_html__( 'Invalid request.', 'ultimate-post' ) );
-		}
-		$plugin_slug = sanitize_text_field( wp_unslash( $_POST['install_plugin'] ) );
-
-		Xpo::install_and_active_plugin( $plugin_slug );
-
-		if ( wp_doing_ajax() || is_network_admin() || isset( $_GET['activate-multi'] ) || isset( $_POST['action'] ) && 'activate-selected' == sanitize_text_field( $_POST['action'] ) ) { //phpcs:ignore
-			return;
-		}
-
-		return wp_send_json_success( admin_url( 'admin.php?page=ultp-dashboard#dashboard' ) );
-	}
-
-	/**
-	 * Installation Notice CSS
-	 *
-	 * @since v.1.0.0
-	 */
-	public function install_notice_css() {
-		?>
-		<style type="text/css">
-			.ultp-wc-install {
-				display: flex;
-				align-items: center;
-				background: #fff;
-				margin-top: 30px !important;
-				/*width: calc(100% - 65px);*/
-				border: 1px solid #ccd0d4;
-				padding: 4px !important;
-				border-radius: 4px;
-				border-left: 3px solid #46b450;
-				line-height: 0;
-				gap: 15px;
-				padding: 15px 10px !important;
-			}
-			.ultp-wc-install img {
-				width: 100px;
-			}
-			.ultp-install-body {
-				-ms-flex: 1;
-				flex: 1;
-			}
-			.ultp-install-body.ultp-image-banner {
-				padding: 0px !important;
-			}
-			.ultp-install-body.ultp-image-banner img {
-				width: 100%;
-			}
-			.ultp-install-body>div {
-				max-width: 450px;
-				margin-bottom: 20px !important;
-			}
-			.ultp-install-body h3 {
-				margin: 0 !important;
-				font-size: 20px;
-				margin-bottom: 10px !important;
-				line-height: 1;
-			}
-			.ultp-pro-notice .wc-install-btn,
-			.wp-core-ui .ultp-wc-active-btn {
-				display: inline-flex;
-				align-items: center;
-				padding: 3px 20px !important;
-			}
-			.ultp-pro-notice.loading .wc-install-btn {
-				opacity: 0.7;
-				pointer-events: none;
-			}
-			.ultp-wc-install.wc-install .dashicons {
-				display: none;
-				animation: dashicons-spin 1s infinite;
-				animation-timing-function: linear;
-			}
-			.ultp-wc-install.wc-install.loading .dashicons {
-				display: inline-block;
-				margin-right: 5px !important;
-			}
-			@keyframes dashicons-spin {
-				0% {
-					transform: rotate(0deg);
-				}
-				100% {
-					transform: rotate(360deg);
-				}
-			}
-			.ultp-wc-install .wc-dismiss-notice {
-				position: relative;
-				text-decoration: none;
-				float: right;
-				right: 5px;
-				display: flex;
-				align-items: center;
-			}
-			.ultp-wc-install .wc-dismiss-notice .dashicons {
-				display: flex;
-				text-decoration: none;
-				animation: none;
-				align-items: center;
-			}
-			.ultp-pro-notice {
-				position: relative;
-				border-left: 3px solid #037fff;
-			}
-			.ultp-pro-notice .ultp-install-body h3 {
-				font-size: 20px;
-				margin-bottom: 5px !important;
-			}
-			.ultp-pro-notice .ultp-install-body>div {
-				max-width: 800px;
-				margin-bottom: 0 !important;
-			}
-			.ultp-pro-notice .button-hero {
-				padding: 8px 14px !important;
-				min-height: inherit !important;
-				line-height: 1 !important;
-				box-shadow: none;
-				border: none;
-				transition: 400ms;
-				background: #46b450;
-			}
-			.ultp-pro-notice .button-hero:hover,
-			.wp-core-ui .ultp-pro-notice .button-hero:active {
-				background: #389e41;
-			}
-			.ultp-pro-notice .ultp-btn-notice-pro {
-				background: #e5561e;
-				color: #fff;
-			}
-			.ultp-pro-notice .ultp-btn-notice-pro:hover,
-			.ultp-pro-notice .ultp-btn-notice-pro:focus {
-				background: #ce4b18;
-			}
-			.ultp-pro-notice .button-hero:hover,
-			.ultp-pro-notice .button-hero:focus {
-				border: none;
-				box-shadow: none;
-			}
-			.ultp-pro-notice .ultp-promotional-dismiss-notice {
-				background-color: #000000;
-				padding-top: 0px !important;
-				position: absolute;
-				right: 0;
-				top: 0px;
-				padding: 10px 10px 14px !important;
-				border-radius: 0 0 0 4px;
-				border: 1px solid;
-				display: inline-block;
-				color: #fff;
-			}
-			.ultp-eid-notice p {
-				margin: 0 !important;
-				color: #f7f7f7;
-				font-size: 16px;
-			}
-			.ultp-eid-notice p.ultp-eid-offer {
-				color: #fff;
-				font-weight: 700;
-				font-size: 18px;
-			}
-			.ultp-eid-notice p.ultp-eid-offer a {
-				background-color: #ffc160;
-				padding: 8px 12px !important;
-				border-radius: 4px;
-				color: #000;
-				font-size: 14px;
-				margin-left: 3px !important;
-				text-decoration: none;
-				font-weight: 500;
-				position: relative;
-				top: -4px;
-			}
-			.ultp-eid-notice p.ultp-eid-offer a:hover {
-				background-color: #edaa42;
-			}
-			.ultp-install-body .ultp-promotional-dismiss-notice {
-				right: 4px;
-				top: 3px;
-				border-radius: unset !important;
-				padding: 10px 8px 12px !important;
-				text-decoration: none;
-			}
-			.ultp-notice {
-				background: #fff;
-				border: 1px solid #c3c4c7;
-				border-left-color: #037fff !important;
-				border-left-width: 4px;
-				border-radius: 4px 0px 0px 4px;
-				box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
-				padding: 0px !important;
-				margin: 40px 20px 0 2px !important;
-				clear: both;
-			}
-			.ultp-notice .ultp-notice-container {
-				display: flex;
-				width: 100%;
-			}
-			.ultp-notice .ultp-notice-container a {
-				text-decoration: none;
-			}
-			.ultp-notice .ultp-notice-container a:visited {
-				color: white;
-			}
-			.ultp-notice .ultp-notice-container img {
-				width: 100%;
-				max-width: 30px !important;
-				padding: 12px !important;
-			}
-			.ultp-notice .ultp-notice-image {
-				display: flex;
-				align-items: center;
-				flex-direction: column;
-				justify-content: center;
-				background-color: #f4f4ff;
-			}
-			.ultp-notice .ultp-notice-image img {
-				max-width: 100%;
-			}
-			.ultp-notice .ultp-notice-content {
-				width: 100%;
-				margin: 5px !important;
-				padding: 8px !important;
-				display: flex;
-				flex-direction: column;
-				gap: 0px;
-			}
-			.ultp-notice .ultp-notice-ultp-button {
-				max-width: fit-content;
-				text-decoration: none;
-				padding: 7px 12px !important;
-				font-size: 12px;
-				color: white;
-				border: none;
-				border-radius: 2px;
-				cursor: pointer;
-				margin-top: 6px !important;
-				background-color: #e5561e;
-			}
-			.ultp-notice-heading {
-				font-size: 18px;
-				font-weight: 500;
-				color: #1b2023;
-			}
-			.ultp-notice-content-header {
-				display: flex;
-				justify-content: space-between;
-				align-items: center;
-			}
-			.ultp-notice-close .dashicons-no-alt {
-				font-size: 25px;
-				height: 26px;
-				width: 25px;
-				cursor: pointer;
-				color: #585858;
-			}
-			.ultp-notice-close .dashicons-no-alt:hover {
-				color: red;
-			}
-			.ultp-notice-content-body {
-				font-size: 12px;
-				color: #343b40;
-			}
-			.ultp-bold {
-				font-weight: bold;
-			}
-			a.ultp-pro-dismiss:focus {
-				outline: none;
-				box-shadow: unset;
-			}
-			.ultp-free-notice .loading,
-			.ultp-notice .loading {
-				width: 16px;
-				height: 16px;
-				border: 3px solid #FFF;
-				border-bottom-color: transparent;
-				border-radius: 50%;
-				display: inline-block;
-				box-sizing: border-box;
-				animation: rotation 1s linear infinite;
-				margin-left: 10px !important;
-			}
-			a.ultp-notice-ultp-button:hover {
-				color: #fff !important;
-			}
-			.ultp-notice .ultp-link-wrap {
-				margin-top: 10px !important;
-			}
-			.ultp-notice .ultp-link-wrap a {
-				margin-right: 4px !important;
-			}
-			.ultp-notice .ultp-link-wrap a:hover {
-				background-color: #ce4b18;
-			}
-			body .ultp-notice .ultp-link-wrap>a.ultp-notice-skip {
-				background: none !important;
-				border: 1px solid #e5561e;
-				color: #e5561e;
-				padding: 6px 15px !important;
-			}
-			body .ultp-notice .ultp-link-wrap>a.ultp-notice-skip:hover {
-				background: #ce4b18 !important;
-			}
-			@keyframes rotation {
-				0% {
-					transform: rotate(0deg);
-				}
-				100% {
-					transform: rotate(360deg);
-				}
-			}
-
-			.ultp-install-btn-wrap {
-				display: flex;
-				align-items: stretch;
-				gap: 10px;
-			}
-			.ultp-install-btn-wrap .ultp-install-cancel {
-				position: static !important;
-				padding: 3px 20px;
-				border: 1px solid #a0a0a0;
-				border-radius: 2px;
-			}
-		</style>
-		<?php
-	}
-
-	/**
-	 * Installation Notice JS
-	 *
-	 * @since v.1.0.0
-	 */
-	public function install_notice_js() {
-		?>
-		<script type="text/javascript">
-			// this js not used in future need to remove
-			// jQuery(document).ready(function($) {
-			// 	'use strict';
-			// 	$(document).on('click', '.wc-install-btn.ultp-install-btn', function(e) {
-			// 		e.preventDefault();
-			// 		const $that = $(this);
-			// 		console.log($that.attr('data-plugin-slug'));
-			// 		$.ajax({
-			// 			type: 'POST',
-			// 			url: ajaxurl,
-			// 			data: {
-			// 				install_plugin: $that.attr('data-plugin-slug'),
-			// 				action: 'ultp_install'
-			// 			},
-			// 			beforeSend: function() {
-			// 				$that.parents('.wc-install').addClass('loading');
-			// 			},
-			// 			success: function(response) {
-			// 				window.location.reload()
-			// 			},
-			// 			complete: function() {
-			// 				// $that.parents('.wc-install').removeClass('loading');
-			// 			}
-			// 		});
-			// 	});
-			// });
-		</script>
 		<?php
 	}
 }

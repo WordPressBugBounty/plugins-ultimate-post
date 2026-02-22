@@ -9,8 +9,8 @@
 		$(this).before(
 			content.replace(
 				"ultp-custom-font-copy",
-				"ultp-custom-font ultp-font-open"
-			)
+				"ultp-custom-font ultp-font-open",
+			),
 		);
 	});
 	$(document).on("click", ".ultp-custom-font-close", function (e) {
@@ -104,51 +104,51 @@
 		$("#toplevel_page_ultp-settings > a").attr("href", postxMenuHref + "#home");
 	}
 
-	$("#toplevel_page_ultp-settings ul > li > a").each(function (e) {
-		if (
-			$(this).attr("href") &&
-			$(this).attr("href").indexOf("?page=ultp-settings") > 0
-		) {
-			if ($(this).hasClass("wp-first-item") != false) {
-				$(this).attr("href", $(this).attr("href") + "#home");
-			}
+	// $("#toplevel_page_ultp-settings ul > li > a").each(function (e) {
+	// 	if (
+	// 		$(this).attr("href") &&
+	// 		$(this).attr("href").indexOf("?page=ultp-settings") > 0
+	// 	) {
+	// 		if ($(this).hasClass("wp-first-item") != false) {
+	// 			$(this).attr("href", $(this).attr("href") + "#home");
+	// 		}
 
-			if (ultp_option_panel.settings) {
-				if (
-					$(this).attr("href").indexOf("#builder") > 0 &&
-					ultp_option_panel.settings?.ultp_builder != "true"
-				) {
-					$(this).hide();
-				}
-				if (
-					$(this).attr("href").indexOf("#custom-font") > 0 &&
-					ultp_option_panel.settings?.ultp_custom_font != "true"
-				) {
-					$(this).hide();
-				}
-				if (
-					$(this).attr("href").indexOf("#saved-templates") > 0 &&
-					ultp_option_panel.settings?.ultp_templates != "true"
-				) {
-					$(this).hide();
-				}
-			}
+	// 		if (ultp_option_panel.settings) {
+	// 			if (
+	// 				$(this).attr("href").indexOf("#builder") > 0 &&
+	// 				ultp_option_panel.settings?.ultp_builder != "true"
+	// 			) {
+	// 				$(this).hide();
+	// 			}
+	// 			if (
+	// 				$(this).attr("href").indexOf("#custom-font") > 0 &&
+	// 				ultp_option_panel.settings?.ultp_custom_font != "true"
+	// 			) {
+	// 				$(this).hide();
+	// 			}
+	// 			if (
+	// 				$(this).attr("href").indexOf("#saved-templates") > 0 &&
+	// 				ultp_option_panel.settings?.ultp_templates != "true"
+	// 			) {
+	// 				$(this).hide();
+	// 			}
+	// 		}
 
-			let hasID = $(this).attr("href").indexOf("#");
-			$(this).attr(
-				"id",
-				"postx-submenu-" +
-					(hasID > 0 ? $(this).attr("href").split("#")[1] : "home")
-			);
+	// 		let hasID = $(this).attr("href").indexOf("#");
+	// 		$(this).attr(
+	// 			"id",
+	// 			"postx-submenu-" +
+	// 				(hasID > 0 ? $(this).attr("href").split("#")[1] : "home"),
+	// 		);
 
-			if ($(this).attr("href").indexOf("?ultp=plugins") > 0) {
-				$(this).attr("target", "_blank");
-			}
-		}
-		if ($(this).attr("href").indexOf("?page=go_postx_pro") > 0) {
-			$(this).attr("target", "_blank");
-		}
-	});
+	// 		if ($(this).attr("href").indexOf("?ultp=plugins") > 0) {
+	// 			$(this).attr("target", "_blank");
+	// 		}
+	// 	}
+	// 	if ($(this).attr("href").indexOf("?page=go_postx_pro") > 0) {
+	// 		$(this).attr("target", "_blank");
+	// 	}
+	// });
 
 	$(document).on("click", ".ultp-popup-close", function (e) {
 		if (!$(this).hasClass("popup-center")) {
@@ -181,7 +181,7 @@
 				e.preventDefault();
 				window.open("https://www.wpxpo.com/postx/");
 			}
-		}
+		},
 	);
 
 	// *************************************
@@ -213,11 +213,11 @@
 					.addClass("current");
 				if (hash == "#home") {
 					$("#toplevel_page_ultp-settings ul li.wp-first-item").addClass(
-						"current"
+						"current",
 					);
 				} else {
 					$(
-						"#toplevel_page_ultp-settings ul li a[href$=" + hash + "]"
+						"#toplevel_page_ultp-settings ul li a[href$=" + hash + "]",
 					).addClass("current");
 				}
 			}
@@ -246,12 +246,12 @@
 						.addClass("current"); // Dash Nav Menu click
 					if (value[1] == "home") {
 						$("#toplevel_page_ultp-settings ul li.wp-first-item").addClass(
-							"current"
+							"current",
 						);
 					}
 				}
 			}
-		}
+		},
 	);
 
 	$(".page-title-action").on("click", function (e) {
@@ -329,7 +329,7 @@
 			},
 			error: function (xhr) {
 				console.log(
-					"Error occured.please try again" + xhr.statusText + xhr.responseText
+					"Error occured.please try again" + xhr.statusText + xhr.responseText,
 				);
 			},
 		});
