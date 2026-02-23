@@ -426,7 +426,7 @@ class ULTP_Initialization {
 						'is_free'           => ! $is_active,
 						'user_email'        => wp_get_current_user()->user_email,
 						'home_url'          => home_url(),
-						'generalDiscount'   => get_transient( transient: 'ultp_generalDiscount' ),
+						'generalDiscount'   => get_transient( 'ultp_generalDiscount' ),
 						'helloBar'          => Notice::get_hellobar_config(),
 						'userInfo'          => array(
 							'name'  => $user_info->first_name ? $user_info->first_name . ( $user_info->last_name ? ' ' . $user_info->last_name : '' ) : $user_info->user_login,
