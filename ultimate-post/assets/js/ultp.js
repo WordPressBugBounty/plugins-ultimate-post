@@ -3,6 +3,36 @@
 
 	const isFront = $("body.postx-admin-page").length == 0;
 	// *************************************
+	// Nonce Generation for AJAX
+	// *************************************
+	async function getUltpNonce() {
+		const nonce = sessionStorage.getItem("ultp_nonce");
+		if (nonce) return nonce;
+
+		try {
+			const response = await $.ajax({
+				url: ultp_data_frontend.ajax,
+				type: "POST",
+				data: { action: "ultp_get_nonce" },
+			});
+
+			if (response?.success && response?.data?.nonce) {
+				sessionStorage.setItem("ultp_nonce", response.data.nonce);
+				return response.data.nonce;
+			}
+
+			console.log("Failed to fetching nonce");
+			return null;
+		} catch (xhr) {
+			console.log(
+				"Error occured.please try again" + xhr.statusText + xhr.responseText,
+			);
+			console.log("Nonce Not Generating Properly");
+			return null;
+		}
+	}
+
+	// *************************************
 	// Social Share window
 	// *************************************
 	$(".ultp-post-share-item a").each(function () {
@@ -530,9 +560,9 @@
 	// *************************************
 	// Filter
 	// *************************************
-	$(document).on("click", ".ultp-filter-wrap li a", function (e) {
+	$(document).on("click", ".ultp-filter-wrap li a", async function (e) {
 		e.preventDefault();
-
+		const ultpNonce = await getUltpNonce();
 		if ($(this).closest("li").hasClass("filter-item")) {
 			let that = $(this),
 				parents = that.closest(".ultp-filter-wrap"),
@@ -579,7 +609,7 @@
 						widgetBlockId: widgetBlockId,
 						ultpUniqueIds: ultpUniqueIds || [],
 						ultpCurrentUniquePosts: ultpCurrentUniquePosts || [],
-						wpnonce: ultp_data_frontend.security,
+						wpnonce: ultpNonce,
 					},
 					beforeSend: function () {
 						wrap.addClass("ultp-loading-active");
@@ -763,155 +793,161 @@
 		);
 	}
 
-	$(document).on("click", ".ultp-pagination-ajax-action li", function (e) {
-		e.preventDefault();
-		let that = $(this),
-			parents = that.closest(".ultp-pagination-ajax-action"),
-			wrap = that.closest(".ultp-block-wrapper");
+	$(document).on(
+		"click",
+		".ultp-pagination-ajax-action li",
+		async function (e) {
+			e.preventDefault();
+			const ultpNonce = await getUltpNonce();
 
-		const blockid = parents.attr("data-blockid");
+			let that = $(this),
+				parents = that.closest(".ultp-pagination-ajax-action"),
+				wrap = that.closest(".ultp-block-wrapper");
 
-		// Pagination block integration
-		if (wrap.length < 1) {
-			const pagiFor = parents.data("for");
-			if (pagiFor) {
-				wrap = $("." + pagiFor + " .ultp-block-wrapper");
+			const blockid = parents.attr("data-blockid");
+
+			// Pagination block integration
+			if (wrap.length < 1) {
+				const pagiFor = parents.data("for");
+				if (pagiFor) {
+					wrap = $("." + pagiFor + " .ultp-block-wrapper");
+				}
 			}
-		}
 
-		if (parents.is(".ultp-disable-editor-click")) {
-			return;
-		}
-		let pageNum = 1;
-		let pages = parents.attr("data-pages");
+			if (parents.is(".ultp-disable-editor-click")) {
+				return;
+			}
+			let pageNum = 1;
+			let pages = parents.attr("data-pages");
 
-		if (that.attr("data-current")) {
-			pageNum = Number(that.attr("data-current"));
-			parents
-				.attr("data-paged", pageNum)
-				.find("li")
-				.removeClass("pagination-active");
-			serial(parents, pageNum, pages);
-			showHide(parents, pageNum, pages);
-		} else {
-			if (that.hasClass("ultp-prev-page-numbers")) {
-				pageNum = Number(parents.attr("data-paged")) - 1;
+			if (that.attr("data-current")) {
+				pageNum = Number(that.attr("data-current"));
 				parents
 					.attr("data-paged", pageNum)
 					.find("li")
 					.removeClass("pagination-active");
-				//parents.find('li[data-current="'+pageNum+'"]').addClass('pagination-active')
 				serial(parents, pageNum, pages);
 				showHide(parents, pageNum, pages);
-			} else if (that.hasClass("ultp-next-page-numbers")) {
-				pageNum = Number(parents.attr("data-paged")) + 1;
-				parents
-					.attr("data-paged", pageNum)
-					.find("li")
-					.removeClass("pagination-active");
-				//parents.find('li[data-current="'+pageNum+'"]').addClass('pagination-active')
-				serial(parents, pageNum, pages);
-				showHide(parents, pageNum, pages);
-			}
-		}
-
-		let post_ID =
-			parents.parents(".ultp-shortcode").length != 0 &&
-			parents.data("selfpostid") == "no"
-				? parents.parents(".ultp-shortcode").data("postid")
-				: parents.data("postid");
-
-		if (that.closest(".ultp-builder-content").length > 0) {
-			post_ID = that.closest(".ultp-builder-content").data("postid");
-		}
-		let widgetBlockId = "";
-		let widgetBlock = $(this).parents(".widget_block:first");
-		if (widgetBlock.length > 0) {
-			let widget_items = widgetBlock.attr("id").split("-");
-			widgetBlockId = widget_items[widget_items.length - 1];
-		}
-
-		const ultpUniqueIds = sessionStorage.getItem("ultp_uniqueIds");
-		const ultpCurrentUniquePosts = JSON.stringify(
-			wrap.find(".ultp-current-unique-posts").data("current-unique-posts"),
-		);
-
-		// Adv Filter Integration
-		const filterValue = parents.data("filter-value") || "";
-		const advFilterData = {};
-
-		if (Array.isArray(filterValue) && filterValue.length > 0) {
-			advFilterData.filterShow = true;
-			advFilterData.checkFilter = true;
-			advFilterData.isAdv = true;
-			advFilterData.author = parents.data("filter-author") || "";
-			advFilterData.order = parents.data("filter-order") || "";
-			advFilterData.orderby = parents.data("filter-orderby") || "";
-			advFilterData.adv_sort = parents.data("filter-adv-sort") || "";
-		}
-
-		if (pageNum) {
-			if (blockid) {
-				setCurrPage(blockid, pageNum, getCurrPage(blockid));
+			} else {
+				if (that.hasClass("ultp-prev-page-numbers")) {
+					pageNum = Number(parents.attr("data-paged")) - 1;
+					parents
+						.attr("data-paged", pageNum)
+						.find("li")
+						.removeClass("pagination-active");
+					//parents.find('li[data-current="'+pageNum+'"]').addClass('pagination-active')
+					serial(parents, pageNum, pages);
+					showHide(parents, pageNum, pages);
+				} else if (that.hasClass("ultp-next-page-numbers")) {
+					pageNum = Number(parents.attr("data-paged")) + 1;
+					parents
+						.attr("data-paged", pageNum)
+						.find("li")
+						.removeClass("pagination-active");
+					//parents.find('li[data-current="'+pageNum+'"]').addClass('pagination-active')
+					serial(parents, pageNum, pages);
+					showHide(parents, pageNum, pages);
+				}
 			}
 
-			$.ajax({
-				url: ultp_data_frontend.ajax,
-				type: "POST",
-				data: {
-					exclude: parents.data("expost"),
-					action: "ultp_pagination",
-					paged: pageNum,
-					blockId: parents.data("blockid"),
-					postId: post_ID,
-					blockName: parents.data("blockname"),
-					builder: parents.data("builder"),
-					widgetBlockId: widgetBlockId,
-					ultpUniqueIds: ultpUniqueIds || [],
-					ultpCurrentUniquePosts: ultpCurrentUniquePosts || [],
+			let post_ID =
+				parents.parents(".ultp-shortcode").length != 0 &&
+				parents.data("selfpostid") == "no"
+					? parents.parents(".ultp-shortcode").data("postid")
+					: parents.data("postid");
 
-					filterType: parents.data("filter-type") || "",
-					filterValue: filterValue,
+			if (that.closest(".ultp-builder-content").length > 0) {
+				post_ID = that.closest(".ultp-builder-content").data("postid");
+			}
+			let widgetBlockId = "";
+			let widgetBlock = $(this).parents(".widget_block:first");
+			if (widgetBlock.length > 0) {
+				let widget_items = widgetBlock.attr("id").split("-");
+				widgetBlockId = widget_items[widget_items.length - 1];
+			}
 
-					...advFilterData,
+			const ultpUniqueIds = sessionStorage.getItem("ultp_uniqueIds");
+			const ultpCurrentUniquePosts = JSON.stringify(
+				wrap.find(".ultp-current-unique-posts").data("current-unique-posts"),
+			);
 
-					wpnonce: ultp_data_frontend.security,
-				},
-				beforeSend: function () {
-					wrap.addClass("ultp-loading-active");
-				},
-				success: function (data) {
-					wrap.find(".ultp-block-items-wrap").html(data);
-					setSession(
-						"ultp_uniqueIds",
-						JSON.stringify(
-							wrap.find(".ultp-current-unique-posts").data("ultp-unique-ids"),
-						),
-					);
-					if ($(window).scrollTop() > wrap.offset().top) {
-						$([document.documentElement, document.body]).animate(
-							{
-								scrollTop: wrap.offset().top - 80,
-							},
-							100,
+			// Adv Filter Integration
+			const filterValue = parents.data("filter-value") || "";
+			const advFilterData = {};
+
+			if (Array.isArray(filterValue) && filterValue.length > 0) {
+				advFilterData.filterShow = true;
+				advFilterData.checkFilter = true;
+				advFilterData.isAdv = true;
+				advFilterData.author = parents.data("filter-author") || "";
+				advFilterData.order = parents.data("filter-order") || "";
+				advFilterData.orderby = parents.data("filter-orderby") || "";
+				advFilterData.adv_sort = parents.data("filter-adv-sort") || "";
+			}
+
+			if (pageNum) {
+				if (blockid) {
+					setCurrPage(blockid, pageNum, getCurrPage(blockid));
+				}
+
+				$.ajax({
+					url: ultp_data_frontend.ajax,
+					type: "POST",
+					data: {
+						exclude: parents.data("expost"),
+						action: "ultp_pagination",
+						paged: pageNum,
+						blockId: parents.data("blockid"),
+						postId: post_ID,
+						blockName: parents.data("blockname"),
+						builder: parents.data("builder"),
+						widgetBlockId: widgetBlockId,
+						ultpUniqueIds: ultpUniqueIds || [],
+						ultpCurrentUniquePosts: ultpCurrentUniquePosts || [],
+
+						filterType: parents.data("filter-type") || "",
+						filterValue: filterValue,
+
+						...advFilterData,
+
+						wpnonce: ultpNonce,
+					},
+					beforeSend: function () {
+						wrap.addClass("ultp-loading-active");
+					},
+					success: function (data) {
+						wrap.find(".ultp-block-items-wrap").html(data);
+						setSession(
+							"ultp_uniqueIds",
+							JSON.stringify(
+								wrap.find(".ultp-current-unique-posts").data("ultp-unique-ids"),
+							),
 						);
-					}
-				},
-				complete: function () {
-					wrap.removeClass("ultp-loading-active");
-					handleDailyMotion();
-				},
-				error: function (xhr) {
-					console.log(
-						"Error occured.please try again" +
-							xhr.statusText +
-							xhr.responseText,
-					);
-					wrap.removeClass("ultp-loading-active");
-				},
-			});
-		}
-	});
+						if ($(window).scrollTop() > wrap.offset().top) {
+							$([document.documentElement, document.body]).animate(
+								{
+									scrollTop: wrap.offset().top - 80,
+								},
+								100,
+							);
+						}
+					},
+					complete: function () {
+						wrap.removeClass("ultp-loading-active");
+						handleDailyMotion();
+					},
+					error: function (xhr) {
+						console.log(
+							"Error occured.please try again" +
+								xhr.statusText +
+								xhr.responseText,
+						);
+						wrap.removeClass("ultp-loading-active");
+					},
+				});
+			}
+		},
+	);
 
 	// *************************************
 	// SlideShow

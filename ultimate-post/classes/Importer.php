@@ -203,7 +203,7 @@ class Importer {
 			);
 		}
 
-		$response = wp_remote_get(
+		$response = wp_safe_remote_post(
 			$api_endpoint . '/wp-json/importer/site_all_posts',
 			array(
 				'method'  => 'POST',
@@ -277,7 +277,7 @@ class Importer {
 			}
 		}
 
-		$response = wp_remote_get(
+		$response = wp_safe_remote_post(
 			$api_endpoint . '/wp-json/importer/single',
 			array(
 				'method'  => 'POST',
@@ -760,7 +760,7 @@ class Importer {
 				'license'  => Xpo::get_lc_key(),
 				'ultp_ver' => ULTP_VER,
 			);
-			$response      = wp_remote_get(
+			$response      = wp_safe_remote_post(
 				$api_endpoint . '/wp-json/importer/single',
 				array(
 					'method'  => 'POST',

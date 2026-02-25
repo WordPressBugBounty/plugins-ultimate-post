@@ -73,7 +73,7 @@ class Post_Featured_Image {
 		$post_video = get_post_meta( get_the_ID(), '__builder_feature_video', true );
 		$caption    = get_post_meta( get_the_ID(), '__builder_feature_caption', true );
 
-		$embeded       = $post_video ? ultimate_post()->get_embeded_video( $post_video, false, true, false, true, true, false, true, array( 'width' => array( 'width' => $attr['videoWidth'] ) ) ) : '';
+		$embeded       = $post_video ? ultimate_post()->get_embeded_video( $post_video, false, true, false, true, true, false, true, array( 'width' => array( 'width' => $attr['videoWidth'] ) ), 'from-block' ) : '';
 		$post_thumb_id = get_post_thumbnail_id( get_the_ID() );
 		$img_content   = ultimate_post()->get_image( $post_thumb_id, $attr['imgCrop'], '', $attr['altText'], $attr['imgSrcset'] );
 		$img_caption   = wp_get_attachment_caption( $post_thumb_id );

@@ -372,7 +372,7 @@ class Xpo {
 	 */
 	public static function install_and_active_plugin( $name ) {
 		$to_r        = array( 'done' => true );
-		$plugin_slug = $name;
+		$plugin_slug = '';
 		switch ( $name ) {
 			case 'post_x':
 				$plugin_slug = 'ultimate-post';

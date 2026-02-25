@@ -674,10 +674,10 @@ class Functions {
 	 * @return ARRAY
 	 */
 	public function get_query( $attr ) {
-		$builder   = isset( $attr['builder'] ) ? $attr['builder'] : '';
-		$post_type = isset( $attr['queryType'] ) ? $attr['queryType'] : 'post';
-		$get_post_type = isset($attr['queryPostType']) ? $attr['queryPostType'] : '';
-		if($post_type != 'archiveBuilder' && !empty($get_post_type)  && $post_type == 'customPostType') {
+		$builder       = isset( $attr['builder'] ) ? $attr['builder'] : '';
+		$post_type     = isset( $attr['queryType'] ) ? $attr['queryType'] : 'post';
+		$get_post_type = isset( $attr['queryPostType'] ) ? $attr['queryPostType'] : '';
+		if ( $post_type != 'archiveBuilder' && ! empty( $get_post_type ) && $post_type == 'customPostType' ) {
 			$post_type = $get_post_type;
 		}
 
@@ -850,7 +850,7 @@ class Functions {
 
 		$query_args = array(
 			'posts_per_page' => $query_number,
-			'post_type'      => is_array( $post_type ) && ! empty( $post_type ) ? $post_type : ( 'archiveBuilder' == $post_type ? 'post' : ( is_string( $post_type ) ? is_array(json_decode( $post_type )) ? json_decode( $post_type ) : $post_type   : $post_type ) ),
+			'post_type'      => is_array( $post_type ) && ! empty( $post_type ) ? $post_type : ( 'archiveBuilder' == $post_type ? 'post' : ( is_string( $post_type ) ? is_array( json_decode( $post_type ) ) ? json_decode( $post_type ) : $post_type : $post_type ) ),
 			'orderby'        => isset( $attr['queryOrderBy'] ) ? $attr['queryOrderBy'] : 'date',
 			'order'          => isset( $attr['queryOrder'] ) ? $attr['queryOrder'] : 'desc',
 			'paged'          => $paged,
@@ -1317,8 +1317,8 @@ class Functions {
 	public function get_svg_icon( $ultp_icons = '' ) {
 		$svg = '';
 		if ( $ultp_icons ) {
-			$icon = $this->svg_icon_compatibility($ultp_icons);
-			$svg = $this->get_path_file_contents( ULTP_PATH . 'assets/img/iconpack/' . $icon . '.svg' );
+			$icon = $this->svg_icon_compatibility( $ultp_icons );
+			$svg  = $this->get_path_file_contents( ULTP_PATH . 'assets/img/iconpack/' . $icon . '.svg' );
 		}
 		return $svg;
 	}
@@ -1696,8 +1696,71 @@ class Functions {
 	 * @param ARRAY | string $size Size for oEmbed.
 	 * @return STRING | false Video embed HTML or false on failure.
 	 */
-	public function get_embeded_video( $url, $autoPlay, $loop, $mute, $playback, $preload, $poster, $inline, $size ) {
+	public function get_embeded_video( $url, $autoPlay, $loop, $mute, $playback, $preload, $poster, $inline, $size, $location = '' ) {
 		$vidAutoPlay = $vidloop = $vidloop = $vidmute = $vidplayback = $vidPoster = $vidInline = '';
+
+		$video_type = '';
+		// Determine video type
+		$video_type = 'local';
+		if ( strpos( $url, 'youtube.com' ) !== false || strpos( $url, 'youtu.be' ) !== false ) {
+			$video_type = 'youtube';
+		} elseif ( strpos( $url, 'vimeo.com' ) !== false ) {
+			$video_type = 'vimeo';
+		}
+
+		// Get poster URL
+		$poster_url = '';
+		if ( is_array( $poster ) && isset( $poster['url'] ) ) {
+			$poster_url = $poster['url'];
+		} elseif ( is_string( $poster ) ) {
+			$poster_url = $poster;
+		}
+
+		// Prepare size attributes
+		$width  = is_array( $size ) && isset( $size['width'] ) ? $size['width'] : 560;
+		$height = is_array( $size ) && isset( $size['height'] ) ? $size['height'] : 315;
+
+		$video_id = '';
+
+		if ( $url ) {
+			$regex = '/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/';
+			if ( preg_match( $regex, $url, $matches ) ) {
+				$video_id = $matches[1];
+			}
+		}
+
+		// Create data attributes for lazy loading
+		$data_attrs = array(
+			'data-video-url'   => is_scalar( $url ) ? esc_attr( $url ) : '',
+			'data-video-type'  => is_scalar( $video_type ) ? esc_attr( $video_type ) : '',
+			'data-autoplay'    => ! empty( $autoPlay ) ? '1' : '0',
+			'data-loop'        => ! empty( $loop ) ? '1' : '0',
+			'data-mute'        => ! empty( $mute ) ? '1' : '0',
+			'data-controls'    => ! empty( $playback ) ? '1' : '0',
+			'data-preload'     => is_scalar( $preload ) ? esc_attr( $preload ) : '',
+			'data-poster'      => is_scalar( $poster_url ) ? esc_attr( $poster_url ) : '',
+			'data-playsinline' => ! empty( $inline ) ? '1' : '0',
+			'data-width'       => is_scalar( $width ) ? esc_attr( $width ) : '',
+			'data-height'      => is_scalar( $height ) ? esc_attr( $height ) : '',
+			'data-video-id'    => is_scalar( $video_id ) ? esc_attr( $video_id ) : '',
+		);
+
+		$data_string = implode(
+			' ',
+			array_map(
+				function ( $key, $value ) {
+					return $key . '="' . $value . '"';
+				},
+				array_keys( $data_attrs ),
+				$data_attrs
+			)
+		);
+
+		$html = '<div class="ultp-video-wrapper ultp-embaded-video"' . $data_string . '></div>';
+
+		if ( $location == '' ) {
+			return $html;
+		}
 
 		if ( $autoPlay ) {
 			$vidAutoPlay = 'autoplay';
@@ -2708,230 +2771,230 @@ class Functions {
 		// Get icon aliases mapping
 		$icon_aliases = array(
 			// Arrow aliases
-			'angle_bottom_left_line' => 'arrow_down_bottom_left_solid',
-			'angle_bottom_right_line' => 'arrow_down_bottom_right_solid',
-			'angle_top_left_line' => 'arrow_up_top_left_solid',
-			'angle_top_right_line' => 'arrow_up_top_right_solid',
-			'rightFillAngle' => 'right_triangle_angle_play_arrow_forward_solid',
-			'leftAngle2' => 'arrow_left_previous_backward_chevron_line',
-			'rightAngle2' => 'arrow_right_next_forward_chevron_line',
-			'collapse_bottom_line' => 'arrow_down_dropdown_maximize_chevron_line',
-			'arrowUp2' => 'arrow_up_dropdown_minimize_chevron_line',
-			'longArrowUp2' => 'long_arrow_up_top_increase_solid',
-			
+			'angle_bottom_left_line'   => 'arrow_down_bottom_left_solid',
+			'angle_bottom_right_line'  => 'arrow_down_bottom_right_solid',
+			'angle_top_left_line'      => 'arrow_up_top_left_solid',
+			'angle_top_right_line'     => 'arrow_up_top_right_solid',
+			'rightFillAngle'           => 'right_triangle_angle_play_arrow_forward_solid',
+			'leftAngle2'               => 'arrow_left_previous_backward_chevron_line',
+			'rightAngle2'              => 'arrow_right_next_forward_chevron_line',
+			'collapse_bottom_line'     => 'arrow_down_dropdown_maximize_chevron_line',
+			'arrowUp2'                 => 'arrow_up_dropdown_minimize_chevron_line',
+			'longArrowUp2'             => 'long_arrow_up_top_increase_solid',
+
 			// Circle arrow aliases
-			'arrow_left_circle_line' => 'arrow_left_backward_circle_line',
+			'arrow_left_circle_line'   => 'arrow_left_backward_circle_line',
 			'arrow_bottom_circle_line' => 'arrow_down_bottom_downward_circle_line',
-			'arrow_right_circle_line' => 'arrow_right_forward_circle_line',
-			'arrow_top_circle_line' => 'arrow_up_top_upward_circle_line',
-			
+			'arrow_right_circle_line'  => 'arrow_right_forward_circle_line',
+			'arrow_top_circle_line'    => 'arrow_up_top_upward_circle_line',
+
 			// Close/Cross aliases
-			'close_circle_line' => 'cross_close_x_minimize_circle_line',
-			'close_line' => 'cross_x_close_minimize_line',
-			
+			'close_circle_line'        => 'cross_close_x_minimize_circle_line',
+			'close_line'               => 'cross_x_close_minimize_line',
+
 			// Direction aliases
-			'arrow_down_line' => 'arrow_down_bottom_downward_line',
-			'leftArrowLg' => 'arrow_left_backward_line',
-			'rightArrowLg' => 'arrow_left_forward_line',
-			'arrow_up_line' => 'long_arrow_up_top_increase_line',
-			
+			'arrow_down_line'          => 'arrow_down_bottom_downward_line',
+			'leftArrowLg'              => 'arrow_left_backward_line',
+			'rightArrowLg'             => 'arrow_left_forward_line',
+			'arrow_up_line'            => 'long_arrow_up_top_increase_line',
+
 			// Solid direction aliases
-			'down_solid' => 'arrow_down_bottom_downward_circle_solid',
-			'right_solid' => 'arrow_right_forward_circle_solid',
-			'left_solid' => 'arrow_left_backward_circle_solid',
-			'up_solid' => 'arrow_up_top_upward_circle_solid',
-			
+			'down_solid'               => 'arrow_down_bottom_downward_circle_solid',
+			'right_solid'              => 'arrow_right_forward_circle_solid',
+			'left_solid'               => 'arrow_left_backward_circle_solid',
+			'up_solid'                 => 'arrow_up_top_upward_circle_solid',
+
 			// Move aliases
-			'bottom_right_line' => 'arrow_move_up_right_line',
-			'bottom_left_line' => 'arrow_move_up_left_line',
-			'top_left_angle_line' => 'arrow_move_down_left_line',
-			'top_right_line' => 'arrow_move_down_right_line',
-			
+			'bottom_right_line'        => 'arrow_move_up_right_line',
+			'bottom_left_line'         => 'arrow_move_up_left_line',
+			'top_left_angle_line'      => 'arrow_move_down_left_line',
+			'top_right_line'           => 'arrow_move_down_right_line',
+
 			// Utility aliases
-			'at_line' => 'at_a_mail_line',
-			'refresh' => 'refresh_reset_cycle_loop_infinity_line',
-			'cart_line' => 'shopping_cart_line',
-			'cart_solid' => 'add_plus_shopping_cart_solid',
-			'cog_line' => 'settings_tool_function_line',
-			'cog_solid' => 'settings_tool_function_solid',
-			'clock' => 'clock_reading_time_1_line',
-			'book' => 'book_line',
-			'download_line' => 'download_1_line',
-			'download_solid' => 'download_1_solid',
-			'downlod_bottom_solid' => 'download_1_solid',
-			
+			'at_line'                  => 'at_a_mail_line',
+			'refresh'                  => 'refresh_reset_cycle_loop_infinity_line',
+			'cart_line'                => 'shopping_cart_line',
+			'cart_solid'               => 'add_plus_shopping_cart_solid',
+			'cog_line'                 => 'settings_tool_function_line',
+			'cog_solid'                => 'settings_tool_function_solid',
+			'clock'                    => 'clock_reading_time_1_line',
+			'book'                     => 'book_line',
+			'download_line'            => 'download_1_line',
+			'download_solid'           => 'download_1_solid',
+			'downlod_bottom_solid'     => 'download_1_solid',
+
 			// Visibility aliases
-			'eye' => 'view_count_show_visible_eye_open_2_line',
-			'hidden_line' => 'hidden_hide_invisible_line',
-			
+			'eye'                      => 'view_count_show_visible_eye_open_2_line',
+			'hidden_line'              => 'hidden_hide_invisible_line',
+
 			// Location aliases
-			'home_line' => 'home_house_line',
-			'home_solid' => 'home_house_solid',
-			'location_line' => 'location_gps_map_line',
-			'location_solid' => 'location_gps_map_solid',
-			
+			'home_line'                => 'home_house_line',
+			'home_solid'               => 'home_house_solid',
+			'location_line'            => 'location_gps_map_line',
+			'location_solid'           => 'location_gps_map_solid',
+
 			// Emotion aliases
-			'love_line' => 'heart_love_wishlist_favourite_line',
-			'love_solid' => 'heart_love_wishlist_favourite_solid',
-			
+			'love_line'                => 'heart_love_wishlist_favourite_line',
+			'love_solid'               => 'heart_love_wishlist_favourite_solid',
+
 			// Media aliases
-			'play_line' => 'play_media_video_circle_line',
-			'videoplay' => 'right_triangle_angle_play_arrow_forward_solid',
-			'left_angle_solid' => 'left_triangle_angle_arrow_backward_solid',
-			
+			'play_line'                => 'play_media_video_circle_line',
+			'videoplay'                => 'right_triangle_angle_play_arrow_forward_solid',
+			'left_angle_solid'         => 'left_triangle_angle_arrow_backward_solid',
+
 			// Shape aliases
-			'caretArrow' => 'caret_up_top_triangle_angle_arrow_upward_solid',
-			'rectangle_solid' => 'square_rounded_solid',
-			'triangle_solid' => 'triangle_shape_solid',
-			
+			'caretArrow'               => 'caret_up_top_triangle_angle_arrow_upward_solid',
+			'rectangle_solid'          => 'square_rounded_solid',
+			'triangle_solid'           => 'triangle_shape_solid',
+
 			// Status aliases
-			'restriction_line' => 'restriction_no_stop_line',
-			'right_circle_line' => 'correct_save_check_circle_line',
-			'save_line' => 'correct_save_check_line',
-			'search_line' => 'search_magnify_line',
-			'search_solid' => 'search_magnify_solid',
-			
+			'restriction_line'         => 'restriction_no_stop_line',
+			'right_circle_line'        => 'correct_save_check_circle_line',
+			'save_line'                => 'correct_save_check_line',
+			'search_line'              => 'search_magnify_line',
+			'search_solid'             => 'search_magnify_solid',
+
 			// Warning aliases
-			'notice_circle_solid' => 'warning_circle_solid',
-			'notice_solid' => 'warning_triangle_solid',
-			'warning_circle_line' => 'warning_circle_line',
-			'warning_triangle_line' => 'warning_triangle_line',
-			
+			'notice_circle_solid'      => 'warning_circle_solid',
+			'notice_solid'             => 'warning_triangle_solid',
+			'warning_circle_line'      => 'warning_circle_line',
+			'warning_triangle_line'    => 'warning_triangle_line',
+
 			// Category aliases
-			'cat1' => 'category_file_documents_1_solid',
-			'cat2' => 'category_book_line',
-			'cat3' => 'category_file_documents_2_line',
-			'cat4' => 'category_file_documents_3_line',
-			'cat5' => 'category_file_documents_3_solid',
-			'cat6' => 'category_file_documents_4_line',
-			'cat7' => 'category_book_line',
-			
+			'cat1'                     => 'category_file_documents_1_solid',
+			'cat2'                     => 'category_book_line',
+			'cat3'                     => 'category_file_documents_2_line',
+			'cat4'                     => 'category_file_documents_3_line',
+			'cat5'                     => 'category_file_documents_3_solid',
+			'cat6'                     => 'category_file_documents_4_line',
+			'cat7'                     => 'category_book_line',
+
 			// Comment aliases
-			'commentCount1' => 'messege_comment_1_line',
-			'commentCount2' => 'messege_comment_3_solid',
-			'commentCount3' => 'messege_comment_3_line',
-			'commentCount4' => 'messege_comment_6_line',
-			'commentCount5' => 'messege_comment_7_line',
-			'commentCount6' => 'messege_comment_8_line',
-			'comment' => 'messege_comment_4_line',
-			
+			'commentCount1'            => 'messege_comment_1_line',
+			'commentCount2'            => 'messege_comment_3_solid',
+			'commentCount3'            => 'messege_comment_3_line',
+			'commentCount4'            => 'messege_comment_6_line',
+			'commentCount5'            => 'messege_comment_7_line',
+			'commentCount6'            => 'messege_comment_8_line',
+			'comment'                  => 'messege_comment_4_line',
+
 			// Date aliases
-			'date1' => 'calendar_date_4_line',
-			'date2' => 'calendar_date_1_solid',
-			'date3' => 'calendar_date_2_line',
-			'date4' => 'calendar_date_4_solid',
-			'date5' => 'calendar_date_3_line',
-			'calendar' => 'calendar_date_3_line',
-			
+			'date1'                    => 'calendar_date_4_line',
+			'date2'                    => 'calendar_date_1_solid',
+			'date3'                    => 'calendar_date_2_line',
+			'date4'                    => 'calendar_date_4_solid',
+			'date5'                    => 'calendar_date_3_line',
+			'calendar'                 => 'calendar_date_3_line',
+
 			// Reading time aliases
-			'readingTime1' => 'clock_reading_time_3_line',
-			'readingTime2' => 'clock_reading_time_2_line',
-			'readingTime3' => 'book_reading_time_line',
-			'readingTime4' => 'clock_reading_time_1_line',
-			'readingTime5' => 'hourglass_timer_time_line',
-			
+			'readingTime1'             => 'clock_reading_time_3_line',
+			'readingTime2'             => 'clock_reading_time_2_line',
+			'readingTime3'             => 'book_reading_time_line',
+			'readingTime4'             => 'clock_reading_time_1_line',
+			'readingTime5'             => 'hourglass_timer_time_line',
+
 			// Tag aliases
-			'tag1' => 'tag_bookmark_save_favourite_mark_discount_sale_line',
-			'tag2' => 'price_tag_label_category_sale_discount_solid',
-			'tag3' => 'price_tag_label_category_sale_discount_line',
-			'tag4' => 'price_tag_offer_sale_coupon_solid',
-			'tag5' => 'price_tag_label_category_sale_discount_line',
-			'tag6' => 'growth_increase_up_solid',
-			
+			'tag1'                     => 'tag_bookmark_save_favourite_mark_discount_sale_line',
+			'tag2'                     => 'price_tag_label_category_sale_discount_solid',
+			'tag3'                     => 'price_tag_label_category_sale_discount_line',
+			'tag4'                     => 'price_tag_offer_sale_coupon_solid',
+			'tag5'                     => 'price_tag_label_category_sale_discount_line',
+			'tag6'                     => 'growth_increase_up_solid',
+
 			// View count aliases
-			'viewCount1' => 'view_count_show_visible_eye_open_1_line',
-			'viewCount2' => 'view_count_show_visible_eye_open_2_line',
-			'viewCount3' => 'view_count_show_visible_eye_open_3_line',
-			'viewCount4' => 'view_count_show_visible_eye_open_4_solid',
-			'viewCount5' => 'view_count_show_visible_eye_open_5_solid',
-			'viewCount6' => 'view_count_show_visible_eye_open_5_solid',
-			
+			'viewCount1'               => 'view_count_show_visible_eye_open_1_line',
+			'viewCount2'               => 'view_count_show_visible_eye_open_2_line',
+			'viewCount3'               => 'view_count_show_visible_eye_open_3_line',
+			'viewCount4'               => 'view_count_show_visible_eye_open_4_solid',
+			'viewCount5'               => 'view_count_show_visible_eye_open_5_solid',
+			'viewCount6'               => 'view_count_show_visible_eye_open_5_solid',
+
 			// Author aliases
-			'author1' => 'author_user_human_1_line',
-			'author2' => 'author_user_human_4_line',
-			'author3' => 'author_user_human_4_solid',
-			'author4' => 'author_user_human_4_line',
-			'author5' => 'author_user_human_3_solid',
-			'author6' => 'author_user_human_6_line',
-			'user' => 'author_user_human_3_line',
-			
+			'author1'                  => 'author_user_human_1_line',
+			'author2'                  => 'author_user_human_4_line',
+			'author3'                  => 'author_user_human_4_solid',
+			'author4'                  => 'author_user_human_4_line',
+			'author5'                  => 'author_user_human_3_solid',
+			'author6'                  => 'author_user_human_6_line',
+			'user'                     => 'author_user_human_3_line',
+
 			// Device aliases
-			'desktop' => 'desktop_monitor_computer_line',
-			'laptop' => 'laptop_computer_line',
-			'tablet' => 'tablet_ipad_pad_line',
-			'mobile' => 'mobile_smartphone_phone_line',
-			
+			'desktop'                  => 'desktop_monitor_computer_line',
+			'laptop'                   => 'laptop_computer_line',
+			'tablet'                   => 'tablet_ipad_pad_line',
+			'mobile'                   => 'mobile_smartphone_phone_line',
+
 			// Emoji aliases
-			'angry_line' => 'angry_emoji_line',
-			'angry_solid' => 'angry_emoji_solid',
-			'confused_line' => 'confused_emoji_line',
-			'confused_solid' => 'confused_emoji_solid',
-			'happy_line' => 'happy_emoji_line',
-			'happy_solid' => 'happy_emoji_solid',
-			'smile_line' => 'smile_emoji_line',
-			'smile_solid' => 'smile_emoji_solid',
-			
+			'angry_line'               => 'angry_emoji_line',
+			'angry_solid'              => 'angry_emoji_solid',
+			'confused_line'            => 'confused_emoji_line',
+			'confused_solid'           => 'confused_emoji_solid',
+			'happy_line'               => 'happy_emoji_line',
+			'happy_solid'              => 'happy_emoji_solid',
+			'smile_line'               => 'smile_emoji_line',
+			'smile_solid'              => 'smile_emoji_solid',
+
 			// Social aliases
-			'share_line' => 'social_community_line',
-			'share' => 'share_social_solid',
-			'apple_solid' => 'apple_logo_icon_solid',
-			'android_solid' => 'android_logo_icon_solid',
-			'google_solid' => 'google_logo_icon_solid',
-			'messenger' => 'messenger_logo_icon_solid',
-			'microsoft_solid' => 'microsoft_logo_icon_solid',
-			'mail' => 'mail_email_messege_solid',
-			'facebook' => 'facebook_logo_icon_solid',
-			'twitter' => 'twitter_x_logo_icon_line',
-			'link' => 'link_chains_line',
-			
+			'share_line'               => 'social_community_line',
+			'share'                    => 'share_social_solid',
+			'apple_solid'              => 'apple_logo_icon_solid',
+			'android_solid'            => 'android_logo_icon_solid',
+			'google_solid'             => 'google_logo_icon_solid',
+			'messenger'                => 'messenger_logo_icon_solid',
+			'microsoft_solid'          => 'microsoft_logo_icon_solid',
+			'mail'                     => 'mail_email_messege_solid',
+			'facebook'                 => 'facebook_logo_icon_solid',
+			'twitter'                  => 'twitter_x_logo_icon_line',
+			'link'                     => 'link_chains_line',
+
 			// Misc aliases
-			'media_document' => 'media_document',
-			'arrowDown2' => 'arrow_down_dropdown_maximize_chevron_line',
-			'setting' => 'settings_tool_function_solid',
-			'upload_solid' => 'upload_1_solid',
+			'media_document'           => 'media_document',
+			'arrowDown2'               => 'arrow_down_dropdown_maximize_chevron_line',
+			'setting'                  => 'settings_tool_function_solid',
+			'upload_solid'             => 'upload_1_solid',
 
 			// Empty aliases for missing icons (return empty string)
-			'correct_solid' => 'correct_save_check_circle_line',
-			'dot_solid' => 'dot_circle_solid',
-			'right_circle_solid' => 'correct_save_check_circle_solid',
-			'full_screen' => 'full_screen_corners_out_solid',
-			'zoom_in' => 'zoom_in_magnifying_glass_plus_line',
-			'zoom_out' => 'zoom_out_magnifying_glass_minus_line',
-			'gallery_indicator' => 'gallery_indicator_image_solid',
-			'ascending' => 'sort_ascending_order_solid',
-			'descending' => 'sort_descending_order_line',
-			'unlink' => 'unlink_link_break_line',
-			'rocket' => 'rocket_fly_boost_launch_pro_line',
-			'unlock' => 'unlocked_open_security_solid',
-			'connect' => 'plugin_connect_socket_integration_solid',
-			'leftAngle' => 'arrow_left_previous_backward_chevron_line',
-			'rightAngle' => 'right_triangle_angle_play_arrow_forward_line',
-			'plus2' => '',
-			'hamicon_1' => 'left_align_1_line',
+			'correct_solid'            => 'correct_save_check_circle_line',
+			'dot_solid'                => 'dot_circle_solid',
+			'right_circle_solid'       => 'correct_save_check_circle_solid',
+			'full_screen'              => 'full_screen_corners_out_solid',
+			'zoom_in'                  => 'zoom_in_magnifying_glass_plus_line',
+			'zoom_out'                 => 'zoom_out_magnifying_glass_minus_line',
+			'gallery_indicator'        => 'gallery_indicator_image_solid',
+			'ascending'                => 'sort_ascending_order_solid',
+			'descending'               => 'sort_descending_order_line',
+			'unlink'                   => 'unlink_link_break_line',
+			'rocket'                   => 'rocket_fly_boost_launch_pro_line',
+			'unlock'                   => 'unlocked_open_security_solid',
+			'connect'                  => 'plugin_connect_socket_integration_solid',
+			'leftAngle'                => 'arrow_left_previous_backward_chevron_line',
+			'rightAngle'               => 'right_triangle_angle_play_arrow_forward_line',
+			'plus2'                    => '',
+			'hamicon_1'                => 'left_align_1_line',
 			// extra in assets\img\iconpack folder
-			'hamicon_2' => 'hemicon_2_line',
-			'hamicon_3' => 'hemicon_3_line',
-			'hamicon_4' => 'hamicon_5_line',
-			'hamicon_5' => 'hamicon_4_sloid',
-			'hamicon_6' => 'hamicon_6_line',
-			'instagram_solid' => 'instagram_logo_icon_solid',
-			'linkedin' => 'linkedin_logo_icon_solid',
-			'pause_solid' => 'pause_solid',
-			'pinterest' => 'pinterest_logo_icon_solid',
-			'reddit' => 'reddit_logo_icon_solid',
-			'skype' => 'skype_logo_icon_solid',
-			'tiktok_lite_solid' => 'tiktok_logo_icon_line',
-			'tiktok_solid' => 'tiktok_logo_icon_circle_solid',
-			'whatsapp' => 'whatsapp_logo_icon_solid',
-			'wordpress_lite_solid' => 'wordpress_logo_icon_solid',
-			'wordpress_solid' => 'wordpress_logo_icon_2_solid',
-			'wrong_solid' => 'cross_close_x_minimize_circle_solid',
-			'youtube_solid' => 'youtube_logo_icon_solid',
-			'five_star_line' => 'star_rating_line',
-			'rightAngleBold' => 'arrow_right_next_forward_chevron_line',
-			'leftAngleBold' => 'arrow_left_previous_backward_chevron_line',
-			'plus' => 'plus',
-			'reset_left_line' => 'refresh_reset_cycle_loop_infinity_line',
+			'hamicon_2'                => 'hemicon_2_line',
+			'hamicon_3'                => 'hemicon_3_line',
+			'hamicon_4'                => 'hamicon_5_line',
+			'hamicon_5'                => 'hamicon_4_sloid',
+			'hamicon_6'                => 'hamicon_6_line',
+			'instagram_solid'          => 'instagram_logo_icon_solid',
+			'linkedin'                 => 'linkedin_logo_icon_solid',
+			'pause_solid'              => 'pause_solid',
+			'pinterest'                => 'pinterest_logo_icon_solid',
+			'reddit'                   => 'reddit_logo_icon_solid',
+			'skype'                    => 'skype_logo_icon_solid',
+			'tiktok_lite_solid'        => 'tiktok_logo_icon_line',
+			'tiktok_solid'             => 'tiktok_logo_icon_circle_solid',
+			'whatsapp'                 => 'whatsapp_logo_icon_solid',
+			'wordpress_lite_solid'     => 'wordpress_logo_icon_solid',
+			'wordpress_solid'          => 'wordpress_logo_icon_2_solid',
+			'wrong_solid'              => 'cross_close_x_minimize_circle_solid',
+			'youtube_solid'            => 'youtube_logo_icon_solid',
+			'five_star_line'           => 'star_rating_line',
+			'rightAngleBold'           => 'arrow_right_next_forward_chevron_line',
+			'leftAngleBold'            => 'arrow_left_previous_backward_chevron_line',
+			'plus'                     => 'plus',
+			'reset_left_line'          => 'refresh_reset_cycle_loop_infinity_line',
 		);
 		// Return resolved alias or false if not found
 		return isset( $icon_aliases[ $icon_name ] ) ? $icon_aliases[ $icon_name ] : $icon_name;

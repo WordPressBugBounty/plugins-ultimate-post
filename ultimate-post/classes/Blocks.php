@@ -38,6 +38,8 @@ class Blocks {
 
 		add_action( 'wp_ajax_ultp_share_count', array( $this, 'ultp_share_count_callback' ) ); // share Count save .
 		add_action( 'wp_ajax_nopriv_ultp_share_count', array( $this, 'ultp_share_count_callback' ) ); // share Count save .
+		add_action( 'wp_ajax_ultp_get_nonce', array( $this, 'ultp_get_nonce_callback' ) ); // Nonce Generating Callback
+		add_action( 'wp_ajax_nopriv_ultp_get_nonce', array( $this, 'ultp_get_nonce_callback' ) ); // Nonce Generating Callback
 	}
 
 	/**
@@ -387,7 +389,7 @@ class Blocks {
 		$taxonomy = isset( $_POST['taxonomy'] ) ? ultimate_post()->ultp_rest_sanitize_params( $_POST['taxonomy'] ) : '[]';
 
 		$author   = isset( $_POST['author'] ) ? ultimate_post()->ultp_rest_sanitize_params( $_POST['author'] ) : false;
-		$orderby  = isset( $_POST['orderby'] ) ? sanitize_text_field( $_POST['orderby'] ) : 'title'; // default orderbyt title requested from support
+		$orderby  = isset( $_POST['orderby'] ) ? sanitize_text_field( $_POST['orderby'] ) : ''; // default orderbyt title requested from support
 		$order    = isset( $_POST['order'] ) ? sanitize_text_field( $_POST['order'] ) : 'DESC';
 		$search   = isset( $_POST['search'] ) ? sanitize_text_field( $_POST['search'] ) : '';
 		$adv_sort = isset( $_POST['adv_sort'] ) ? sanitize_text_field( $_POST['adv_sort'] ) : '';
@@ -602,10 +604,12 @@ class Blocks {
 							$value['attrs']['queryTaxValue'] = wp_json_encode( $taxonomy );
 							$value['attrs']['queryRelation'] = 'AND';
 							$value['attrs']['queryAuthor']   = $adv_filter_data['author'];
-							$value['attrs']['queryOrderBy']  = $adv_filter_data['orderby'];
 							$value['attrs']['queryOrder']    = $adv_filter_data['order'];
 							$value['attrs']['querySearch']   = $adv_filter_data['search'];
 							$value['attrs']['queryQuick']    = $adv_filter_data['adv_sort'];
+							if ( ! empty( $adv_filter_data['orderby'] ) ) {
+								$value['attrs']['queryOrderBy'] = $adv_filter_data['orderby'];
+							}
 						} else {
 							$value['attrs']['queryTaxValue'] = wp_json_encode( array( $taxonomy ) );
 						}
@@ -634,7 +638,7 @@ class Blocks {
 
 					if ( $filter_attributes['isAdv'] ) {
 						$filter_attributes['queryAuthor']  = $adv_filter_data['author'];
-						$filter_attributes['queryOrderBy'] = $adv_filter_data['orderby'];
+						$filter_attributes['queryOrderBy'] = ! empty( $adv_filter_data['orderby'] ) ? $adv_filter_data['orderby'] : $value['attrs']['queryOrderBy'];
 						$filter_attributes['queryOrder']   = $adv_filter_data['order'];
 						$filter_attributes['querySearch']  = $adv_filter_data['search'];
 						$filter_attributes['queryQuick']   = $adv_filter_data['adv_sort'];
@@ -703,5 +707,21 @@ class Blocks {
 		wp_reset_query();
 
 		return $wraper_after;
+	}
+
+	/**
+	 * Nonce Generation Callback
+	 *
+	 * @since v.5.0.6
+	 *
+	 * @return STRING The AJAX response.
+	 */
+	public function ultp_get_nonce_callback() {
+		nocache_headers();
+		wp_send_json_success(
+			array(
+				'nonce' => wp_create_nonce( 'ultp-nonce' ),
+			)
+		);
 	}
 }
