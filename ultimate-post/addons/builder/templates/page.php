@@ -90,7 +90,8 @@ if ( wp_is_block_theme() ) {
 		$footer = ob_get_clean();
 		echo '<footer class="wp-block-template-part">' . $footer . '</footer>';
 	}
-	wp_head();
+	// wp_head();
+	// wp_head(); all ready wp head declared in header, i can not find any conflict to check that, if you find any conflict for removing then use it
 	wp_footer();
 } else {
 	get_footer();

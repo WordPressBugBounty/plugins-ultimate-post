@@ -686,6 +686,7 @@ class Advanced_Filter {
 					'data-blockId'  => $attr['blockId'],
 					'aria-expanded' => 'false',
 					'aria-label'    => 'Select Filter (' . $attr['type'] . ')',
+					'data-builder'  => ultimate_post()->get_builder_attr( 'archiveBuilderFilter' ),
 				)
 			);
 

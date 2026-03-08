@@ -255,8 +255,13 @@ class ULTP_Initialization {
 				)
 			);
 		}
-		if ( ! isset( $tags['path'] ) ) {
-			$tags['path'] = array(
+		if ( ! isset( $tags['path'] ) || ! is_array( $tags['path'] ) ) {
+			$tags['path'] = array();
+		}
+
+		$tags['path'] = array_merge(
+			$tags['path'],
+			array(
 				'd'                 => true,
 				'stroke'            => true,
 				'stroke-miterlimit' => true,
@@ -266,8 +271,12 @@ class ULTP_Initialization {
 				'style'             => true,
 				'opacity'           => true,
 				'fill'              => true,
-			);
-		}
+				'stroke-width'      => true,
+				'stroke-linecap'    => true,
+				'stroke-linejoin'   => true,
+			)
+		);
+
 		if ( ! isset( $tags['g'] ) ) {
 			$tags['g'] = array(
 				'transform' => true,

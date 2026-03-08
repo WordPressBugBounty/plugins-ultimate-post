@@ -1161,7 +1161,7 @@
 		return `${fType}: ${name}`;
 	}
 
-	function applyFilter(parent, blockId, blockName, postId, grids) {
+	function applyFilter(parent, blockId, blockName, postId, grids, builder) {
 		const selectedFilters = [];
 		const filterData = {};
 		const pagis = parent.data("pagi");
@@ -1272,7 +1272,7 @@
 					action: "ultp_adv_filter",
 
 					...filterData,
-
+					builder_id: builder,
 					blockId: blockId,
 					blockName: blockName,
 					postId: postId,
@@ -1383,6 +1383,7 @@
 		const selectedFilterTemp = $(this).find(".ultp-filter-clear-template");
 		const clearBtn = $(this).find(".ultp-filter-clear-button");
 		const firstElClass = "ultp-block-" + clearBtn.data("blockid") + "-first";
+		let builder = "";
 
 		function resetFilters() {
 			// Resetting select fields
@@ -1411,7 +1412,14 @@
 
 		function fetchPostsWithFilter() {
 			gridData.forEach((data) => {
-				applyFilter(parent, data["blockId"], data["name"], postId, grids);
+				applyFilter(
+					parent,
+					data["blockId"],
+					data["name"],
+					postId,
+					grids,
+					builder,
+				);
 			});
 		}
 
@@ -1422,7 +1430,7 @@
 			const filter = $(this);
 			const type = $(this).attr("data-type");
 			const input = $(this).find(".ultp-filter-select-search");
-
+			builder = $(this).attr("data-builder");
 			function showDropdown(show) {
 				if (show) {
 					$(".ultp-filter-select .ultp-filter-select-options").css(

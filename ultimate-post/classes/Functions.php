@@ -495,7 +495,7 @@ class Functions {
 	 */
 	public function get_builder_attr( $type ) {
 		$builder_data = '';
-		if ( $type == 'archiveBuilder' ) {
+		if ( $type == 'archiveBuilder' || $type == 'archiveBuilderFilter' ) {
 			if ( is_archive() ) {
 				if ( is_date() ) {
 					if ( is_year() ) {
@@ -516,6 +516,9 @@ class Functions {
 			} elseif ( is_search() ) {
 				$builder_data = 'search###' . get_search_query( true );
 			}
+		}
+		if ( $type == 'archiveBuilderFilter' ) {
+			return $builder_data ? $builder_data : '';
 		}
 		return $builder_data ? 'data-builder="' . $builder_data . '"' : '';
 	}
@@ -777,9 +780,12 @@ class Functions {
 					$archive_query['post_status'] = array( 'publish', 'private' );
 				}
 			}
-
+			// queryOrder
 			if ( ! isset( $archive_query['orderby'] ) ) {
 				$archive_query['orderby'] = isset( $attr['queryOrderBy'] ) ? $attr['queryOrderBy'] : 'date';
+			}
+			if ( ! isset( $archive_query['queryOrder'] ) ) {
+				$archive_query['order'] = isset( $attr['queryOrder'] ) ? $attr['queryOrder'] : 'ASC';
 			}
 
 			// Quick Query Support for Builder

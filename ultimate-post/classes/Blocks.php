@@ -386,13 +386,13 @@ class Blocks {
 		$blockId = isset( $_POST['blockId'] ) ? sanitize_text_field( $_POST['blockId'] ) : '';
 		$postId  = isset( $_POST['postId'] ) ? sanitize_text_field( $_POST['postId'] ) : '';
 
-		$taxonomy = isset( $_POST['taxonomy'] ) ? ultimate_post()->ultp_rest_sanitize_params( $_POST['taxonomy'] ) : '[]';
-
-		$author   = isset( $_POST['author'] ) ? ultimate_post()->ultp_rest_sanitize_params( $_POST['author'] ) : false;
-		$orderby  = isset( $_POST['orderby'] ) ? sanitize_text_field( $_POST['orderby'] ) : ''; // default orderbyt title requested from support
-		$order    = isset( $_POST['order'] ) ? sanitize_text_field( $_POST['order'] ) : 'DESC';
-		$search   = isset( $_POST['search'] ) ? sanitize_text_field( $_POST['search'] ) : '';
-		$adv_sort = isset( $_POST['adv_sort'] ) ? sanitize_text_field( $_POST['adv_sort'] ) : '';
+		$taxonomy   = isset( $_POST['taxonomy'] ) ? ultimate_post()->ultp_rest_sanitize_params( $_POST['taxonomy'] ) : '[]';
+		$builder_id = isset( $_POST['builder_id'] ) ? sanitize_text_field( $_POST['builder_id'] ) : '';
+		$author     = isset( $_POST['author'] ) ? ultimate_post()->ultp_rest_sanitize_params( $_POST['author'] ) : false;
+		$orderby    = isset( $_POST['orderby'] ) ? sanitize_text_field( $_POST['orderby'] ) : ''; // default orderbyt title requested from support
+		$order      = isset( $_POST['order'] ) ? sanitize_text_field( $_POST['order'] ) : 'DESC';
+		$search     = isset( $_POST['search'] ) ? sanitize_text_field( $_POST['search'] ) : '';
+		$adv_sort   = isset( $_POST['adv_sort'] ) ? sanitize_text_field( $_POST['adv_sort'] ) : '';
 
 		$adv_filter_data = array(
 			'is_adv'      => true,
@@ -403,6 +403,7 @@ class Blocks {
 			'order'       => $order,
 			'search'      => $search,
 			'adv_sort'    => $adv_sort,
+			'builder'     => $builder_id,
 		);
 
 		$blockRaw      = isset( $_POST['blockName'] ) ? sanitize_text_field( $_POST['blockName'] ) : '';
@@ -626,6 +627,10 @@ class Blocks {
 						$ultp_uniqueIds[ $value['attrs']['queryUnique'] ] = array_diff( $ultp_uniqueIds[ $value['attrs']['queryUnique'] ], $ultp_current_unique_posts );
 						$value['attrs']['savedQueryUnique']               = $ultp_uniqueIds;
 						$value['attrs']['ultp_current_unique_posts']      = $ultp_current_unique_posts;
+					}
+
+					if ( $adv_filter_data['builder'] ) {
+						$value['attrs']['builder'] = $adv_filter_data['builder'];
 					}
 
 					$attr = array_merge( $attr, $value['attrs'] );
