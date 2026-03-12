@@ -81,8 +81,9 @@ class Notice {
 	 */
 	public static function get_hellobar_config() {
 		return array(
-			'ultp_helloBar_flash_sale_2026_1'      => Xpo::get_transient_without_cache( 'ultp_helloBar_flash_sale_2026_1' ),
-			'ultp_helloBar_final_hour_sale_2026_1' => Xpo::get_transient_without_cache( 'ultp_helloBar_final_hour_sale_2026_1' ),
+			'ultp_helloBar_spring_sale_2026_1' => Xpo::get_transient_without_cache( 'ultp_helloBar_spring_sale_2026_1' ),
+			'ultp_helloBar_spring_sale_2026_2' => Xpo::get_transient_without_cache( 'ultp_helloBar_spring_sale_2026_2' ),
+			'ultp_helloBar_spring_sale_2026_3' => Xpo::get_transient_without_cache( 'ultp_helloBar_spring_sale_2026_3' ),
 		);
 	}
 
@@ -165,6 +166,7 @@ class Notice {
 	 */
 	public function ultp_dashboard_notice_callback() {
 		$this->ultp_dashboard_banner_notice();
+		$this->ultp_dashboard_content_notice();
 	}
 
 	/**
@@ -184,7 +186,7 @@ class Notice {
 
 				'left_image'         => ULTP_URL . 'assets/img/dashboard_banner/2026_flash_sale_logo.png',
 				'right_image'        => ULTP_URL . 'assets/img/dashboard_banner/2026_final_hours_and_flash_sale_right_btn.png',
-				'bg_image'           => ULTP_URL . 'assets/img/dashboard_banner/2026_final_hours_and_flash_sale_bg.png',
+				'bg_image'           => ULTP_URL . 'assets/img/dashboard_banner/2026_spring_sale_bg.png',
 				'text'               => 'Hurry Before It Ends!',
 				'countdown_color'    => '#3CF357',
 				'url'                => Xpo::generate_utm_link(
@@ -205,10 +207,32 @@ class Notice {
 				'bg_image'           => ULTP_URL . 'assets/img/dashboard_banner/2026_final_hours_and_flash_sale_bg.png',
 				'text'               => 'Hurry Before It Ends!',
 				'countdown_duration' => 172800, // Duration in seconds.
-				'countdown_color'    => '#3CF357',
+				'countdown_color'    => '#0322ff',
 				'url'                => Xpo::generate_utm_link(
 					array(
 						'utmKey' => 'final_hour',
+					)
+				),
+
+				'visibility'         => ! Xpo::is_lc_active(),
+			),
+			array(
+				'key'                => 'ultp_banner_spring_sale_2026_1',
+				'start'              => '2026-04-05 00:00 Asia/Dhaka',
+				'end'                => '2026-04-14 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka.
+
+				'brand_color'        => '#0322ff',
+
+				'left_image'         => ULTP_URL . 'assets/img/dashboard_banner/spring_sale/2026_spring_sale_offer.png',
+				'right_image'        => ULTP_URL . 'assets/img/dashboard_banner/spring_sale/2026_spring_sale_button.png',
+				'bg_image'           => ULTP_URL . 'assets/img/dashboard_banner/spring_sale/2026_spring_sale_bg.png',
+				'text'               => 'Hurry Before It Ends!',
+				'countdown_duration' => 259200, // Duration in seconds.
+				// 'countdown_color'    => '#0322ff',
+				'countdown_color'    => '#000',
+				'url'                => Xpo::generate_utm_link(
+					array(
+						'utmKey' => 'spring_sale',
 					)
 				),
 
@@ -298,6 +322,9 @@ class Notice {
 							max-width: 1358px;
 							margin: 0px auto;
 							padding: 10px 15px;
+							height: 90px;
+							box-sizing: border-box;
+
 						">
 							<img class="ultp-banner-logo-img" style="" loading="lazy" src="<?php echo esc_url( $notice['left_image'] ); ?>" />
 							<div style="
@@ -308,7 +335,7 @@ class Notice {
 								justify-content: center;
 								font-weight: 700;
 								font-size: 28px;
-								color: white;
+								color: #000;
 								line-height: 32px;
 							">
 								<span class="ultp-notice-banner-title">
@@ -479,7 +506,7 @@ class Notice {
 					align-items: flex-end;
 					gap: 26px;
 				}
- 
+
 				.ultp-consent-text-first {
 					font-size: 14px;
 					font-weight: 600;
@@ -490,7 +517,7 @@ class Notice {
 					font-size: 14px;
 					color: #070707;
 				}
- 
+
 				.ultp-consent-accept {
 					background-color: #070707;
 					color: #fff;
@@ -563,5 +590,231 @@ class Notice {
 				class="ultp-notice-close-icon dashicons dashicons-dismiss"> </span></a>
 			</div>
 		<?php
+	}
+	/**
+	 * Dashboard Content Notice
+	 *
+	 * @return void
+	 */
+	public function ultp_dashboard_content_notice() {
+		$content_notices = array(
+			array(
+				'key'                => 'ultp_dashboard_content_notice_spring_sale_v1',
+				'start'              => '2026-03-16 00:00 Asia/Dhaka',
+				'end'                => '2026-03-25 23:59 Asia/Dhaka',
+				'url'                => Xpo::generate_utm_link(
+					array(
+						'utmKey' => 'content_notice',
+					)
+				),
+				'visibility'         => ! Xpo::is_lc_active(),
+				'content_heading'    => __( 'Spring Sale:', 'ultimate-post' ),
+				'content_subheading' => __( 'PostX offers are live - Enjoy %s off on PostX Pro.', 'ultimate-post' ),
+				'discount_content'   => ' up to 50% OFF',
+				'brand_color'        => '#0322ff',
+				'icon'               => ULTP_URL . 'assets/img/dashboard_banner/spring_sale/2026_spring_sale_brand_logo.png',
+				'button_text'        => __( 'Claim Your Discount!', 'ultimate-post' ),
+				'is_discount_logo'   => true,
+				'border_color'       => '#0322ff',
+			),
+			array(
+				'key'                => 'ultp_dashboard_content_notice_spring_sale_v2',
+				'start'              => '2026-03-26 00:00 Asia/Dhaka',
+				'end'                => '2026-04-04 23:59 Asia/Dhaka',
+				'url'                => Xpo::generate_utm_link(
+					array(
+						'utmKey' => 'content_notice',
+					)
+				),
+				'visibility'         => ! Xpo::is_lc_active(),
+				'content_heading'    => __( 'Spring Sale:', 'ultimate-post' ),
+				'content_subheading' => __( 'PostX offers are live - Enjoy %s off on PostX Pro.', 'ultimate-post' ),
+				'discount_content'   => ' up to 50% OFF',
+				'brand_color'        => '#0322ff',
+				'icon'               => ULTP_URL . 'assets/img/dashboard_banner/spring_sale/2026_spring_discount_logo.png',
+				'button_text'        => __( 'Claim Your Discount!', 'ultimate-post' ),
+				'is_discount_logo'   => true,
+				'border_color'       => '#0322ff',
+			),
+
+		);
+
+		$ultp_db_nonce = wp_create_nonce( 'ultp-nonce' );
+
+		foreach ( $content_notices as $key => $notice ) {
+			$notice_key = isset( $notice['key'] ) ? $notice['key'] : $this->notice_version;
+			if ( isset( $_GET['ultp_notice'] ) && $notice_key === $_GET['ultp_notice'] ) {
+				continue;
+			} else {
+				$border_color = $notice['border_color'];
+
+				$current_time = gmdate( 'U' );
+				$notice_start = gmdate( 'U', strtotime( $notice['start'] ) );
+				$notice_end   = gmdate( 'U', strtotime( $notice['end'] ) );
+				if ( $current_time >= $notice_start && $current_time <= $notice_end && $notice['visibility'] ) {
+					$notice_transient = Xpo::get_transient_without_cache( 'ultp_get_pro_notice_' . $notice_key );
+
+					if ( 'off' !== $notice_transient ) {
+
+						$query_args = array(
+							'ultp_notice' => $notice_key,
+							'wpnonce'     => $ultp_db_nonce,
+						);
+						if ( isset( $notice['repeat_interval'] ) && $notice['repeat_interval'] ) {
+							$query_args['ultp_interval'] = $notice['repeat_interval'];
+						}
+
+						$url = isset( $notice['url'] ) ? $notice['url'] : Xpo::generate_utm_link(
+							array(
+								'utmKey' => 'content_notice',
+							)
+						);
+
+						?>
+
+						<style id="ultp-notice-css" type="text/css">
+							.ultp-content-notice-wrapper {
+								border: 1px solid #c3c4c7;
+								border-left: 3px solid #037fff;
+								margin: 15px 0 !important;
+								display: flex;
+								align-items: center;
+								background-color: #eef0f4;
+								width: 100%;
+								padding: 10px 0;
+								position: relative;
+								box-sizing: border-box;
+							}
+
+							.ultp-content-notice-wrapper.notice {
+								margin: 10px 0;
+								width: calc(100% - 20px);
+							}
+
+							.wrap .ultp-content-notice-wrapper.notice {
+								width: 100%;
+							}
+
+							.ultp-content-notice-icon {
+								margin-left: 15px;
+							}
+
+							.ultp-content-notice-discout-icon {
+								margin-left: 10px;
+							}
+
+							.ultp-content-notice-icon img {
+								max-width: 42px;
+								height: 70px;
+							}
+
+							.ultp-content-notice-discout-icon img {
+								height: 70px;
+								width: 70px;
+								object-fit: contain;
+							}
+
+							.ultp-notice-content-wrapper {
+								display: flex;
+								flex-direction: column;
+								gap: 8px;
+								font-size: 14px;
+								line-height: 20px;
+								margin-left: 15px;
+							}
+
+							.ultp-content-notice-buttons {
+								display: flex;
+								align-items: center;
+								gap: 15px;
+							}
+
+							.ultp-content-notice-btn {
+								font-weight: 600;
+								text-transform: uppercase !important;
+								padding: 2px 10px !important;
+								background-color: #0322ff;
+								border: none !important;
+							}
+
+							.ultp-content-discount_btn {
+								background-color: #ffffff;
+								text-decoration: none;
+								border: 1px solid #0322ff;
+								padding: 5px 10px;
+								border-radius: 5px;
+								font-weight: 500;
+								text-transform: uppercase;
+								color: #0322ff !important;
+							}
+
+							.ultp-content-notice-close {
+								position: absolute;
+								right: 2px;
+								top: 5px;
+								text-decoration: none;
+								color: #b6b6b6;
+								font-family: dashicons;
+								font-size: 16px;
+								line-height: 20px;
+							}
+
+							.ultp-content-notice-close-icon {
+								font-size: 14px;
+							}
+						</style>
+					<div class="ultp-content-notice-wrapper notice data_collection_notice" 
+					style="border-left: 3px solid <?php echo esc_attr( $border_color ); ?>;"
+					> 
+						<?php
+						if ( $notice['is_discount_logo'] ) {
+							?>
+								<div class="ultp-content-notice-discout-icon"> <img src="<?php echo esc_url( $notice['icon'] ); ?>"/>  </div>
+							<?php
+						} else {
+							?>
+								<div class="ultp-content-notice-icon"> <img src="<?php echo esc_url( $notice['icon'] ); ?>"/>  </div>
+							<?php
+						}
+						?>
+						
+						<div class="ultp-notice-content-wrapper">
+							<div class="">
+								<strong><?php printf( esc_html( $notice['content_heading'] ) ); ?> </strong>
+						<?php
+						printf(
+							wp_kses_post( $notice['content_subheading'] ),
+							'<strong>' . esc_html( $notice['discount_content'] ) . '</strong>'
+						);
+						?>
+							</div>
+							<div class="ultp-content-notice-buttons">
+							<?php if ( isset( $notice['is_discount_logo'] ) && $notice['is_discount_logo'] ) : ?>
+									<a class="ultp-content-discount_btn" href="<?php echo esc_url( $url ); ?>" target="_blank">
+										<?php echo esc_html( $notice['button_text'] ); ?>
+									</a>
+								<?php else : ?>
+									<a class="ultp-content-notice-btn button button-primary" href="<?php echo esc_url( $url ); ?>" target="_blank" style="background-color: <?php echo ! empty( $notice['background_color'] ) ? esc_attr( $notice['background_color'] ) : '#86a62c'; ?>;">
+									<?php echo esc_html( $notice['button_text'] ); ?>
+										
+									</a>
+								<?php endif; ?>
+							</div>
+						</div>
+						<a href=
+							<?php
+							echo esc_url(
+								add_query_arg(
+									$query_args
+								)
+							);
+							?>
+						class="ultp-content-notice-close"><span class="ultp-content-notice-close-icon dashicons dashicons-dismiss"> </span></a>
+					</div>
+								<?php
+					}
+				}
+			}
+		}
 	}
 }

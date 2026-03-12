@@ -81,13 +81,13 @@ class Options {
 				'utmKey' => 'flash_sale_meta',
 			),
 			array(
-				'start'  => '2026-02-25 00:00 Asia/Dhaka',
-				'end'    => '2026-03-01 23:59 Asia/Dhaka',
+				'start'  => '2026-03-16 00:00 Asia/Dhaka',
+				'end'    => '2026-04-14 23:59 Asia/Dhaka',
 				'text'   => __(
-					'Final Hour Sale - Up to 50% OFF',
+					'Spring Sale - Up to 50% OFF',
 					'ultimate-post'
 				),
-				'utmKey' => 'final_hour_meta',
+				'utmKey' => 'plugin_meta',
 			),
 		);
 

@@ -251,11 +251,6 @@ class Xpo {
 			// 'medium'   => 'flash-sale',
 			// 'campaign' => 'postx-dashboard',
 			// ),
-			'exclusive_deals'    => array(
-				'source'   => 'db-postx-notice-text',
-				'medium'   => 'exclusive-deals',
-				'campaign' => 'postx-dashboard',
-			),
 			'new_year_sale'      => array(
 				'source'   => 'db-postx-notice-text',
 				'medium'   => 'new-year-sale',
@@ -282,7 +277,26 @@ class Xpo {
 				'medium'   => 'final-hour-sale',
 				'campaign' => 'postx-dashboard',
 			),
-
+			'spring_sale'        => array(
+				'source'   => 'db-postx-notice',
+				'medium'   => 'spring-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			'exclusive_deals'    => array(
+				'source'   => 'db-postx-notice-logo',
+				'medium'   => 'exclusive-deals',
+				'campaign' => 'postx-dashboard',
+			),
+			'content_notice'     => array(
+				'source'   => 'db-postx-notice',
+				'medium'   => 'spring-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			'plugin_meta'        => array(
+				'source'   => 'db-postx-plugin',
+				'medium'   => 'plugin-meta',
+				'campaign' => 'postx-dashboard',
+			),
 		);
 
 		// Step 1: Get parameters
