@@ -305,15 +305,21 @@ class Advanced_Filter {
 				}
 				break;
 			case 'category':
-				if ( ! empty( $ids ) && $ids !== '_all' ) {
-					$categories = get_categories(
-						array(
-							'per_page' => -1,
-							'include'  => $ids,
-						)
-					);
+				$args = array(
+					'taxonomy'   => 'category',
+					'hide_empty' => false,
+				);
 
+				if ( 'all' !== $option && ! empty( $ids ) && '_all' !== $ids ) {
+					$args['include'] = wp_parse_id_list( $ids );
+					$args['orderby'] = 'include';
+				}
+
+				$categories = get_terms( $args );
+
+				if ( ! is_wp_error( $categories ) && ! empty( $categories ) ) {
 					foreach ( $categories as $category ) {
+						$res['_all']            = $allText;
 						$res[ $category->slug ] = $category->name;
 					}
 				}
@@ -648,7 +654,7 @@ class Advanced_Filter {
 				}
 				?>
 				<div <?php echo $btn_wrapper_attrs; ?> <?php echo $tax; ?> data-selected="<?php echo esc_attr( $key ); ?>" data-type="<?php echo esc_attr( $attr['type'] ); ?>">
-					<?php echo $name; ?>
+					<?php echo esc_html( $name ); ?>
 				</div>
 			<?php endforeach ?>
 			</div>

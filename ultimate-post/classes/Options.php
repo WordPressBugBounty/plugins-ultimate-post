@@ -87,7 +87,7 @@ class Options {
 					'Spring Sale - Up to 50% OFF',
 					'ultimate-post'
 				),
-				'utmKey' => 'plugin_meta',
+				'utmKey' => 'spring_sale_meta',
 			),
 		);
 

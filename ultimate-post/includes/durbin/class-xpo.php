@@ -292,9 +292,9 @@ class Xpo {
 				'medium'   => 'spring-sale',
 				'campaign' => 'postx-dashboard',
 			),
-			'plugin_meta'        => array(
-				'source'   => 'db-postx-plugin',
-				'medium'   => 'plugin-meta',
+			'spring_sale_meta'   => array(
+				'source'   => 'db-postx-plugin-meta',
+				'medium'   => 'spring-sale',
 				'campaign' => 'postx-dashboard',
 			),
 		);

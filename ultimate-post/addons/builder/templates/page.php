@@ -3,24 +3,26 @@ defined( 'ABSPATH' ) || exit;
 
 global $ULTP_HEADER_ID;
 global $ULTP_FOOTER_ID;
+$header = '';
+
+if ( wp_is_block_theme() && ! $ULTP_HEADER_ID ) {
+	ob_start();
+	block_template_part( 'header' );
+	$header = ob_get_clean();
+}
 
 if ( wp_is_block_theme() ) {
 	?><!DOCTYPE html>
 	<html <?php language_attributes(); ?>>
 	<head>
 		<meta charset="<?php bloginfo( 'charset' ); ?>" />
-		<?php
-		wp_head();
-		?>
+		<?php wp_head(); ?>
 	</head>
 	<body <?php body_class(); ?>>
 	<?php
 	wp_body_open();
 
-	if ( ! $ULTP_HEADER_ID ) {
-		ob_start();
-		block_template_part( 'header' );
-		$header = ob_get_clean();
+	if ( $header ) {
 		echo '<header class="wp-block-template-part">' . $header . '</header>';
 	}
 } else {
