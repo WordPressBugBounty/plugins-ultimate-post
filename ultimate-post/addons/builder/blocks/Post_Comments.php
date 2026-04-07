@@ -111,7 +111,7 @@ class Post_Comments {
 			$cookies_label = $attr['cookiesEnable'] ? '<p class="comment-form-cookies-consent"><input id="wp-comment-cookies-consent" name="wp-comment-cookies-consent" type="checkbox" value="yes"/><label for="wp-comment-cookies-consent">' . $attr['cookiesText'] . '</label></p>' : '';
 
 			$comments_args = array(
-				'comment_field'       => '<div class="comment-form-comment ultp-comment-input ultp-field-control">' . $comment_label . '<textarea class="hi" id="comment" name="comment" placeholder="' . $attr['inputPlaceHolder'] . '" cols="45" rows="8" aria-required="true"></textarea></div>',
+				'comment_field'       => '<div class="comment-form-comment ultp-comment-input ultp-field-control">' . esc_html( $comment_label ) . '<textarea class="hi" id="comment" name="comment" placeholder="' . esc_attr( $attr['inputPlaceHolder'] ) . '" cols="45" rows="8" aria-required="true"></textarea></div>',
 				'fields'              => apply_filters(
 					'comment_form_default_fields',
 					array(

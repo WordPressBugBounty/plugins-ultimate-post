@@ -173,7 +173,7 @@ class Caches {
 				);
 			} else {
 				$response = wp_remote_post(
-					'https://ultp.wpxpo.com/wp-json/restapi/v2/design',
+					'https://postxkit.wpxpo.com/wp-json/restapi/v2/design',
 					array(
 						'method'  => 'POST',
 						'timeout' => 120,

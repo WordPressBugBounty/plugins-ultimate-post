@@ -324,7 +324,7 @@ class Post_Grid_2 {
 					}
 							$post_loop .= '</a>';
 					if ( $post_video ) {
-						$post_loop .= '<div enableAutoPlay="' . $attr['popupAutoPlay'] . '" class="ultp-video-icon">' . ultimate_post()->get_svg_icon( 'play_line' ) . '</div>';
+						$post_loop .= '<div enableVideoPopup="' . $attr['enablePopup'] . '" enableAutoPlay="' . $attr['popupAutoPlay'] . '" class="ultp-video-icon">' . ultimate_post()->get_svg_icon( 'play_line' ) . '</div>';
 					}
 					if ( ( $attr['catPosition'] != 'aboveTitle' ) && $attr['catShow'] ) {
 						$post_loop .= '<div class="ultp-category-img-grid">' . $category . '</div>';
@@ -332,7 +332,7 @@ class Post_Grid_2 {
 						$post_loop .= '</div>';
 				} else {
 					if ( $post_video ) {
-						$post_loop .= '<div enableAutoPlay="' . $attr['popupAutoPlay'] . '" class="ultp-video-icon">' . ultimate_post()->get_svg_icon( 'play_line' ) . '</div>';
+						$post_loop .= '<div enableVideoPopup="' . $attr['enablePopup'] . '" enableAutoPlay="' . $attr['popupAutoPlay'] . '" class="ultp-video-icon">' . ultimate_post()->get_svg_icon( 'play_line' ) . '</div>';
 					}
 					$post_loop .= '<div class="ultp-block-image ultp-block-empty-image"></div>';
 				}

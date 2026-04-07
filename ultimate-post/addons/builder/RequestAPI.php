@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * RequestAPI class.
  */
 class RequestAPI {
-	private $api_endpoint = 'https://ultp.wpxpo.com/wp-json/restapi/v2/';
+	private $api_endpoint = 'https://postxkit.wpxpo.com/wp-json/restapi/v2/';
 
 	public function __construct() {
 		add_action( 'rest_api_init', array( $this, 'get_template_data' ) );

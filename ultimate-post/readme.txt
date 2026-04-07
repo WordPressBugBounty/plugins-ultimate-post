@@ -4,7 +4,7 @@ Tags: post grid, post list, post slider, ajax filter, post filter
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 5.6
-Stable tag: 5.0.12
+Stable tag: 5.0.13
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -268,6 +268,12 @@ It is a Gutenberg plugin it works great with WordPress version 5.x.x or more. An
 11. With the help of the Elementor and Saved Template addons, you can use any of the post blocks of PostX to any pages while editing with Elementor builder.
 
 == Changelog ==
+= 5.0.13 – 07 April 2026 =
+* Fix: Post Grid 2 Video popup issue
+* Fix: Post Comment Block Vulnerability Patched
+* Fix: Advanced Filter ASC/DESC translation issue
+* Fix: Advanced Filter Custom taxonomy block issue
+
 = 5.0.12 – 01 April 2026 =
 * Fix: Image Block Cover issue
 * Fix: Starter pack typography issue

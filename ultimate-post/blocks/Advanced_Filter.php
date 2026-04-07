@@ -370,37 +370,38 @@ class Advanced_Filter {
 				}
 				break;
 			case 'custom_tax':
-				if ( $post_types == '' ) {
+				if ( '' === $post_types ) {
 					break;
 				}
 
-				$post_types = json_decode( $post_types );
-
 				foreach ( $post_types as $post_type ) {
 					$taxonomies = get_object_taxonomies( $post_type );
+
 					foreach ( $taxonomies as $taxonomy ) {
-						$terms = get_terms(
-							array(
-								'taxonomy'   => $taxonomy,
-								'hide_empty' => false,
-							)
-						);
-						foreach ( $terms as $term ) {
-							$should_add = true;
-							if ( 'specific' === $option ) {
-								$should_add = false;
-								if ( is_array( $data_ids ) ) {
-									$should_add = in_array( $term->slug, $data_ids, true );
-								} elseif ( is_string( $data_ids ) ) {
-									$data_ids_arr = array_filter( array_map( 'trim', explode( ',', $data_ids ) ), 'strlen' );
-									$should_add   = in_array( $term->slug, $data_ids_arr, true );
+						if ( 'category' !== $taxonomy && 'post_tag' !== $taxonomy ) {
+							$terms = get_terms(
+								array(
+									'taxonomy'   => $taxonomy,
+									'hide_empty' => false,
+								)
+							);
+							foreach ( $terms as $term ) {
+								$should_add = true;
+								if ( 'specific' === $option ) {
+									$should_add = false;
+									if ( is_array( $data_ids ) ) {
+										$should_add = in_array( $term->slug, $data_ids, true );
+									} elseif ( is_string( $data_ids ) ) {
+										$data_ids_arr = array_filter( array_map( 'trim', explode( ',', $data_ids ) ), 'strlen' );
+										$should_add   = in_array( $term->slug, $data_ids_arr, true );
+									}
 								}
-							}
-							if ( $should_add ) {
-								$res[ $term->slug ] = array(
-									'name'     => $term->name,
-									'taxonomy' => $taxonomy,
-								);
+								if ( $should_add ) {
+									$res[ $term->slug ] = array(
+										'name'     => $term->name,
+										'taxonomy' => $taxonomy,
+									);
+								}
 							}
 						}
 					}
@@ -557,41 +558,44 @@ class Advanced_Filter {
 				return $data;
 
 			case 'custom_tax':
-				if ( '' == $post_types ) {
+				if ( '' === $post_types ) {
 					return array();
 				}
-
-				$post_types = json_decode( $post_types );
 
 				$data = array();
 
 				foreach ( $post_types as $post_type ) {
 					$taxonomies = get_object_taxonomies( sanitize_text_field( $post_type ) );
 					foreach ( $taxonomies as $taxonomy ) {
-						$terms = array();
+						if ( 'category' !== $taxonomy && 'post_tag' !== $taxonomy ) {
+							$terms = array();
 
-						if ( 'specific' === $mode && count( $filtered_specific ) > 0 ) {
-							foreach ( $filtered_specific as $s ) {
-								$res = get_term_by( 'slug', $s, $taxonomy );
-								if ( ! empty( $res ) ) {
-									$terms[] = $res;
+							if ( 'specific' === $mode && count( $filtered_specific ) > 0 ) {
+								foreach ( $filtered_specific as $s ) {
+									$res = get_term_by( 'slug', $s, $taxonomy );
+									if ( ! empty( $res ) ) {
+										$terms[] = $res;
+									}
+								}
+							} else {
+								$terms = get_terms(
+									array(
+										'taxonomy'   => $taxonomy,
+										'hide_empty' => false,
+									)
+								);
+							}
+
+							foreach ( $terms as $term ) {
+								$existing_ids = array_column( $data, 'id' );
+								if ( ! in_array( $term->slug, $existing_ids, true ) ) {
+									$data[] = array(
+										'id'       => $term->slug,
+										'name'     => $term->name,
+										'taxonomy' => $taxonomy,
+									);
 								}
 							}
-						} else {
-							$terms = get_terms(
-								array(
-									'taxonomy'   => $taxonomy,
-									'hide_empty' => false,
-								)
-							);
-						}
-
-						foreach ( $terms as $term ) {
-							$data[] = array(
-								'id'       => $term->slug,
-								'name'     => $term->name,
-								'taxonomy' => $taxonomy,
-							);
 						}
 					}
 				}
@@ -614,6 +618,17 @@ class Advanced_Filter {
 		}
 
 		$post_types = isset( $attr['postTypes'] ) ? $attr['postTypes'] : '';
+
+		if ( is_string( $post_types ) ) {
+			$post_types = json_decode( $post_types, true );
+		}
+
+		if ( is_array( $post_types ) && in_array( 'customPostType', $post_types, true ) ) {
+			$post_types = json_decode( $attr['queryPostType'][0] ?? '[]', true );
+			if ( is_string( $post_types ) ) {
+				$post_types = json_decode( $post_types, true );
+			}
+		}
 
 		$attr['blockId'] = ultimate_post()->sanitize_attr( $attr, 'blockId', 'sanitize_html_class', 'missing_block_id' );
 		$attr['allText'] = ultimate_post()->sanitize_attr( $attr, 'allText', 'sanitize_text_field', 'missing_block_id' );
@@ -640,28 +655,28 @@ class Advanced_Filter {
 			?>
 			<div class="ultp-block-<?php echo esc_attr( $attr['blockId'] ); ?>-wrapper" data-multiselect="<?php echo isset( $attr['inlineMultiSelect'] ) && $attr['inlineMultiSelect'] ? 'true' : 'false'; ?>"	>
 
-			<?php
-
-			foreach ( $data as $key => $value ) :
-				?>
 				<?php
-				if ( is_array( $value ) ) {
-					$name = $value['name'];
-					$tax  = isset( $value['taxonomy'] ) ? 'data-tax="' . esc_attr( $value['taxonomy'] ) . '"' : '';
-				} else {
-					$name = $value;
-					$tax  = '';
-				}
-				?>
+
+				foreach ( $data as $key => $value ) :
+					?>
+					<?php
+					if ( is_array( $value ) ) {
+						$name = $value['name'];
+						$tax  = isset( $value['taxonomy'] ) ? 'data-tax="' . esc_attr( $value['taxonomy'] ) . '"' : '';
+					} else {
+						$name = $value;
+						$tax  = '';
+					}
+					?>
 				<div <?php echo $btn_wrapper_attrs; ?> <?php echo $tax; ?> data-selected="<?php echo esc_attr( $key ); ?>" data-type="<?php echo esc_attr( $attr['type'] ); ?>">
 					<?php echo esc_html( $name ); ?>
 				</div>
-			<?php endforeach ?>
+				<?php endforeach ?>
 			</div>
-			<?php
+				<?php
 
-			$content = ob_get_clean();
-			return $content;
+				$content = ob_get_clean();
+				return $content;
 		} elseif ( 'dropdown' === $attr['filterStyle'] ) {
 
 			$mode     = 'all';
@@ -709,9 +724,9 @@ class Advanced_Filter {
 				</div>
 				<ul style="display: none;" class="ultp-filter-select-options ultp-filter-select__dropdown">
 
-					<?php
-					if ( isset( $attr['searchEnabled'] ) && $attr['searchEnabled'] ) :
-						?>
+				<?php
+				if ( isset( $attr['searchEnabled'] ) && $attr['searchEnabled'] ) :
+					?>
 						<input 
 							type="search" 
 							class="ultp-filter-select-search" 
@@ -719,10 +734,10 @@ class Advanced_Filter {
 						/>
 					<?php endif; ?>
 
-					<?php foreach ( $data as $item ) : ?>
-						<?php
+						<?php foreach ( $data as $item ) : ?>
+							<?php
 							$tax = isset( $item['taxonomy'] ) ? 'data-tax="' . esc_attr( $item['taxonomy'] ) . '"' : '';
-						?>
+							?>
 						<li class="ultp-filter-select__dropdown-inner" <?php echo $tax; ?> data-id="<?php echo esc_attr( $item['id'] ); ?>">
 							<?php echo esc_html( $item['name'] ); ?>
 						</li>
@@ -731,20 +746,20 @@ class Advanced_Filter {
 				</ul>
 			</div>
 
-			<?php
-			$content = ob_get_clean();
-			return $content;
+				<?php
+				$content = ob_get_clean();
+				return $content;
 		}
 
 		return '';
 	}
 
-	/**
-	 * Search_content
-	 *
-	 * @param  mixed $attr array.
-	 * @return string
-	 */
+		/**
+		 * Search_content
+		 *
+		 * @param  mixed $attr array.
+		 * @return string
+		 */
 	public function search_content( $attr ) {
 		$block_name = 'filter-search-adv';
 		$is_active  = ultimate_post()->is_lc_active();
@@ -779,17 +794,17 @@ class Advanced_Filter {
 				</span>
 			</div>
 		</div>
-		<?php
-		$content = ob_get_clean();
-		return $content;
+			<?php
+			$content = ob_get_clean();
+			return $content;
 	}
 
-	/**
-	 * Clear_content
-	 *
-	 * @param  mixed $attr array.
-	 * @return array
-	 */
+		/**
+		 * Clear_content
+		 *
+		 * @param  mixed $attr array.
+		 * @return array
+		 */
 	public function clear_content( $attr ) {
 		$block_name = 'filter-clear';
 		// $is_active     = ultimate_post()->is_lc_active();
@@ -828,13 +843,13 @@ class Advanced_Filter {
 
 			<div <?php echo $wrapper_attrs; ?>>
 				<button class="ultp-clear-button">
-					<?php echo esc_html( $attr['clearButtonText'] ); ?>
+				<?php echo esc_html( $attr['clearButtonText'] ); ?>
 				</button>
 			</div>
 		</div>
 
-		<?php
-		$content = ob_get_clean();
-		return $content;
+			<?php
+			$content = ob_get_clean();
+			return $content;
 	}
 }

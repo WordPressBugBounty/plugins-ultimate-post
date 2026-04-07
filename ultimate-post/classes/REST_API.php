@@ -205,39 +205,39 @@ class REST_API {
 	 */
 	public function search_settings_action( $server ) {
 		global $wpdb;
-        $post = $server->get_params();
-        $request_type = isset($post['type'])?ultimate_post()->ultp_rest_sanitize_params($post['type']):'';
-        $condition_type = isset($post['condition'])?ultimate_post()->ultp_rest_sanitize_params($post['condition']):'';
-        $term_type = isset($post['term'])?ultimate_post()->ultp_rest_sanitize_params( $post['term'] ):'';
-        // get post type
-        $get_multiple_post_type = isset($post['postType']) ? ultimate_post()->ultp_rest_sanitize_params($post['postType'])  : array();
-        $multiple_post_type = is_array($get_multiple_post_type) ?  $get_multiple_post_type : json_decode($get_multiple_post_type, true);
-        $split = explode('###', $condition_type);
-        $post_type_condition = array();
-        if($split[0] == 'customPostType' && count($multiple_post_type)) {
-            $post_type_condition = get_object_taxonomies($multiple_post_type);
-        }
+		$post           = $server->get_params();
+		$request_type   = isset( $post['type'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['type'] ) : '';
+		$condition_type = isset( $post['condition'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['condition'] ) : '';
+		$term_type      = isset( $post['term'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['term'] ) : '';
+		// get post type
+		$get_multiple_post_type = isset( $post['postType'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['postType'] ) : array();
+		$multiple_post_type     = is_array( $get_multiple_post_type ) ? $get_multiple_post_type : json_decode( $get_multiple_post_type, true );
+		$split                  = explode( '###', $condition_type );
+		$post_type_condition    = array();
+		if ( $split[0] == 'customPostType' && count( $multiple_post_type ) ) {
+			$post_type_condition = get_object_taxonomies( $multiple_post_type );
+		}
 
-        switch ($request_type) {
-            case 'posts':
-            case 'allpost':
-            case 'postExclude':
-                $post_type = array('post');
-                if ($request_type == 'allpost' || $condition_type == 'customPostType') {
-                    $post_type = array_keys(ultimate_post()->get_post_type());
-                } else if ($request_type == 'postExclude' && $condition_type != 'customPostType') {
-                    $post_type = array($condition_type);
-                }
-                $args = array(
-                    'post_type'         => $post_type,
-                    'post_status'       => 'publish',
-                    'posts_per_page'    => 10,
-                );
-                if (is_numeric($term_type)) {
-                    $args['p'] = $term_type;
-                } else {
-                    $args['s'] = $term_type;
-                }
+		switch ( $request_type ) {
+			case 'posts':
+			case 'allpost':
+			case 'postExclude':
+				$post_type = array( 'post' );
+				if ( $request_type == 'allpost' || $condition_type == 'customPostType' ) {
+					$post_type = array_keys( ultimate_post()->get_post_type() );
+				} elseif ( $request_type == 'postExclude' && $condition_type != 'customPostType' ) {
+					$post_type = array( $condition_type );
+				}
+				$args = array(
+					'post_type'      => $post_type,
+					'post_status'    => 'publish',
+					'posts_per_page' => 10,
+				);
+				if ( is_numeric( $term_type ) ) {
+					$args['p'] = $term_type;
+				} else {
+					$args['s'] = $term_type;
+				}
 
 				$post_results = new \WP_Query( $args );
 				$data         = array();
@@ -288,25 +288,25 @@ class REST_API {
 				);
 				break;
 
-            case 'taxvalue':
-                $split = explode('###', $condition_type);
-                $condition = $split[1] != 'multiTaxonomy' ? array($split[1]) : get_object_taxonomies($split[0]);
+			case 'taxvalue':
+				$split     = explode( '###', $condition_type );
+				$condition = $split[1] != 'multiTaxonomy' ? array( $split[1] ) : get_object_taxonomies( $split[0] );
 
-                if($post_type_condition && count($post_type_condition)) {
-                    $condition = $post_type_condition;
-                }
+				if ( $post_type_condition && count( $post_type_condition ) ) {
+					$condition = $post_type_condition;
+				}
 
-                $args = array(
-                    'taxonomy'  => $condition,
-                    'fields'    => 'all',
-                    'orderby'   => 'id', 
-                    'order'     => 'ASC',
-                    'name__like'=> $term_type
-                );
-                if (is_numeric($term_type)) {
-                    unset($args['name__like']);
-                    $args['include'] = array($term_type);
-                }
+				$args = array(
+					'taxonomy'   => $condition,
+					'fields'     => 'all',
+					'orderby'    => 'id',
+					'order'      => 'ASC',
+					'name__like' => $term_type,
+				);
+				if ( is_numeric( $term_type ) ) {
+					unset( $args['name__like'] );
+					$args['include'] = array( $term_type );
+				}
 
 				$post_results = get_terms( $args );
 				$data         = array();
@@ -332,41 +332,47 @@ class REST_API {
 				);
 				break;
 
-            case 'taxExclude':
-                $condition = get_object_taxonomies($condition_type);
-                if($post_type_condition && count($post_type_condition)) {
-                    $condition = $post_type_condition;
-                }
-                $args = array(
-                    'taxonomy'  => $condition,
-                    'fields'    => 'all',
-                    'orderby'   => 'id', 
-                    'order'     => 'ASC',
-                    'name__like'=> $term_type
-                ); 
-                if (is_numeric($term_type)) {
-                    unset($args['name__like']);
-                    $args['include'] = array($term_type);
-                }
-                $post_results = get_terms( $args );
-                $data = [];
-                if (!empty($post_results)) {
-                    foreach ($post_results as $key => $val) {
-                        $data[] = array('value'=>$val->taxonomy.'###'.$val->slug, 'title'=> '[ID: '.$val->term_id.'] '.$val->taxonomy.': '.$val->name);
-                    }
-                }
-                return ['success' => true, 'data' => $data];
-                break;
-                // allPostType
-            case 'allPostType': 
-                $all_types = array_values(get_post_types( array( 'public' => true ), 'names' ));
-                $postType = array();
-                foreach($all_types as $type){
-                    $postType[] = array(
-                        'title' => $type,
-                        'value' => $type,
-                    );
-                };
+			case 'taxExclude':
+				$condition = get_object_taxonomies( $condition_type );
+				if ( $post_type_condition && count( $post_type_condition ) ) {
+					$condition = $post_type_condition;
+				}
+				$args = array(
+					'taxonomy'   => $condition,
+					'fields'     => 'all',
+					'orderby'    => 'id',
+					'order'      => 'ASC',
+					'name__like' => $term_type,
+				);
+				if ( is_numeric( $term_type ) ) {
+					unset( $args['name__like'] );
+					$args['include'] = array( $term_type );
+				}
+				$post_results = get_terms( $args );
+				$data         = array();
+				if ( ! empty( $post_results ) ) {
+					foreach ( $post_results as $key => $val ) {
+						$data[] = array(
+							'value' => $val->taxonomy . '###' . $val->slug,
+							'title' => '[ID: ' . $val->term_id . '] ' . $val->taxonomy . ': ' . $val->name,
+						);
+					}
+				}
+				return array(
+					'success' => true,
+					'data'    => $data,
+				);
+				break;
+				// allPostType
+			case 'allPostType':
+				$all_types = array_values( get_post_types( array( 'public' => true ), 'names' ) );
+				$postType  = array();
+				foreach ( $all_types as $type ) {
+					$postType[] = array(
+						'title' => $type,
+						'value' => $type,
+					);
+				}
 
 				return array(
 					'success' => true,
@@ -579,6 +585,13 @@ class REST_API {
 
 		$post_types = isset( $prams['postTypes'] ) ? ultimate_post()->ultp_rest_sanitize_params( $prams['postTypes'] ) : array();
 
+		if ( is_string( $post_types ) ) {
+			$post_types = json_decode( $post_types, true );
+			if ( ! is_array( $post_types ) ) {
+				$post_types = array();
+			}
+		}
+
 		$data = array(
 			array(
 				'id'   => '_all',
@@ -589,17 +602,19 @@ class REST_API {
 		foreach ( $post_types as $post_type ) {
 			$taxonomies = get_object_taxonomies( $post_type );
 			foreach ( $taxonomies as $taxonomy ) {
-				$terms = get_terms(
-					array(
-						'taxonomy'   => $taxonomy,
-						'hide_empty' => false,
-					)
-				);
-				foreach ( $terms as $term ) {
-					$data[] = array(
-						'id'   => $term->slug,
-						'name' => $term->name,
+				if ( 'category' !== $taxonomy && 'post_tag' !== $taxonomy ) {
+					$terms = get_terms(
+						array(
+							'taxonomy'   => $taxonomy,
+							'hide_empty' => false,
+						)
 					);
+					foreach ( $terms as $term ) {
+						$data[] = array(
+							'id'   => $term->slug,
+							'name' => $term->name,
+						);
+					}
 				}
 			}
 		}
