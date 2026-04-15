@@ -310,7 +310,7 @@ class Notice {
 							align-items: center;
 							justify-content: center;
 						"
-						aria-label="<?php esc_html_e( 'Close Banner', 'wow-table-rate-shipping' ); ?>"
+						aria-label="<?php esc_html_e( 'Close Banner', 'ultimate-post' ); ?>"
 						href="<?php echo esc_url( add_query_arg( $query_args ) ); ?>">
 					</a>
 
@@ -537,10 +537,10 @@ class Notice {
 			<div class="ultp-consent-box ultp-notice-wrapper notice data_collection_notice">
 			<div class="ultp-consent-content">
 			<div class="ultp-consent-text">
-			<div class="ultp-consent-text-first"><?php esc_html_e( 'Want to help make PostX even more awesome?', 'wow-table-rate-shipping' ); ?></div>
+			<div class="ultp-consent-text-first"><?php esc_html_e( 'Want to help make PostX even more awesome?', 'ultimate-post' ); ?></div>
 			<div class="ultp-consent-text-last">
-					<?php esc_html_e( 'Allow us to collect diagnostic data and usage information. see ', 'wow-table-rate-shipping' ); ?>
-			<a href="https://www.wpxpo.com/data-collection-policy/" target="_blank" ><?php esc_html_e( 'what we collect.', 'wow-table-rate-shipping' ); ?></a>
+					<?php esc_html_e( 'Allow us to collect diagnostic data and usage information. see ', 'ultimate-post' ); ?>
+			<a href="https://www.wpxpo.com/data-collection-policy/" target="_blank" ><?php esc_html_e( 'what we collect.', 'ultimate-post' ); ?></a>
 			</div>
 			</div>
 			<a
@@ -558,7 +558,7 @@ class Notice {
 									);
 					?>
 									class="ultp-notice-close"
-			><?php esc_html_e( 'Accept & Close', 'wow-table-rate-shipping' ); ?></a>
+			><?php esc_html_e( 'Accept & Close', 'ultimate-post' ); ?></a>
 			</div>
 			<a href=
 				<?php

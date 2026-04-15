@@ -4,7 +4,7 @@ Tags: post grid, post list, post slider, ajax filter, post filter
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 5.6
-Stable tag: 5.0.14
+Stable tag: 5.0.15
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -180,6 +180,10 @@ Check out the video of Jack Cao and learn how to create News Magazine Website fo
 
 We are glad that you are considering PostX. We have more amazing plugins that you can check out:
 
+🚚 [**WowShipping 🔥:**](https://wordpress.org/plugins/wow-table-rate-shipping/) The complete table rate shipping plugin for WooCommerce, featuring 30+ flexible conditions and integrations with popular carriers like UPS, USPS, DHL, Sendle, and more.
+
+➕ [**WowAddons 🔥 :**](https://wordpress.org/plugins/product-addons/) The ultimate product addons plugin with 25+ extra product options, custom fields, allowing you to sell customizable products and increase average order value.
+
 🧲 [**WowOptin:**](https://wordpress.org/plugins/optin/) The next-gen optin and popup builder plugin with Canva-like design flexibility and detailed audience targeting.
 
 💝 [**WowStore:**](https://wordpress.org/plugins/product-blocks/) An all-in-one WooCommerce solution to create professional and conversion-focused eCommerce stores.
@@ -268,6 +272,10 @@ It is a Gutenberg plugin it works great with WordPress version 5.x.x or more. An
 11. With the help of the Elementor and Saved Template addons, you can use any of the post blocks of PostX to any pages while editing with Elementor builder.
 
 == Changelog ==
+= 5.0.15 – 15 April 2026 =
+* Fix: Optimized ajax request handling using apiFetch
+* Fix: Synchronized dark/light mode in the starter pack
+
 = 5.0.14 – 08 April 2026 =
 * Fix: Advanced Filter issue
 

@@ -104,26 +104,26 @@ class Post_Comments {
 			$req       = get_option( 'require_name_email' );
 			$aria_req  = ( $req ? " aria-required='true'" : '' );
 
-			$auth_label    = $attr['inputLabel'] ? '<label for="author">' . __( '' . $attr['nameInputText'] . '' ) . '' . ( $req ? '<span class="required">*</span>' : '' ) . '</label>' : '';
-			$email_label   = $attr['inputLabel'] ? '<label for="email">' . __( '' . $attr['emailInputText'] . '' ) . '' . ( $req ? '<span class="required">*</span>' : '' ) . '</label>' : '';
-			$url_label     = $attr['inputLabel'] ? '<label for="url">' . __( '' . $attr['webInputText'] . '', 'domainreference' ) . '</label>' : '';
-			$comment_label = $attr['inputLabel'] ? '<label for="comment">' . __( '' . $attr['cmntInputText'] . '' ) . '</label>' : '';
+			$auth_label    = $attr['inputLabel'] ? '<label for="author">' . $attr['nameInputText'] . ( $req ? '<span class="required">*</span>' : '' ) . '</label>' : '';
+			$email_label   = $attr['inputLabel'] ? '<label for="email">' . $attr['emailInputText'] . ( $req ? '<span class="required">*</span>' : '' ) . '</label>' : '';
+			$url_label     = $attr['inputLabel'] ? '<label for="url">' . $attr['webInputText'] . '</label>' : '';
+			$comment_label = $attr['inputLabel'] ? '<label for="comment">' . $attr['cmntInputText'] . '</label>' : '';
 			$cookies_label = $attr['cookiesEnable'] ? '<p class="comment-form-cookies-consent"><input id="wp-comment-cookies-consent" name="wp-comment-cookies-consent" type="checkbox" value="yes"/><label for="wp-comment-cookies-consent">' . $attr['cookiesText'] . '</label></p>' : '';
 
 			$comments_args = array(
-				'comment_field'       => '<div class="comment-form-comment ultp-comment-input ultp-field-control">' . esc_html( $comment_label ) . '<textarea class="hi" id="comment" name="comment" placeholder="' . esc_attr( $attr['inputPlaceHolder'] ) . '" cols="45" rows="8" aria-required="true"></textarea></div>',
+				'comment_field'       => '<div class="comment-form-comment ultp-comment-input ultp-field-control">' . wp_kses_post( $comment_label ) . '<textarea class="hi" id="comment" name="comment" placeholder="' . esc_attr( $attr['inputPlaceHolder'] ) . '" cols="45" rows="8" aria-required="true"></textarea></div>',
 				'fields'              => apply_filters(
 					'comment_form_default_fields',
 					array(
-						'author'  => '<div class="ultp-field-control ultp-comment-name">' . $auth_label . '<input id="author" placeholder="Your name" name="author" type="text" value="' . esc_attr( $commenter['comment_author'] ) . '" size="30"' . $aria_req . ' /></div>',
-						'email'   => '<div class="ultp-field-control ultp-comment-email">' . $email_label . '<input id="email" placeholder="your.email@example.com" name="email" type="text" value="' . esc_attr( $commenter['comment_author_email'] ) . '" size="30"' . $aria_req . ' /></div>',
-						'url'     => '<div class="ultp-field-control ultp-comment-website">' . $url_label . '<input id="url" name="url" placeholder="https://yourwebsite.com" type="text" value="' . esc_attr( $commenter['comment_author_url'] ) . '" size="30" /></div>',
+						'author'  => '<div class="ultp-field-control ultp-comment-name">' . wp_kses_post( $auth_label ) . '<input id="author" placeholder="Your name" name="author" type="text" value="' . esc_attr( $commenter['comment_author'] ) . '" size="30"' . $aria_req . ' /></div>',
+						'email'   => '<div class="ultp-field-control ultp-comment-email">' . wp_kses_post( $email_label ) . '<input id="email" placeholder="your.email@example.com" name="email" type="text" value="' . esc_attr( $commenter['comment_author_email'] ) . '" size="30"' . $aria_req . ' /></div>',
+						'url'     => '<div class="ultp-field-control ultp-comment-website">' . wp_kses_post( $url_label ) . '<input id="url" name="url" placeholder="https://yourwebsite.com" type="text" value="' . esc_attr( $commenter['comment_author_url'] ) . '" size="30" /></div>',
 						'cookies' => $cookies_label,
 					)
 				),
 				'class_submit'        => 'ultp-comment-btn',
 				'comment_notes_after' => '',
-				'submit_button'       => '<input name="%1$s" type="submit" id="%2$s" className="%3$s ultp-comment-btn" value="' . $attr['subBtnText'] . '" />',
+				'submit_button'       => '<input name="%1$s" type="submit" id="%2$s" class="%3$s ultp-comment-btn" value="' . $attr['subBtnText'] . '" />',
 				'class_form'          => 'ultp-comment-form',
 				'title_reply'         => ( $attr['replyHeading'] ? '<div class="crunchify-text ultp-comments-title">' . $attr['leaveRepText'] . '</div>' : '' ),
 				'class_container'     => 'ultp-comment-form-container',
