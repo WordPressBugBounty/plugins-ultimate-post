@@ -1379,10 +1379,10 @@
 		const parent = $(this).parents(".ultp-post-grid-parent");
 		const grids = parent.find(".ultp-block-wrapper");
 		const gridData = JSON.parse(parent.attr("data-grids"));
-		const postId = parent.attr("data-postid");
 		const selectedFilterTemp = $(this).find(".ultp-filter-clear-template");
 		const clearBtn = $(this).find(".ultp-filter-clear-button");
 		const firstElClass = "ultp-block-" + clearBtn.data("blockid") + "-first";
+		let postId = "";
 		let builder = "";
 
 		function resetFilters() {
@@ -1430,6 +1430,7 @@
 			const filter = $(this);
 			const type = $(this).attr("data-type");
 			const input = $(this).find(".ultp-filter-select-search");
+			postId = $(this).attr("data-current-postid");
 			builder = $(this).attr("data-builder");
 			function showDropdown(show) {
 				if (show) {
@@ -1492,7 +1493,12 @@
 							copy.addClass("ultp-filter-clear-selected-filter");
 							copy
 								.find(".ultp-selected-filter-text")
-								.text(getFormattedSelectedFilter(type, text));
+								.text(
+									getFormattedSelectedFilter(
+										filter.attr("data-filter-label"),
+										text,
+									),
+								);
 							// Alignment
 							if (clearBtn.hasClass(firstElClass)) {
 								clearBtn.removeClass(firstElClass);
@@ -1558,6 +1564,7 @@
 		that.find(".ultp-filter-button").each(function () {
 			const currFBtn = this;
 			const fBtnType = $(this).data("type");
+			postId = $(this).attr("data-current-postid");
 			$(this).on("click", function () {
 				const isActive = $(currFBtn).attr("data-is-active") === "true";
 				const value = $(this).data("selected");

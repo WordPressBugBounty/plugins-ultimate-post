@@ -4,30 +4,52 @@ Tags: post grid, post list, post slider, ajax filter, post filter
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 5.6
-Stable tag: 5.0.16
+Stable tag: 5.0.17
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
-A highly customizable plugin to create news, magazines, and any kind of blog site with post grid, post filter, post slider, and post blocks.
+Design professional blogs with advanced Gutenberg blocks, premade templates, dynamic post grids, and smart filters.
 
 == Description ==
 
-🥇 The #1 WordPress **News** **Magazine** and **Blogging** Solution
-📈 Highest **Post Grid** Layout Variations with vast customization options
-💕 A plugin by **WPXPO**, that empowers **60K+** businesses!
+🥇 The #1 WordPress news, magazine, and blogging solution
+📈 Highest post grid layout variations with enhanced customization
+💕 A plugin by **WPXPO**, that empowers **65K+** businesses!
 📞 Dedicated support team with **4.9/5** customer satisfaction on [**Trustpilot**](https://uk.trustpilot.com/review/wpxpo.com)
 
-😲 [**Free Demo**](https://trypostx.wpxpo.com/) | 🔥 [**PostX Pro**](https://www.wpxpo.com/postx/) | 📃 [**Documentation**](https://wpxpo.com/docs/postx/getting-started/)
+😲 [**Free Demo**](https://trypostx.wpxpo.com/) | 🔥 [**PostX Pro**](https://www.wpxpo.com/postx/) | 📃 [**Starter Templates**](https://www.wpxpo.com/product/postx/templates/) | 📦 [**All Blocks**](https://www.wpxpo.com/product/postx/features/blocks/)
 
-## Ultimate News Magazines and Blogging Solution for WordPress
+== Ultimate Blog Website Builder for WordPress ==
 
-Blog posts and news articles are the main things on news, magazines, and blog websites. PostX takes the posts displaying to a whole new level. It has the most attractive, professional, and highly customizable layouts with various important features. 
+Create modern news, magazine, and blog websites with advanced Gutenberg blocks, ready-made site templates, dynamic grid layouts, and advanced post filtering – all without coding.
 
 [youtube https://www.youtube.com/watch?v=FYgSe7kgb6M]
 
-## Starter Sites – Build Sites In 3 Steps!
+== Key Features of PostX ==
 
-PostX’s Starter sites come with complete website templates that are ready to be important. You just need to explore the templates, choose the one that you like, personalize, and go live. So you can give your site a whole new makeover or impress your clients in minutes. Currently, PostX has templates for the following websites:
+* Ready-to-import starter sites to launch full blog websites in minutes.
+* 45+ advanced Gutenberg blocks for creating dynamic, content-rich layouts.
+* 250+ ready-made pattern designs to speed up page creation.
+* Site builder to create custom templates for posts, categories, tags, authors, etc.
+* Query builder to display posts by category, tag, author, custom taxonomy, or custom logic.
+* Advanced post filtering, search, and pagination with Ajax for seamless browsing.
+* Dynamic content support to pull data from custom fields, post meta, and custom post types.
+* Global style settings to control colors, typography, and more across the entire site.
+* Multi-column layouts and templates to create custom headers, footers, and mega menus.
+* Advanced blogging tools such as table of contents, frontend post submission, and more.
+* Built-in AI (ChatGPT) and SEO plugins integration for content creation
+* Seamless integration with popular page builders such as Elementor, Divi, etc.
+* Use custom fonts, dark mode, and more design options
+* Mobile device responsive design & multi-language support
+* Performance optimized codebase
+
+== Starter Sites - Build Any Blog Website in 3 Steps! ==
+
+Launch a fully designed blog website in minutes. With PostX starter sites, you can select a premade site template, customize it to match your brand, and go live – no need to spend hours manually creating every page!
+
+**👉 Check out the [Starter Site Templates!](https://www.wpxpo.com/product/postx/templates/)**
+
+With PostX, you can easily build:
 
 ✅ News Websites
 ✅ Magazine Websites
@@ -41,97 +63,161 @@ PostX’s Starter sites come with complete website templates that are ready to b
 ✅ Food Blog Websites
 ✅ And More!
 
-👉 [**Explore Start Site Templates**](https://www.wpxpo.com/product/postx/templates/)
+👉 **Step-by-step guide on creating a news blog website in WordPress using PostX:**
 
-[**Gutenberg Posts Blocks**](https://www.wpxpo.com/postx/blocks/)
+[youtube https://www.youtube.com/watch?v=xbOsCVvx1a0]
 
-Drag and drop Gutenberg post blocks to display your blog posts in an organized way. Choose from 40+ blocks and customize each of the elements with complete creative freedom. Or you can choose from 250+ designer-made patterns to skip the customization part. With PostX’s post blocks, you can display your posts in the following layouts:
 
-✔ Post Grid
-✔ Post List
-✔ Post Slider & Carousel 
-✔ Post Carousel
-✔ Post Module
-✔ And More
+== Gutenberg Blocks for Professional Blog Layouts ==
+Get all the essential blocks to build a professional blog website. PostX blocks help you organize and design blog pages that are unique and visually engaging. 
 
-[**Ajax Search Block**](https://www.wpxpo.com/product/postx/features/ajax-search-for-wordpress/)
+✔ **Post Grid:** Showcase posts with 7+ cool grid layouts - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid6829)
+✔ **Post List:** Present content in structured list formats - [View Demo ](https://www.wpxpo.com/product/postx/features/blocks/#demoid6836)
+✔ **Post Slider & Carousel:** Highlight featured posts with interactive sliders - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid7487)
+✔ **Post Module:** Display posts in structured, magazine-style layouts - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid6825)
+✔ **Mega Menu:** Create advanced navigation menus - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid8819)
+✔ **Row/Column Block:** Build structured layouts easily - [View Demo](https://www.wpxpo.com/product/postx/features/row-column-block/)
+✔ **Image Block:** Style images with advanced controls - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid6843)
+✔ **News Ticker:** Display trending posts dynamically - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid6845)
+✔ **Search Block:** Ajax search for better navigation - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid8233)
+✔ **Star Rating:** Add rating systems to highlight content - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid8858)
+✔ **Accordion Block:** Display expandable content sections - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid8851)
+✔ **Button Group:** Stylish CTA buttons for more engagement - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid7952)
+✔ **Taxonomy Block:** Categories and tags in engaging designs - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid6841)
+✔ **Image Gallery Block:** Create visually rich image sections - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid8951)
+✔ **Tabs Block:** Organize blocks under tabs for improved visual - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid9045)
+✔ **YouTube Gallery Block:** Show video content in organized layouts - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid9096)
+✔ [**More 20+**](https://www.wpxpo.com/product/postx/features/blocks/#site-cat-builder) Dynamic builder block
 
-The Ajax Search Block allows you to enable a visually appealing search system for your WordPress site. So the readers can instantly find their desired content with the ajax search system.
 
-[**Query Builder for Post Sorting**](https://www.wpxpo.com/postx/advanced-query-loop/)
+== Dynamic Gutenberg Site Builder ==
 
-PostX’s advanced query builder helps you effortlessly display posts, pages, and custom post types for your desired layouts. Here is the list of all essential post-displaying options.
+Design every part of your website exactly the way you want with PostX’s dynamic site builder. Create unique templates for specific pages to make them stand out – or maintain consistency with the same template. 
+
+✔ Diverse layouts for category and tag pages
+✔ Cool designs for archive Pages
+✔ Custom blog post templates
+✔ Custom Search & date pages
+✔ Custom 404 Not Found Pages
+✔ Custom home page designs
+✔ Custom author pages
+
+[**👉 More about the**](https://www.wpxpo.com/product/postx/features/gutenberg-site-builder/) Dynamic Site Builder
+
+== Query Builder for Enhanced Content Display ==
+
+Choose exactly what content to show inside a section. Using the Quick Query feature, you can utilize advanced sorting options and customization options for maximum control over content display.
+
+Here is the list of essential post-displaying options:
 
 ✔ Display Posts Based on Category
 ✔ Display Posts Based on Tags
-✔ Display Posts Based on Category and Tags
 ✔ Display Specific Posts/Pages
+✔ Display Posts from Specific Authors
 ✔ Display Custom Post Types
 ✔ Popular Posts
-✔ Related Posts
-✔ Recent Posts
 ✔ Random Posts
 ✔ Oldest Posts
 ✔ Most Commented Posts
+✔ Top Posts of the Month
+✔ All-time Favorites
+✔ Alphabetical ASC
+✔ Alphabetical DESC
 ✔ Reorder Posts
 ✔ Exclude Posts
 
-[**Advanced Post Filter**](https://www.wpxpo.com/product/postx/features/wordpress-post-filter/)
+And a lot of other options! 👉 **Learn about [Query Builder](https://www.wpxpo.com/product/postx/features/advanced-query-builder/)**
 
-With the Ajax post filter of PostX, users see multiple posts within the same section without reloading the whole page. You have all essential post-filtering options including:
+== Advanced Post Filter ==
 
-✔ Post Filter By Category 
-✔ Post Filter Tags
-✔ Post Filter By 
+Let users easily filter and find the posts they are looking for – without reloading the whole page. You have all essential post-filtering options, including:
+
+✔ Filter By Ascending and Descending
+✔ Filter By Custom Taxonomy
+✔ Post Filter By Category
 ✔ Post Filter By Author
-✔ Filter By Ascending and Descending 
-✔ Filter By Custom Taxonomy 
-✔ Search Filter 
+✔ Advanced Sort Filter
+✔ Post Filter Tags
+✔ Order By Filter
+✔ Search Filter
 
-[**Dynamic Gutenberg Site Builder**](https://www.wpxpo.com/postx/gutenberg-site-builder/)
+👉 **Details about [Advanced Post Filter](https://www.wpxpo.com/product/postx/features/wordpress-post-filter/)**
 
-PostX has the first-ever dynamic site builder for Gutenberg with dedicated templates for all essential pages. With this Gutenberg builder, you can take full control over your site and resign the following pages.
+== Ajax Pagination ==
 
-✔ Home Page
-✔ Blog Posts 
-✔ Archive Pages
-✔ Category Pages
-✔ Tag Pages 
-✔ Author Pages
-✔ Search & Date Pages
+Keep users engaged with seamless Ajax-powered pagination that loads content instantly without refreshing the page. PostX offers multiple pagination styles so you can choose what fits your website.
 
-[**Ajax Pagination**](https://www.wpxpo.com/product/postx/features/ajax-pagination/)
+✔ Load More pagination
+✔ Numeric pagination
+✔ Next/previous pagination
 
-The Ajax-powered pagination helps your readers to explore more posts in the same section or page. You can choose from three types of paginations, (load more, navigation, or numeric) and customize them as per your requirements.  
-
-[**Global Styles**](https://www.wpxpo.com/product/postx/features/wordpress-global-styles/)
-
-It helps to override the theme styles and add PostX’s color palettes & typography to your entire site. Explore the available options and choose the style that suits your brand identity.
+**👉 Check out details for [Ajax Pagination](https://www.wpxpo.com/product/postx/features/ajax-pagination/)**
 
 
-[**Front End Submission**](https://www.wpxpo.com/product/postx/features/front-end-post-submission/)
+== Enhanced Blogging Features ==
 
-Effectively manage guest writers by letting them submit posts from the front end or make custom dashboards for them with SEO optimization support. Moreover, you can add comments or corrections as like Google Docs without leaving the WordPress dashboard.
+Take your blog to the next level with advanced features designed to improve engagement, usability, and content management.
+
+[**Front End Post Submission**](https://www.wpxpo.com/product/postx/features/front-end-post-submission/)
+Allow writers to submit content directly from the front end without giving them access to the WordPress dashboard. Perfect for managing guest and freelance writers.
 
 **Dynamic Content**
+Pull data dynamically from any post type and display information such as post meta, custom fields, and more. 
 
-Add custom fields created by plugins like ACF to PostX’s blocks dynamically. So you can also display custom post types with additional fields in an organized and attractive way,
+[**Table of Contents**](https://www.wpxpo.com/product/postx/features/table-of-content-wordpress/)
+Add a structured table of contents to posts that improves readability and navigation – which also helps in SEO.
 
 [**Reading Progress Bar**](https://www.wpxpo.com/product/postx/features/reading-progress-bar/)
+Show a visual progress bar on posts to highlight how much the visitor has read or scrolled. You can also add the progress bar to any page of your WordPress site.
 
-Display a visual presentation to highlight readers how much they read or scrolled. However, you can also add the progress bar to any page of your WordPress site. 
+[**Taxonomy Image & Color**](https://www.wpxpo.com/product/postx/features/wordpress-taxonomy-image-and-color/)
+Add featured images and desired colors to categories, tags, and custom post types – making the taxonomies more visually appealing.
 
-[**Custom Font**](https://www.wpxpo.com/product/postx/features/custom-fonts-for-wordpress/)
+== Header, Footer & Mega Menu Builder ==
 
-Upload your desired fonts with single or multiple variations. So you can add the uploaded fonts to PostX’s blocks with full typography customization options. 
+Improve your site’s navigation and direct visitors to highlighted sections of your site using fully customizable headers, footers, and mega menus.
 
-[**Taxonomy Image and Color**](https://www.wpxpo.com/product/postx/features/wordpress-taxonomy-image-and-color/)
+✔ A wide library of premade header and footer templates
+✔ Option to create different headers/footers for different pages
+✔ Build advanced mega menus with rich layouts, images, and content
 
-Add featured images and desired colors to categories, tags, and custom post types. So you can display taxonomies as like blog posts using PostX’s taxonomy blocks. 
+**Learn about:** [PostX Mega menu](https://www.wpxpo.com/product/postx/features/mega-menu/)
+**Learn about:** [PostX Header & Footer](https://www.wpxpo.com/product/postx/features/header-footer-builder/)
 
-[**Page Builder Integration**](https://www.wpxpo.com/product/postx/features/integrations/)
+== Premade Patterns ==
 
-Liked PostX’s design variations but are not ready to switch your current page builder? Don’t worry you can still use our blocks, patterns, and home page templates with the most popular page builders including: 
+Speed up your blog creation with a library of ready-made designs.
+
+Instead of building sections from scratch, choose from professionally designed layouts and customize them to fit your brand.
+
+**Check out the live demo of [Premade Patterns.](https://www.wpxpo.com/product/postx/features/patterns/)**
+
+== Blog Design & Customization ==
+
+Control the aesthetics of your entire blog effortlessly. Create a unique and consistent brand identity with global settings while having block-level control over designs.
+
+**Block-level Settings**
+Fine-tune every part of your blog layout with powerful styling controls built directly into each block. Easily switch between different layout variations, customize individual elements like title, image, meta, taxonomy, excerpt, and more.
+
+**[Global Styles](https://www.wpxpo.com/product/postx/features/wordpress-global-styles/)**
+Choose the colors and typography that you prefer and apply them globally across your website for a consistent look and feel.
+
+**[Custom Fonts](https://www.wpxpo.com/product/postx/features/custom-fonts-for-wordpress/)**
+Upload and use custom fonts that align with your brand guidelines. Use them with single or multiple variations – and use them inside PostX’s blocks with full typography customization options.
+
+**Dark Mode & RTL Support**
+Give your readers a modern, eye-friendly experience with a built-in Light/Dark mode toggle. Also, we provide RTL support, which ensures a seamless reading experience for users who prefer right-to-left languages.
+
+
+== Integrations & Compatibility ==
+
+PostX works seamlessly with your favorite tools and enhances your blog management workflow.
+
+**AI Integration**
+Integrate with your ChatGPT account to easily create and optimize content directly inside WordPress.
+
+**Gutenberg Blocks in Page Builders**
+Love the comfort of your favorite page builders? Easily use Gutenberg blocks and any PostX-created designs directly inside popular page builders such as:
 
 ✔ Elementor
 ✔ Divi
@@ -140,18 +226,12 @@ Liked PostX’s design variations but are not ready to switch your current page 
 ✔ Bricks Builder
 ✔ Beaver
 
-[**SEO Integration**](https://www.wpxpo.com/product/postx/features/integrations/)
+Design and reuse any set of designs with the help of the [Saved Template](https://www.wpxpo.com/product/postx/features/saved-template/) feature of PostX.
 
-PostX has built-in SEO integration that allows you to replace the default WordPress excerpt with custom meta descriptions added with the following SEO plugins:
+== SEO Plugins Support ==
+Fully compatible with major SEO plugins like Rank Math, Yoast, All-in-One SEO, Squirrly, SEOPress and others to display custom meta descriptions easily inside content. 
 
-✔ Yoast
-✔ Rank Math
-✔ All-in-One SEO
-✔ Squirrly
-✔ SEOPress
-
-**PostX Recommended Themes**
-
+== PostX Recommended Themes ==
 PostX should work properly with all popular WordPress themes. We have personally tested with various themes. Here is a list of themes that are fully compatible with PostX.
 
 ✔ Twenty Twenty-Five
@@ -165,18 +245,39 @@ PostX should work properly with all popular WordPress themes. We have personally
 ✔ Blossom Theme
 ✔ Block WP
 
-== 🏆 Featured by top reviewers ==
+== Upcoming Features ==
+* Dynamic Image Generation
+* Infinite Scroll
+* Icon Block
+* Instagram Blocks
+* Countdown Timer Blocks
+
+**Have a cool idea for a feature? Let us know: [Request a feature](https://www.wpxpo.com/product/postx/roadmap/)**
+
+== Recommended by the WordPress Experts ==
 
 Check out what Paul C (WPTuts) had to say about PostX.
-
 [youtube https://www.youtube.com/watch?v=fh72g1wPVa0]
 
-
-Check out the video of Jack Cao and learn how to create News Magazine Website for free.
-
+Check out the video of Jack Cao and learn how to create a News Magazine Website for free.
 [youtube https://www.youtube.com/watch?v=X4vKrjcSpI8]
 
-## Other Plugins by WPXPO
+
+== Translations  ==
+
+PostX plugin is compatible with WPML Plugin and also it works perfectly with loco translate plugin. 
+You can Translate PostX on [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/ultimate-post/).
+
+== Liked PostX? ==
+
+- Join our [Facebook Group](https://www.facebook.com/groups/gutenbergpostx).
+- Learn from our tutorials on [YouTube Channel](https://www.youtube.com/channel/UC9I7kzTtG31YlWdG3iL42Jg).
+
+== Author ==
+
+Developed by [WPXPO](https://www.wpxpo.com). [Contribute to Gutenberg Post Blocks on Bitbucket](https://bitbucket.org/wpstabon/ultimate-post/src/master/) and join the party.
+
+== Other Plugins by WPXPO ==
 
 We are glad that you are considering PostX. We have more amazing plugins that you can check out:
 
@@ -191,19 +292,6 @@ We are glad that you are considering PostX. We have more amazing plugins that yo
 💸 [**WowRevenue:**](https://wordpress.org/plugins/revenue/) Collections of various WooCommerce discount campaigns to boost revenue by increasing the average order value.
 
 📦 [**WholesaleX:**](https://wordpress.org/plugins/wholesalex/) A complete WooCommerce Wholesale solution with additional features like a bulk order form, dynamic pricing & discount rules.
-
-
-= Author =
-Developed by [WPXPO](https://www.wpxpo.com). [Contribute to Gutenberg Post Blocks on Bitbucket](https://bitbucket.org/wpstabon/ultimate-post/src/master/) and join the party.
-
-= Liked PostX? =
-- Join our [Facebook Group](https://www.facebook.com/groups/gutenbergpostx).
-- Learn from our tutorials on [YouTube Channel](https://www.youtube.com/channel/UC9I7kzTtG31YlWdG3iL42Jg).
-
-### 📗 Translations 
-
-PostX plugin is compatible with WPML Plugin and also it works perfectly with loco translate plugin. 
-You can Translate PostX on [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/ultimate-post/).
 
 
 == Installation ==
@@ -272,6 +360,12 @@ It is a Gutenberg plugin it works great with WordPress version 5.x.x or more. An
 11. With the help of the Elementor and Saved Template addons, you can use any of the post blocks of PostX to any pages while editing with Elementor builder.
 
 == Changelog ==
+= 5.0.17 – 26 April 2026 =
+* Fix: Advanced fIlter dynamic label issue 
+* Fix: Advanced filter tag inline view issue 
+* Fix: Advanced fIlter reset button nameing issue
+* Fix: Advanced filter postid removed from backend
+
 = 5.0.16 – 16 April 2026 =
 * Fix: Starter pack Dark/Light mode css optimized
 
@@ -282,7 +376,6 @@ It is a Gutenberg plugin it works great with WordPress version 5.x.x or more. An
 = 5.0.14 – 08 April 2026 =
 * Fix: Advanced Filter issue
 
-== Changelog ==
 = 5.0.13 – 07 April 2026 =
 * Fix: Post Grid 2 Video popup issue
 * Fix: Post Comment Block Vulnerability Patched

@@ -325,14 +325,17 @@ class Advanced_Filter {
 				}
 				break;
 			case 'tags':
-				if ( ! empty( $ids ) && $ids !== '_all' ) {
-					$tags = get_tags(
-						array(
-							'per_page' => -1,
-							'include'  => $ids,
-						)
-					);
+ 				$args = array(
+					'taxonomy'   => 'post_tag',
+					'hide_empty' => false,
+				);
+				if ( 'all' !== $option && ! empty( $ids ) && $ids !== '_all') {
+					$args['include'] = wp_parse_id_list( $ids );
+					$args['orderby'] = 'include';
+				}
 
+				$tags = get_terms( $args );
+				if ( ! is_wp_error( $tags ) && ! empty( $tags ) ) {
 					foreach ( $tags as $tag ) {
 						$res[ $tag->slug ] = $tag->name;
 					}
@@ -648,6 +651,9 @@ class Advanced_Filter {
 					'role'           => 'button',
 					'data-blockId'   => $attr['blockId'],
 					'data-is-active' => 'false',
+					'data-builder'  => ultimate_post()->get_builder_attr( 'archiveBuilderFilter' ),
+					'data-current-postid'  => get_the_ID(),
+					'data-filter-label' => isset($attr['allText']) ? $attr['allText'] : 'All',
 				)
 			);
 
@@ -708,6 +714,8 @@ class Advanced_Filter {
 					'aria-expanded' => 'false',
 					'aria-label'    => 'Select Filter (' . $attr['type'] . ')',
 					'data-builder'  => ultimate_post()->get_builder_attr( 'archiveBuilderFilter' ),
+					'data-current-postid'  => get_the_ID(),
+					'data-filter-label' => isset($def_value['name']) ? $def_value['name'] : 'All',
 				)
 			);
 
