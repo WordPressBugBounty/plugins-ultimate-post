@@ -590,7 +590,7 @@ class Notice {
 		<style>
 				.ultp-consent-box {
 					width: 656px;
-					padding: 16px;
+					padding: 16px !important;
 					border: 1px solid #070707;
 					border-left-width: 4px;
 					border-radius: 4px;
