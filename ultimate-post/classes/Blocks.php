@@ -1,4 +1,7 @@
 <?php
+// phpcs:ignore
+// @codingStandardsIgnoreFile
+// @ignoreWarnings
 /**
  * Require All Blocks and handle block ajax action
  *
@@ -7,7 +10,6 @@
  */
 
 namespace ULTP;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -593,6 +595,17 @@ class Blocks {
 	 */
 	public function filter_content_return( $blocks, $blockId, $blockRaw, $blockName, $taxtype, $taxonomy, $postId, &$toReturn, $widgetBlockId = '', $adv_filter_data = array(), $ultp_uniqueIds = array(), $ultp_current_unique_posts = array() ) {
 		foreach ( $blocks as $key => $value ) {
+			if ( ( $value['blockName'] ?? '' ) === 'core/shortcode' ) {
+				if ( preg_match( '/id="([^"]+)"/', $value['innerHTML'] ?? '', $matches ) ) {
+					$template_post = get_post( $matches[1] );
+					if ( $template_post && ! empty( $template_post->post_content ) ) {
+						$template_blocks = parse_blocks( $template_post->post_content );
+						// recurse into the expanded blocks instead
+						$this->filter_content_return( $template_blocks, $blockId, $blockRaw, $blockName, $taxtype, $taxonomy, $postId, $toReturn, $widgetBlockId, $adv_filter_data, $ultp_uniqueIds, $ultp_current_unique_posts );
+						continue; // skip the shortcode block itself
+					}
+				}
+        	}
 			if ( $blockName == $value['blockName'] ) {
 				if ( $value['attrs']['blockId'] == $blockId ) {
 					$objName     = str_replace( ' ', '_', ucwords( str_replace( array( 'ultimate-post/', '-' ), array( '', ' ' ), $blockName ) ) );

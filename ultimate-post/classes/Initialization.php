@@ -92,9 +92,13 @@ class ULTP_Initialization {
 		require_once ULTP_PATH . 'includes/notice/class-notice.php';
 		require_once ULTP_PATH . 'includes/durbin/class-our-plugins.php';
 		require_once ULTP_PATH . 'includes/notice/class-wow-shipping-promotion.php';
+		require_once ULTP_PATH . 'includes/notice/class-wow-revenue-promotion.php';
+		require_once ULTP_PATH . 'includes/notice/class-wow-addons-promotion.php';
 		new \ULTP\Includes\Deactive\Deactive();
 		new \ULTP\Includes\notice\Notice();
 		new \ULTP\Includes\notice\WowShippingPromotion();
+		new \ULTP\Includes\notice\WowRevenuePromotion();
+		new \ULTP\Includes\notice\WowAddonsPromotion();
 		new \ULTP\Includes\Durbin\OurPlugins();
 	}
 
