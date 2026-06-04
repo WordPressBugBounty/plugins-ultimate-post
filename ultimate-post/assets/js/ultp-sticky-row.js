@@ -37,7 +37,7 @@
 										rowSelector
 											.addClass("stickyTopActive")
 											.removeClass("stickyTopDeActive");
-									}
+									},
 								);
 							} else {
 								if (elementPosition + elementHeight > $(this).scrollTop()) {

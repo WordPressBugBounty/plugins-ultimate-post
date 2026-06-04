@@ -24,16 +24,18 @@ class Advanced_Filter {
 	 *
 	 * @var array
 	 */
-	public $order = array(
-		array(
-			'id'   => 'DESC',
-			'name' => 'DESC',
-		),
-		array(
-			'id'   => 'ASC',
-			'name' => 'ASC',
-		),
-	);
+	public function get_order_options() {
+		return array(
+			array(
+				'id'   => 'DESC',
+				'name' => __( 'DESC', 'ultimate-post' ),
+			),
+			array(
+				'id'   => 'ASC',
+				'name' => __( 'ASC', 'ultimate-post' ),
+			),
+		);
+	}
 
 	/**
 	 * Order by Value for select
@@ -276,9 +278,10 @@ class Advanced_Filter {
 	 * @param  mixed $post_types string.
 	 * @param  mixed $allText string.
 	 * @param  mixed $option string.
+	 * @param  mixed $order array.
 	 * @return array
 	 */
-	public function get_button_data( $type, $data_ids, $post_types = '', $allText = 'All', $option = '' ) {
+	public function get_button_data( $type, $data_ids, $post_types = '', $allText = 'All', $option = '', $order = array() ) {
 
 		$res = array();
 
@@ -325,11 +328,11 @@ class Advanced_Filter {
 				}
 				break;
 			case 'tags':
- 				$args = array(
+				$args = array(
 					'taxonomy'   => 'post_tag',
 					'hide_empty' => false,
 				);
-				if ( 'all' !== $option && ! empty( $ids ) && $ids !== '_all') {
+				if ( 'all' !== $option && ! empty( $ids ) && $ids !== '_all' ) {
 					$args['include'] = wp_parse_id_list( $ids );
 					$args['orderby'] = 'include';
 				}
@@ -434,8 +437,7 @@ class Advanced_Filter {
 		}
 	}
 
-	public function get_select_data( $type, $all_text, $post_types = '', $specific = array(), $mode = 'all' ) {
-
+	public function get_select_data( $type, $all_text, $post_types = '', $specific = array(), $mode = 'all', $order = array() ) {
 		$all               = null;
 		$all_idx           = array_search( '_all', $specific, true );
 		$filtered_specific = $specific;
@@ -543,8 +545,8 @@ class Advanced_Filter {
 				$filtered_specific = array_map( 'strtoupper', $filtered_specific );
 
 				return 'specific' === $mode ?
-				$this->filter_select_options( $this->order, $filtered_specific )
-				: $this->order;
+				$this->filter_select_options( $order, $filtered_specific )
+				: $order;
 
 			case 'order_by':
 				return 'specific' === $mode ?
@@ -643,17 +645,17 @@ class Advanced_Filter {
 				return '';
 			}
 
-			$data = $this->get_button_data( $attr['type'], $inline_values, $post_types, $attr['allText'], $attr['dropdownOptionsType'] );
+			$data = $this->get_button_data( $attr['type'], $inline_values, $post_types, $attr['allText'], $attr['dropdownOptionsType'], $this->get_order_options() );
 
 			$btn_wrapper_attrs = get_block_wrapper_attributes(
 				array(
-					'class'          => 'ultp-block-' . $attr['blockId'] . ' ultp-filter-button',
-					'role'           => 'button',
-					'data-blockId'   => $attr['blockId'],
-					'data-is-active' => 'false',
-					'data-builder'  => ultimate_post()->get_builder_attr( 'archiveBuilderFilter' ),
-					'data-current-postid'  => get_the_ID(),
-					'data-filter-label' => isset($attr['allText']) ? $attr['allText'] : 'All',
+					'class'               => 'ultp-block-' . $attr['blockId'] . ' ultp-filter-button',
+					'role'                => 'button',
+					'data-blockId'        => $attr['blockId'],
+					'data-is-active'      => 'false',
+					'data-builder'        => ultimate_post()->get_builder_attr( 'archiveBuilderFilter' ),
+					'data-current-postid' => get_the_ID(),
+					'data-filter-label'   => isset( $attr['allText'] ) ? $attr['allText'] : 'All',
 				)
 			);
 
@@ -701,21 +703,21 @@ class Advanced_Filter {
 				}
 			}
 
-			$data = $this->get_select_data( $attr['type'], $attr['allText'], $post_types, $specific, $mode );
+			$data = $this->get_select_data( $attr['type'], $attr['allText'], $post_types, $specific, $mode, $this->get_order_options() );
 
 			$def_value = ! empty( current( $data ) ) ? current( $data ) : null;
 
 			$wrapper_attrs = get_block_wrapper_attributes(
 				array(
-					'class'         => 'ultp-block-' . $attr['blockId'] . ' ultp-filter-select',
-					'data-selected' => isset( $def_value['id'] ) ? $def_value['id'] : 0,
-					'data-type'     => $attr['type'],
-					'data-blockId'  => $attr['blockId'],
-					'aria-expanded' => 'false',
-					'aria-label'    => 'Select Filter (' . $attr['type'] . ')',
-					'data-builder'  => ultimate_post()->get_builder_attr( 'archiveBuilderFilter' ),
-					'data-current-postid'  => get_the_ID(),
-					'data-filter-label' => isset($def_value['name']) ? $def_value['name'] : 'All',
+					'class'               => 'ultp-block-' . $attr['blockId'] . ' ultp-filter-select',
+					'data-selected'       => isset( $def_value['id'] ) ? $def_value['id'] : 0,
+					'data-type'           => $attr['type'],
+					'data-blockId'        => $attr['blockId'],
+					'aria-expanded'       => 'false',
+					'aria-label'          => 'Select Filter (' . $attr['type'] . ')',
+					'data-builder'        => ultimate_post()->get_builder_attr( 'archiveBuilderFilter' ),
+					'data-current-postid' => get_the_ID(),
+					'data-filter-label'   => isset( $def_value['name'] ) ? $def_value['name'] : 'All',
 				)
 			);
 
