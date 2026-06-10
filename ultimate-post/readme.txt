@@ -4,7 +4,7 @@ Tags: post grid, post list, post slider, ajax filter, post filter
 Requires at least: 5.0
 Tested up to: 7.0
 Requires PHP: 5.6
-Stable tag: 5.0.24
+Stable tag: 5.0.25
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -283,6 +283,8 @@ Developed by [WPXPO](https://www.wpxpo.com). [Contribute to Gutenberg Post Block
 
 We are glad that you are considering PostX. We have more amazing plugins that you can check out:
 
+📄 [**WowInvoice 🔥:**](https://wordpress.org/plugins/wow-pdf-invoices-packing-slips/) A comprehensive PDF invoices & packing slips plugin for WooCommerce that automates documents like invoices, packing slips, and picklists. 
+
 🚚 [**WowShipping 🔥:**](https://wordpress.org/plugins/wow-table-rate-shipping/) The complete table rate shipping plugin for WooCommerce, featuring 30+ flexible conditions and integrations with popular carriers like UPS, USPS, DHL, Sendle, and more.
 
 ➕ [**WowAddons 🔥 :**](https://wordpress.org/plugins/product-addons/) The ultimate product addons plugin with 25+ extra product options, custom fields, allowing you to sell customizable products and increase average order value.
@@ -362,6 +364,10 @@ It is a Gutenberg plugin it works great with WordPress version 5.x.x or more. An
 11. With the help of the Elementor and Saved Template addons, you can use any of the post blocks of PostX to any pages while editing with Elementor builder.
 
 == Changelog ==
+= 5.0.25 – 10 June 2026 =
+* Fix: Setup wizard improved
+* Fix: Advanced list padding issue 
+
 = 5.0.24 – 04 June 2026 =
 * Fix: WordPress 7.0 compatibility updated
 

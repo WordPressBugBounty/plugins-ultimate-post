@@ -366,10 +366,11 @@ class ULTP_Initialization {
 	 * @return void No return value.
 	 */
 	public function register_option_panel_scripts_callback() {
-		$is_active   = ultimate_post()->is_lc_active();
-		$license_key = Xpo::get_lc_key();
+		$is_active             = ultimate_post()->is_lc_active();
+		$license_key           = Xpo::get_lc_key();
 		$_page = isset($_GET['page']) ? sanitize_text_field($_GET['page']) : '';    // @codingStandardsIgnoreLine
-		$post_type   = get_post_type();
+		$post_type             = get_post_type();
+		$is_woocommerce_active = class_exists( 'WooCommerce' ) ? true : false;
 
 		wp_enqueue_style( 'wp-color-picker' );
 		wp_enqueue_script( 'wp-color-picker' );
@@ -388,6 +389,7 @@ class ULTP_Initialization {
 				'settings'           => ultimate_post()->get_setting(),
 				'post_type'          => $post_type,
 				'saved_template_url' => admin_url( 'admin.php?page=ultp-settings#saved-templates' ),
+				'woocommerce'        => $is_woocommerce_active,
 			)
 		);
 

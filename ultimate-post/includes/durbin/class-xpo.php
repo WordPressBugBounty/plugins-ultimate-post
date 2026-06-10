@@ -201,107 +201,107 @@ class Xpo {
 
 	public static function generate_utm_link( $params = array() ) {
 		$default_config = array(
-			'example'            => array(
+			'example'               => array(
 				'source'   => 'db-postx-featurename',
 				'medium'   => 'block-feature',
 				'campaign' => 'postx-dashboard',
 			),
-			'summer_db'          => array(
+			'summer_db'             => array(
 				'source'   => 'db-postx-notice',
 				'medium'   => 'black-friday-sale',
 				'campaign' => 'postx-dashboard',
 			),
-			'plugin_dir_pro'     => array(
+			'plugin_dir_pro'        => array(
 				'source'   => 'db-postx-plugin',
 				'medium'   => 'upgrade-pro',
 				'campaign' => 'postx-dashboard',
 			),
-			'post_type_page'     => array(
+			'post_type_page'        => array(
 				'source'   => 'db-postx-posttype',
 				'medium'   => 'upgrade-pro',
 				'campaign' => 'postx-dashboard',
 			),
-			'plugin_dir_support' => array(
+			'plugin_dir_support'    => array(
 				'source'   => 'db-postx-pluginmeta',
 				'medium'   => 'meta-support',
 				'campaign' => 'postx-dashboard',
 			),
-			'dashboard_go_pro'   => array(
+			'dashboard_go_pro'      => array(
 				'source'   => 'db-postx-submenu',
 				'medium'   => 'left-menu-upgrade',
 				'campaign' => 'postx-dashboard',
 			),
-			'sub_menu'           => array(
+			'sub_menu'              => array(
 				'source'   => 'db-postx-submenu',
 				'medium'   => 'upgrade-pro',
 				'campaign' => 'postx-dashboard',
 			),
-			'content_notice'     => array(
+			'content_notice'        => array(
 				'source'   => 'db-postx-notice',
 				'medium'   => 'spring-sale',
 				'campaign' => 'postx-dashboard',
 			),
 
 			// Flash sale.
-			'flash_sale_content'        => array(
+			'flash_sale_content'    => array(
 				'source'   => 'db-postx-notice-content',
 				'medium'   => 'summer-flash-sale',
 				'campaign' => 'postx-dashboard',
 			),
-			'flash_sale'         => array(
+			'flash_sale'            => array(
 				'source'   => 'db-postx-notice',
 				'medium'   => 'summer-flash-sale',
 				'campaign' => 'postx-dashboard',
 			),
-			'flash_sale_meta'    => array(
+			'flash_sale_meta'       => array(
 				'source'   => 'db-postx-plugin-meta',
 				'medium'   => 'summer-flash-sale',
 				'campaign' => 'postx-dashboard',
 			),
-			// Massive Sale  
-			'massive_sale_content'        => array(
+			// Massive Sale
+			'massive_sale_content'  => array(
 				'source'   => 'db-postx-notice-content',
 				'medium'   => 'summer-massive-sale',
 				'campaign' => 'postx-dashboard',
 			),
-			'massive_sale'       => array(
+			'massive_sale'          => array(
 				'source'   => 'db-postx-notice',
 				'medium'   => 'summer-massive-sale',
 				'campaign' => 'postx-dashboard',
 			),
-			'massive_sale_meta'       => array(
+			'massive_sale_meta'     => array(
 				'source'   => 'db-postx-plugin-meta',
 				'medium'   => 'summer-massive-sale',
 				'campaign' => 'postx-dashboard',
 			),
 			// Surprise Sale
-			'surprise_sale_content'        => array(
+			'surprise_sale_content' => array(
 				'source'   => 'db-postx-notice-content',
 				'medium'   => 'summer-surprise-sale',
 				'campaign' => 'postx-dashboard',
 			),
-			'surprise_sale'        => array(
+			'surprise_sale'         => array(
 				'source'   => 'db-postx-notice',
 				'medium'   => 'summer-surprise-sale',
 				'campaign' => 'postx-dashboard',
 			),
-			'surprise_sale_meta'        => array(
+			'surprise_sale_meta'    => array(
 				'source'   => 'db-postx-plugin-meta',
 				'medium'   => 'summer-surprise-sale',
 				'campaign' => 'postx-dashboard',
 			),
 			// Final Hours Sale
-			'final_hours_content'        => array(
+			'final_hours_content'   => array(
 				'source'   => 'db-postx-notice-content',
 				'medium'   => 'summer-final-sale',
 				'campaign' => 'postx-dashboard',
 			),
-			'final_hour'         => array(
+			'final_hour'            => array(
 				'source'   => 'db-postx-notice',
 				'medium'   => 'summer-final-sale',
 				'campaign' => 'postx-dashboard',
 			),
-			'final_hour_meta'    => array(
+			'final_hour_meta'       => array(
 				'source'   => 'db-postx-plugin-meta',
 				'medium'   => 'summer-final-sale',
 				'campaign' => 'postx-dashboard',
@@ -376,7 +376,7 @@ class Xpo {
 				'wow_revenue'  => file_exists( WP_PLUGIN_DIR . '/revenue/revenue.php' ),
 				'wholesale_x'  => file_exists( WP_PLUGIN_DIR . '/wholesalex/wholesalex.php' ),
 				'wow_addon'    => file_exists( WP_PLUGIN_DIR . '/product-addons/product-addons.php' ),
-
+				'wow_invoice'  => file_exists( WP_PLUGIN_DIR . '/wow-pdf-invoices-packing-slips/wow-pdf-invoices-packing-slips.php' ),
 			),
 			'products_active' => array(
 				'wow_shipping' => defined( 'WTRS_VER' ),
@@ -386,6 +386,7 @@ class Xpo {
 				'wow_revenue'  => defined( 'REVENUE_VER' ),
 				'wholesale_x'  => defined( 'WHOLESALEX_VER' ),
 				'wow_addon'    => defined( 'PRAD_VER' ),
+				'wow_invoice'  => defined( 'WINV_VER' ),
 			),
 		);
 	}
@@ -423,6 +424,10 @@ class Xpo {
 				break;
 			case 'woocommerce':
 				$plugin_slug = 'woocommerce';
+				break;
+			case 'wow_invoice':
+				$plugin_slug = 'wow-pdf-invoices-packing-slips';
+				$active_url  = admin_url( 'admin.php?page=winv-dashboard#overview' );
 				break;
 		}
 
@@ -479,13 +484,17 @@ class Xpo {
 		if ( is_wp_error( $api ) ) {
 			wp_die( $api ); //phpcs:ignore
 		}
-
+		$title          = '';
+		$url            = '';
+		$nonce          = '';
 		$upgrader       = new \Plugin_Upgrader( new \WP_Ajax_Upgrader_Skin( compact( 'title', 'url', 'nonce', 'plugin', 'api' ) ) );
 		$install_result = $upgrader->install( $api->download_link );
 
 		if ( ! is_wp_error( $install_result ) ) {
 			activate_plugin( $plugin );
-			return array( 'done' => false );
+			return array(
+				'done' => false,
+			);
 		}
 
 		return array( 'done' => true );

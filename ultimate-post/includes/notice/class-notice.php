@@ -82,11 +82,11 @@ class Notice {
 	public static function get_hellobar_config() {
 		return array(
 			// Flash sale
-			'ultp_helloBar_flash_sale_2026_4' => Xpo::get_transient_without_cache( 'ultp_helloBar_flash_sale_2026_4' ),
+			'ultp_helloBar_flash_sale_2026_4'       => Xpo::get_transient_without_cache( 'ultp_helloBar_flash_sale_2026_4' ),
 			// Surprise sale
-			'ultp_helloBar_surprise_sale_2026_5' => Xpo::get_transient_without_cache( 'ultp_helloBar_surprise_sale_2026_5' ),
+			'ultp_helloBar_surprise_sale_2026_5'    => Xpo::get_transient_without_cache( 'ultp_helloBar_surprise_sale_2026_5' ),
 			// Massive sale
-			'ultp_helloBar_massive_sale_2026_6' => Xpo::get_transient_without_cache( 'ultp_helloBar_massive_sale_2026_6' ),
+			'ultp_helloBar_massive_sale_2026_6'     => Xpo::get_transient_without_cache( 'ultp_helloBar_massive_sale_2026_6' ),
 			// Final hours sale
 			'ultp_helloBar_final_hours_sale_2026_7' => Xpo::get_transient_without_cache( 'ultp_helloBar_final_hours_sale_2026_7' ),
 		);
@@ -195,13 +195,13 @@ class Notice {
 				'bg_image'           => ULTP_URL . 'assets/img/dashboard_banner/flash_sale/bg.png',
 				'text'               => 'Deal ending soon',
 				'countdown_duration' => 259200, // Duration in seconds.
-				// 'countdown_color'    => '#0322ff', 
+				// 'countdown_color'    => '#0322ff',
 				'countdown_color'    => '#3CF357',
 				'url'                => Xpo::generate_utm_link(
 					array(
 						'utmKey' => 'flash_sale_content',
 					)
-				), 
+				),
 
 				'visibility'         => ! Xpo::is_lc_active(),
 			),
@@ -555,7 +555,7 @@ class Notice {
 
 				.ultp-consent-accept {
 					background-color: #070707;
-					color: #fff;
+					color: #fff !important; 
 					border: none;
 					padding: 6px 10px;
 					border-radius: 4px;
@@ -633,7 +633,7 @@ class Notice {
 	 */
 	public function ultp_dashboard_content_notice() {
 		$content_notices = array(
-			// Flash sale 
+			// Flash sale
 			array(
 				'key'                => 'ultp_dashboard_content_notice_flash_sale_brand_logos',
 				'start'              => '2026-05-07 00:00 Asia/Dhaka',
@@ -753,7 +753,7 @@ class Notice {
 				'border_color'       => '#0322ff',
 			),
 
-			// Final Hours Sale 
+			// Final Hours Sale
 			array(
 				'key'                => 'ultp_dashboard_content_notice_final_hours_sale_brand_logo',
 				'start'              => '2026-06-21 00:00 Asia/Dhaka',
