@@ -32,7 +32,8 @@ class WowRevenuePromotion {
 	 * @return void
 	 */
 	public function run_promotions() {
-		if ( ! class_exists( '\WooCommerce' ) ||
+		$is_active = ultimate_post()->is_lc_active();
+		if ( $is_active || ! class_exists( '\WooCommerce' ) ||
 			defined( 'REVENUE_VER' )
 		) {
 			return;
