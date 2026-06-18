@@ -26,6 +26,19 @@ class Notice {
 	 */
 	private $notice_js_css_applied = false;
 
+	/**
+	 * Notice Priority
+	 *
+	 * @var string $plugin_notice_priority
+	 */
+	private $plugin_notice_priority = 1;
+
+	/**
+	 * Notice Priority
+	 *
+	 * @var string $plugin_notice_priority
+	 */
+	private $plugin_notice_priority_key = 'postx';
 
 	/**
 	 * Notice Constructor
@@ -39,6 +52,7 @@ class Notice {
 
 		// Woocommerce Install Action
 		// add_action( 'wp_ajax_ultp_install', array( $this, 'install_activate_plugin' ) ); // this ajax not called anywhere in future need to removed, that is arise patchstack security issue
+		add_filter( 'xpo_active_notice_lists', array( $this, 'handle_xpo_active_notice_lists' ), 99, 1 );
 	}
 
 	/**
@@ -81,13 +95,13 @@ class Notice {
 	 */
 	public static function get_hellobar_config() {
 		return array(
-			// Flash sale
+			// Flash sale.
 			'ultp_helloBar_flash_sale_2026_4'       => Xpo::get_transient_without_cache( 'ultp_helloBar_flash_sale_2026_4' ),
-			// Surprise sale
+			// Surprise sale.
 			'ultp_helloBar_surprise_sale_2026_5'    => Xpo::get_transient_without_cache( 'ultp_helloBar_surprise_sale_2026_5' ),
-			// Massive sale
+			// Massive sale.
 			'ultp_helloBar_massive_sale_2026_6'     => Xpo::get_transient_without_cache( 'ultp_helloBar_massive_sale_2026_6' ),
-			// Final hours sale
+			// Final hours sale.
 			'ultp_helloBar_final_hours_sale_2026_7' => Xpo::get_transient_without_cache( 'ultp_helloBar_final_hours_sale_2026_7' ),
 		);
 	}
@@ -170,8 +184,10 @@ class Notice {
 	 * @return void
 	 */
 	public function ultp_dashboard_notice_callback() {
-		$this->ultp_dashboard_banner_notice();
-		$this->ultp_dashboard_content_notice();
+		if ( $this->is_available_for_notice() ) {
+			$this->ultp_dashboard_banner_notice();
+			$this->ultp_dashboard_content_notice();
+		}
 	}
 
 	/**
@@ -179,10 +195,10 @@ class Notice {
 	 *
 	 * @return void
 	 */
-	public function ultp_dashboard_banner_notice() {
+	public function ultp_dashboard_banner_notice( $return_bool = false ) {
 		$ultp_db_nonce  = wp_create_nonce( 'ultp-nonce' );
 		$banner_notices = array(
-			// FLash sale
+			// FLash sale.
 			array(
 				'key'                => 'ultp_banner_flash_sale_2026_1',
 				'start'              => '2026-05-18 00:00 Asia/Dhaka',
@@ -291,7 +307,9 @@ class Notice {
 				if ( 'off' === $notice_transient ) {
 					continue;
 				}
-
+				if ( $return_bool ) { // Early return for Other plugin notice.
+					return true;
+				}
 				if ( ! $this->notice_js_css_applied ) {
 					$this->ultp_banner_notice_js();
 					$this->notice_js_css_applied = true;
@@ -304,30 +322,88 @@ class Notice {
 					$query_args['ultp_interval'] = $notice['repeat_interval'];
 				}
 				?>
-				<style>
-					@media only screen and (max-width: 1200px) {
-						.ultp-notice-wrapper.notice .ultp-banner-logo-img {
-							max-width: 230px;
+					<style type="text/css">
+					.ultp-notice-wrapper.ultp-banner-notice {
+						height: auto !important;
+						padding: 0 !important;
+						position: relative;
+						box-sizing: border-box;
+						background-repeat: no-repeat;
+						background-size: cover;
+						background-position: center;
+					}
+					.ultp-notice-wrapper.ultp-banner-notice .ultp-banner-link {
+						width: 100%;
+						text-decoration: none;
+						display: block;
+					}
+					.ultp-notice-wrapper.ultp-banner-notice .ultp-banner-content {
+						display: flex;
+						justify-content: space-between;
+						align-items: center;
+						max-width: 700px;
+						margin: 0 auto;
+						padding: 10px 16px;
+						gap: 16px;
+					}
+					.ultp-notice-wrapper.ultp-banner-notice .ultp-banner-side-image {
+						display: block;
+						max-width: 100%;
+						height: auto;
+						max-height: 32px;
+					}
+					.ultp-notice-wrapper.ultp-banner-notice .ultp-banner-main .ultp-banner-main-text {
+						color: #ffffff;
+					}
+					.ultp-notice-wrapper.ultp-banner-notice .ultp-banner-main {
+						display: flex;
+						flex-direction: column;
+						gap: 4px;
+						align-items: center;
+						justify-content: center;
+						font-weight: 700;
+						font-size: 18px;
+						color: #333333;
+						line-height: 1.2;
+						text-align: center;
+					}
+
+					@media screen and (max-width: 1100px) {
+						/* .ultp-notice-wrapper.ultp-banner-notice .ultp-banner-content {
+							flex-direction: column;
+						} */
+						.ultp-notice-wrapper.ultp-banner-notice .ultp-banner-content .ultp-banner-main-text {
+							display: none;
 						}
-						.ultp-banner-grab-btn-img {
-							max-width: 130px;
+					}
+					@media screen and (max-width: 490px) {
+						.ultp-notice-wrapper.ultp-banner-notice {
+							display: none;
 						}
-						.ultp-notice-countdown {
+					}
+					@media screen and (max-width: 782px) {
+						.ultp-notice-wrapper.ultp-banner-notice .ultp-banner-content {
+							justify-content: center;
+							padding: 12px 32px 12px 12px;
+						}
+						.ultp-notice-wrapper.ultp-banner-notice .ultp-banner-main {
+							font-size: 22px;
+							line-height: 28px;
+						}
+					}
+					@media screen and (max-width: 480px) {
+						.ultp-notice-wrapper.ultp-banner-notice .ultp-banner-content {
+							padding: 10px 32px 10px 10px;
+						}
+						.ultp-notice-wrapper.ultp-banner-notice .ultp-banner-main {
 							font-size: 18px;
-						}
-						.ultp-notice-banner-title {
-							font-size: 20px;
+							line-height: 24px;
 						}
 					}
 				</style>
 				<div 
-					class="ultp-notice-wrapper notice" 
+					class="ultp-notice-wrapper ultp-banner-notice notice" 
 					style="
-						height:90px;
-						border-radius: 7px 0px 0px 7px;
-						padding:0;
-						position:relative;
-						box-sizing: border-box;
 						border-left: 3px solid <?php echo esc_attr( $notice['brand_color'] ); ?>;
 						background-image: url('<?php echo esc_attr( $notice['bg_image'] ); ?>');
 				">
@@ -345,35 +421,15 @@ class Notice {
 							align-items: center;
 							justify-content: center;
 						"
-						aria-label="<?php esc_html_e( 'Close Banner', 'ultimate-post' ); ?>"
+						aria-label="<?php esc_html_e( 'Close Banner', 'product-addons' ); ?>"
 						href="<?php echo esc_url( add_query_arg( $query_args ) ); ?>">
 					</a>
 
-					<a style="width:100%;text-decoration: none;" target="_blank" href="<?php echo esc_url( $notice['url'] ); ?>">
-						<div style="
-							display: flex;
-							justify-content: space-between;
-							align-items: center;
-							max-width: 1358px;
-							margin: 0px auto;
-							padding: 10px 15px;
-							height: 90px;
-							box-sizing: border-box;
-
-						">
-							<img class="ultp-banner-logo-img" style="" loading="lazy" src="<?php echo esc_url( $notice['left_image'] ); ?>" />
-							<div style="
-								display: flex;
-								flex-direction: column;
-								gap: 4px;
-								align-items: center;
-								justify-content: center;
-								font-weight: 700;
-								font-size: 28px;
-								color: #000;
-								line-height: 32px;
-							">
-								<span class="ultp-notice-banner-title evgn-titile-text-white" style="color: #fff;">
+					<a class="ultp-banner-link" target="_blank" href="<?php echo esc_url( $notice['url'] ); ?>">
+						<div class="ultp-banner-content">
+							<img class="ultp-banner-side-image" loading="lazy" src="<?php echo esc_url( $notice['left_image'] ); ?>" />
+							<div class="ultp-banner-main">
+								<span class="ultp-banner-main-text">
 									<?php echo esc_html( $notice['text'] ); ?>
 								</span>	
 								<div 
@@ -386,7 +442,7 @@ class Notice {
 									00:00:00:00
 								</div>
 							</div>
-							<img class="ultp-banner-grab-btn-img" style="" loading="lazy" src="<?php echo esc_url( $notice['right_image'] ); ?>" />
+							<img class="ultp-banner-side-image" loading="lazy" src="<?php echo esc_url( $notice['right_image'] ); ?>" />
 						</div>
 					</a>
 				</div>
@@ -631,7 +687,7 @@ class Notice {
 	 *
 	 * @return void
 	 */
-	public function ultp_dashboard_content_notice() {
+	public function ultp_dashboard_content_notice( $return_bool = false ) {
 		$content_notices = array(
 			// Flash sale
 			array(
@@ -811,7 +867,9 @@ class Notice {
 					$notice_transient = Xpo::get_transient_without_cache( 'ultp_get_pro_notice_' . $notice_key );
 
 					if ( 'off' !== $notice_transient ) {
-
+						if ( $return_bool ) { // Early return for Other plugin notice.
+							return true;
+						}
 						$query_args = array(
 							'ultp_notice' => $notice_key,
 							'wpnonce'     => $ultp_db_nonce,
@@ -972,5 +1030,32 @@ class Notice {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Handle Plugin Notice for all plugins
+	 *
+	 * @param array $active_lists Lists of all active plugin notice.
+	 * @return array
+	 */
+	public function handle_xpo_active_notice_lists( $active_lists ) {
+		if ( $this->ultp_dashboard_banner_notice( true ) || $this->ultp_dashboard_content_notice( true ) ) {
+			$active_lists[ $this->plugin_notice_priority_key ] = $this->plugin_notice_priority;
+		}
+		return $active_lists;
+	}
+
+	/**
+	 * Handle Plugin Notice for all plugins
+	 *
+	 * @return bool
+	 */
+	public function is_available_for_notice() {
+		$active_notices = apply_filters( 'xpo_active_notice_lists', array() );
+		if ( empty( $active_notices ) ) {
+			return true;
+		}
+		asort( $active_notices );
+		return array_key_first( $active_notices ) === $this->plugin_notice_priority_key;
 	}
 }
