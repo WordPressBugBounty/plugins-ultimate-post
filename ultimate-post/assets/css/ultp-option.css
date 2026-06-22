@@ -399,6 +399,13 @@ z-index: 9999;
 	width: -moz-available;
 	position: relative;
 }
+
+.ultp-templatekit-list-container .error {
+	max-width: 1345px;
+	margin: 0 auto !important;
+	margin-top: 30px !important;
+}
+
 .ultp-templatekit-layout-search-container {
 	display: flex;
 	justify-content: space-between;
@@ -1397,19 +1404,20 @@ th:has(.ultp-custom-font-preview-th) {
 }
 
 .ultp-go-pro {
-	background: var(--postx-primary-color) !important;
-	animation: ultp-bg-fill .5s infinite alternate;
-	border: 2px solid;
+	background: linear-gradient(180deg, #ff9336, transparent) #de521e !important;
+	/* animation: ultp-bg-fill .5s infinite alternate; */
+	/* border: 2px solid; */
 	font-weight: 500;
+	color: #ffffff !important;
 }
 
 /* Animation */
 @keyframes ultp-bg-fill {
 	0% {
-		border-color: #0039b5;
+		border-color: #ffaa00;
 	}
 
 	100% {
-		border-color: #456bbd;
+		border-color: #ffaa00;
 	}
 }

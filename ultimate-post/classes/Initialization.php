@@ -366,7 +366,9 @@ class ULTP_Initialization {
 	 * @return void No return value.
 	 */
 	public function register_option_panel_scripts_callback() {
-		$is_active             = ultimate_post()->is_lc_active();
+		$is_active  = ultimate_post()->is_lc_active();
+		$is_expired = Xpo::is_lc_expired();
+
 		$license_key           = Xpo::get_lc_key();
 		$_page = isset($_GET['page']) ? sanitize_text_field($_GET['page']) : '';    // @codingStandardsIgnoreLine
 		$post_type             = get_post_type();
@@ -384,6 +386,7 @@ class ULTP_Initialization {
 				'url'                => ULTP_URL,
 				'version'            => ULTP_VER,
 				'active'             => $is_active,
+				'expierd'            => $is_expired,
 				'security'           => wp_create_nonce( 'ultp-nonce' ),
 				'ajax'               => admin_url( 'admin-ajax.php' ),
 				'settings'           => ultimate_post()->get_setting(),
@@ -434,6 +437,7 @@ class ULTP_Initialization {
 						'security'          => wp_create_nonce( 'ultp-nonce' ),
 						'url'               => ULTP_URL,
 						'active'            => $is_active,
+						'expierd'           => $is_expired,
 						'license'           => $license_key,
 						'settings'          => ultimate_post()->get_setting(),
 						'addons_settings'   => apply_filters( 'ultp_settings', array() ),
