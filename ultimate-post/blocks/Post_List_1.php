@@ -14,6 +14,7 @@ class Post_List_1 {
 		return array(
 			'blockId'             => '',
 			'previewImg'          => '',
+			'infiniteScroll'      => false,
 
 			/*
 			============================
@@ -276,13 +277,18 @@ class Post_List_1 {
 		$attr['readMoreText']   = wp_kses( $attr['readMoreText'], ultimate_post()->ultp_allowed_html_tags() );
 		$attr['gridStyle']      = sanitize_html_class( $attr['gridStyle'] );
 
-		if ( $recent_posts->have_posts() ) {
+		$iscroll   = '';
+		$wrap_data = '';
+		if ( $attr['infiniteScroll'] ) {
+			$iscroll = 'ultp-iscroll-active';
+			include ULTP_PATH . 'blocks/template/infinite_scroll_data.php';
+		}
 
+		if ( $recent_posts->have_posts() ) {
 			// Pagination Block Html
 			include ULTP_PATH . 'blocks/template/pagination_block.php';
-
-			$wraper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="ultp-post-grid-block wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '' . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '">';
-				$wraper_before .= '<div class="ultp-block-wrapper">';
+			$wraper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="ultp-post-grid-block wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '' . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . ' ' . $iscroll . ' ">';
+				$wraper_before .= '<div class="ultp-block-wrapper" ' . $wrap_data . '>';
 
 					// Loading
 					$wraper_before .= ultimate_post()->postx_loading();

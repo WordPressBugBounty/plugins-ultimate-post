@@ -19,6 +19,7 @@ class Post_List_2 {
 			// Layout
 			// --------------------------
 			'layout'              => 'layout1',
+			'infiniteScroll'      => false,
 
 			/*
 			============================
@@ -276,6 +277,12 @@ class Post_List_2 {
 		$attr['popupAutoPlay']  = $attr['popupAutoPlay'] == true;
 		$attr['readMoreText']   = wp_kses( $attr['readMoreText'], ultimate_post()->ultp_allowed_html_tags() );
 		$attr['varticalAlign']  = sanitize_html_class( $attr['varticalAlign'] );
+		$iscroll                = '';
+		$wrap_data              = '';
+		if ( $attr['infiniteScroll'] ) {
+			$iscroll = 'ultp-iscroll-active';
+			include ULTP_PATH . 'blocks/template/infinite_scroll_data.php';
+		}
 
 		if ( $recent_posts->have_posts() ) {
 
@@ -283,7 +290,7 @@ class Post_List_2 {
 			include ULTP_PATH . 'blocks/template/pagination_block.php';
 
 			$wraper_before .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="ultp-post-grid-block wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '' . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '">';
-			$wraper_before .= '<div class="ultp-block-wrapper">';
+			$wraper_before .= '<div class="ultp-block-wrapper ' . $wrap_data . '">';
 
 			// Loading
 			$wraper_before .= ultimate_post()->postx_loading();

@@ -273,14 +273,14 @@ class Post_Grid_7 {
 			$wraper_before .= ultimate_post()->postx_loading();
 
 			if ( $attr['headingShow'] || $attr['filterShow'] || $attr['paginationShow'] ) {
-				$wraper_before .= '<div class="ultp-heading-filter">';
-				$wraper_before .= '<div class="ultp-heading-filter-in">';
+				$wraper_before .= '<div class="ultp - heading - filter">';
+				$wraper_before .= '<div class="ultp - heading - filter - in">';
 
 				// Heading
 				include ULTP_PATH . 'blocks/template/heading.php';
 
 				if ( $attr['filterShow'] || $attr['paginationShow'] ) {
-					$wraper_before .= '<div class="ultp-filter-navigation">';
+					$wraper_before .= '<div class="ultp - filter - navigation">';
 
 					// Filter
 					if ( $attr['filterShow'] && $attr['queryType'] != 'posts' && $attr['queryType'] != 'customPosts' ) {
@@ -298,7 +298,7 @@ class Post_Grid_7 {
 				$wraper_before .= '</div>';
 			}
 
-			$wraper_before .= '<div class="ultp-block-items-wrap ultp-block-row ultp-' . $attr['layout'] . '">';
+			$wraper_before .= '<div class="ultp - block - items - wrap ultp - block - row ultp - ' . $attr['layout'] . '">';
 			$idx            = 0;
 			while ( $recent_posts->have_posts() ) :
 				$recent_posts->the_post();
@@ -318,11 +318,11 @@ class Post_Grid_7 {
 					$current_unique_posts[]              = $post_id;
 				}
 
-				$post_loop .= '<' . $attr['contentTag'] . ' class="ultp-block-item post-id-' . $post_id . ' ultp-block-item-' . $idx . ( $attr['titleAnimation'] ? ' ultp-animation-' . $attr['titleAnimation'] : '' ) . '">';
-				$post_loop .= '<div class="ultp-block-content-wrap ultp-block-content-overlay">';
+				$post_loop .= '<' . $attr['contentTag'] . ' class="ultp - block - item post - id - ' . $post_id . ' ultp - block - item - ' . $idx . ( $attr['titleAnimation'] ? ' ultp - animation - ' . $attr['titleAnimation'] : '' ) . '">';
+				$post_loop .= '<div class="ultp - block - content - wrap ultp - block - content - overlay">';
 
 				if ( ( $post_thumb_id || $attr['fallbackEnable'] ) && $attr['showImage'] ) {
-					$post_loop .= '<div class="ultp-block-image ultp-block-image-' . $attr['imgAnimation'] . ( $attr['imgOverlay'] ? ' ultp-block-image-overlay ultp-block-image-' . $attr['imgOverlayType'] : '' ) . '">';
+					$post_loop .= '<div class="ultp - block - image ultp - block - image - ' . $attr['imgAnimation'] . ( $attr['imgOverlay'] ? ' ultp - block - image - overlay ultp - block - image - ' . $attr['imgOverlayType'] : '' ) . '">';
 					$srcset     = $attr['imgSrcset'] ? 'srcset="' . esc_attr( wp_get_attachment_image_srcset( $post_thumb_id ) ) . '"' : '';
 					// Post Image Size
 					$imgSize    = $idx == 0 ? $attr['imgCrop'] : $attr['imgCropSmall'];
@@ -337,7 +337,7 @@ class Post_Grid_7 {
 						} else {
 							// Default Fallback Image
 							$video      = ultimate_post()->get_youtube_id( $post_video );
-							$post_loop .= '<img  src="' . ( $video ? 'https://img.youtube.com/vi/' . $video . '/0.jpg' : $dummy_url ) . '" alt="dummy-img" />';
+							$post_loop .= '<img  src="' . ( $video ? 'https:// img.youtube.com/vi/' . $video . '/0.jpg' : $dummy_url ) . '" alt="dummy-img" />';
 						}
 					}
 					$post_loop .= '</a>';

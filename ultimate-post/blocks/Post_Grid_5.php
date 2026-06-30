@@ -21,7 +21,6 @@ class Post_Grid_5 {
 			'openInTab'              => false,
 			'columnFlip'             => false,
 			'notFoundMessage'        => 'No Post Found',
-
 			/*
 			============================
 				Query Setting

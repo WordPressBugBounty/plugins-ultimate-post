@@ -655,6 +655,11 @@ z-index: 9999;
 	line-height: 20px;
 	color: #41474E;
 }
+
+.ultp-action-btn {
+	flex-shrink: 0;
+}
+
 .ultp-action-btn .ultp-btns {
 	text-decoration: none;
 	font-size: 12px;
@@ -662,8 +667,8 @@ z-index: 9999;
 	border-radius: 4px;
 	color: #fff;
 	cursor: pointer;
-
 }
+
 .ultp-action-btn .ultp-btn-import {
 	border-radius: 4px;
 	background: linear-gradient(180deg, #18dda0, transparent) #11a728;

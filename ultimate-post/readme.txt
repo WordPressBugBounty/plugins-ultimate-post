@@ -1,10 +1,10 @@
-=== Post Grid Gutenberg Blocks for News, Magazines, Blog Websites - PostX ===
+=== Post Grid Gutenberg Blocks - PostX ===
 Contributors: wpxpo, anik4e, jakirhasan
-Tags: post grid, post list, post slider, ajax filter, post filter
+Tags: post grid, gutenberg blocks, blog grid, Gutenberg, grid
 Requires at least: 5.0
 Tested up to: 7.0
 Requires PHP: 5.6
-Stable tag: 5.0.28
+Stable tag: 5.0.29
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -364,6 +364,9 @@ It is a Gutenberg plugin it works great with WordPress version 5.x.x or more. An
 11. With the help of the Elementor and Saved Template addons, you can use any of the post blocks of PostX to any pages while editing with Elementor builder.
 
 == Changelog ==
+= 5.0.29 – 30 June 2026 =
+* Fix: Infinite scroll support added to Post Grid 1, 2, 3 and Post List 1, 2, 3, 4
+
 = 5.0.28 – 22 June 2026 =
 * Fix: Dashboard user experience updated
 

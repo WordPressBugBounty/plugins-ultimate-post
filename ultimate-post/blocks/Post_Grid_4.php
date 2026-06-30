@@ -19,6 +19,7 @@ class Post_Grid_4 {
 			// Layout
 			// --------------------------
 			'layout'                 => 'layout1',
+			'infiniteScroll'         => false,
 
 			// --------------------------
 			// Query Setting

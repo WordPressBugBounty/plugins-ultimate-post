@@ -264,7 +264,6 @@ class Post_Grid_6 {
 		$attr['overlayContentPosition'] = sanitize_html_class( $attr['overlayContentPosition'] );
 
 		if ( $recent_posts->have_posts() ) {
-
 			// Pagination Block Html
 			include ULTP_PATH . 'blocks/template/pagination_block.php';
 

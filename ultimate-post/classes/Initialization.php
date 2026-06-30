@@ -469,6 +469,7 @@ class ULTP_Initialization {
 	 */
 	public function register_block_scripts_editor_area() {
 		ultimate_post()->register_scripts_common();
+		$is_expired = Xpo::is_lc_expired();
 		global $pagenow;
 		$depends = 'wp-editor';
 		if ( $pagenow === 'widgets.php' ) {
@@ -535,6 +536,7 @@ class ULTP_Initialization {
 				'dark_logo'          => get_option( 'ultp_site_dark_logo' ) ? get_option( 'ultp_site_dark_logo' ) : false,
 				'builder_url'        => admin_url( 'admin.php?page=ultp-settings#builder' ),
 				'custom_fonts'       => $custom_fonts,
+				'expierd'            => $is_expired,
 			)
 		);
 		wp_set_script_translations( 'ultp-blocks-editor-script', 'ultimate-post', ULTP_PATH . 'languages/' );

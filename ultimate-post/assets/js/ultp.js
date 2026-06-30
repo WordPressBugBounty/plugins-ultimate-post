@@ -793,6 +793,91 @@
 		);
 	}
 
+	// *************************************
+	// Common Pagination AJAX Dispatcher
+	// *************************************
+	function paginationAjaxCall({
+		wrap, // .ultp-block-wrapper Selector
+		builder, // Get Builder Data
+		post_ID,
+		exclude,
+		pageNum,
+		blockid,
+		ultpNonce, // Get Nonce
+		blockName,
+		filterType,
+		widgetBlockId,
+		ultpCurrentUniquePosts,
+		filterValue,
+		advFilterData = {},
+		onSuccess,
+		onBeforeSend,
+	}) {
+		if (!pageNum) return;
+
+		const ultpUniqueIds = sessionStorage.getItem("ultp_uniqueIds");
+
+		// console.log({
+		// 	exclude,
+		// 	action: "ultp_pagination",
+		// 	paged: pageNum,
+		// 	blockId: blockid,
+		// 	postId: post_ID,
+		// 	blockName,
+		// 	builder,
+		// 	widgetBlockId,
+		// 	ultpUniqueIds: ultpUniqueIds || [],
+		// 	ultpCurrentUniquePosts: ultpCurrentUniquePosts || [],
+		// 	filterType: filterType || "",
+		// 	wpnonce: ultpNonce,
+		// 	filterValue,
+		// 	...advFilterData,
+		// });
+
+		$.ajax({
+			url: ultp_data_frontend.ajax,
+			type: "POST",
+			data: {
+				exclude,
+				action: "ultp_pagination",
+				paged: pageNum,
+				blockId: blockid,
+				postId: post_ID,
+				blockName,
+				builder,
+				widgetBlockId,
+				ultpUniqueIds: ultpUniqueIds || [],
+				ultpCurrentUniquePosts: ultpCurrentUniquePosts || [],
+				filterType: filterType || "",
+				wpnonce: ultpNonce,
+				filterValue,
+				...advFilterData,
+			},
+			beforeSend() {
+				if (typeof onBeforeSend === "function") {
+					onBeforeSend();
+				} else {
+					wrap.addClass("ultp-loading-active");
+				}
+			},
+			success(data) {
+				if (typeof onSuccess === "function") onSuccess(data);
+			},
+			complete() {
+				wrap.removeClass("ultp-loading-active");
+				handleDailyMotion();
+			},
+			error(xhr) {
+				console.log(
+					"Error occured. please try again " +
+						xhr.statusText +
+						xhr.responseText,
+				);
+				wrap.removeClass("ultp-loading-active");
+			},
+		});
+	}
+
 	$(document).on(
 		"click",
 		".ultp-pagination-ajax-action li",
@@ -804,7 +889,19 @@
 				parents = that.closest(".ultp-pagination-ajax-action"),
 				wrap = that.closest(".ultp-block-wrapper");
 
+			if (parents.is(".ultp-disable-editor-click")) {
+				return;
+			}
+
+			let pageNum = 1;
+			let pages = parents.attr("data-pages");
+
+			const exclude = parents.data("expost");
+			const builder = parents.data("builder");
+			const blockName = parents.data("blockname");
 			const blockid = parents.attr("data-blockid");
+			const filterType = parents.data("filter-type") || "";
+			const filterValue = parents.data("filter-value") || "";
 
 			// Pagination block integration
 			if (wrap.length < 1) {
@@ -813,12 +910,6 @@
 					wrap = $("." + pagiFor + " .ultp-block-wrapper");
 				}
 			}
-
-			if (parents.is(".ultp-disable-editor-click")) {
-				return;
-			}
-			let pageNum = 1;
-			let pages = parents.attr("data-pages");
 
 			if (that.attr("data-current")) {
 				pageNum = Number(that.attr("data-current"));
@@ -850,6 +941,17 @@
 				}
 			}
 
+			let widgetBlockId = "";
+			let widgetBlock = that.parents(".widget_block:first");
+			if (widgetBlock.length > 0) {
+				let widget_items = widgetBlock.attr("id").split("-");
+				widgetBlockId = widget_items[widget_items.length - 1];
+			}
+
+			const ultpCurrentUniquePosts = JSON.stringify(
+				wrap.find(".ultp-current-unique-posts").data("current-unique-posts"),
+			);
+
 			let post_ID =
 				parents.parents(".ultp-shortcode").length != 0 &&
 				parents.data("selfpostid") == "no"
@@ -859,22 +961,9 @@
 			if (that.closest(".ultp-builder-content").length > 0) {
 				post_ID = that.closest(".ultp-builder-content").data("postid");
 			}
-			let widgetBlockId = "";
-			let widgetBlock = $(this).parents(".widget_block:first");
-			if (widgetBlock.length > 0) {
-				let widget_items = widgetBlock.attr("id").split("-");
-				widgetBlockId = widget_items[widget_items.length - 1];
-			}
 
-			const ultpUniqueIds = sessionStorage.getItem("ultp_uniqueIds");
-			const ultpCurrentUniquePosts = JSON.stringify(
-				wrap.find(".ultp-current-unique-posts").data("current-unique-posts"),
-			);
-
-			// Adv Filter Integration
-			const filterValue = parents.data("filter-value") || "";
+			// Build adv filter data from pagination element
 			const advFilterData = {};
-
 			if (Array.isArray(filterValue) && filterValue.length > 0) {
 				advFilterData.filterShow = true;
 				advFilterData.checkFilter = true;
@@ -885,67 +974,41 @@
 				advFilterData.adv_sort = parents.data("filter-adv-sort") || "";
 			}
 
-			if (pageNum) {
-				if (blockid) {
-					setCurrPage(blockid, pageNum, getCurrPage(blockid));
-				}
-
-				$.ajax({
-					url: ultp_data_frontend.ajax,
-					type: "POST",
-					data: {
-						exclude: parents.data("expost"),
-						action: "ultp_pagination",
-						paged: pageNum,
-						blockId: parents.data("blockid"),
-						postId: post_ID,
-						blockName: parents.data("blockname"),
-						builder: parents.data("builder"),
-						widgetBlockId: widgetBlockId,
-						ultpUniqueIds: ultpUniqueIds || [],
-						ultpCurrentUniquePosts: ultpCurrentUniquePosts || [],
-
-						filterType: parents.data("filter-type") || "",
-						filterValue: filterValue,
-
-						...advFilterData,
-
-						wpnonce: ultpNonce,
-					},
-					beforeSend: function () {
-						wrap.addClass("ultp-loading-active");
-					},
-					success: function (data) {
-						wrap.find(".ultp-block-items-wrap").html(data);
-						setSession(
-							"ultp_uniqueIds",
-							JSON.stringify(
-								wrap.find(".ultp-current-unique-posts").data("ultp-unique-ids"),
-							),
-						);
-						if ($(window).scrollTop() > wrap.offset().top) {
-							$([document.documentElement, document.body]).animate(
-								{
-									scrollTop: wrap.offset().top - 80,
-								},
-								100,
-							);
-						}
-					},
-					complete: function () {
-						wrap.removeClass("ultp-loading-active");
-						handleDailyMotion();
-					},
-					error: function (xhr) {
-						console.log(
-							"Error occured.please try again" +
-								xhr.statusText +
-								xhr.responseText,
-						);
-						wrap.removeClass("ultp-loading-active");
-					},
-				});
+			if (blockid) {
+				setCurrPage(blockid, pageNum, getCurrPage(blockid));
 			}
+
+			// console.log(advFilterData, "advFilterData");
+			paginationAjaxCall({
+				wrap,
+				pageNum,
+				blockid,
+				ultpNonce,
+				blockName,
+				post_ID,
+				filterType,
+				ultpCurrentUniquePosts,
+				widgetBlockId,
+				exclude,
+				builder,
+				filterValue,
+				advFilterData,
+				onSuccess(data) {
+					wrap.find(".ultp-block-items-wrap").html(data);
+					setSession(
+						"ultp_uniqueIds",
+						JSON.stringify(
+							wrap.find(".ultp-current-unique-posts").data("ultp-unique-ids"),
+						),
+					);
+					if ($(window).scrollTop() > wrap.offset().top) {
+						$([document.documentElement, document.body]).animate(
+							{ scrollTop: wrap.offset().top - 80 },
+							100,
+						);
+					}
+				},
+			});
 		},
 	);
 
@@ -1246,6 +1309,7 @@
 		filterData.taxonomy = selectedFilters;
 
 		const searchVal = parent.find(".ultp-filter-search input");
+
 		if (searchVal.length > 0) {
 			filterData.search = searchVal.val();
 		}
@@ -1285,6 +1349,11 @@
 					grid.addClass("ultp-loading-active");
 				},
 				success: function (response) {
+					// console.log(
+					// 	JSON.parse(response.data.filteredData.data_attrs),
+					// 	"response",
+					// );
+					console.log("testing", searchVal);
 					grid
 						.closest(".wp-block-ultimate-post-post-grid-parent")
 						?.find(".ultp-not-found-message")
@@ -1327,7 +1396,24 @@
 							.replaceWith(response?.data?.filteredData?.pagination);
 					}
 
-					// Pagination Block Integration
+					if (grid.parent().is(".ultp-iscroll-active")) {
+						const dataAttrs = JSON.parse(response.data.filteredData.data_attrs);
+
+						Object.entries(dataAttrs).forEach(([key, value]) => {
+							if (value !== null && value !== undefined) {
+								grid.attr("data-" + key, value);
+							}
+						});
+
+						const iscrollBlock = grid.parent();
+						iscrollBlock.UltpInfiniteScroll(
+							iscrollBlock,
+							setSession,
+							getUltpNonce,
+							paginationAjaxCall,
+						);
+					}
+
 					if (response?.data?.filteredData?.pagination) {
 						pagis?.map((pagiClass) => {
 							let pagi = [];
@@ -1939,4 +2025,14 @@
 	// 		)
 	// 		.addClass("pt-active");
 	// }
+	if ($(".ultp-iscroll-active").length > 0) {
+		$(".ultp-iscroll-active").each(function () {
+			$(this).UltpInfiniteScroll(
+				$(this),
+				setSession, // set Unique Post Id
+				getUltpNonce, // Get Nonce
+				paginationAjaxCall, // Pagination API Call Function
+			);
+		});
+	}
 })(jQuery);

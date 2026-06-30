@@ -662,11 +662,13 @@ class Blocks {
 						$filter_attributes['queryOrderBy'] = 
 						! empty( $adv_filter_data['orderby'] ) ? $adv_filter_data['orderby'] : ( $value['attrs']['queryOrderBy'] ?? '' );
 					}
-
+					$pagination = $this->pagination_for_filter( $attr, $postId, $blockRaw, $filter_attributes );
 					$toReturn = array(
 						'blocks'         => $objectBlock->content( $attr, true ),
 						'notFound'       => isset( $attr['notFoundMessage'] ) ? $attr['notFoundMessage'] : '',
-						'pagination'     => $this->pagination_for_filter( $attr, $postId, $blockRaw, $filter_attributes ),
+						'pagination'     => $pagination['pagination_content'],
+						'data_attrs'     => $pagination['data_attrs'],
+						'data_all_attrs'     => $pagination['data_attrs'],
 						'paginationType' => $attr['paginationType'],
 						'paginationShow' => $attr['paginationShow'],
 					);
@@ -724,8 +726,26 @@ class Blocks {
 			$wraper_after .= '</div>';
 		}
 		wp_reset_query();
-
-		return $wraper_after;
+			
+		// queryQuick
+		return array(
+			'pagination_content' => $wraper_after,
+			'data_attrs'        => wp_json_encode( array(
+				'paged'       => 1,
+				'blockid'     => $attr['blockId'],
+				'postid'      => $postId,
+				'pages'       => $pageNum,
+				'blockname'   => $blockRaw,
+				'filter_value' => isset( $filter_attributes['queryTaxValue'] ) ? $filter_attributes['queryTaxValue'] : '',
+				'filter_type'  => isset( $filter_attributes['queryTax'] ) ? $filter_attributes['queryTax'] : '',
+				'filter_author' => isset( $filter_attributes['queryAuthor'] ) ? $filter_attributes['queryAuthor'] : '',
+				'filter_order'  => isset( $filter_attributes['queryOrder'] ) ? $filter_attributes['queryOrder'] : 'DESC',
+				'filter_orderby'  => isset( $filter_attributes['queryOrderBy'] ) ? $filter_attributes['queryOrderBy'] : '',
+				'filter_search'  => isset( $filter_attributes['querySearch'] ) ? $filter_attributes['querySearch'] : '',
+				'filter_queryQuick'  => isset( $filter_attributes['queryQuick'] ) ? $filter_attributes['queryQuick'] : '',
+				'filter_for'    => 'ultp-block-' . $attr['blockId'],
+			)),
+		);
 	}
 
 	/**
