@@ -95,14 +95,8 @@ class Notice {
 	 */
 	public static function get_hellobar_config() {
 		return array(
-			// Flash sale.
-			'ultp_helloBar_flash_sale_2026_4'       => Xpo::get_transient_without_cache( 'ultp_helloBar_flash_sale_2026_4' ),
-			// Surprise sale.
-			'ultp_helloBar_surprise_sale_2026_5'    => Xpo::get_transient_without_cache( 'ultp_helloBar_surprise_sale_2026_5' ),
-			// Massive sale.
-			'ultp_helloBar_massive_sale_2026_6'     => Xpo::get_transient_without_cache( 'ultp_helloBar_massive_sale_2026_6' ),
 			// Final hours sale.
-			'ultp_helloBar_final_hours_sale_2026_7' => Xpo::get_transient_without_cache( 'ultp_helloBar_final_hours_sale_2026_7' ),
+			'ultp_helloBar_summer_sale_2026_v1' => Xpo::get_transient_without_cache( 'ultp_helloBar_summer_sale_2026_v1' ),
 		);
 	}
 
@@ -187,6 +181,8 @@ class Notice {
 		if ( $this->is_available_for_notice() ) {
 			$this->ultp_dashboard_banner_notice();
 			$this->ultp_dashboard_content_notice();
+			$this->ultp_dashboard_image_banner_notice();
+
 		}
 	}
 
@@ -421,7 +417,7 @@ class Notice {
 							align-items: center;
 							justify-content: center;
 						"
-						aria-label="<?php esc_html_e( 'Close Banner', 'product-addons' ); ?>"
+						aria-label="<?php esc_html_e( 'Close Banner', 'ultimate-post' ); ?>"
 						href="<?php echo esc_url( add_query_arg( $query_args ) ); ?>">
 					</a>
 
@@ -689,169 +685,48 @@ class Notice {
 	 */
 	public function ultp_dashboard_content_notice( $return_bool = false ) {
 		$content_notices = array(
-			// Flash sale
 			array(
-				'key'                => 'ultp_dashboard_content_notice_flash_sale_brand_logos',
-				'start'              => '2026-05-07 00:00 Asia/Dhaka',
-				'end'                => '2026-05-12 23:59 Asia/Dhaka',
+				'key'                => 'ultp_dashboard_content_notice_summer_sale_2026_vv1',
+				'start'              => '2026-07-06 00:00 Asia/Dhaka',
+				'end'                => '2026-07-12 23:59 Asia/Dhaka',
 				'url'                => Xpo::generate_utm_link(
 					array(
-						'utmKey' => 'flash_sale',
+						'utmKey' => 'summer_db',
 					)
 				),
 				'visibility'         => ! Xpo::is_lc_active(),
-				'content_heading'    => __( 'Flash Sale:', 'ultimate-post' ),
-				'content_subheading' => __( 'Enjoy %s on PostX Pro.', 'ultimate-post' ),
-				'discount_content'   => ' up to 45% Off',
-				'brand_color'        => '#0322ff',
-				'icon'               => ULTP_URL . 'assets/img/dashboard_banner/brand_logo_round.svg',
-				'button_text'        => __( 'Claim Your Discount!', 'ultimate-post' ),
-				'is_discount_logo'   => true,
+				'content_heading'    => __( 'Summer Sale:', 'ultimate-post' ),
+				/* translators: %s: discount percentage */
+				'content_subheading' => __( 'Enjoy up to %s on PostX Pro.', 'ultimate-post' ),
+				'discount_content'   => '  50% OFF',
 				'border_color'       => '#0322ff',
-			),
-			array(
-				'key'                => 'ultp_dashboard_content_notice_flash_sale_discount_logo',
-				'start'              => '2026-05-13 00:00 Asia/Dhaka',
-				'end'                => '2026-05-17 23:59 Asia/Dhaka',
-				'url'                => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'flash_sale',
-					)
-				),
-				'visibility'         => ! Xpo::is_lc_active(),
-				'content_heading'    => __( 'Flash Sale:', 'ultimate-post' ),
-				'content_subheading' => __( 'Enjoy %s on PostX Pro.', 'ultimate-post' ),
-				'discount_content'   => ' up to 45% Off',
-				'brand_color'        => '#0322ff',
-				'icon'               => ULTP_URL . 'assets/img/dashboard_banner/flash_sale_45_discount_logo.png',
+				'icon'               => ULTP_URL . 'assets/img/dashboard_banner/brand_logo.svg',
 				'button_text'        => __( 'Upgrade Now!', 'ultimate-post' ),
 				'is_discount_logo'   => true,
-				'border_color'       => '#0322ff',
 			),
-
-			// Surprise Sale
 			array(
-				'key'                => 'ultp_dashboard_content_notice_surprise_sale_brand_logo',
-				'start'              => '2026-05-22 00:00 Asia/Dhaka',
-				'end'                => '2026-05-25 23:59 Asia/Dhaka',
+				'key'                => 'ultp_dashboard_content_notice_summer_sale_2026_vv2',
+				'start'              => '2026-07-13 00:00 Asia/Dhaka',
+				'end'                => '2026-07-19 23:59 Asia/Dhaka',
 				'url'                => Xpo::generate_utm_link(
 					array(
-						'utmKey' => 'surprise_sale',
+						'utmKey' => 'summer_db',
 					)
 				),
 				'visibility'         => ! Xpo::is_lc_active(),
-				'content_heading'    => __( 'Surprise Sale:', 'ultimate-post' ),
-				'content_subheading' => __( 'Enjoy %s on PostX Pro.', 'ultimate-post' ),
-				'discount_content'   => ' up to 50% Off',
-				'brand_color'        => '#0322ff',
-				'icon'               => ULTP_URL . 'assets/img/dashboard_banner/brand_logo_round.svg',
-				'button_text'        => __( 'Claim Your Discount!', 'ultimate-post' ),
-				'is_discount_logo'   => true,
+				'content_heading'    => __( 'Summer Sale:', 'ultimate-post' ),
+				/* translators: %s: discount percentage */
+				'content_subheading' => __( 'Enjoy up to %s on PostX Pro.', 'ultimate-post' ),
+				'discount_content'   => '  50% OFF',
 				'border_color'       => '#0322ff',
-			),
-			array(
-				'key'                => 'ultp_dashboard_content_notice_surprise_sale_discount_logo',
-				'start'              => '2026-05-26 00:00 Asia/Dhaka',
-				'end'                => '2026-05-28 23:59 Asia/Dhaka',
-				'url'                => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'surprise_sale',
-					)
-				),
-				'visibility'         => ! Xpo::is_lc_active(),
-				'content_heading'    => __( 'Surprise Sale:', 'ultimate-post' ),
-				'content_subheading' => __( 'Enjoy %s on PostX Pro.', 'ultimate-post' ),
-				'discount_content'   => ' up to 50% Off',
-				'brand_color'        => '#0322ff',
 				'icon'               => ULTP_URL . 'assets/img/dashboard_banner/flash_sale_50_discount_logo.png',
 				'button_text'        => __( 'Upgrade Now!', 'ultimate-post' ),
 				'is_discount_logo'   => true,
-				'border_color'       => '#0322ff',
-			),
-
-			// Massive Sale
-			array(
-				'key'                => 'ultp_dashboard_content_notice_massive_sale_brand_logo',
-				'start'              => '2026-06-02 00:00 Asia/Dhaka',
-				'end'                => '2026-06-10 23:59 Asia/Dhaka',
-				'url'                => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'massive_sale',
-					)
-				),
-				'visibility'         => ! Xpo::is_lc_active(),
-				'content_heading'    => __( 'Massive Sale:', 'ultimate-post' ),
-				'content_subheading' => __( 'Enjoy %s on PostX Pro.', 'ultimate-post' ),
-				'discount_content'   => ' up to 50% Off',
-				'brand_color'        => '#0322ff',
-				'icon'               => ULTP_URL . 'assets/img/dashboard_banner/brand_logo_round.svg',
-				'button_text'        => __( 'Claim Your Discount!', 'ultimate-post' ),
-				'is_discount_logo'   => true,
-				'border_color'       => '#0322ff',
-			),
-			array(
-				'key'                => 'ultp_dashboard_content_notice_massive_sale_discount_logo',
-				'start'              => '2026-06-11 00:00 Asia/Dhaka',
-				'end'                => '2026-06-16 23:59 Asia/Dhaka',
-				'url'                => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'massive_sale',
-					)
-				),
-				'visibility'         => ! Xpo::is_lc_active(),
-				'content_heading'    => __( 'Massive Sale:', 'ultimate-post' ),
-				'content_subheading' => __( 'Enjoy %s on PostX Pro.', 'ultimate-post' ),
-				'discount_content'   => ' up to 50% Off',
-				'brand_color'        => '#0322ff',
-				'icon'               => ULTP_URL . 'assets/img/dashboard_banner/flash_sale_50_discount_logo.png',
-				'button_text'        => __( 'Upgrade Now!', 'ultimate-post' ),
-				'is_discount_logo'   => true,
-				'border_color'       => '#0322ff',
-			),
-
-			// Final Hours Sale
-			array(
-				'key'                => 'ultp_dashboard_content_notice_final_hours_sale_brand_logo',
-				'start'              => '2026-06-21 00:00 Asia/Dhaka',
-				'end'                => '2026-06-24 23:59 Asia/Dhaka',
-				'url'                => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'final_hour',
-					)
-				),
-				'visibility'         => ! Xpo::is_lc_active(),
-				'content_heading'    => __( 'Final Hours Sale:', 'ultimate-post' ),
-				'content_subheading' => __( 'Enjoy %s on PostX Pro.', 'ultimate-post' ),
-				'discount_content'   => ' up to 50% Off',
-				'brand_color'        => '#0322ff',
-				'icon'               => ULTP_URL . 'assets/img/dashboard_banner/brand_logo_round.svg',
-				'button_text'        => __( 'Claim Your Discount!', 'ultimate-post' ),
-				'is_discount_logo'   => true,
-				'border_color'       => '#0322ff',
-			),
-			array(
-				'key'                => 'ultp_dashboard_content_notice_final_hours_sale_discount_logo',
-				'start'              => '2026-06-25 00:00 Asia/Dhaka',
-				'end'                => '2026-06-27 23:59 Asia/Dhaka',
-				'url'                => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'final_hour',
-					)
-				),
-				'visibility'         => ! Xpo::is_lc_active(),
-				'content_heading'    => __( 'Final Hours Sale:', 'ultimate-post' ),
-				'content_subheading' => __( 'Enjoy %s on PostX Pro.', 'ultimate-post' ),
-				'discount_content'   => ' up to 50% Off',
-				'brand_color'        => '#0322ff',
-				'icon'               => ULTP_URL . 'assets/img/dashboard_banner/flash_sale_50_discount_logo.png',
-				'button_text'        => __( 'Upgrade Now!', 'ultimate-post' ),
-				'is_discount_logo'   => true,
-				'border_color'       => '#0322ff',
 			),
 
 		);
 
-		$ultp_db_nonce = wp_create_nonce( 'ultp-nonce' );
+			$ultp_db_nonce = wp_create_nonce( 'ultp-nonce' );
 
 		foreach ( $content_notices as $key => $notice ) {
 			$notice_key = isset( $notice['key'] ) ? $notice['key'] : $this->notice_version;
@@ -980,30 +855,30 @@ class Notice {
 					<div class="ultp-content-notice-wrapper notice data_collection_notice" 
 					style="border-left: 3px solid <?php echo esc_attr( $border_color ); ?>;"
 					> 
-						<?php
-						if ( $notice['is_discount_logo'] ) {
-							?>
+							<?php
+							if ( $notice['is_discount_logo'] ) {
+								?>
 								<div class="ultp-content-notice-discout-icon"> <img src="<?php echo esc_url( $notice['icon'] ); ?>"/>  </div>
-							<?php
-						} else {
-							?>
+								<?php
+							} else {
+								?>
 								<div class="ultp-content-notice-icon"> <img src="<?php echo esc_url( $notice['icon'] ); ?>"/>  </div>
-							<?php
-						}
-						?>
+								<?php
+							}
+							?>
 						
 						<div class="ultp-notice-content-wrapper">
 							<div class="">
 								<strong><?php printf( esc_html( $notice['content_heading'] ) ); ?> </strong>
-						<?php
-						printf(
-							wp_kses_post( $notice['content_subheading'] ),
-							'<strong>' . esc_html( $notice['discount_content'] ) . '</strong>'
-						);
-						?>
+							<?php
+							printf(
+								wp_kses_post( $notice['content_subheading'] ),
+								'<strong>' . esc_html( $notice['discount_content'] ) . '</strong>'
+							);
+							?>
 							</div>
 							<div class="ultp-content-notice-buttons">
-							<?php if ( isset( $notice['is_discount_logo'] ) && $notice['is_discount_logo'] ) : ?>
+						<?php if ( isset( $notice['is_discount_logo'] ) && $notice['is_discount_logo'] ) : ?>
 									<a class="ultp-content-discount_btn" href="<?php echo esc_url( $url ); ?>" target="_blank">
 										<?php echo esc_html( $notice['button_text'] ); ?>
 									</a>
@@ -1025,7 +900,7 @@ class Notice {
 							?>
 						class="ultp-content-notice-close"><span class="ultp-content-notice-close-icon dashicons dashicons-dismiss"> </span></a>
 					</div>
-								<?php
+							<?php
 					}
 				}
 			}
@@ -1039,7 +914,7 @@ class Notice {
 	 * @return array
 	 */
 	public function handle_xpo_active_notice_lists( $active_lists ) {
-		if ( $this->ultp_dashboard_banner_notice( true ) || $this->ultp_dashboard_content_notice( true ) ) {
+		if ( $this->ultp_dashboard_banner_notice( true ) || $this->ultp_dashboard_content_notice( true ) || $this->ultp_dashboard_image_banner_notice( true ) ) {
 			$active_lists[ $this->plugin_notice_priority_key ] = $this->plugin_notice_priority;
 		}
 		return $active_lists;
@@ -1057,5 +932,112 @@ class Notice {
 		}
 		asort( $active_notices );
 		return array_key_first( $active_notices ) === $this->plugin_notice_priority_key;
+	}
+
+	public function ultp_dashboard_image_banner_notice( $return_bool = false ) {
+		$ultp_db_nonce  = wp_create_nonce( 'ultp-nonce' );
+		$banner_notices = array(
+			array(
+				'key'         => 'ultp_summer_sale_2612',
+				'start'       => '2026-07-20 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
+				'end'         => '2026-08-01 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
+				'banner_src'  => ULTP_URL . 'assets/img/dashboard_banner/dashboard_banner_summer_sale.png',
+				'url'         => Xpo::generate_utm_link(
+					array(
+						'utmKey' => 'summer_db',
+					)
+				),
+				'close_color' => '#000000',
+				'visibility'  => ! Xpo::is_lc_active(),
+			),
+		);
+
+		foreach ( $banner_notices as $notice ) {
+			$notice_key = isset( $notice['key'] ) ? $notice['key'] : $this->notice_version;
+			if ( isset( $_GET['ultp_notice'] ) && $notice_key === sanitize_text_field(wp_unslash($_GET['ultp_notice'])) ) { // phpcs:ignore
+				continue;
+			}
+
+			$current_time = gmdate( 'U' );
+			$notice_start = gmdate( 'U', strtotime( $notice['start'] ) );
+			$notice_end   = gmdate( 'U', strtotime( $notice['end'] ) );
+			if ( $current_time >= $notice_start && $current_time <= $notice_end && $notice['visibility'] ) {
+
+				$notice_transient = Xpo::get_transient_without_cache( 'ultp_get_pro_notice_' . $notice_key );
+
+				if ( 'off' === $notice_transient ) {
+					continue;
+				}
+
+				if ( $return_bool ) { // Early return for Other plugin notice.
+					return true;
+				}
+
+				if ( ! $this->notice_js_css_applied ) {
+					$this->ultp_banner_notice_js();
+					$this->notice_js_css_applied = true;
+				}
+				$query_args = array(
+					'ultp_notice' => $notice_key,
+					'wpnonce'     => $ultp_db_nonce,
+				);
+				if ( isset( $notice['repeat_interval'] ) && $notice['repeat_interval'] ) {
+					$query_args['ultp_interval'] = $notice['repeat_interval'];
+				}
+				?>
+				<style type="text/css">
+					.ultp-notice-wrapper.ultp-image-notice-wrapper {
+						padding: 0 !important;
+						position: relative;
+						box-sizing: border-box;
+						overflow: hidden;
+						border-radius: 0px;
+						border: none !important;
+					}
+					.ultp-notice-wrapper.ultp-image-notice-wrapper .ultp-image-banner {
+						position: relative;
+						line-height: 0;
+					}
+					.ultp-notice-wrapper.ultp-image-notice-wrapper .ultp-btn-image {
+						display: block;
+					}
+					.ultp-notice-wrapper.ultp-image-notice-wrapper .ultp-btn-image img {
+						display: block;
+						width: 100%;
+						height: auto;
+						border-radius: 0;
+					}
+					.ultp-notice-wrapper.ultp-image-notice-wrapper .ultp-content-notice-close {
+						top: 4px;
+						right: 4px;
+						position: absolute;
+						z-index: 999;
+					}
+					@media screen and (max-width: 650px) {
+						.ultp-image-notice-wrapper {
+							display: none;
+						}
+					}
+				</style>
+				<div class="ultp-notice-wrapper ultp-image-notice-wrapper notice wc-install ultp-free-notice">
+					<div class="wc-install-body ultp-image-banner">
+						<a class="wc-dismiss-notice ultp-content-notice-close"  href="
+						<?php
+						echo esc_url(
+							add_query_arg(
+								$query_args
+							)
+						);
+						?>
+						"><span class="ultp-content-notice-close-icon dashicons dashicons-dismiss" style="color: <?php echo esc_attr( $notice['close_color'] ); ?>;"> </span></a>
+						<a class="ultp-btn-image" target="_blank" href="<?php echo esc_url( $notice['url'] ); ?>">
+							<img loading="lazy" src="<?php echo esc_url( $notice['banner_src'] ); ?>" alt="Discount Banner"/>
+						</a>
+					</div>
+				</div>
+				
+				<?php
+			}
+		}
 	}
 }

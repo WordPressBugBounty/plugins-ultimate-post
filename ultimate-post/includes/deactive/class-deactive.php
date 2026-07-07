@@ -59,32 +59,32 @@ class Deactive {
 	public function get_deactive_settings() {
 		return array(
 			array(
-                'id'            => 'not-working',
-                'input'         => false,
-                'text'          => __( "The plugin isn’t working properly.", "product-blocks" )
-            ),
-            array(
-                'id'            => 'limited-features',
-                'input'         => false,
-                'text'          => __( "Limited features on the free version.", "product-blocks" )
-            ),
-            array(
-                'id'            => 'better-plugin',
-                'input'         => true,
-                'text'          => __( "I found a better plugin.", "product-blocks" ),
-                'placeholder'   => __( "Please share which plugin.", "product-blocks" ),
-            ),
-            array(
-                'id'            => 'temporary-deactivation',
-                'input'         => false,
-                'text'          => __( "It's a temporary deactivation.", "product-blocks" )
-            ),
-            array(
-                'id'            => 'other',
-                'input'         => true,
-                'text'          => __( "Other.", "product-blocks" ),
-                'placeholder'   => __( "Please share the reason.", "product-blocks" ),
-            ),
+				'id'    => 'not-working',
+				'input' => false,
+				'text'  => __( 'The plugin isn’t working properly.', 'ultimate-post' ),
+			),
+			array(
+				'id'    => 'limited-features',
+				'input' => false,
+				'text'  => __( 'Limited features on the free version.', 'ultimate-post' ),
+			),
+			array(
+				'id'          => 'better-plugin',
+				'input'       => true,
+				'text'        => __( 'I found a better plugin.', 'ultimate-post' ),
+				'placeholder' => __( 'Please share which plugin.', 'ultimate-post' ),
+			),
+			array(
+				'id'    => 'temporary-deactivation',
+				'input' => false,
+				'text'  => __( "It's a temporary deactivation.", 'ultimate-post' ),
+			),
+			array(
+				'id'          => 'other',
+				'input'       => true,
+				'text'        => __( 'Other.', 'ultimate-post' ),
+				'placeholder' => __( 'Please share the reason.', 'ultimate-post' ),
+			),
 		);
 	}
 

@@ -208,7 +208,7 @@ class Xpo {
 			),
 			'summer_db'             => array(
 				'source'   => 'db-postx-notice',
-				'medium'   => 'black-friday-sale',
+				'medium'   => 'summer-sale',
 				'campaign' => 'postx-dashboard',
 			),
 			'plugin_dir_pro'        => array(
@@ -239,6 +239,11 @@ class Xpo {
 			'content_notice'        => array(
 				'source'   => 'db-postx-notice',
 				'medium'   => 'spring-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			'summer_sale_meta'      => array(
+				'source'   => 'db-postx-plugin-meta',
+				'medium'   => 'summer-sale',
 				'campaign' => 'postx-dashboard',
 			),
 
