@@ -268,8 +268,8 @@ class Post_List_3 {
 			// Pagination Block Html
 			include ULTP_PATH . 'blocks/template/pagination_block.php';
 
-			$wraper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="ultp-post-grid-block wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '' . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '">';
-				$wraper_before .= '<div class="ultp-block-wrapper ' . $wrap_data . '">';
+			$wraper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="ultp-post-grid-block wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '' . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . ' ' . $iscroll . '">';
+				$wraper_before .= '<div class="ultp-block-wrapper" ' . $wrap_data . '>';
 
 					// Loading
 					$wraper_before .= ultimate_post()->postx_loading();

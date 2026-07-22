@@ -97,6 +97,7 @@ class Notice {
 		return array(
 			// Final hours sale.
 			'ultp_helloBar_summer_sale_2026_v1' => Xpo::get_transient_without_cache( 'ultp_helloBar_summer_sale_2026_v1' ),
+			'ultp_helloBar_summer_sale_2026_v1_2' => Xpo::get_transient_without_cache( 'ultp_helloBar_summer_sale_2026_v1_2' ),
 		);
 	}
 
@@ -705,9 +706,9 @@ class Notice {
 				'is_discount_logo'   => true,
 			),
 			array(
-				'key'                => 'ultp_dashboard_content_notice_summer_sale_2026_vv2',
-				'start'              => '2026-07-13 00:00 Asia/Dhaka',
-				'end'                => '2026-07-19 23:59 Asia/Dhaka',
+				'key'                => 'ultp_dashboard_content_notice_summer_sale_2026_vv3',
+				'start'              => '2026-08-02 00:00 Asia/Dhaka',
+				'end'                => '2026-08-08 23:59 Asia/Dhaka',
 				'url'                => Xpo::generate_utm_link(
 					array(
 						'utmKey' => 'summer_db',
@@ -944,7 +945,20 @@ class Notice {
 				'banner_src'  => ULTP_URL . 'assets/img/dashboard_banner/dashboard_banner_summer_sale.png',
 				'url'         => Xpo::generate_utm_link(
 					array(
-						'utmKey' => 'summer_db',
+						'utmKey' => 'sub_menu_offer',
+					)
+				),
+				'close_color' => '#000000',
+				'visibility'  => ! Xpo::is_lc_active(),
+			),
+			array(
+				'key'         => 'ultp_summer_sale_2613',
+				'start'       => '2026-08-09 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
+				'end'         => '2026-08-16 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
+				'banner_src'  => ULTP_URL . 'assets/img/dashboard_banner/dashboard_banner_summer_sale.png',
+				'url'         => Xpo::generate_utm_link(
+					array(
+						'utmKey' => 'sub_menu_offer',
 					)
 				),
 				'close_color' => '#000000',
