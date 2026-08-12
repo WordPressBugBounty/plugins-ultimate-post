@@ -31,6 +31,7 @@ class Options {
 	public function __construct() {
 		add_action( 'admin_init', array( $this, 'handle_external_redirects' ) );
 		add_action( 'admin_menu', array( $this, 'menu_page_callback' ) );
+		add_action( 'admin_footer', array( $this, 'sync_addon_submenu_visibility' ) );
 		add_action( 'in_admin_header', array( $this, 'remove_all_notices' ) );
 		add_filter( 'plugin_row_meta', array( $this, 'plugin_settings_meta' ), 10, 2 );
 		add_filter( 'plugin_action_links_' . ULTP_BASE, array( $this, 'plugin_action_links_callback' ) );
@@ -245,6 +246,44 @@ class Options {
 			'ultp-startersites',
 			array( self::class, 'handle_external_redirects' )
 		);
+	}
+
+	/**
+	 * Sync addon-backed WordPress submenu items with addon enabled status.
+	 *
+	 * @since v.4.1.7
+	 * @return void No return value.
+	 */
+	public function sync_addon_submenu_visibility() {
+		$settings = ultimate_post()->get_setting();
+		$submenus = array(
+			'builder'         => 'ultp_builder',
+			'saved-templates' => 'ultp_templates',
+			'custom-font'     => 'ultp_custom_font',
+		);
+
+		foreach ( $submenus as $slug => $setting_key ) {
+			$submenus[ $slug ] = isset( $settings[ $setting_key ] ) && $settings[ $setting_key ] !== 'false';
+		}
+		?>
+		<script>
+			( function() {
+				const postxAddonSubmenus = <?php echo wp_json_encode( $submenus ); ?>;
+
+				Object.keys( postxAddonSubmenus ).forEach( function( slug ) {
+					const link = document.querySelector( '#adminmenu a[href*="page=ultp-settings#' + slug + '"]' );
+					const item = link ? link.closest( 'li' ) : null;
+
+					if ( ! item ) {
+						return;
+					}
+
+					item.id = 'postx-submenu-' + slug;
+					item.style.display = postxAddonSubmenus[ slug ] ? '' : 'none';
+				} );
+			}() );
+		</script>
+		<?php
 	}
 
 	/**

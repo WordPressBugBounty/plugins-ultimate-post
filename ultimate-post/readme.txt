@@ -4,7 +4,7 @@ Tags: post grid, gutenberg blocks, blog grid, Gutenberg, grid
 Requires at least: 5.0
 Tested up to: 7.0
 Requires PHP: 5.6
-Stable tag: 5.0.34
+Stable tag: 5.0.35
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -364,6 +364,14 @@ It is a Gutenberg plugin it works great with WordPress version 5.x.x or more. An
 11. With the help of the Elementor and Saved Template addons, you can use any of the post blocks of PostX to any pages while editing with Elementor builder.
 
 == Changelog ==
+= 5.0.35 – 12 August 2026 =
+* Fix: Search block optimized with debounced input, cancelled stale requests, output escaping, and input validation
+* Fix: Search popup now opens on the first search and resets pagination when the search term changes
+* Fix: Builder panel now scrolls to top on navigation
+* Fix: Range field issue in the dashboard settings
+* Fix: Add-ons toggle menu visibility
+* Fix: Plugin page broken design fix
+
 = 5.0.34 – 22 July 2026 =
 * Fix: Infinite loop issue fixed for Post List 2 block
 * Fix: Infinite loop issue fixed for Post List 3 block

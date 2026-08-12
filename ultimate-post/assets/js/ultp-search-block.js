@@ -5,10 +5,30 @@
 	}
 	function handleUltpSearchBlock() {
 		let postPages = 1;
+		// Typing fires one REST request per keystroke, and each one is an uncached
+		// WP_Query (POST bypasses every page cache). Waiting for a pause collapses a
+		// 10-character query from 8 requests down to 1.
+		const SEARCH_DEBOUNCE_MS = 300;
+		let searchDebounceTimer = null;
+		// Debounce stops requests being *sent*, but one already in flight can still
+		// land after a newer one and overwrite it with stale results. Keep a handle
+		// per block so a superseded request can be dropped. Keyed by blockId because
+		// two search blocks on one page must not cancel each other.
+		const searchAbortControllers = {};
+		const abortSearchRequest = (blockId) => {
+			if (searchAbortControllers[blockId]) {
+				searchAbortControllers[blockId].abort();
+				delete searchAbortControllers[blockId];
+			}
+		};
 		// Search Clear Text Button
 		$(document).on("click", ".ultp-search-clear", function () {
 			postPages = 1;
 			const blockId = $(this).data("blockid");
+			// Drop anything queued or in flight, or its response repopulates the
+			// results we just cleared.
+			clearTimeout(searchDebounceTimer);
+			abortSearchRequest(blockId);
 			$(this)
 				.parents(".ultp-search-inputwrap")
 				.find(".ultp-searchres-input")
@@ -46,7 +66,18 @@
 		}
 		// Input On Change Action
 		$(document).on("input", ".ultp-searchres-input", function (e) {
-			searchResultAPI($(this), e.target.value);
+			const input = $(this);
+			const value = e.target.value;
+			// Editing the term starts a new result set, so pagination goes back to
+			// page one. Without this a page number left over from "view more" is
+			// reused for the new term: search "shi", view more twice, then type
+			// "shirt", and the request asks for page 3 of "shirt" -- almost always
+			// empty, so a valid search reports no results.
+			postPages = 1;
+			clearTimeout(searchDebounceTimer);
+			searchDebounceTimer = setTimeout(function () {
+				searchResultAPI(input, value);
+			}, SEARCH_DEBOUNCE_MS);
 		});
 
 		const searchResultAPI = (
@@ -64,18 +95,30 @@
 			const el = $(
 				`.wp-block-ultimate-post-advanced-search.ultp-block-${blockId}`
 			).find(".ultp-search-frontend");
+			// Set PopUp Positions.
+			// handleSetPosition() appends the results container to <body> the first
+			// time it runs for a block, so the container must be looked up *after*
+			// it, not before. Capturing it first left an empty set on the very first
+			// search, and every render call below then silently did nothing.
+			handleSetPosition(
+				el,
+				$(`.result-data.ultp-block-${blockId}`).length ? false : true
+			);
 			const selector = $(`.result-data.ultp-block-${blockId}`);
-			// Set PopUp Positions
-			handleSetPosition(el, selector.length ? false : true);
 
 			if (searchText.length > 2) {
 				if (el.data("ajax")) {
 					selector.find(".ultp-search-result").addClass("ultp-search-show");
 					selector.find(".ultp-result-loader").addClass("active");
 					selector.addClass("popup-active");
+					// This search supersedes anything still running for this block.
+					abortSearchRequest(blockId);
+					const controller = new AbortController();
+					searchAbortControllers[blockId] = controller;
 					wp.apiFetch({
 						path: "/ultp/ultp_search_data",
 						method: "POST",
+						signal: controller.signal,
 						data: {
 							searchText: searchText,
 							date: parseInt(el.data("date")),
@@ -151,6 +194,14 @@
 								selector.find(".ultp-viewall-results").removeClass("active");
 							}
 						}
+					})
+					.catch((err) => {
+						// Superseded by a newer search. Expected, not a failure.
+						if (err && err.name === "AbortError") {
+							return;
+						}
+						// Real failure: stop the spinner so the popup cannot hang.
+						selector.find(".ultp-result-loader").removeClass("active");
 					});
 				}
 			} else {

@@ -21,6 +21,32 @@ defined( 'ABSPATH' ) || exit;
 class REST_API {
 
 	/**
+	 * Upper bound for the search endpoint's postPerPage. Matches the max of the
+	 * Search block's "Show Initial Post" slider, so no UI value is ever capped.
+	 * This is the same max range of the slider in gutenburg editor. 
+	 * 100 is enough for search bar result.
+	 *
+	 * @since v.5.0.35
+	 */
+	const SEARCH_POSTS_PER_PAGE_MAX = 100;
+
+	/**
+	 * Longest accepted search term. Longer strings only widen the LIKE pattern
+	 * scanned against every row; no real query needs more.
+	 *
+	 * @since v.5.0.35
+	 */
+	const SEARCH_TEXT_MAX_LENGTH = 200;
+
+	/**
+	 * Upper bound for excerptLimit. Also keeps $num_words + 1 inside integer range
+	 * in wp_trim_words(), which otherwise overflows to float on a huge value.
+	 *
+	 * @since v.5.0.35
+	 */
+	const SEARCH_EXCERPT_WORDS_MAX = 400;
+
+	/**
 	 * Setup class.
 	 *
 	 * @since v.1.0.0
@@ -634,25 +660,58 @@ class REST_API {
 		$searchText  = isset( $post['searchText'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['searchText'] ) : '';
 		$paged       = isset( $post['paged'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['paged'] ) : '';
 		$postPerPage = isset( $post['postPerPage'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['postPerPage'] ) : '';
-		$query_args  = array(
+
+		// Public route: cap posts_per_page so -1 can never mean "unlimited".
+		// 0 survives the cap, and WP_Query resolves it to the posts_per_page option.
+		$postPerPage = min( absint( $postPerPage ), self::SEARCH_POSTS_PER_PAGE_MAX );
+		// is_scalar first: searchText arrives as an array if the caller sends one, and
+		// casting that to string is an "Array to string conversion" warning.
+		$searchText = is_scalar( $searchText ) ? mb_substr( (string) $searchText, 0, self::SEARCH_TEXT_MAX_LENGTH ) : '';
+
+		$query_args = array(
 			's'              => $searchText,
 			'paged'          => $paged,
-			'compare'        => 'LIKE',
 			'orderby'        => 'relevance',
 			'posts_per_page' => $postPerPage,
 		);
 		if ( isset( $post['exclude'] ) && is_array( $post['exclude'] ) && count( $post['exclude'] ) > 0 ) {
-			$post['exclude'] = ultimate_post()->ultp_rest_sanitize_params( $post['exclude'] );
-			$post_exclude    = array();
-			foreach ( $post['exclude'] as $data ) {
-				$post_exclude[ $data['title'] ] = $data['title'];
+			$all_types    = get_post_types( array( 'public' => true ), 'names' );
+			$post_exclude = array();
+
+			// Bound before sanitising: this route is public, and sanitising an array
+			// whose length the caller picks is itself the attack. Excluding more post
+			// types than exist is meaningless, so nothing valid is dropped.
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Length is bounded here only; every element is sanitized below before use.
+			$exclude_input = array_slice( $post['exclude'], 0, count( $all_types ) );
+
+			foreach ( $exclude_input as $data ) {
+				// A flat array of strings would index a string here and warn.
+				if ( ! is_array( $data ) || ! isset( $data['title'] ) || ! is_scalar( $data['title'] ) ) {
+					continue;
+				}
+				$exclude_type                  = sanitize_text_field( $data['title'] );
+				$post_exclude[ $exclude_type ] = $exclude_type;
 			}
-			$all_types               = get_post_types( array( 'public' => true ), 'names' );
-			$post_type               = array_diff_key( $all_types, $post_exclude );
-			$query_args['post_type'] = $post_type;
+
+			$query_args['post_type'] = array_diff_key( $all_types, $post_exclude );
 		}
 		$output       = '';
 		$query_result = new \WP_Query( $query_args );
+
+		/**
+		 * Resolved once here rather than guarded at each use, since the request may
+		 * omit any of them. The loose == is deliberate: the two callers disagree on
+		 * type -- the editor sends real booleans, the frontend sends 1/0 parsed out
+		 * of data attributes -- and both must keep working.
+		 */
+		$show_image    = isset( $post['image'] ) && $post['image'] == 1;
+		$show_category = isset( $post['category'] ) && $post['category'] == 1;
+		$show_author   = isset( $post['author'] ) && $post['author'] == 1;
+		$show_date     = isset( $post['date'] ) && $post['date'] == 1;
+		$show_excerpt  = isset( $post['excerpt'] ) && $post['excerpt'] == 1;
+		$excerpt_limit = isset( $post['excerptLimit'] )
+							? min( absint( $post['excerptLimit'] ), self::SEARCH_EXCERPT_WORDS_MAX )
+							: 55;
 
 		if ( $query_result->have_posts() ) {
 			while ( $query_result->have_posts() ) {
@@ -661,38 +720,57 @@ class REST_API {
 				$title   = get_the_title();
 
 				$output .= '<div class="ultp-search-result__item">';
-				if ( $post['image'] == 1 && has_post_thumbnail() ) {
-					$thumb_id = get_post_thumbnail_id( $post_id );
-					$output  .= '<img class="ultp-searchresult-image" src=' . wp_get_attachment_image_src( $thumb_id, 'thumbnail', false )[0] . ' alt="' . $title . '"/>';
+
+				if ( $show_image && has_post_thumbnail() ) {
+					// has_post_thumbnail() only proves the _thumbnail_id meta exists.
+					// If the attachment behind it was deleted, src() returns false.
+					$thumb = wp_get_attachment_image_src( get_post_thumbnail_id( $post_id ), 'thumbnail', false );
+					if ( ! empty( $thumb[0] ) ) {
+						$output .= '<img class="ultp-searchresult-image" src="' . esc_url( $thumb[0] ) . '" alt="' . esc_attr( $title ) . '"/>';
+					}
 				}
-					$output     .= '<div class="ultp-searchresult-content">';
-						$output .= '<div class="ultp-rescontent-meta">';
-							// Category.
-							$post_cat = get_the_terms( $post_id, 'category' );
-				if ( $post['category'] == 1 && $post_cat && count( $post_cat ) ) {
+
+				$output .= '<div class="ultp-searchresult-content">';
+				$output .= '<div class="ultp-rescontent-meta">';
+
+				// Category.
+				$post_cat = get_the_terms( $post_id, 'category' );
+				if ( $show_category && $post_cat && ! is_wp_error( $post_cat ) ) {
 					$output .= '<div class="ultp-searchresult-category">';
 					foreach ( $post_cat as $cat ) {
-								$output .= '<a href="' . get_term_link( $cat->term_id ) . '">' . $cat->name . '</a>';
+						$term_link = get_term_link( $cat->term_id );
+						if ( is_wp_error( $term_link ) ) {
+							continue;
+						}
+						$output .= '<a href="' . esc_url( $term_link ) . '">' . esc_html( $cat->name ) . '</a>';
 					}
-								$output .= '</div>';
-				}
-							// Author.
-				if ( $post['author'] == 1 ) {
-					$user_id = get_the_author_meta( 'ID' );
-					$output .= '<a href="' . get_author_posts_url( $user_id ) . '" class="ultp-searchresult-author">' . get_the_author_meta( 'display_name' ) . '</a>';
-				}
-							// Date.
-				if ( $post['date'] == 1 ) {
-					$output .= '<div class="ultp-searchresult-publishdate">' . get_the_date( 'F j, Y' ) . '</div>';
-				}
-						$output .= '</div>';
-						$output .= '<a href="' . get_permalink() . '" class="ultp-searchresult-title">' . $title . '</a>';
-				if ( $post['excerpt'] == 1 ) {
-					$output .= '<div class="ultp-searchresult-excerpt">' . wp_trim_words( get_the_excerpt(), isset( $post['excerptLimit'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['excerptLimit'] ) : 55 ) . '</div>';
-				}
 					$output .= '</div>';
-				$output     .= '</div>';
+				}
+
+				// Author.
+				if ( $show_author ) {
+					$user_id = get_the_author_meta( 'ID' );
+					$output .= '<a href="' . esc_url( get_author_posts_url( $user_id ) ) . '" class="ultp-searchresult-author">' . esc_html( get_the_author_meta( 'display_name' ) ) . '</a>';
+				}
+
+				// Date.
+				if ( $show_date ) {
+					$output .= '<div class="ultp-searchresult-publishdate">' . esc_html( get_the_date( 'F j, Y' ) ) . '</div>';
+				}
+
+				$output .= '</div>';
+				$output .= '<a href="' . esc_url( get_permalink() ) . '" class="ultp-searchresult-title">' . esc_html( $title ) . '</a>';
+
+				if ( $show_excerpt ) {
+					// wp_trim_words() strips tags, so what comes back is plain text.
+					$output .= '<div class="ultp-searchresult-excerpt">' . esc_html( wp_trim_words( get_the_excerpt(), $excerpt_limit ) ) . '</div>';
+				}
+
+				$output .= '</div>';
+				$output .= '</div>';
 			}
+			// the_post() overwrote the global $post; hand it back.
+			wp_reset_postdata();
 		}
 
 		return array(
