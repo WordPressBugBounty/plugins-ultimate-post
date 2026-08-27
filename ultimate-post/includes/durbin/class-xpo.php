@@ -434,6 +434,9 @@ class Xpo {
 				$plugin_slug = 'wow-pdf-invoices-packing-slips';
 				$active_url  = admin_url( 'admin.php?page=winv-dashboard#overview' );
 				break;
+			case 'wow_recommend':
+				$plugin_slug = 'wow-ai-product-recommendations';
+				break;
 		}
 
 		if ( ! file_exists( WP_PLUGIN_DIR . '/' . $plugin_slug . '/' . $plugin_slug . '.php' ) ) {
