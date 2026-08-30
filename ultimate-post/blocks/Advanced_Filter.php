@@ -635,8 +635,9 @@ class Advanced_Filter {
 			}
 		}
 
-		$attr['blockId'] = ultimate_post()->sanitize_attr( $attr, 'blockId', 'sanitize_html_class', 'missing_block_id' );
-		$attr['allText'] = ultimate_post()->sanitize_attr( $attr, 'allText', 'sanitize_text_field', 'missing_block_id' );
+		$attr['blockId']      = ultimate_post()->sanitize_attr( $attr, 'blockId', 'sanitize_html_class', 'missing_block_id' );
+		$attr['allText']      = ultimate_post()->sanitize_attr( $attr, 'allText', 'sanitize_text_field', 'missing_block_id' );
+		$current_page_post_id = ( isset( $attr['currentPostId'] ) && $attr['currentPostId'] ) ? sanitize_html_class( $attr['currentPostId'] ) : ultimate_post()->get_page_post_id( $attr['blockId'] );
 
 		if ( 'inline' === $attr['filterStyle'] ) {
 			$inline_values = json_decode( $attr['filterValues'], true );
@@ -654,7 +655,7 @@ class Advanced_Filter {
 					'data-blockId'        => $attr['blockId'],
 					'data-is-active'      => 'false',
 					'data-builder'        => ultimate_post()->get_builder_attr( 'archiveBuilderFilter' ),
-					'data-current-postid' => get_the_ID(),
+					'data-current-postid' => $current_page_post_id,
 					'data-filter-label'   => isset( $attr['allText'] ) ? $attr['allText'] : 'All',
 				)
 			);
@@ -716,7 +717,7 @@ class Advanced_Filter {
 					'aria-expanded'       => 'false',
 					'aria-label'          => 'Select Filter (' . $attr['type'] . ')',
 					'data-builder'        => ultimate_post()->get_builder_attr( 'archiveBuilderFilter' ),
-					'data-current-postid' => get_the_ID(),
+					'data-current-postid' => $current_page_post_id,
 					'data-filter-label'   => isset( $def_value['name'] ) ? $def_value['name'] : 'All',
 				)
 			);
