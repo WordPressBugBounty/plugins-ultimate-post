@@ -82,13 +82,13 @@ class Options {
 				'utmKey' => 'summer_sale_meta',
 			),
 			array(
-				'start'  => '2026-08-02 00:00 Asia/Dhaka',
-				'end'    => '2026-08-16 23:59 Asia/Dhaka',
+				'start'  => '2026-09-02 00:00 Asia/Dhaka',
+				'end'    => '2026-10-10 23:59 Asia/Dhaka',
 				'text'   => __(
-					'Summer Sale - Up to 50% OFF',
+					'Get Pro at $39',
 					'ultimate-post'
 				),
-				'utmKey' => 'summer_sale_meta',
+				'utmKey' => 'base_price_meta',
 			),
 		);
 
@@ -109,9 +109,11 @@ class Options {
 			} else {
 
 				$text = esc_html__( 'Upgrade to Pro', 'ultimate-post' );
-				$url  = Xpo::generate_utm_link(array(
-								'utmKey' => 'sub_menu',
-							));
+				$url  = Xpo::generate_utm_link(
+					array(
+						'utmKey' => 'sub_menu',
+					)
+				);
 
 				foreach ( $offer_config as $offer ) {
 					$current_time = gmdate( 'U' );

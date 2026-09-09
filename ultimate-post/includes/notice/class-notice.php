@@ -98,6 +98,7 @@ class Notice {
 			// Final hours sale.
 			'ultp_helloBar_summer_sale_2026_v1'   => Xpo::get_transient_without_cache( 'ultp_helloBar_summer_sale_2026_v1' ),
 			'ultp_helloBar_summer_sale_2026_v1_2' => Xpo::get_transient_without_cache( 'ultp_helloBar_summer_sale_2026_v1_2' ),
+			'ultp_helloBar_base_price_2026'       => Xpo::get_transient_without_cache( 'ultp_helloBar_base_price_2026' ),
 		);
 	}
 

@@ -246,6 +246,11 @@ class Xpo {
 				'medium'   => 'summer-sale',
 				'campaign' => 'postx-dashboard',
 			),
+			'base_price_meta'       => array(
+				'source'   => 'db-postx-plugin-meta',
+				'medium'   => 'base-price',
+				'campaign' => 'postx-dashboard',
+			),
 
 			// Flash sale.
 			'flash_sale_content'    => array(
