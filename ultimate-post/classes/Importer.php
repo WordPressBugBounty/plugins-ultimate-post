@@ -564,24 +564,24 @@ class Importer {
 		}
 		$wow_optin_template_import_status = 'successfully working';
 
-		$activated_plugins = $installed_plugin == 'yes' ? apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) : array();
-		if ( in_array( 'optin/optin.php', $activated_plugins ) && $wow_optin_template_id && $installed_plugin == 'yes' ) {
-			try {
-				if ( class_exists( '\OPTN\Includes\Db', true ) && method_exists( '\OPTN\Includes\Db', 'get_instance' ) ) {
-					$db_instance = \OPTN\Includes\Db::get_instance();
-					if ( is_object( $db_instance ) && is_callable( array( $db_instance, 'activate_recipe' ) ) ) {
-						$db_instance->activate_recipe(
-							$wow_optin_template_id,
-							array(
-								'disable_others' => true,
-							)
-						);
-					}
-				}
-			} catch ( \Throwable $e ) {
-				$wow_optin_template_import_status = 'have any problem to import Optin template.';
-			}
-		}
+		// $activated_plugins = $installed_plugin == 'yes' ? apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) : array();
+		// if ( in_array( 'optin/optin.php', $activated_plugins ) && $wow_optin_template_id && $installed_plugin == 'yes' ) {
+		// try {
+		// if ( class_exists( '\OPTN\Includes\Db', true ) && method_exists( '\OPTN\Includes\Db', 'get_instance' ) ) {
+		// $db_instance = \OPTN\Includes\Db::get_instance();
+		// if ( is_object( $db_instance ) && is_callable( array( $db_instance, 'activate_recipe' ) ) ) {
+		// $db_instance->activate_recipe(
+		// $wow_optin_template_id,
+		// array(
+		// 'disable_others' => true,
+		// )
+		// );
+		// }
+		// }
+		// } catch ( \Throwable $e ) {
+		// $wow_optin_template_import_status = 'have any problem to import Optin template.';
+		// }
+		// }
 		// $wow_optin_template_import_status
 		return rest_ensure_response(
 			array(

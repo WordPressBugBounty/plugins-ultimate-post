@@ -35,55 +35,22 @@ final class DCController {
 				array(
 					'methods'             => 'POST',
 					'callback'            => array( $this, 'handle_dynamic_data' ),
-					// 'permission_callback' => function () {
-					// 	return is_user_logged_in() && current_user_can( 'edit_posts' );
-					// },
+					// there is an unauthenticated route for fetching user data against post, that can be used to fetch user sensitive data like user email, user password reset token hast ( user_activation_key ) , private or draft post title e.t.c as unauthenticated user.
 					'permission_callback' => function ( $request ) {
-						// there is an unauthenticated route for fetching user data against post, that can be used to fetch user sensitive data like user email, user password reset token hast ( user_activation_key ) , private or draft post title e.t.c as unauthenticated user.
-						$post_id = method_exists( $request, 'get_param' )
-						? intval( $request->get_param('post_id') )
-						: ( isset( $request['post_id'] ) ? intval( $request['post_id'] ) : 0 );
+						$post_id = $this->get_request_post_id( $request );
+
+						if ( ! $this->user_can_access_post( $post_id ) ) {
+							return false;
+						}
 
 						$data_type = method_exists( $request, 'get_param' )
 							? $request->get_param('data_type')
 							: ( isset( $request['data_type'] ) ? $request['data_type'] : '' );
 
-						// User must be logged in
-						if ( ! is_user_logged_in() ) {
-							return false;
-						}
-
-						// If no post_id, require edit_posts capability
-						if ( $post_id <= 0 ) {
-							return current_user_can( 'edit_posts' );
-						}
-
-						// Get the post
-						$post = get_post( $post_id );
-						if ( ! $post ) {
-							return false;
-						}
-
-						// Check if post is password protected
-						if ( post_password_required( $post ) ) {
-							return false;
-						}
-
-						// User must be able to edit this specific post
-						if ( ! current_user_can( 'edit_post', $post_id ) ) {
-							return false;
-						}
-
-						// For non-published posts, user must be author OR have edit_posts capability
-						if ( $post->post_status !== 'publish' ) {
-							if ( (int) $post->post_author !== get_current_user_id() && ! current_user_can( 'edit_posts' ) ) {
-								return false;
-							}
-						}
-
 						// Restrict author_info to users who can edit the author OR admins
 						if ( $data_type === 'author_info' ) {
-							$author_id = (int) $post->post_author;
+							$post      = get_post( $post_id );
+							$author_id = $post ? (int) $post->post_author : 0;
 							if ( ! current_user_can( 'edit_user', $author_id ) && ! current_user_can( 'manage_options' ) ) {
 								return false;
 							}
@@ -103,11 +70,69 @@ final class DCController {
 				array(
 					'methods'             => 'POST',
 					'callback'            => array( $this, 'handle_custom_fields' ),
-					'permission_callback' => '__return_true',
+					// custom field keys can reveal the meta-field schema of posts the caller shouldn't be able to see (private/draft/pending/scheduled/password-protected), so require the same access check as get_dynamic_content.
+					'permission_callback' => function ( $request ) {
+						return $this->user_can_access_post( $this->get_request_post_id( $request ) );
+					},
 					'args'                => array(),
 				),
 			)
 		);
+	}
+
+	/**
+	 * Reads the `post_id` request param, compatible with both WP_REST_Request and plain array access.
+	 *
+	 * @param WP_REST_Request|array $request Request object or params array.
+	 * @return int
+	 */
+	private function get_request_post_id( $request ) {
+		return method_exists( $request, 'get_param' )
+			? intval( $request->get_param( 'post_id' ) )
+			: ( isset( $request['post_id'] ) ? intval( $request['post_id'] ) : 0 );
+	}
+
+	/**
+	 * Whether the current user may access dynamic data/custom fields for the given post.
+	 *
+	 * @param int $post_id
+	 * @return bool
+	 */
+	private function user_can_access_post( $post_id ) {
+		// User must be logged in
+		if ( ! is_user_logged_in() ) {
+			return false;
+		}
+
+		// If no post_id, require edit_posts capability
+		if ( $post_id <= 0 ) {
+			return current_user_can( 'edit_posts' );
+		}
+
+		// Get the post
+		$post = get_post( $post_id );
+		if ( ! $post ) {
+			return false;
+		}
+
+		// Check if post is password protected
+		if ( post_password_required( $post ) ) {
+			return false;
+		}
+
+		// User must be able to edit this specific post
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return false;
+		}
+
+		// For non-published posts, user must be author OR have edit_posts capability
+		if ( $post->post_status !== 'publish' ) {
+			if ( (int) $post->post_author !== get_current_user_id() && ! current_user_can( 'edit_posts' ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**

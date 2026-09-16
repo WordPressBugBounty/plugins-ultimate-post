@@ -4,7 +4,7 @@ Tags: post grid, gutenberg blocks, blog grid, Gutenberg, grid
 Requires at least: 5.0
 Tested up to: 7.1
 Requires PHP: 5.6
-Stable tag: 5.0.39
+Stable tag: 5.0.41
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -364,6 +364,12 @@ It is a Gutenberg plugin it works great with WordPress version 5.x.x or more. An
 11. With the help of the Elementor and Saved Template addons, you can use any of the post blocks of PostX to any pages while editing with Elementor builder.
 
 == Changelog ==
+= 5.0.41 – 16 September 2026 =
+* Fix: Pattern library filter navigation showing incorrectly on homepage
+
+= 5.0.40 – 13 September 2026 =
+* Fix: Unauthenticated custom fields disclosure issue in Dynamic Content addon (reported by Pedro Pinho via WPScan)
+
 = 5.0.39 – 09 September 2026 =
 * Fix: Minor bug fixes and performance improved.
 
