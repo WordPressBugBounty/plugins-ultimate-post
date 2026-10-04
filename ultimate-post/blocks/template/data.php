@@ -1,5 +1,6 @@
 <?php
 defined( 'ABSPATH' ) || exit;
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Included inside block render methods; variables are local.
 
 global $post;
 $post_id       = get_the_ID();
@@ -16,5 +17,4 @@ $view          = get_post_meta( get_the_ID(), '__post_views_count', true );
 $post_time     = human_time_diff( get_the_time( 'U' ), current_time( 'U' ) );
 $word_read     = apply_filters( 'ultp_word_read_min', 1200 );
 $reading_time  = ceil( mb_strlen( wp_strip_all_tags( get_the_content() ) ) / $word_read ) . ( isset( $attr['metaMinText'] ) ? ' ' . wp_kses( $attr['metaMinText'], ultimate_post()->ultp_allowed_html_tags() ) : '' );
-$is_active     = ultimate_post()->is_lc_active();
 $post_video    = isset( $attr['vidIconEnable'] ) && $attr['vidIconEnable'] ? get_post_meta( $post_id, '__builder_feature_video', true ) : '';

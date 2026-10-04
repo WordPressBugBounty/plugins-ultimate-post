@@ -160,15 +160,6 @@
 		$(this).parent().find(".ultp-popup-container").addClass("active");
 	});
 
-	const actionBtn = $(".page-title-action");
-	const savedBtn = $(".ultp-saved-templates-action");
-	if (savedBtn.length > 0) {
-		if (savedBtn.data())
-			actionBtn.addClass("ultp-save-templates-pro").text(savedBtn.data("text"));
-		actionBtn.attr("href", savedBtn.data("link"));
-		actionBtn.attr("target", "_blank");
-	}
-
 	// *************************************
 	// Add URL for PostX
 	// *************************************

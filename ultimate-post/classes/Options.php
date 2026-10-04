@@ -202,8 +202,8 @@ class Options {
 
 		// Check if current date is between November 5th and December 10th
 		$current_date         = current_time( 'Y-m-d' );
-		$start_date           = date( 'Y' ) . '-01-01'; // January 1st of current year
-		$end_date             = date( 'Y' ) . '-02-15';   // February 15th of current year
+		$start_date           = gmdate( 'Y' ) . '-01-01'; // January 1st of current year
+		$end_date             = gmdate( 'Y' ) . '-02-15';   // February 15th of current year
 		$menu_pro_text_period = ( $current_date >= $start_date && $current_date <= $end_date );
 
 		if ( ! Xpo::is_lc_active() ) {
@@ -298,11 +298,12 @@ class Options {
 		if (empty($_GET['page'])) {     // @codingStandardsIgnoreLine
 			return;
 		}
-		$_page = sanitize_key( $_GET['page'] );
+		$_page = sanitize_key( $_GET['page'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only admin page slug.
 		if ('ultp-startersites' === $_page) {   // @codingStandardsIgnoreLine
-			exit( wp_safe_redirect( admin_url( 'admin.php?page=ultp-settings#startersites' ) ) );
+			wp_safe_redirect( admin_url( 'admin.php?page=ultp-settings#startersites' ) );
+			exit;
 		} else if ('go_postx_pro' === $_page) {   // @codingStandardsIgnoreLine
-			wp_redirect(
+			wp_redirect( // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Intentional redirect to the fixed wpxpo.com pricing URL.
 				Xpo::generate_utm_link(
 					array(
 						'utmKey' => 'dashboard_go_pro',

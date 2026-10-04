@@ -73,75 +73,66 @@ class Advanced_Search {
 		$wraper_before = $wraper_after = $content = $popup_content = '';
 		$block_name    = 'advanced-search';
 
-		$is_visible = true;
-		if ( isset( $attr['blockPubDate'] ) && $attr['blockPubDate'] != 'empty' ) {
-			$is_visible = ultimate_post()->is_pro_feature_visible( $attr['blockPubDate'] );
-		}
+		$attr = wp_parse_args( $attr, $this->get_attributes() );
 
-		$is_active = ultimate_post()->is_lc_active();
+		$attr['blockId']              = sanitize_html_class( $attr['blockId'] );
+		$attr['className']            = isset( $attr['className'] ) && $attr['className'] ? preg_replace( '/[^A-Za-z0-9_ -]/', '', $attr['className'] ) : '';
+		$attr['align']                = isset( $attr['align'] ) && $attr['align'] ? preg_replace( '/[^A-Za-z0-9_ -]/', '', $attr['align'] ) : '';
+		$attr['popupAnimation']       = sanitize_html_class( $attr['popupAnimation'] );
+		$attr['btnNewTab']            = $attr['btnNewTab'] == true;
+		$attr['searchAjaxEnable']     = $attr['searchAjaxEnable'] == true;
+		$attr['enableSearchPage']     = $attr['enableSearchPage'] == true;
+		$attr['resImageEnable']       = $attr['resImageEnable'] == true;
+		$attr['resAuthEnable']        = $attr['resAuthEnable'] == true;
+		$attr['resDateEnable']        = $attr['resDateEnable'] == true;
+		$attr['resExcerptEnable']     = $attr['resExcerptEnable'] == true;
+		$attr['moreResultsbtn']       = $attr['moreResultsbtn'] == true;
+		$attr['resCatEnable']         = $attr['resCatEnable'] == true;
+		$attr['resExcerptLimit']      = sanitize_html_class( $attr['resExcerptLimit'] );
+		$attr['moreResultPosts']      = sanitize_html_class( $attr['moreResultPosts'] );
+		$attr['searchPopupPosition']  = sanitize_html_class( $attr['searchPopupPosition'] );
+		$attr['searchFormStyle']      = sanitize_html_class( $attr['searchFormStyle'] );
+		$attr['searchPopupIconStyle'] = sanitize_html_class( $attr['searchPopupIconStyle'] );
 
-		if ( $is_active || $is_visible ) {
-			$attr = wp_parse_args( $attr, $this->get_attributes() );
+		$allowed_html_tags              = ultimate_post()->ultp_allowed_html_tags();
+		$attr['windowpopupText']        = wp_kses( $attr['windowpopupText'], $allowed_html_tags );
+		$attr['searchnoresult']         = wp_kses( $attr['searchnoresult'], $allowed_html_tags );
+		$attr['moreResultsText']        = wp_kses( $attr['moreResultsText'], $allowed_html_tags );
+		$attr['searchButtonText']       = wp_kses( $attr['searchButtonText'], $allowed_html_tags );
+		$attr['searchInputPlaceholder'] = wp_kses( $attr['searchInputPlaceholder'], $allowed_html_tags );
 
-			$attr['blockId']              = sanitize_html_class( $attr['blockId'] );
-			$attr['className']            = isset( $attr['className'] ) && $attr['className'] ? preg_replace( '/[^A-Za-z0-9_ -]/', '', $attr['className'] ) : '';
-			$attr['align']                = isset( $attr['align'] ) && $attr['align'] ? preg_replace( '/[^A-Za-z0-9_ -]/', '', $attr['align'] ) : '';
-			$attr['popupAnimation']       = sanitize_html_class( $attr['popupAnimation'] );
-			$attr['btnNewTab']            = $attr['btnNewTab'] == true;
-			$attr['searchAjaxEnable']     = $attr['searchAjaxEnable'] == true;
-			$attr['enableSearchPage']     = $attr['enableSearchPage'] == true;
-			$attr['resImageEnable']       = $attr['resImageEnable'] == true;
-			$attr['resAuthEnable']        = $attr['resAuthEnable'] == true;
-			$attr['resDateEnable']        = $attr['resDateEnable'] == true;
-			$attr['resExcerptEnable']     = $attr['resExcerptEnable'] == true;
-			$attr['moreResultsbtn']       = $attr['moreResultsbtn'] == true;
-			$attr['resCatEnable']         = $attr['resCatEnable'] == true;
-			$attr['resExcerptLimit']      = sanitize_html_class( $attr['resExcerptLimit'] );
-			$attr['moreResultPosts']      = sanitize_html_class( $attr['moreResultPosts'] );
-			$attr['searchPopupPosition']  = sanitize_html_class( $attr['searchPopupPosition'] );
-			$attr['searchFormStyle']      = sanitize_html_class( $attr['searchFormStyle'] );
-			$attr['searchPopupIconStyle'] = sanitize_html_class( $attr['searchPopupIconStyle'] );
-
-			$allowed_html_tags              = ultimate_post()->ultp_allowed_html_tags();
-			$attr['windowpopupText']        = wp_kses( $attr['windowpopupText'], $allowed_html_tags );
-			$attr['searchnoresult']         = wp_kses( $attr['searchnoresult'], $allowed_html_tags );
-			$attr['moreResultsText']        = wp_kses( $attr['moreResultsText'], $allowed_html_tags );
-			$attr['searchButtonText']       = wp_kses( $attr['searchButtonText'], $allowed_html_tags );
-			$attr['searchInputPlaceholder'] = wp_kses( $attr['searchInputPlaceholder'], $allowed_html_tags );
-
-			$data_var       = 'data-searchPostType="' . esc_attr( json_decode( wp_json_encode( $attr['searchPostType'] ) ) ) . '"';
-			$wraper_before .= '<div ' . ( $attr['advanceId'] ? 'id="' . sanitize_html_class( $attr['advanceId'] ) . '" ' : '' ) . ' class="wp-block-ultimate-post-' . $block_name . ' ultp-block-' . sanitize_html_class( $attr['blockId'] ) . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '' . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '">';
-			$wraper_before .= '<div class="ultp-block-wrapper">';
-			$content       .= '<div class="ultp-search-container ultp-search-frontend' . ( $attr['searchPopup'] ? ' ultp-search-animation-' . $attr['popupAnimation'] : '' ) . '"  data-ajax="' . esc_attr( $attr['searchAjaxEnable'] ) . '" data-gosearch="' . esc_attr( $attr['enableSearchPage'] ) . '" data-enablenewtab="' . esc_attr( $attr['btnNewTab'] ) . '" data-blockId="' . esc_attr( $attr['blockId'] ) . '"
+		$data_var       = 'data-searchPostType="' . esc_attr( json_decode( wp_json_encode( $attr['searchPostType'] ) ) ) . '"';
+		$wraper_before .= '<div ' . ( $attr['advanceId'] ? 'id="' . sanitize_html_class( $attr['advanceId'] ) . '" ' : '' ) . ' class="wp-block-ultimate-post-' . $block_name . ' ultp-block-' . sanitize_html_class( $attr['blockId'] ) . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '' . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '">';
+		$wraper_before .= '<div class="ultp-block-wrapper">';
+		$content       .= '<div class="ultp-search-container ultp-search-frontend' . ( $attr['searchPopup'] ? ' ultp-search-animation-' . $attr['popupAnimation'] : '' ) . '"  data-ajax="' . esc_attr( $attr['searchAjaxEnable'] ) . '" data-gosearch="' . esc_attr( $attr['enableSearchPage'] ) . '" data-enablenewtab="' . esc_attr( $attr['btnNewTab'] ) . '" data-blockId="' . esc_attr( $attr['blockId'] ) . '"
                     data-image="' . esc_attr( $attr['resImageEnable'] ) . '"  data-author="' . esc_attr( $attr['resAuthEnable'] ) . '" data-date="' . esc_attr( $attr['resDateEnable'] ) . '" data-excerpt="' . esc_attr( $attr['resExcerptEnable'] ) . '" data-excerptLimit="' . esc_attr( $attr['resExcerptLimit'] ) . '" data-allresult="' . esc_attr( $attr['moreResultsbtn'] ) . '" data-catEnable="' . esc_attr( $attr['resCatEnable'] ) . '"  data-postno="' . esc_attr( $attr['moreResultPosts'] ) . '" ' . ( $attr['searchPopup'] ? 'data-popuptype="' . esc_attr( $attr['popupAnimation'] ) . '" ' : '' ) . ' ' . ( $attr['searchAjaxEnable'] ? 'data-noresultext="' . esc_attr( $attr['searchnoresult'] ) . '" ' : '' ) . ' ' . ( $attr['moreResultsbtn'] ? 'data-viewmoretext="' . esc_attr( $attr['moreResultsText'] ) . '" ' : '' ) . ' data-popupposition="' . esc_attr( $attr['searchPopupPosition'] ) . '" ' . $data_var . '>';
-			if ( $attr['searchPopup'] ) {
-				$content .= $this->renderSearchButton( $attr['searchPopupIconStyle'], $attr['searchBtnText'], $attr['searchBtnIcon'], $attr['searchButtonText'] );
-			}
-			if ( $attr['searchPopup'] == false ) {
-				$content .= $this->renderSearchForm( $attr['searchFormStyle'], $attr['searchBtnText'], $attr['searchBtnIcon'], $attr );
-			}
-			if ( $attr['searchPopup'] ) {
-				$popup_content .= '<div class="ultp-search-canvas">';
-
-				$popup_content .= '<div class="ultp-canvas-header">';
-				if ( $attr['windowpopupHeading'] ) {
-					$popup_content .= '<div class="ultp-search-popup-heading">' . $attr['windowpopupText'] . '</div>';
-				}
-				$popup_content .= $this->renderSearchForm( $attr['searchFormStyle'], $attr['searchBtnText'], $attr['searchBtnIcon'], $attr );
-				$popup_content .= '</div>';
-				$popup_content .= '<div class="ultp-popupclose-icon">' . ultimate_post()->get_svg_icon( 'close_line' ) . '</div>';
-				$popup_content .= '</div>';
-				if ( $attr['popupAnimation'] == 'popup' ) {
-					$content .= $popup_content;
-				} else {
-					$content .= $popup_content;
-				}
-			}
-			$content      .= '</div>';
-			$wraper_after .= '</div>';
-			$wraper_after .= '</div>';
-			return $wraper_before . $content . $wraper_after;
+		if ( $attr['searchPopup'] ) {
+			$content .= $this->renderSearchButton( $attr['searchPopupIconStyle'], $attr['searchBtnText'], $attr['searchBtnIcon'], $attr['searchButtonText'] );
 		}
+		if ( $attr['searchPopup'] == false ) {
+			$content .= $this->renderSearchForm( $attr['searchFormStyle'], $attr['searchBtnText'], $attr['searchBtnIcon'], $attr );
+		}
+		if ( $attr['searchPopup'] ) {
+			$popup_content .= '<div class="ultp-search-canvas">';
+
+			$popup_content .= '<div class="ultp-canvas-header">';
+			if ( $attr['windowpopupHeading'] ) {
+				$popup_content .= '<div class="ultp-search-popup-heading">' . $attr['windowpopupText'] . '</div>';
+			}
+			$popup_content .= $this->renderSearchForm( $attr['searchFormStyle'], $attr['searchBtnText'], $attr['searchBtnIcon'], $attr );
+			$popup_content .= '</div>';
+			$popup_content .= '<div class="ultp-popupclose-icon">' . ultimate_post()->get_svg_icon( 'close_line' ) . '</div>';
+			$popup_content .= '</div>';
+			if ( $attr['popupAnimation'] == 'popup' ) {
+				$content .= $popup_content;
+			} else {
+				$content .= $popup_content;
+			}
+		}
+		$content      .= '</div>';
+		$wraper_after .= '</div>';
+		$wraper_after .= '</div>';
+		return $wraper_before . $content . $wraper_after;
 	}
 
 	public function renderSearchButton( $style, $textEnable = true, $iconEnable = true, $searchButtonText = '' ) {

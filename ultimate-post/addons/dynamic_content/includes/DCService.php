@@ -94,12 +94,7 @@ final class DCService {
 	public static function get_dc_content_for_image( $post_id, $content_src ) {
 		$res = '';
 
-		if (
-			str_starts_with( $content_src, 'acf_' ) ||
-			str_starts_with( $content_src, 'cmeta_' ) ||
-			str_starts_with( $content_src, 'pods_' ) ||
-			str_starts_with( $content_src, 'mb_' )
-		) {
+		if ( self::is_field_key( $content_src ) ) {
 			$res = self::get_field_value( $post_id, $content_src );
 		} elseif (
 			str_starts_with( $content_src, 'link_' )
@@ -141,12 +136,7 @@ final class DCService {
 			$text = self::get_post_info( $post_id, $content_src );
 		} elseif ( str_starts_with( $content_src, 'a_' ) ) {
 			$text = self::get_author_info( $post_id, $content_src );
-		} elseif (
-			str_starts_with( $content_src, 'acf_' ) ||
-			str_starts_with( $content_src, 'cmeta_' ) ||
-			str_starts_with( $content_src, 'pods_' ) ||
-			str_starts_with( $content_src, 'mb_' )
-		) {
+		} elseif ( self::is_field_key( $content_src ) ) {
 			$text = self::get_field_value( $post_id, $content_src );
 		}
 
@@ -214,12 +204,7 @@ final class DCService {
 					$text = self::get_post_info( $dcField['postId'], $dcField['contentSrc'] );
 				} elseif ( str_starts_with( $dcField['contentSrc'], 'a_' ) ) {
 					$text = self::get_author_info( $dcField['postId'], $dcField['contentSrc'] );
-				} elseif (
-					str_starts_with( $dcField['contentSrc'], 'acf_' ) ||
-					str_starts_with( $dcField['contentSrc'], 'cmeta_' ) ||
-					str_starts_with( $dcField['contentSrc'], 'pods_' ) ||
-					str_starts_with( $dcField['contentSrc'], 'mb_' )
-				) {
+				} elseif ( self::is_field_key( $dcField['contentSrc'] ) ) {
 					$text = self::get_field_value( $dcField['postId'], $dcField['contentSrc'] );
 				}
 
@@ -272,41 +257,17 @@ final class DCService {
 			}
 		}
 
-		if ( self::check_prefix_and_remove( $meta_key, 'cmeta_' ) ) {
+		if ( self::check_prefix( $meta_key, 'cmeta_' ) ) {
 			if ( empty( $post_id ) ) {
 				return '';
 			}
-			return get_post_meta( $post_id, $meta_key, true );
+			return get_post_meta( $post_id, self::maybe_remove_prefix( $meta_key, 'cmeta_' ), true );
 		}
 
-		if ( self::check_prefix_and_remove( $meta_key, 'acf_' ) ) {
-			if ( class_exists( 'ACF' ) ) {
-				if ( ! empty( $post_id ) ) {
-					$value = get_field( $meta_key, $post_id );
-					return self::extract_acf_value( $value );
-				} else {
-					return get_field( $meta_key, false );
-				}
-			}
-		}
-
-		if ( self::check_prefix_and_remove( $meta_key, 'mb_' ) ) {
-			if ( function_exists( 'rwmb_get_value' ) ) {
-				$value = rwmb_get_value( $meta_key, array(), $post_id );
-				return self::extract_mb_value( $value, $meta_key, $post_id );
-			}
-		}
-
-		if ( self::check_prefix_and_remove( $meta_key, 'pods_' ) ) {
-			if ( function_exists( 'pods' ) ) {
-				$pods = pods( get_post_type( $post_id ), $post_id );
-				if ( is_object( $pods ) && method_exists( $pods, 'exists' ) &&
-					$pods->exists() && method_exists( $pods, 'field' )
-				) {
-					$value = $pods->field( $meta_key );
-					return self::extract_pods_value( $value );
-				}
-			}
+		// Other field sources are answered by PostX Pro.
+		$value = apply_filters( 'ultp_dc_field_value', null, $meta_key, $post_id );
+		if ( null !== $value ) {
+			return $value;
 		}
 
 		return '';
@@ -456,11 +417,7 @@ final class DCService {
 			}
 		}
 
-		if ( self::check_prefix( $key, 'acf_' ) ||
-			self::check_prefix( $key, 'mb_' ) ||
-			self::check_prefix( $key, 'cmeta_' ) ||
-			self::check_prefix( $key, 'pods_' )
-		) {
+		if ( self::is_field_key( $key ) ) {
 			$res = self::get_field_value( $post_id, $key );
 		} else {
 			$author_id = absint( get_post_field( 'post_author', $post_id ) );
@@ -574,9 +531,11 @@ final class DCService {
 		if ( is_singular() ) {
 			$title = get_the_title();
 		} elseif ( is_search() ) {
+			/* translators: %s: Search query. */
 			$title = sprintf( esc_html__( 'Search Results for: %s', 'ultimate-post' ), get_search_query() );
 
 			if ( get_query_var( 'paged' ) ) {
+				/* translators: %s: Page number. */
 				$title .= sprintf( esc_html__( '&nbsp;&ndash; Page %s', 'ultimate-post' ), get_query_var( 'paged' ) );
 			}
 		} elseif ( is_category() ) {
@@ -605,131 +564,6 @@ final class DCService {
 	}
 
 	/**
-	 * Formats ACF value based upon data type
-	 *
-	 * @since 4.1.1
-	 *
-	 * @param array|string $value ACF Meta Value.
-	 *
-	 * @return string
-	 */
-	private static function extract_acf_value( $value ) {
-		if ( is_array( $value ) ) {
-			$image_id = absint( $value['id'] );
-			$value    = wp_get_attachment_image_src( $image_id );
-		} elseif ( is_numeric( $value ) ) {
-			return $value;
-		}
-
-		return $value;
-	}
-
-	/**
-	 * Formats Pods value based upon data type
-	 *
-	 * @since 4.1.1
-	 *
-	 * @param array|string $value Pods Meta Value.
-	 *
-	 * @return string
-	 */
-	private static function extract_pods_value( $value ) {
-		if ( is_array( $value ) ) {
-
-			// Single image
-			if ( isset( $value['guid'] ) ) {
-				return $value['guid'];
-			}
-
-			// Multi image
-			if ( isset( $value[0]['guid'] ) ) {
-				return $value[0]['guid'];
-			}
-
-			// Repeater
-			if ( isset( $value[0] ) &&
-				( is_string( $value[0] ) || is_numeric( $value[0] ) || is_bool( $value[0] ) )
-			) {
-				return $value[0];
-			}
-
-			return '';
-		}
-
-		return $value;
-	}
-
-	/**
-	 * Formats Meta Box value based upon data type
-	 *
-	 * @since 4.1.1
-	 *
-	 * @param array|string $value
-	 *
-	 * @return string
-	 */
-	private static function extract_mb_value( $custom_fields, $meta_key, $post_id ) {
-
-		if ( ! is_array( $custom_fields ) ) {
-			return strval( $custom_fields );
-		}
-
-		$field_data = rwmb_get_field_settings( $meta_key, array(), $post_id );
-
-		// Process the first element if its an array
-		foreach ( $custom_fields as $field ) {
-			$field_type  = $field_data['type'];
-			$field_value = '';
-
-			switch ( $field_type ) {
-				case 'checkbox':
-				case 'radio':
-					$field_value = isset( $field['checked'] ) ? 'checked' : '';
-					break;
-				case 'select':
-				case 'radio_list':
-				case 'checkbox_list':
-				case 'taxonomy':
-				case 'taxonomy_advanced':
-				case 'post':
-				case 'post_advanced':
-				case 'post_checkbox_list':
-				case 'post_select':
-					$field_value = isset( $field['selected'] ) ? $field['selected'] : '';
-					break;
-				case 'file':
-				case 'file_input':
-				case 'file_advanced':
-				case 'file_upload':
-					$field_value = isset( $field['url'] ) ? $field['url'] : $field['id'];
-					break;
-				case 'single_image':
-					$field_value = wp_get_attachment_image_url( $custom_fields['ID'], 'full' );
-					break;
-				case 'image':
-				case 'image_advanced':
-				case 'image_upload':
-				case 'plupload_image':
-				case 'thickbox_image':
-					$field_value = wp_get_attachment_image_url( $field['ID'], 'full' );
-					break;
-				case 'date':
-				case 'datetime':
-				case 'time':
-					$field_value = $field['date'];
-					break;
-				default:
-					$field_value = $field['value'];
-					break;
-			}
-
-			return $field_value;
-		}
-
-		return '';
-	}
-
-	/**
 	 * Properly decodes HTML chars from string
 	 *
 	 * @param mixed $str
@@ -754,6 +588,24 @@ final class DCService {
 		return join( ' ', array_slice( explode( ' ', $str ), 0, $limit ) );
 	}
 
+	/**
+	 * Whether a dynamic content key is a custom field
+	 *
+	 * Plain custom metas (`cmeta_`) are handled here; other field sources are answered by PostX Pro.
+	 *
+	 * @param string $key Key with its prefix.
+	 * @return bool
+	 */
+	private static function is_field_key( $key ) {
+		if ( ! is_string( $key ) || '' === $key ) {
+			return false;
+		}
+		if ( self::check_prefix( $key, 'cmeta_' ) ) {
+			return true;
+		}
+		return (bool) apply_filters( 'ultp_dc_is_field_key', false, $key );
+	}
+
 	private static function check_prefix( $key, $prefix ) {
 		return substr( $key, 0, strlen( $prefix ) ) === $prefix;
 	}
@@ -763,13 +615,5 @@ final class DCService {
 			return substr( $key, strlen( $prefix ) );
 		}
 		return $key;
-	}
-
-	private static function check_prefix_and_remove( &$key, $prefix ) {
-		if ( substr( $key, 0, strlen( $prefix ) ) === $prefix ) {
-			$key = substr( $key, strlen( $prefix ) );
-			return true;
-		}
-		return false;
 	}
 }

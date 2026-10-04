@@ -12,14 +12,33 @@ class Xpo {
 	/**
 	 * Gets license key
 	 *
+	 * PostX Pro answers through the `ultp_license_key` filter.
+	 *
 	 * @return string
 	 */
 	public static function get_lc_key() {
-		return get_option( 'edd_ultp_license_key', '' );
+		if ( has_filter( 'ultp_license_key' ) ) {
+			$key = apply_filters( 'ultp_license_key', '' );
+			return is_string( $key ) ? $key : '';
+		}
+		if ( self::is_pro_before_1_9_0() ) {
+			return get_option( 'edd_ultp_license_key', '' );
+		}
+		return '';
 	}
 
+	/**
+	 * Checks if the license is active.
+	 *
+	 * PostX Pro answers through the `ultp_license_active` filter.
+	 *
+	 * @return bool
+	 */
 	public static function is_lc_active() {
-		if ( defined( 'ULTP_PRO_VER' ) ) {
+		if ( has_filter( 'ultp_license_active' ) ) {
+			return true === apply_filters( 'ultp_license_active', false );
+		}
+		if ( self::is_pro_before_1_9_0() ) {
 			$license_data = get_option( 'edd_ultp_license_data', array() );
 			return isset( $license_data['license'] ) && 'valid' === $license_data['license'];
 		}
@@ -27,17 +46,34 @@ class Xpo {
 	}
 
 	/**
+	 * Checks if PostX Pro is a version before 1.9.0.
+	 *
+	 * Those versions hook none of the filters PostX now asks PostX Pro through (the
+	 * `ultp_license_*` ones, `ultp_template_request_body`, `ultp_seo_meta_excerpt`),
+	 * so PostX still does that work itself for them.
+	 *
+	 * @return bool
+	 */
+	public static function is_pro_before_1_9_0() {
+		return defined( 'ULTP_PRO_VER' ) && version_compare( ULTP_PRO_VER, '1.9.0', '<' );
+	}
+
+	/**
 	 * Checks if the license has expired.
 	 *
-	 * This method checks the stored license data in the WordPress options table
-	 * and determines if the license status is set to 'expired'. It returns `true`
-	 * if the license is expired, otherwise `false`.
+	 * PostX Pro answers through the `ultp_license_expired` filter.
 	 *
 	 * @return bool True if the license is expired, otherwise false.
 	 */
 	public static function is_lc_expired() {
-		$license_data = get_option( 'edd_ultp_license_data', array() );
-		return isset( $license_data['license'] ) && 'expired' === $license_data['license'];
+		if ( has_filter( 'ultp_license_expired' ) ) {
+			return true === apply_filters( 'ultp_license_expired', false );
+		}
+		if ( self::is_pro_before_1_9_0() ) {
+			$license_data = get_option( 'edd_ultp_license_data', array() );
+			return isset( $license_data['license'] ) && 'expired' === $license_data['license'];
+		}
+		return false;
 	}
 
 	/**
@@ -325,7 +361,7 @@ class Xpo {
 		$hash          = $params['hash'] ?? 'pricing';
 		$custom_config = $params['config'] ?? null;
 
-		$parsed_url = parse_url( $base_url );
+		$parsed_url = wp_parse_url( $base_url );
 		$scheme     = $parsed_url['scheme'] ?? 'https';
 		$host       = $parsed_url['host'] ?? '';
 		$path       = $parsed_url['path'] ?? '';
@@ -497,7 +533,7 @@ class Xpo {
 		);
 
 		if ( is_wp_error( $api ) ) {
-			wp_die( $api ); //phpcs:ignore
+			wp_die( esc_html( $api->get_error_message() ) );
 		}
 		$title          = '';
 		$url            = '';

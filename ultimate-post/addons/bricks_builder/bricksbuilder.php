@@ -44,9 +44,9 @@ class PostX_Bricks_Integration extends \Bricks\Element {
 		$current_url = isset( $_SERVER['REQUEST_URI'] ) ? esc_url( $_SERVER['REQUEST_URI'] ) : ''; //phpcs:ignore
 
 		// Render element HTML
-		echo "<div {$this->render_attributes( '_root' )}>"; //phpcs:ignore
+		echo "<div {$this->render_attributes( '_root' )}>"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Bricks API attribute string; the only attribute this element sets is the fixed class bricks-postx-wrapper.
 		if ( $id ) {
-			echo ultimate_post()->build_css_for_inline_print( $id, true );
+			echo ultimate_post()->build_css_for_inline_print( $id, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- <style> tag from build_css_for_inline_print(): integer post ID, CSS passed through wp_strip_all_tags().
 			echo '<div class="ultp-shortcode" data-postid="' . esc_attr( $id ) . '">';
 				$args      = array(
 					'p'         => $id,
@@ -62,6 +62,7 @@ class PostX_Bricks_Integration extends \Bricks\Element {
 				}
 				echo '</div>';
 		} elseif ( strpos( 'bricks=run', $current_url ) !== false || strpos( $current_url, 'bricks/v1/render_element' ) !== false ) {
+				/* translators: %s: Menu path to the Saved Templates screen. */
 				echo '<p style="text-align:center; font-size: 20px;">' . sprintf( esc_html__( 'Pick a Template from your saved ones. Or create a template from: %s.', 'ultimate-post' ) . ' ', '<strong><i>' . esc_html__( 'Dashboard > PostX > Saved Templates', 'ultimate-post' ) . '</i></strong>' ) . '</p>';
 		}
 		echo '</div>';

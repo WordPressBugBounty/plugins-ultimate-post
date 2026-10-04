@@ -301,7 +301,7 @@ class Styles {
 	 */
 	public function disable_google_font_callback() {
 		if ( ! ( isset( $_REQUEST['wpnonce'] ) &&
-			wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['wpnonce'] ) ), 'ultp-nonce' ) )
+			wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['wpnonce'] ) ), 'ultp-admin-nonce' ) )
 		) {
 			return;
 		}
@@ -416,7 +416,7 @@ class Styles {
 
 		$rootCSS     = ( isset( $ultpPresetColors['rootCSS'] ) && $ultpPresetColors['rootCSS'] ) ? $ultpPresetColors['rootCSS'] : ':root { --postx_preset_Base_1_color: #f4f4ff; --postx_preset_Base_2_color: #dddff8; --postx_preset_Base_3_color: #B4B4D6; --postx_preset_Primary_color: #3323f0; --postx_preset_Secondary_color: #4a5fff; --postx_preset_Tertiary_color: #FFFFFF; --postx_preset_Contrast_3_color: #545472; --postx_preset_Contrast_2_color: #262657; --postx_preset_Contrast_1_color: #10102e; --postx_preset_Over_Primary_color: #ffffff;  }';
 		$savedDLMode = ( isset( $global['enableDark'] ) && $global['enableDark'] ) ? 'ultpdark' : 'ultplight';
-		$localDLMode = isset( $_COOKIE['ultplocalDLMode'] ) ? $_COOKIE['ultplocalDLMode'] : $savedDLMode;
+		$localDLMode = isset( $_COOKIE['ultplocalDLMode'] ) ? sanitize_key( wp_unslash( $_COOKIE['ultplocalDLMode'] ) ) : $savedDLMode;
 
 		if ( $localDLMode == 'ultplight' && $savedDLMode == 'ultpdark' ) {
 			$rootCSS = $this->handle_dark_light_color_switcher( $rootCSS );
@@ -454,7 +454,7 @@ class Styles {
 	public function enqueue_postx_block_css() {
 		$this->postx_global_css_callback();
 		if ( apply_filters( 'postx_common_script', false ) ||
-			isset( $_GET['et_fb'] )       // divi theme issue.
+			isset( $_GET['et_fb'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only Divi editor detection (divi theme issue).
 		) {
 			ultimate_post()->register_scripts_common();
 		}
@@ -557,9 +557,15 @@ class Styles {
 					}
 				}
 			}
+			/**
+			 * Whether the Mega Menu block renders. PostX Pro provides it; PostX alone does not.
+			 *
+			 * @param bool  $render Whether to output the block. False by default.
+			 * @param array $block  The block being rendered.
+			 */
 			if (
-				$block['blockName'] == 'ultimate-post/mega-menu' &&
-				! ultimate_post()->is_lc_active()
+				'ultimate-post/mega-menu' === $block['blockName'] &&
+				! apply_filters( 'ultp_mega_menu_render', false, $block )
 			) {
 				return '';
 			}
@@ -638,7 +644,7 @@ class Styles {
 			}
 			if ( $css ) {
 				ultimate_post()->register_scripts_common();
-				wp_register_style( "ultp-post-{$post_id}", false );
+				wp_register_style( "ultp-post-{$post_id}", false, array(), ULTP_VER );
 				wp_enqueue_style( "ultp-post-{$post_id}" );
 				wp_add_inline_style( "ultp-post-{$post_id}", $css );
 			}
@@ -656,7 +662,7 @@ class Styles {
 		$parts = get_posts(
 			array(
 				'post_type'      => 'wp_template_part',
-				'meta_query'     => array(
+				'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Finds the few template parts that use PostX blocks; sites have only a handful of wp_template_part posts.
 					array(
 						'key'   => '_ultp_active',
 						'value' => 'yes',

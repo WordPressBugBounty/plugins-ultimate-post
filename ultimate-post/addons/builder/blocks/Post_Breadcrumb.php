@@ -70,7 +70,7 @@ class Post_Breadcrumb {
                     if ($attr['bcrumbSeparator']) {
                         $separator .= '<li class="ultp-breadcrumb-separator"></li>';
                     }
-                    $content .= '<li><a href="'.esc_url(home_url('/')).'">'.__( strlen($attr['bcrumbRootText']) > 0 ? $attr['bcrumbRootText'] : 'Home', 'ultimate-post').'</a></li>';
+                    $content .= '<li><a href="'.esc_url(home_url('/')).'">'.( strlen($attr['bcrumbRootText']) > 0 && 'Home' !== $attr['bcrumbRootText'] ? $attr['bcrumbRootText'] : __( 'Home', 'ultimate-post' ) ).'</a></li>';
                     if (is_category() || is_single() || is_tag() || is_author()) {
                         if (is_category()) {
                             $cat = get_queried_object();

@@ -40,8 +40,10 @@ class Blocks {
 
 		add_action( 'wp_ajax_ultp_share_count', array( $this, 'ultp_share_count_callback' ) ); // share Count save .
 		add_action( 'wp_ajax_nopriv_ultp_share_count', array( $this, 'ultp_share_count_callback' ) ); // share Count save .
-		add_action( 'wp_ajax_ultp_get_nonce', array( $this, 'ultp_get_nonce_callback' ) ); // Nonce Generating Callback
-		add_action( 'wp_ajax_nopriv_ultp_get_nonce', array( $this, 'ultp_get_nonce_callback' ) ); // Nonce Generating Callback
+		// Public by design — see ultp_get_nonce_callback() for why, and for what
+		// 'ultp-public-nonce' does and does not protect.
+		add_action( 'wp_ajax_ultp_get_nonce', array( $this, 'ultp_get_nonce_callback' ) );
+		add_action( 'wp_ajax_nopriv_ultp_get_nonce', array( $this, 'ultp_get_nonce_callback' ) );
 	}
 
 	/**
@@ -228,7 +230,7 @@ class Blocks {
 						$value['attrs']['queryExclude'] = wp_json_encode( $queryArr );
 					}
 					$attr = array_merge( $attr, $value['attrs'] );
-                    echo  $objectBlock->content($attr, true); //phpcs:ignore
+					echo $objectBlock->content( $attr, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Block render output; each block escapes its own markup.
 					die();
 				}
 			}
@@ -247,7 +249,7 @@ class Blocks {
 	 * @return STRING The AJAX response.
 	 */
 	public function ultp_next_prev_callback() {
-		if ( ! ( isset( $_REQUEST['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['wpnonce'] ) ), 'ultp-nonce' ) ) ) {
+		if ( ! $this->verify_public_nonce() ) {
 			return;
 		}
 
@@ -341,7 +343,7 @@ class Blocks {
 	 * @return STRING The AJAX response.
 	 */
 	public function ultp_filter_callback() {
-		if ( ! ( isset( $_REQUEST['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['wpnonce'] ) ), 'ultp-nonce' ) ) ) {
+		if ( ! $this->verify_public_nonce() ) {
 			return;
 		}
 
@@ -381,7 +383,7 @@ class Blocks {
 	 * @return STRING The AJAX response.
 	 */
 	public function ultp_adv_filter_callback() {
-		if ( ! ( isset( $_REQUEST['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['wpnonce'] ) ), 'ultp-nonce' ) ) ) {
+		if ( ! $this->verify_public_nonce() ) {
 			return;
 		}
 
@@ -439,7 +441,7 @@ class Blocks {
 	 * @return STRING The AJAX response.
 	 */
 	public function ultp_pagination_callback() {
-		if ( ! ( isset( $_REQUEST['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['wpnonce'] ) ), 'ultp-nonce' ) ) ) {
+		if ( ! $this->verify_public_nonce() ) {
 			return;
 		}
 
@@ -512,7 +514,7 @@ class Blocks {
 	 * @return void
 	 */
 	public function ultp_share_count_callback() {
-		if ( ! ( isset( $_REQUEST['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['wpnonce'] ) ), 'ultp-nonce' ) ) ) {
+		if ( ! $this->verify_public_nonce() ) {
 			return;
 		}
 
@@ -749,7 +751,55 @@ class Blocks {
 	}
 
 	/**
-	 * Nonce Generation Callback
+	 * Verify the front-end AJAX nonce, or end the request.
+	 *
+	 * Fails with a machine-readable 403 rather than the bare `return` these
+	 * handlers used to do. A bare return lets admin-ajax emit "0" at HTTP 200,
+	 * which the client cannot tell apart from a real response — ultp_next_prev's
+	 * success handler treated that "0" as markup and rendered it into the block.
+	 *
+	 * The 'ultp_invalid_nonce' code is a contract with assets/js/ultp.js: on
+	 * seeing it the client discards its cached nonce, fetches a fresh one and
+	 * retries once. A nonce legitimately expires while a tab is open (WordPress
+	 * nonces last 12-24h, tabs last longer), so this is a routine condition and
+	 * not an attack signal. See ultp_get_nonce_callback() for what this nonce
+	 * does and does not protect.
+	 *
+	 * @since v.5.1.0
+	 *
+	 * @return BOOLEAN True when the nonce is valid; otherwise the request ends.
+	 */
+	private function verify_public_nonce() {
+		if ( isset( $_REQUEST['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['wpnonce'] ) ), 'ultp-public-nonce' ) ) {
+			return true;
+		}
+
+		wp_send_json_error(
+			array(
+				'code'    => 'ultp_invalid_nonce',
+				'message' => __( 'Security token expired. Please try again.', 'ultimate-post' ),
+			),
+			403
+		);
+
+		return false;
+	}
+
+	/**
+	 * Vends the front-end AJAX nonce.
+	 *
+	 * Public by design: full-page caching makes a nonce embedded in HTML stale for
+	 * most visitors, so front-end blocks fetch one at runtime instead.
+	 *
+	 * SECURITY: because this endpoint is public, 'ultp-public-nonce' is NOT a CSRF
+	 * control on the front end — anyone can request one. It is a request-shape
+	 * check only. Any nopriv handler that changes state MUST carry its own
+	 * authorisation; see ultp_share_count_callback() for the pattern (post status,
+	 * capability and rate-limit checks, none of which depend on the nonce).
+	 *
+	 * This endpoint vends the PUBLIC nonce only. Admin routes verify the separate
+	 * 'ultp-admin-nonce', which is never vended here and is always paired with a
+	 * capability check. Do not merge the two.
 	 *
 	 * @since v.5.0.6
 	 *
@@ -759,7 +809,7 @@ class Blocks {
 		nocache_headers();
 		wp_send_json_success(
 			array(
-				'nonce' => wp_create_nonce( 'ultp-nonce' ),
+				'nonce' => wp_create_nonce( 'ultp-public-nonce' ),
 			)
 		);
 	}

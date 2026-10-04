@@ -427,7 +427,7 @@ class REST_API {
 	 */
 	public function ultp_route_post_data( $prams ) {
 		$prams = $prams->get_params();
-		if ( ! ( isset( $prams['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $prams['wpnonce'] ) ), 'ultp-nonce' ) ) ) {
+		if ( ! ( isset( $prams['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $prams['wpnonce'] ) ), 'ultp-admin-nonce' ) ) ) {
 			die();
 		}
 		$data    = array();
@@ -515,7 +515,7 @@ class REST_API {
 							'slug'  => $val->slug,
 							'name'  => $val->name,
 							'url'   => get_term_link( $val->term_id ),
-							'color' => get_term_meta( $val->term_id, 'ultp_category_color', true ),
+							'color' => ultimate_post()->get_term_color( $val ),
 						);
 					}
 					$var['category'] = $v;
@@ -536,7 +536,7 @@ class REST_API {
 	 * @return ARRAY | Response Taxonomy List as Array
 	 */
 	public function ultp_route_common_data( $prams ) {
-		if ( ! ( isset( $_REQUEST['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['wpnonce'] ) ), 'ultp-nonce' ) ) ) {
+		if ( ! ( isset( $_REQUEST['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['wpnonce'] ) ), 'ultp-admin-nonce' ) ) ) {
 			return rest_ensure_response( array() );
 		}
 
@@ -588,7 +588,7 @@ class REST_API {
 	 */
 	public function ultp_route_taxonomy_info_data( $prams ) {
 		$prams = $prams->get_params();
-		if ( ! ( isset( $prams['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $prams['wpnonce'] ) ), 'ultp-nonce' ) ) ) {
+		if ( ! ( isset( $prams['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $prams['wpnonce'] ) ), 'ultp-admin-nonce' ) ) ) {
 			return rest_ensure_response( array() );
 		}
 		$taxValue       = isset( $prams['taxValue'] ) ? ultimate_post()->ultp_rest_sanitize_params( $prams['taxValue'] ) : '';

@@ -180,7 +180,7 @@ class Post_Slider_1 {
 
 	public function content( $attr, $noAjax ) {
 		$attr = wp_parse_args( $attr, $this->get_attributes() );
-		global $unique_ID;
+		global $ultp_unique_ID;
 
 		if ( ! $noAjax ) {
 			$paged         = is_front_page() ? get_query_var( 'page' ) : get_query_var( 'paged' );
@@ -238,7 +238,7 @@ class Post_Slider_1 {
 				include ULTP_PATH . 'blocks/template/data.php';
 
 				if ( $attr['queryUnique'] ) {
-					$unique_ID[ $attr['queryUnique'] ][] = $post_id;
+					$ultp_unique_ID[ $attr['queryUnique'] ][] = $post_id;
 				}
 
 				$post_loop .= '<' . $attr['contentTag'] . ' class="ultp-block-item post-id-' . $post_id . '">';
@@ -333,7 +333,7 @@ class Post_Slider_1 {
 				$wraper_after .= '</div>'; // .ultp-block-wrapper
 			$wraper_after     .= '</div>'; // .wp-block-ultimate-post-post-slider-1
 
-			wp_reset_query();
+			wp_reset_postdata();
 		} else {
 			$wraper_before .= ultimate_post()->get_no_result_found_html( $attr['notFoundMessage'] );
 		}

@@ -111,44 +111,44 @@ class Functions {
 		switch ( $prams['queryQuick'] ) {
 			case 'related_posts':
 				global $post;
-				$p_id = isset( $post->ID ) && $post->ID ? $post->ID : ( isset( $_POST['postId'] ) ? sanitize_text_field( $_POST['postId'] ) : '' ); //phpcs:disable WordPress.Security.NonceVerification.Missing
+				$p_id = isset( $post->ID ) && $post->ID ? $post->ID : ( isset( $_POST['postId'] ) ? sanitize_text_field( wp_unslash( $_POST['postId'] ) ) : '' ); //phpcs:disable WordPress.Security.NonceVerification.Missing
 				if ( $p_id ) {
-					$args['post__not_in'] = array( $p_id );
+					$args['post__not_in'] = array( $p_id ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- Needed by the block query; the user picks these filters.
 				}
 				break;
 			case 'related_tag':
 				global $post;
-				$p_id = isset( $post->ID ) && $post->ID ? $post->ID : ( isset( $prams['current_post'] ) && $prams['current_post'] ? $prams['current_post'] : ( isset( $_POST['postId'] ) ? sanitize_text_field( $_POST['postId'] ) : '' ) ); //phpcs:disable ordPress.Security.NonceVerification.Missing
+				$p_id = isset( $post->ID ) && $post->ID ? $post->ID : ( isset( $prams['current_post'] ) && $prams['current_post'] ? $prams['current_post'] : ( isset( $_POST['postId'] ) ? sanitize_text_field( wp_unslash( $_POST['postId'] ) ) : '' ) ); //phpcs:disable ordPress.Security.NonceVerification.Missing
 				if ( $p_id ) {
-					$args['tax_query']    = array(
+					$args['tax_query']    = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Needed by the block query; the user picks these filters.
 						array(
 							'taxonomy' => 'post_tag',
 							'terms'    => $this->get_terms_id( $p_id, 'post_tag' ),
 							'field'    => 'term_id',
 						),
 					);
-					$args['post__not_in'] = array( $p_id );
+					$args['post__not_in'] = array( $p_id ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- Needed by the block query; the user picks these filters.
 				}
 				break;
 			case 'related_category':
 				global $post;
-				$p_id = isset( $post->ID ) && $post->ID ? $post->ID : ( isset( $prams['current_post'] ) && $prams['current_post'] ? $prams['current_post'] : ( isset( $_POST['postId'] ) ? sanitize_text_field( $_POST['postId'] ) : '' ) ); //phpcs:disable ordPress.Security.NonceVerification.Missing
+				$p_id = isset( $post->ID ) && $post->ID ? $post->ID : ( isset( $prams['current_post'] ) && $prams['current_post'] ? $prams['current_post'] : ( isset( $_POST['postId'] ) ? sanitize_text_field( wp_unslash( $_POST['postId'] ) ) : '' ) ); //phpcs:disable ordPress.Security.NonceVerification.Missing
 				if ( $p_id ) {
-					$args['tax_query']    = array(
+					$args['tax_query']    = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Needed by the block query; the user picks these filters.
 						array(
 							'taxonomy' => 'category',
 							'terms'    => $this->get_terms_id( $p_id, 'category' ),
 							'field'    => 'term_id',
 						),
 					);
-					$args['post__not_in'] = array( $p_id );
+					$args['post__not_in'] = array( $p_id ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- Needed by the block query; the user picks these filters.
 				}
 				break;
 			case 'related_cat_tag':
 				global $post;
-				$p_id = isset( $post->ID ) && $post->ID ? $post->ID : ( isset( $prams['current_post'] ) && $prams['current_post'] ? $prams['current_post'] : ( isset( $_POST['postId'] ) ? sanitize_text_field( $_POST['postId'] ) : '' ) ); //phpcs:disable ordPress.Security.NonceVerification.Missing
+				$p_id = isset( $post->ID ) && $post->ID ? $post->ID : ( isset( $prams['current_post'] ) && $prams['current_post'] ? $prams['current_post'] : ( isset( $_POST['postId'] ) ? sanitize_text_field( wp_unslash( $_POST['postId'] ) ) : '' ) ); //phpcs:disable ordPress.Security.NonceVerification.Missing
 				if ( $p_id ) {
-					$args['tax_query']    = array(
+					$args['tax_query']    = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Needed by the block query; the user picks these filters.
 						array(
 							'taxonomy' => 'post_tag',
 							'terms'    => $this->get_terms_id( $p_id, 'post_tag' ),
@@ -160,7 +160,7 @@ class Functions {
 							'field'    => 'term_id',
 						),
 					);
-					$args['post__not_in'] = array( $p_id );
+					$args['post__not_in'] = array( $p_id ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- Needed by the block query; the user picks these filters.
 				}
 				break;
 			case 'sticky_posts':
@@ -232,25 +232,25 @@ class Functions {
 				$args['date_query'] = array( array( 'after' => '1 month ago' ) );
 				break;
 			case 'popular_post_1_day_view':
-				$args['meta_key']   = '__post_views_count';
+				$args['meta_key']   = '__post_views_count'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Needed by the block query; the user picks these filters.
 				$args['orderby']    = 'meta_value_num';
 				$args['order']      = 'DESC';
 				$args['date_query'] = array( array( 'after' => '1 day ago' ) );
 				break;
 			case 'popular_post_7_days_view':
-				$args['meta_key']   = '__post_views_count';
+				$args['meta_key']   = '__post_views_count'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Needed by the block query; the user picks these filters.
 				$args['orderby']    = 'meta_value_num';
 				$args['order']      = 'DESC';
 				$args['date_query'] = array( array( 'after' => '1 week ago' ) );
 				break;
 			case 'popular_post_30_days_view':
-				$args['meta_key']   = '__post_views_count';
+				$args['meta_key']   = '__post_views_count'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Needed by the block query; the user picks these filters.
 				$args['orderby']    = 'meta_value_num';
 				$args['order']      = 'DESC';
 				$args['date_query'] = array( array( 'after' => '1 month ago' ) );
 				break;
 			case 'popular_post_all_times_view':
-				$args['meta_key'] = '__post_views_count';
+				$args['meta_key'] = '__post_views_count'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Needed by the block query; the user picks these filters.
 				$args['orderby']  = 'meta_value_num';
 				$args['order']    = 'DESC';
 				break;
@@ -342,6 +342,9 @@ class Functions {
 	 * @return STRING|ARRAY.
 	 */
 	public function build_css_for_inline_print( $post_id, $call_common = true ) {
+		// Callers pass a template ID from builder settings or shortcode attributes; it goes into
+		// a file path and the id attribute below, so only a positive integer is accepted.
+		$post_id = absint( $post_id );
 		if ( $post_id ) {
 			$upload_dir_url     = wp_get_upload_dir();
 			$upload_css_dir_url = trailingslashit( $upload_dir_url['basedir'] );
@@ -399,6 +402,26 @@ class Functions {
 
 
 	/**
+	 * Settings that are safe to send to the browser.
+	 *
+	 * Same as get_setting() without secrets: the OpenAI key is replaced by
+	 * `chatgpt_has_key`. Use this for anything localized to a script. get_setting()
+	 * itself is unchanged, because callers write its result back to the option.
+	 *
+	 * @return array
+	 */
+	public function get_client_settings() {
+		$data = $this->get_setting();
+		if ( ! is_array( $data ) ) {
+			return array();
+		}
+		$data['chatgpt_has_key'] = ! empty( $data['chatgpt_secret_key'] );
+		unset( $data['chatgpt_secret_key'] );
+		return $data;
+	}
+
+
+	/**
 	 * Set Option Settings
 	 *
 	 * @since v.1.0.0
@@ -436,7 +459,7 @@ class Functions {
 		$alt          = $alt ? ' alt="' . $alt . '" ' : '';
 		$lazy_data    = $lazy ? ' loading="lazy"' : '';
 
-		$dlMode = isset( $_COOKIE['ultplocalDLMode'] ) ? $_COOKIE['ultplocalDLMode'] : ultimate_post()->get_dl_mode();
+		$dlMode = isset( $_COOKIE['ultplocalDLMode'] ) ? sanitize_key( wp_unslash( $_COOKIE['ultplocalDLMode'] ) ) : ultimate_post()->get_dl_mode();
 
 		$lightMode = $hasDarkImage ? ( $dlMode == 'ultplight' ? '' : 'inactive ' ) : '';
 		$darkMode  = $hasDarkImage ? ( $hasDarkImage && $dlMode == 'ultpdark' ? '' : ' inactive ' ) : '';
@@ -483,7 +506,7 @@ class Functions {
 	 */
 	public function excerpt( $post_id, $limit = 55 ) {
 		$content = preg_replace( '/(\[postx_template[\s\w="]*)]/m', '', get_the_excerpt( $post_id ) ); // Remove postx_template shortcode form Content
-		return apply_filters( 'the_excerpt', wp_trim_words( $content, $limit ) );
+		return apply_filters( 'the_excerpt', wp_trim_words( $content, $limit ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core hook.
 	}
 
 	/**
@@ -691,7 +714,7 @@ class Functions {
 				if ( isset( $str[0] ) ) {
 					if ( $str[0] == 'taxonomy' ) {
 						if ( isset( $str[1] ) && isset( $str[2] ) ) {
-							$archive_query['tax_query'] = array(
+							$archive_query['tax_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Needed by the block query; the user picks these filters.
 								array(
 									'taxonomy' => $str[1],
 									'field'    => 'slug',
@@ -733,8 +756,8 @@ class Functions {
 			$archive_query['posts_per_page'] = isset( $attr['queryNumber'] ) ? $attr['queryNumber'] : 1;
 			$archive_query['paged']          = isset( $attr['paged'] ) ? $attr['paged'] : 1;
 
-			$archive_query['paged'] = ! wp_doing_ajax() && isset( $_GET[ $attr['blockId'] . '_page' ] ) && is_numeric( $_GET[ $attr['blockId'] . '_page' ] ) ?
-				intval( $_GET[ $attr['blockId'] . '_page' ] ) :
+			$archive_query['paged'] = ! wp_doing_ajax() && isset( $_GET[ $attr['blockId'] . '_page' ] ) && is_numeric( $_GET[ $attr['blockId'] . '_page' ] ) ? // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page number for block pagination.
+				intval( $_GET[ $attr['blockId'] . '_page' ] ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page number for block pagination.
 				$archive_query['paged'];
 
 			if ( isset( $attr['queryOffset'] ) && $attr['queryOffset'] ) {
@@ -755,21 +778,21 @@ class Functions {
 			if ( isset( $attr['queryExclude'] ) && $attr['queryExclude'] ) {
 				$_exclude = ( substr( $attr['queryExclude'], 0, 1 ) === '[' ) ? $this->get_value( json_decode( $attr['queryExclude'] ) ) : explode( ',', $attr['queryExclude'] );
 				if ( is_array( $_exclude ) && count( $_exclude ) ) {
-					$archive_query['post__not_in'] = isset( $archive_query['post__not_in'] ) ? array_merge( $archive_query['post__not_in'], $_exclude ) : $_exclude;
+					$archive_query['post__not_in'] = isset( $archive_query['post__not_in'] ) ? array_merge( $archive_query['post__not_in'], $_exclude ) : $_exclude; // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- Needed by the block query; the user picks these filters.
 				}
 			}
 
 			if ( isset( $attr['querySticky'] ) && $attr['querySticky'] ) {
 				if ( filter_var( $attr['querySticky'], FILTER_VALIDATE_BOOLEAN ) ) {
 					$sticky                        = get_option( 'sticky_posts', array() );
-					$archive_query['post__not_in'] = isset( $archive_query['post__not_in'] ) ? array_merge( $archive_query['post__not_in'], $sticky ) : $sticky;
+					$archive_query['post__not_in'] = isset( $archive_query['post__not_in'] ) ? array_merge( $archive_query['post__not_in'], $sticky ) : $sticky; // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- Needed by the block query; the user picks these filters.
 				}
 			}
 			// ===============
 			if ( isset( $attr['queryUnique'] ) && $attr['queryUnique'] ) {
-				global $unique_ID;
-				if ( isset( $unique_ID[ $attr['queryUnique'] ] ) ) {
-					$archive_query['post__not_in'] = isset( $archive_query['post__not_in'] ) ? array_merge( $archive_query['post__not_in'], $unique_ID[ $attr['queryUnique'] ] ) : $unique_ID[ $attr['queryUnique'] ];
+				global $ultp_unique_ID;
+				if ( isset( $ultp_unique_ID[ $attr['queryUnique'] ] ) ) {
+					$archive_query['post__not_in'] = isset( $archive_query['post__not_in'] ) ? array_merge( $archive_query['post__not_in'], $ultp_unique_ID[ $attr['queryUnique'] ] ) : $ultp_unique_ID[ $attr['queryUnique'] ]; // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- Needed by the block query; the user picks these filters.
 				}
 			}
 			// ===============
@@ -809,7 +832,7 @@ class Functions {
 									'terms'    => $val,
 								);
 							}
-							$archive_query['tax_query'] = $final;
+							$archive_query['tax_query'] = $final; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Needed by the block query; the user picks these filters.
 						}
 					}
 				}
@@ -817,8 +840,8 @@ class Functions {
 			// from v.3.0.7 - for search builder
 			if ( is_search() ) {
 				$archive_query['orderby'] = 'relevance';
-				if ( isset( $_GET['ultp_exclude'] ) ) {       // Added support for search block exclude
-					$ultp_exclude = json_decode( stripslashes( $_GET['ultp_exclude'] ), true );
+				if ( isset( $_GET['ultp_exclude'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only public search filter (search block exclude).
+					$ultp_exclude = json_decode( sanitize_text_field( wp_unslash( $_GET['ultp_exclude'] ) ), true ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only public search filter.
 					if ( is_array( $ultp_exclude ) ) {
 						$all_types                  = get_post_types( array( 'public' => true ), 'names' );
 						$post_type                  = array_diff( $all_types, $ultp_exclude );
@@ -849,9 +872,9 @@ class Functions {
 		$paged = isset( $attr['paged'] ) ? $attr['paged'] : 1;
 		$paged = ! wp_doing_ajax() &&
 			isset( $attr['blockId'] ) &&
-			isset( $_GET[ $attr['blockId'] . '_page' ] ) &&
-			is_numeric( $_GET[ $attr['blockId'] . '_page' ] ) ?
-			intval( $_GET[ $attr['blockId'] . '_page' ] ) :
+			isset( $_GET[ $attr['blockId'] . '_page' ] ) && // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page number for block pagination.
+			is_numeric( $_GET[ $attr['blockId'] . '_page' ] ) ? // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page number for block pagination.
+			intval( $_GET[ $attr['blockId'] . '_page' ] ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page number for block pagination.
 			$paged;
 
 		$query_args = array(
@@ -906,7 +929,7 @@ class Functions {
 
 		if ( isset( $attr['queryOrderBy'] ) && isset( $attr['metaKey'] ) ) {
 			if ( $attr['queryOrderBy'] == 'meta_value_num' ) {
-				$query_args['meta_key'] = $attr['metaKey'];
+				$query_args['meta_key'] = $attr['metaKey']; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Needed by the block query; the user picks these filters.
 			}
 		}
 
@@ -924,7 +947,7 @@ class Functions {
 			if ( isset( $attr['queryTaxValue'] ) ) {
 				$var = $this->getFilterQueryArgs( $attr );
 				if ( isset( $var ) && count( $var ) > 1 ) {
-					$query_args['tax_query'] = $var;
+					$query_args['tax_query'] = $var; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Needed by the block query; the user picks these filters.
 				}
 			}
 		}
@@ -954,13 +977,13 @@ class Functions {
 				}
 
 				if ( is_array( $query_args ) && array_key_exists( 'tax_query', $query_args ) ) {
-					$query_args['tax_query']   = array(
+					$query_args['tax_query']   = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Needed by the block query; the user picks these filters.
 						'relation' => 'AND',
 						$query_args['tax_query'],
 					);
 					$query_args['tax_query'][] = $final;
 				} else {
-					$query_args['tax_query'] = $final;
+					$query_args['tax_query'] = $final; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Needed by the block query; the user picks these filters.
 				}
 			}
 		}
@@ -968,19 +991,19 @@ class Functions {
 		if ( isset( $attr['queryExclude'] ) && $attr['queryExclude'] ) {
 			$_exclude = ( substr( $attr['queryExclude'], 0, 1 ) === '[' ) ? $this->get_value( json_decode( $attr['queryExclude'] ) ) : explode( ',', $attr['queryExclude'] );
 			if ( is_array( $_exclude ) && count( $_exclude ) ) {
-				$query_args['post__not_in'] = isset( $query_args['post__not_in'] ) ? array_merge( $query_args['post__not_in'], $_exclude ) : $_exclude;
+				$query_args['post__not_in'] = isset( $query_args['post__not_in'] ) ? array_merge( $query_args['post__not_in'], $_exclude ) : $_exclude; // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- Needed by the block query; the user picks these filters.
 			}
 		}
 
 		if ( isset( $attr['queryUnique'] ) && $attr['queryUnique'] ) {
-			global $unique_ID;
-			if ( isset( $unique_ID[ $attr['queryUnique'] ] ) ) {
-				$query_args['post__not_in'] = isset( $query_args['post__not_in'] ) ? array_merge( $query_args['post__not_in'], $unique_ID[ $attr['queryUnique'] ] ) : $unique_ID[ $attr['queryUnique'] ];
+			global $ultp_unique_ID;
+			if ( isset( $ultp_unique_ID[ $attr['queryUnique'] ] ) ) {
+				$query_args['post__not_in'] = isset( $query_args['post__not_in'] ) ? array_merge( $query_args['post__not_in'], $ultp_unique_ID[ $attr['queryUnique'] ] ) : $ultp_unique_ID[ $attr['queryUnique'] ]; // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- Needed by the block query; the user picks these filters.
 			}
 		}
 		// exclude current post from Post blocks // v.2.9.6.
 		if ( is_single() && get_the_ID() ) {
-			$query_args['post__not_in'] = isset( $query_args['post__not_in'] ) ? array_merge( $query_args['post__not_in'], array( get_the_ID() ) ) : array( get_the_ID() );
+			$query_args['post__not_in'] = isset( $query_args['post__not_in'] ) ? array_merge( $query_args['post__not_in'], array( get_the_ID() ) ) : array( get_the_ID() ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- Needed by the block query; the user picks these filters.
 		}
 
 		if ( isset( $attr['queryQuick'] ) ) {
@@ -1008,7 +1031,7 @@ class Functions {
 		if ( isset( $attr['querySticky'] ) && $attr['querySticky'] ) {
 			if ( filter_var( $attr['querySticky'], FILTER_VALIDATE_BOOLEAN ) ) {
 				$sticky                     = get_option( 'sticky_posts', array() );
-				$query_args['post__not_in'] = isset( $query_args['post__not_in'] ) ? array_merge( $query_args['post__not_in'], $sticky ) : $sticky;
+				$query_args['post__not_in'] = isset( $query_args['post__not_in'] ) ? array_merge( $query_args['post__not_in'], $sticky ) : $sticky; // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- Needed by the block query; the user picks these filters.
 			}
 		}
 
@@ -1017,7 +1040,7 @@ class Functions {
 				if ( isset( $attr['checkFilter'] ) && isset( $attr['queryTax'] ) && isset( $attr['queryTaxValue'] ) ) {
 					$var = $this->getFilterQueryArgs( $attr );
 					if ( isset( $var ) && count( $var ) > 1 ) {
-						$query_args['tax_query'] = $var;
+						$query_args['tax_query'] = $var; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Needed by the block query; the user picks these filters.
 					}
 				} elseif ( isset( $attr['filterType'] ) && isset( $attr['filterValue'] ) ) {
 					$filterValue = strlen( $attr['filterValue'] ) > 2 ? $attr['filterValue'] : array();
@@ -1032,7 +1055,7 @@ class Functions {
 								// 'operator' => '=',
 							);
 						}
-						$query_args['tax_query'] = $final;
+						$query_args['tax_query'] = $final; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Needed by the block query; the user picks these filters.
 					}
 				}
 			}
@@ -1112,11 +1135,11 @@ class Functions {
 			}
 
 			if ( $is_valid ) {
-				$query_args['tax_query'] = $tax_query;
+				$query_args['tax_query'] = $tax_query; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Needed by the block query; the user picks these filters.
 			}
 		}
 		// $query_args['test'] = is_array( $post_type ) && ! empty( $post_type ) ? $post_type : ( 'archiveBuilder' === $post_type ? 'post' : ( is_string( $post_type ) ? json_decode( $post_type ) : $post_type ) );
-		$query_args['wpnonce'] = wp_create_nonce( 'ultp-nonce' );
+		$query_args['wpnonce'] = wp_create_nonce( 'ultp-public-nonce' );
 
 		return apply_filters( 'ultp_frontend_query', $query_args );
 	}
@@ -1138,7 +1161,7 @@ class Functions {
 				for ( $x = count( $offset_post ); $x > count( $offset_post ) - $queryOffset; $x-- ) {
 					$offset[] = $offset_post[ $x - 1 ]->ID;
 				}
-				$query['post__not_in'] = $offset;
+				$query['post__not_in'] = $offset; // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- Needed by the block query; the user picks these filters.
 			}
 		} else {
 			$query['offset'] = isset( $queryOffset ) ? $queryOffset : 0;
@@ -1260,9 +1283,9 @@ class Functions {
 		$paged     = $paged ? $paged : 1;
 
 		$paged = ! wp_doing_ajax() &&
-			isset( $_GET[ $blockId . '_page' ] ) &&
-			is_numeric( $_GET[ $blockId . '_page' ] ) ?
-			intval( $_GET[ $blockId . '_page' ] ) : $paged;
+			isset( $_GET[ $blockId . '_page' ] ) && // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page number for block pagination.
+			is_numeric( $_GET[ $blockId . '_page' ] ) ? // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page number for block pagination.
+			intval( $_GET[ $blockId . '_page' ] ) : $paged; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page number for block pagination.
 
 		if ( $pages == '' ) {
 			global $wp_query;
@@ -1389,7 +1412,7 @@ class Functions {
 	 */
 	public function get_tax_data( $terms ) {
 		$temp         = array();
-		$thumbnail_id = get_term_meta( $terms->term_id, 'ultp_category_image', true );
+		$thumbnail_id = $this->get_term_image_id( $terms );
 		$image_src    = array();
 		if ( $thumbnail_id ) {
 			$image_sizes = ultimate_post()->get_image_size();
@@ -1401,14 +1424,64 @@ class Functions {
 			}
 		}
 		$temp['url']          = get_term_link( $terms );
-		$temp['thumbnail_id'] = $thumbnail_id;
+		$temp['thumbnail_id'] = $thumbnail_id ? (string) $thumbnail_id : '';
 		$temp['name']         = $terms->name;
 		$temp['desc']         = $terms->description;
 		$temp['count']        = $terms->count;
 		$temp['image']        = $image_src;
-		$color                = get_term_meta( $terms->term_id, 'ultp_category_color', true );
+		$color                = $this->get_term_color( $terms );
 		$temp['color']        = $color ? $color : '#037fff';
 		return $temp;
+	}
+
+	/**
+	 * Image attachment ID of a term, set by PostX Pro's Taxonomy Image & Color add-on.
+	 *
+	 * PostX Pro answers `ultp_term_image_id` only while the add-on is on.
+	 *
+	 * @param WP_Term $term Term.
+	 * @return INT Attachment ID, or 0.
+	 */
+	public function get_term_image_id( $term ) {
+		// PostX Pro before 1.9.0 does not hook the filter below.
+		if ( Xpo::is_pro_before_1_9_0() ) {
+			return absint( $this->get_term_meta_from_old_pro( $term, 'image' ) );
+		}
+		return absint( apply_filters( 'ultp_term_image_id', 0, $term ) );
+	}
+
+	/**
+	 * Colour of a term, set by PostX Pro's Taxonomy Image & Color add-on.
+	 *
+	 * PostX Pro answers `ultp_term_color` only while the add-on is on.
+	 *
+	 * @param WP_Term $term Term.
+	 * @return STRING Colour, or ''.
+	 */
+	public function get_term_color( $term ) {
+		// PostX Pro before 1.9.0 does not hook the filter below.
+		if ( Xpo::is_pro_before_1_9_0() ) {
+			return (string) $this->get_term_meta_from_old_pro( $term, 'color' );
+		}
+		$color = apply_filters( 'ultp_term_color', '', $term );
+		return is_string( $color ) ? $color : '';
+	}
+
+	/**
+	 * Get a term's image or colour as PostX Pro before 1.9.0 expects
+	 *
+	 * Newer versions provide them through the `ultp_term_image_id` and `ultp_term_color` filters.
+	 *
+	 * @param WP_Term $term Term.
+	 * @param STRING  $type 'image' or 'color'.
+	 * @return STRING
+	 */
+	private function get_term_meta_from_old_pro( $term, $type ) {
+		if ( ! $term instanceof \WP_Term ) {
+			return '';
+		}
+		$value = get_term_meta( $term->term_id, 'image' === $type ? 'ultp_category_image' : 'ultp_category_color', true );
+		return is_scalar( $value ) ? (string) $value : '';
 	}
 
 	public function get_category_data( $catSlug, $number = 40, $type = '', $tax_slug = 'category', $archiveBuilder = '' ) {
@@ -1598,9 +1671,10 @@ class Functions {
 	 */
 	public function filter_html( $filterText = '', $filterType = '', $filterValue = '[]', $filterMobileText = '...', $filterMobile = true ) {
 		$html  = '';
-		$html .= '<ul ' . ( $filterMobile ? 'class="ultp-flex-menu"' : '' ) . ' data-name="' . ( $filterMobileText ? $filterMobileText : '&nbsp;' ) . '">';
+		$html .= '<ul ' . ( $filterMobile ? 'class="ultp-flex-menu"' : '' ) . ' data-name="' . ( $filterMobileText ? esc_attr( $filterMobileText ) : '&nbsp;' ) . '">';
 		$cat   = $this->taxonomy( $filterType );
 		if ( $filterText ) {
+			// Already passed through wp_kses() by the caller, which keeps the allowed HTML.
 			$html .= '<li class="filter-item"><a class="filter-active" data-taxonomy="" href="#">' . $filterText . '</a></li>';
 		}
 		if ( $filterValue ) {
@@ -1609,7 +1683,10 @@ class Functions {
 			if ( is_array( $filterValue ) && count( $filterValue ) ) {
 				foreach ( $filterValue as $val ) {
 					$val   = isset( $val->value ) ? $val->value : $val;
-					$html .= '<li class="filter-item"><a data-taxonomy="' . $val . '" href="#">' . ( isset( $cat[ $val ] ) ? $cat[ $val ] : $val ) . '</a></li>';
+					if ( ! is_scalar( $val ) ) {
+						continue;
+					}
+					$html .= '<li class="filter-item"><a data-taxonomy="' . esc_attr( $val ) . '" href="#">' . esc_html( isset( $cat[ $val ] ) ? $cat[ $val ] : $val ) . '</a></li>';
 				}
 			}
 		}
@@ -1630,24 +1707,54 @@ class Functions {
 
 
 	/**
-	 * Check if a pro feature is visible based on license expiration date.
+	 * Get the request body for the template service
 	 *
-	 * @since v.2.4.2
-	 * @param STRING $date Date to compare with license expiration.
-	 * @return BOOL True if the pro feature is visible, false otherwise.
+	 * PostX Pro adds its license key through the `ultp_template_request_body` filter.
+	 *
+	 * @param ARRAY  $body    Request body.
+	 * @param STRING $context Which request it is: builder_premade, starter_posts, starter_content or single_page.
+	 * @return ARRAY
 	 */
-	public function is_pro_feature_visible( $date ) {
-		if ( function_exists( 'ultimate_post_pro' ) ) {
-			$license_data = get_option( 'edd_ultp_license_data' );
-			if ( isset( $license_data['expires'] ) ) {
-				$expires = $license_data['expires'];
-				if ( 'lifetime' === $expires ) {
-					return true;
-				}
-				return strtotime( $date ) < strtotime( $expires );
-			}
-			return true;
+	public function get_template_request_body( $body, $context ) {
+		$filtered = apply_filters( 'ultp_template_request_body', $body, $context );
+		$body     = is_array( $filtered ) ? $filtered : $body;
+
+		// PostX Pro before 1.9.0 does not hook the filter above, so its license key is added here.
+		if ( ! isset( $body['license'] ) && Xpo::is_pro_before_1_9_0() ) {
+			$body['license'] = Xpo::get_lc_key();
 		}
+
+		return $body;
+	}
+
+
+	/**
+	 * Validate if the template service URL is from an allowed domain (SSRF protection).
+	 *
+	 * @param STRING $url The URL to validate.
+	 * @return BOOL True if allowed, false otherwise.
+	 */
+	public function is_allowed_template_endpoint( $url ) {
+		$allowed_domains = array(
+			'postxkit.wpxpo.com',
+		);
+
+		$parsed_url = wp_parse_url( $url );
+		if ( ! $parsed_url || empty( $parsed_url['host'] ) ) {
+			return false;
+		}
+
+		$host = strtolower( $parsed_url['host'] );
+
+		foreach ( $allowed_domains as $domain ) {
+			$domain = strtolower( $domain );
+
+			// Exact match OR valid subdomain
+			if ( $host === $domain || substr( $host, - ( strlen( $domain ) + 1 ) ) === '.' . $domain ) {
+				return true;
+			}
+		}
+
 		return false;
 	}
 
@@ -1664,19 +1771,13 @@ class Functions {
 	public function get_excerpt( $post_id = 0, $show_seo_meta = 0, $show_full_excerpt = 0, $excerpt_limit = 55 ) {
 		$html = '';
 		if ( $show_seo_meta ) {
-			$str = '';
-			if ( function_exists( 'ultimate_post_pro' ) ) {
-				if ( ultimate_post()->get_setting( 'ultp_yoast' ) == 'true' ) {
-					$str = method_exists( ultimate_post_pro(), 'get_yoast_meta' ) ? ultimate_post_pro()->get_yoast_meta( $post_id ) : '';
-				} elseif ( ultimate_post()->get_setting( 'ultp_rankmath' ) == 'true' ) {
-					$str = method_exists( ultimate_post_pro(), 'get_rankmath_meta' ) ? ultimate_post_pro()->get_rankmath_meta( $post_id ) : '';
-				} elseif ( ultimate_post()->get_setting( 'ultp_aioseo' ) == 'true' ) {
-					$str = method_exists( ultimate_post_pro(), 'get_aioseo_meta' ) ? ultimate_post_pro()->get_aioseo_meta( $post_id ) : '';
-				} elseif ( ultimate_post()->get_setting( 'ultp_seopress' ) == 'true' ) {
-					$str = method_exists( ultimate_post_pro(), 'get_seopress_meta' ) ? ultimate_post_pro()->get_seopress_meta( $post_id ) : '';
-				} elseif ( ultimate_post()->get_setting( 'ultp_squirrly' ) == 'true' ) {
-					$str = method_exists( ultimate_post_pro(), 'get_squirrly_meta' ) ? ultimate_post_pro()->get_squirrly_meta( $post_id ) : '';
-				}
+			// PostX Pro answers this filter with the description from the active SEO plugin.
+			$str = apply_filters( 'ultp_seo_meta_excerpt', '', $post_id );
+			$str = is_string( $str ) ? $str : '';
+
+			// PostX Pro before 1.9.0 does not hook the filter above.
+			if ( ! $str && Xpo::is_pro_before_1_9_0() ) {
+				$str = $this->get_seo_meta_from_old_pro( $post_id );
 			}
 			$html = $str ? $str : ultimate_post()->excerpt( $post_id, $excerpt_limit );
 		} elseif ( $show_full_excerpt == 0 ) {
@@ -1685,6 +1786,32 @@ class Functions {
 			$html = get_the_excerpt();
 		}
 		return $html;
+	}
+
+	/**
+	 * Get the SEO meta description from PostX Pro before 1.9.0
+	 *
+	 * Newer versions provide it through the `ultp_seo_meta_excerpt` filter.
+	 *
+	 * @param INT $post_id Post ID.
+	 * @return STRING
+	 */
+	private function get_seo_meta_from_old_pro( $post_id ) {
+		$str = '';
+		if ( function_exists( 'ultimate_post_pro' ) ) {
+			if ( ultimate_post()->get_setting( 'ultp_yoast' ) == 'true' ) {
+				$str = method_exists( ultimate_post_pro(), 'get_yoast_meta' ) ? ultimate_post_pro()->get_yoast_meta( $post_id ) : '';
+			} elseif ( ultimate_post()->get_setting( 'ultp_rankmath' ) == 'true' ) {
+				$str = method_exists( ultimate_post_pro(), 'get_rankmath_meta' ) ? ultimate_post_pro()->get_rankmath_meta( $post_id ) : '';
+			} elseif ( ultimate_post()->get_setting( 'ultp_aioseo' ) == 'true' ) {
+				$str = method_exists( ultimate_post_pro(), 'get_aioseo_meta' ) ? ultimate_post_pro()->get_aioseo_meta( $post_id ) : '';
+			} elseif ( ultimate_post()->get_setting( 'ultp_seopress' ) == 'true' ) {
+				$str = method_exists( ultimate_post_pro(), 'get_seopress_meta' ) ? ultimate_post_pro()->get_seopress_meta( $post_id ) : '';
+			} elseif ( ultimate_post()->get_setting( 'ultp_squirrly' ) == 'true' ) {
+				$str = method_exists( ultimate_post_pro(), 'get_squirrly_meta' ) ? ultimate_post_pro()->get_squirrly_meta( $post_id ) : '';
+			}
+		}
+		return $str;
 	}
 
 	/**
@@ -1839,7 +1966,7 @@ class Functions {
 		$content_post = get_post( $post_id );
 		$content      = $content_post->post_content;
 		if ( $builder_type == 'divi' || $builder_type == 'elementor' ) {
-			$content = apply_filters( 'the_content', $content );
+			$content = apply_filters( 'the_content', $content ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core hook.
 		} else {
 			global $wp_embed;
 			$content = $wp_embed->autoembed( $content );
@@ -1849,7 +1976,7 @@ class Functions {
 		$content = str_replace( ']]>', ']]&gt;', $content );
 		$content = preg_replace( '%<p>&nbsp;\s*</p>%', '', $content );
 		$content = preg_replace( '/^(?:<br\s*\/?>\s*)+/', '', $content );
-		echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
+		echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Rendered post content (do_blocks/the_content), the same markup core prints for the post.
 	}
 
 	/**
@@ -2269,10 +2396,9 @@ class Functions {
 				'ultp_data_frontend',
 				array(
 					'url'             => ULTP_URL,
-					'active'          => ultimate_post()->is_lc_active(),
 					'ultpSavedDLMode' => ultimate_post()->get_dl_mode(),
 					'ajax'            => admin_url( 'admin-ajax.php' ),
-					'security'        => wp_create_nonce( 'ultp-nonce' ),
+					'security'        => wp_create_nonce( 'ultp-public-nonce' ),
 					'home_url'        => home_url(),
 					'dark_logo'       => get_option( 'ultp_site_dark_logo', false ),
 				)

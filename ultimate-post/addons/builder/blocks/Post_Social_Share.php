@@ -124,7 +124,7 @@ class Post_Social_Share {
 		$wrapper_before = $wrapper_after = $wrapper_content = '';
 
 		$post_id     = get_the_ID();
-		$post_link   = home_url( esc_url_raw( $_SERVER['REQUEST_URI'] ) ); //phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+		$post_link   = home_url( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) ); //phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 		$total_share = get_post_meta( $post_id, 'share_count', true );
 		$total_share = $total_share ? $total_share : 0;
 

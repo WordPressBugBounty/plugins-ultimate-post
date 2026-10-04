@@ -24,7 +24,7 @@ class Shortcode {
 
 		if ( $id ) {
 			if ( class_exists( 'SitePress' ) ) {
-				$id = apply_filters( 'wpml_object_id', $id, 'ultp_templates', true );
+				$id = apply_filters( 'wpml_object_id', $id, 'ultp_templates', true ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WPML hook.
 			}
 			$content      = '';
 			$pre_content  = '';
@@ -39,12 +39,12 @@ class Shortcode {
 						)
 					);
 					// Breakdance builder support for its shortcode render
-					$current_url = isset( $_SERVER['REQUEST_URI'] ) ? esc_url( $_SERVER['REQUEST_URI'] ) : '';
-					if ( ! empty( $_GET['_breakdance_doing_ajax'] ) ||
+					$current_url = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+					if ( ! empty( $_GET['_breakdance_doing_ajax'] ) || // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only Breakdance editor detection.
 						strpos( $current_url, 'bricks/v1/render_element' ) !== false
 					) {
 
-						if ( ! empty( $_GET['_breakdance_doing_ajax'] ) && get_template() == 'bricks' ) {
+						if ( ! empty( $_GET['_breakdance_doing_ajax'] ) && get_template() == 'bricks' ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only Breakdance editor detection.
 							get_header();
 						}
 						$pre_content .= ultimate_post()->build_css_for_inline_print( $id, true );

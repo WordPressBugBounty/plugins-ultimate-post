@@ -5,9 +5,40 @@
 	// *************************************
 	// Nonce Generation for AJAX
 	// *************************************
-	async function getUltpNonce() {
-		const nonce = sessionStorage.getItem("ultp_nonce");
-		if (nonce) return nonce;
+	const ULTP_NONCE_KEY = "ultp_public_nonce";
+
+	// sessionStorage throws outright when the browser blocks site data (private
+	// windows, cookie-blocking extensions). Guard every access so that degrades to
+	// "fetch a nonce per request" instead of breaking the block entirely.
+	function readStoredNonce() {
+		try {
+			return sessionStorage.getItem(ULTP_NONCE_KEY);
+		} catch (e) {
+			return null;
+		}
+	}
+
+	function storeNonce(value) {
+		try {
+			sessionStorage.setItem(ULTP_NONCE_KEY, value);
+		} catch (e) {
+			// Not cacheable in this browser; every call refetches instead.
+		}
+	}
+
+	function clearStoredNonce() {
+		try {
+			sessionStorage.removeItem(ULTP_NONCE_KEY);
+		} catch (e) {
+			// Nothing was stored, so nothing to clear.
+		}
+	}
+
+	async function getUltpNonce(forceRefresh = false) {
+		if (!forceRefresh) {
+			const nonce = readStoredNonce();
+			if (nonce) return nonce;
+		}
 
 		try {
 			const response = await $.ajax({
@@ -17,7 +48,7 @@
 			});
 
 			if (response?.success && response?.data?.nonce) {
-				sessionStorage.setItem("ultp_nonce", response.data.nonce);
+				storeNonce(response.data.nonce);
 				return response.data.nonce;
 			}
 
@@ -30,6 +61,97 @@
 			console.log("Nonce Not Generating Properly");
 			return null;
 		}
+	}
+
+	// A front-end nonce goes stale in normal use: WordPress nonces last 12-24h and
+	// a tab can stay open longer, a full-page cache can serve HTML carrying a nonce
+	// minted for an earlier visitor, and a plugin update can change the action name
+	// under a tab that is already open. All three look identical from here, and
+	// before this existed all three broke the block with no way back short of a
+	// reload. PHP marks exactly this case with ultp_invalid_nonce.
+	function isExpiredNonce(xhr) {
+		return (
+			xhr?.status === 403 &&
+			xhr?.responseJSON?.data?.code === "ultp_invalid_nonce"
+		);
+	}
+
+	/**
+	 * $.ajax for the nonce-guarded front-end endpoints.
+	 *
+	 * Takes the same options as $.ajax plus `nonce`, the value to try first, and
+	 * injects it as `wpnonce`. On an expired-nonce 403 it discards the cached
+	 * nonce, fetches a fresh one and replays the request once. The retry is
+	 * invisible to the caller: `success` runs only for the attempt that worked,
+	 * and `complete`/`error` are suppressed on an attempt that is being retried,
+	 * so loading states are not torn down half way.
+	 */
+	function ultpAjax(options) {
+		const {
+			nonce: initialNonce,
+			data = {},
+			success,
+			error,
+			complete,
+			...rest
+		} = options;
+
+		let retried = false;
+
+		function fail(xhr, ...args) {
+			if (typeof error === "function") error.call(this, xhr, ...args);
+			if (typeof complete === "function") complete.call(this, xhr, ...args);
+		}
+
+		function send(nonce) {
+			// Set per attempt, not per call: it must not leak into the retry.
+			let retrying = false;
+
+			$.ajax({
+				...rest,
+				data: { ...data, wpnonce: nonce },
+				success,
+				error(xhr, ...args) {
+					if (!retried && isExpiredNonce(xhr)) {
+						retried = true;
+						retrying = true;
+						clearStoredNonce();
+						getUltpNonce(true).then((fresh) => {
+							if (fresh) {
+								send(fresh);
+							} else {
+								fail.call(this, xhr, ...args);
+							}
+						});
+						return;
+					}
+					if (typeof error === "function") error.call(this, xhr, ...args);
+				},
+				complete(xhr, ...args) {
+					if (retrying) return;
+					if (typeof complete === "function") complete.call(this, xhr, ...args);
+				},
+			});
+		}
+
+		// Prefer a nonce fetched live over whatever the caller passed. A caller's
+		// nonce comes either from page HTML, which a full-page cache can serve
+		// stale, or from a value captured once at init and reused for the life of
+		// the page (UltpInfiniteScroll does this). Reading storage first costs
+		// nothing and stops those callers replaying a known-dead nonce forever.
+		const storedNonce = readStoredNonce();
+		if (storedNonce || initialNonce) {
+			send(storedNonce || initialNonce);
+			return;
+		}
+
+		getUltpNonce().then((nonce) => {
+			if (nonce) {
+				send(nonce);
+			} else {
+				fail({ status: 0, statusText: "no nonce", responseText: "" });
+			}
+		});
 	}
 
 	// *************************************
@@ -67,14 +189,14 @@
 			let count = $(this)
 				.parents(".ultp-post-share-item-inner-block")
 				.attr("count");
-			$.ajax({
+			ultpAjax({
 				url: ultp_data_frontend.ajax,
 				type: "POST",
+				nonce: ultp_data_frontend.security,
 				data: {
 					action: "ultp_share_count",
 					shareCount: count,
 					postId: id,
-					wpnonce: ultp_data_frontend.security,
 				},
 				error: function (xhr) {
 					console.log(
@@ -324,9 +446,10 @@
 			advFilterData.adv_sort = parents.data("filter-adv-sort") || "";
 		}
 
-		$.ajax({
+		ultpAjax({
 			url: ultp_data_frontend.ajax,
 			type: "POST",
+			nonce: ultp_data_frontend.security,
 			data: {
 				action: "ultp_next_prev",
 				paged: paged,
@@ -342,8 +465,6 @@
 				ultpCurrentUniquePosts: ultpCurrentUniquePosts || [],
 
 				...advFilterData,
-
-				wpnonce: ultp_data_frontend.security,
 			},
 			beforeSend: function () {
 				if (blockWrapper.length < 1 && postBlock.length > 0) {
@@ -464,9 +585,10 @@
 			advFilterData.adv_sort = that.data("filter-adv-sort") || "";
 		}
 
-		$.ajax({
+		ultpAjax({
 			url: ultp_data_frontend.ajax,
 			type: "POST",
+			nonce: ultp_data_frontend.security,
 			data: {
 				action: "ultp_next_prev",
 				paged: paged,
@@ -482,8 +604,6 @@
 				ultpCurrentUniquePosts: ultpCurrentUniquePosts || [],
 
 				...advFilterData,
-
-				wpnonce: ultp_data_frontend.security,
 			},
 			beforeSend: function () {
 				parents.addClass("ultp-loading-active");
@@ -596,9 +716,10 @@
 			);
 
 			if (parents.data("blockid")) {
-				$.ajax({
+				ultpAjax({
 					url: ultp_data_frontend.ajax,
 					type: "POST",
+					nonce: ultpNonce,
 					data: {
 						action: "ultp_filter",
 						taxtype: parents.data("taxtype"),
@@ -609,7 +730,6 @@
 						widgetBlockId: widgetBlockId,
 						ultpUniqueIds: ultpUniqueIds || [],
 						ultpCurrentUniquePosts: ultpCurrentUniquePosts || [],
-						wpnonce: ultpNonce,
 					},
 					beforeSend: function () {
 						wrap.addClass("ultp-loading-active");
@@ -834,9 +954,10 @@
 		// 	...advFilterData,
 		// });
 
-		$.ajax({
+		ultpAjax({
 			url: ultp_data_frontend.ajax,
 			type: "POST",
+			nonce: ultpNonce,
 			data: {
 				exclude,
 				action: "ultp_pagination",
@@ -849,7 +970,6 @@
 				ultpUniqueIds: ultpUniqueIds || [],
 				ultpCurrentUniquePosts: ultpCurrentUniquePosts || [],
 				filterType: filterType || "",
-				wpnonce: ultpNonce,
 				filterValue,
 				...advFilterData,
 			},
@@ -1329,9 +1449,10 @@
 		$(grids).each(function () {
 			const grid = $(this);
 
-			$.ajax({
+			ultpAjax({
 				url: ultp_data_frontend.ajax,
 				type: "POST",
+				nonce: ultp_data_frontend.security,
 				data: {
 					action: "ultp_adv_filter",
 
@@ -1343,7 +1464,6 @@
 					ultpUniqueIds: ultpUniqueIds || [],
 					ultpCurrentUniquePosts: ultpCurrentUniquePosts || [],
 					widgetBlockId: widgetBlockId,
-					wpnonce: ultp_data_frontend.security,
 				},
 				beforeSend: function () {
 					grid.addClass("ultp-loading-active");

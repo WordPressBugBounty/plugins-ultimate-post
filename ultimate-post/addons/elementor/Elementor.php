@@ -1,7 +1,7 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
-final class Elementor_ULTP_Extension {
+final class ULTP_Elementor_Extension {
 
 	private static $_instance = null;
 
@@ -35,10 +35,9 @@ final class Elementor_ULTP_Extension {
 			'ultp_data_frontend',
 			array(
 				'url'             => ULTP_URL,
-				'active'          => ultimate_post()->is_lc_active(),
 				'ultpSavedDLMode' => ultimate_post()->get_dl_mode(),
 				'ajax'            => admin_url( 'admin-ajax.php' ),
-				'security'        => wp_create_nonce( 'ultp-nonce' ),
+				'security'        => wp_create_nonce( 'ultp-public-nonce' ),
 				'home_url'        => home_url(),
 				'dark_logo'       => get_option( 'ultp_site_dark_logo', false ),
 			)
@@ -51,6 +50,6 @@ final class Elementor_ULTP_Extension {
 
 	public function register_widgets() {
 		$this->includes();
-		\Elementor\Plugin::instance()->widgets_manager->register( new \Gutenberg_Post_Blocks_Widget() );
+		\Elementor\Plugin::instance()->widgets_manager->register( new \ULTP_Elementor_Post_Blocks_Widget() );
 	}
 }

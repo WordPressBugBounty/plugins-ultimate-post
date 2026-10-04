@@ -1,4 +1,7 @@
-<?php $id = $settings->template;//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited ?>
+<?php
+defined( 'ABSPATH' ) || exit;
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Included by Beaver Builder inside the module render method; variables are local.
+$id = $settings->template;//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited ?>
 <div class="ultp-shortcode" data-postid="<?php echo esc_attr( $id ); ?>">
 	<?php
 	if ( $id ) {
@@ -14,7 +17,7 @@
 			}
 			wp_reset_postdata();
 		}
-	} elseif ( isset( $_GET['fl_builder'] ) ) {
+	} elseif ( isset( $_GET['fl_builder'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only Beaver Builder editor detection.
 		//phpcs:ignore
 			echo '<p style="text-align:center;">' . sprintf( esc_html__( 'Pick a Template from your saved ones. Or create a template from: %s.', 'ultimate-post' ) . ' ', '<strong><i>' . esc_html__( 'Dashboard > PostX > Saved Templates', 'ultimate-post' ) . '</i></strong>' ) . '</p>'; //phpcs:ignore
 

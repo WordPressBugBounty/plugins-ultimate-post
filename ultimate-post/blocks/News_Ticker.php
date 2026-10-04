@@ -234,7 +234,7 @@ class News_Ticker {
 
 	public function content( $attr, $noAjax ) {
 		$attr = wp_parse_args( $attr, $this->get_attributes() );
-		global $unique_ID;
+		global $ultp_unique_ID;
 
 		if ( ! $noAjax ) {
 			$paged         = is_front_page() ? get_query_var( 'page' ) : get_query_var( 'paged' );
@@ -289,7 +289,7 @@ class News_Ticker {
 				$title     = get_the_title( $post_id );
 				$titlelink = get_permalink( $post_id );
 				if ( $attr['queryUnique'] ) {
-					$unique_ID[ $attr['queryUnique'] ][] = $post_id;
+					$ultp_unique_ID[ $attr['queryUnique'] ][] = $post_id;
 				}
 				$typeStyle = $style = '';
 				if ( $attr['tickerType'] != 'marquee' && $attr['tickerType'] != 'typewriter' && $attr['tickerAnimation'] == 'fadeout' ) {
@@ -338,7 +338,7 @@ class News_Ticker {
 				$wraper_after      .= '</div>';
 			$wraper_after          .= '</div>';
 
-			wp_reset_query();
+			wp_reset_postdata();
 		}
 
 		return $noAjax ? $post_loop : $wraper_before . $post_loop . $wraper_after;

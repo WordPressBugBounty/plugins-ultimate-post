@@ -24,6 +24,12 @@ final class DCController {
 	public function __construct() {
 		require_once ULTP_PATH . '/addons/dynamic_content/includes/DCService.php';
 
+		// PostX Pro before 1.9.0 does not answer the custom field filters below.
+		if ( \ULTP\Includes\Durbin\Xpo::is_pro_before_1_9_0() ) {
+			require_once ULTP_PATH . '/addons/dynamic_content/includes/DCLegacyFields.php';
+			new DCLegacyFields();
+		}
+
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 	}
 
@@ -180,29 +186,44 @@ final class DCController {
 		// All metas
 		$all_custom_metas = $this->get_custom_metas( $post_id, $post_type );
 
-		// ACF
-		$acf_field_keys = $this->get_acf_fields( $post_id, $field_type, $post_type );
-
-		// Meta Box
-		$mb_field_keys = $this->get_mb_fields( $post_id, $field_type, $post_type );
-
-		// Pods
-		$pods_field_keys = $this->get_pods_fields( $post_id, $field_type, $post_type );
-
-		$filtered_custom_metas = array_values( array_diff( $all_custom_metas, $acf_field_keys['_fields'] ) );
-		$filtered_custom_metas = array_filter(
-			$filtered_custom_metas,
-			function ( $item ) use ( $acf_field_keys ) {
-				foreach ( $acf_field_keys['prefixes'] as $prefix ) {
-					if ( str_starts_with( $item, $prefix ) ) {
-						return false;
-					}
-				}
-				return true;
-			}
+		// Field sources other than plain custom metas, added by PostX Pro.
+		$sources = apply_filters(
+			'ultp_dc_custom_field_sources',
+			array(),
+			array(
+				'post_id'    => $post_id,
+				'post_type'  => $post_type,
+				'field_type' => $field_type,
+			)
 		);
-		$filtered_custom_metas = array_values( array_diff( $filtered_custom_metas, $mb_field_keys['_fields'] ) );
-		$filtered_custom_metas = array_values( array_diff( $filtered_custom_metas, $pods_field_keys['_fields'] ) );
+		$sources = is_array( $sources ) ? $sources : array();
+
+		// Keys and key prefixes that belong to those sources are not plain custom metas.
+		$source_keys     = array();
+		$source_prefixes = array();
+		foreach ( $sources as $source ) {
+			if ( ! empty( $source['_fields'] ) && is_array( $source['_fields'] ) ) {
+				$source_keys = array_merge( $source_keys, $source['_fields'] );
+			}
+			if ( ! empty( $source['prefixes'] ) && is_array( $source['prefixes'] ) ) {
+				$source_prefixes = array_merge( $source_prefixes, $source['prefixes'] );
+			}
+		}
+
+		$filtered_custom_metas = array_values( array_diff( $all_custom_metas, $source_keys ) );
+		$filtered_custom_metas = array_values(
+			array_filter(
+				$filtered_custom_metas,
+				function ( $item ) use ( $source_prefixes ) {
+					foreach ( $source_prefixes as $prefix ) {
+						if ( str_starts_with( $item, $prefix ) ) {
+							return false;
+						}
+					}
+					return true;
+				}
+			)
+		);
 
 		// Return value
 		$res['custom_metas'] = array(
@@ -217,346 +238,19 @@ final class DCController {
 			),
 		);
 
-		$res['acf'] = array(
-			'fields' => $acf_field_keys['fields'],
-		);
-
-		$res['mb'] = array(
-			'fields' => $mb_field_keys['fields'],
-		);
-
-		$res['pods'] = array(
-			'fields' => $pods_field_keys['fields'],
-		);
+		foreach ( $sources as $key => $source ) {
+			if ( 'custom_metas' === $key || ! is_array( $source ) ) {
+				continue;
+			}
+			$res[ $key ] = array(
+				'fields' => isset( $source['fields'] ) && is_array( $source['fields'] ) ? $source['fields'] : array(),
+			);
+		}
 
 		return rest_ensure_response(
 			array(
 				'data' => $res,
 			)
-		);
-	}
-
-	/**
-	 * Get ACF fields
-	 *
-	 * @param int    $post_id
-	 * @param string $field_type
-	 * @param string $post_type
-	 *
-	 * @return array
-	 * @since 4.1.1
-	 */
-	public function get_acf_fields( $post_id, $field_type, $post_type ) {
-		$res = array(
-			'fields'   => array(),
-			'_fields'  => array(),
-			'prefixes' => array(),
-		);
-
-		if ( ! class_exists( 'ACF' ) ) {
-			return $res;
-		}
-
-		if ( empty( $post_id ) && empty( $post_type ) ) {
-			global $post;
-			$post_id = isset( $post->ID ) ? $post->ID : '';
-		}
-
-		$allowed_types = $this->get_allowed_acf_field_types( $field_type );
-
-		// If post_id set set, return ACF fields for that post
-		if ( ! empty( $post_id ) ) {
-			$fields = get_field_objects( $post_id );
-			if ( is_array( $fields ) ) {
-				foreach ( $fields as $field ) {
-					if ( in_array( $field['type'], $allowed_types, true ) ) {
-						$res['fields'][] = array(
-							'value' => $field['name'],
-							'label' => $field['label'],
-						);
-					}
-
-					$res['_fields'][] = $field['name'];
-
-					// For filtering out pesky repeater field's sub fields
-					if ( $field['type'] === 'repeater' ) {
-						$res['prefixes'][] = $field['name'];
-					}
-				}
-			}
-		} elseif ( ! empty( $post_type ) ) {
-			$groups = acf_get_field_groups( array( 'post_type' => $post_type ) );
-			foreach ( $groups as $group ) {
-				$fields = acf_get_fields( $group['ID'] );
-				if ( is_array( $fields ) ) {
-					foreach ( $fields as $field ) {
-						if ( in_array( $field['type'], $allowed_types, true ) ) {
-							$res['fields'][] = array(
-								'value' => $field['name'],
-								'label' => $field['label'] . ' [' . $group['title'] . ']',
-							);
-						}
-						$res['_fields'][] = $field['name'];
-
-						if ( $field['type'] === 'repeater' ) {
-							$res['prefixes'][] = $field['name'];
-						}
-					}
-				}
-			}
-		}
-
-		return $res;
-	}
-
-	/**
-	 * Get Meta Box fields
-	 *
-	 * @param int    $post_id
-	 * @param string $field_type
-	 * @param string $post_type
-	 *
-	 * @return array
-	 * @since 4.1.1
-	 */
-	public function get_mb_fields( $post_id, $field_type, $post_type ) {
-		$res = array(
-			'fields'   => array(),
-			'_fields'  => array(),
-			'prefixes' => array(),
-		);
-
-		if ( ! function_exists( 'rwmb_get_field_settings' ) ) {
-			return $res;
-		}
-
-		$value = null;
-
-		if ( empty( $post_id ) && empty( $post_type ) ) {
-			global $post;
-			$value = isset( $post->ID ) ? $post->ID : '';
-		} elseif ( ! empty( $post_id ) ) {
-			$value = $post_id;
-		} elseif ( ! empty( $post_type ) ) {
-			$value = $post_type;
-		}
-
-		if ( empty( $value ) ) {
-			return $res;
-		}
-
-		$allowed_types = self::get_allowed_mb_field_type( $field_type );
-
-		$fields = rwmb_get_object_fields( $value );
-
-		if ( is_array( $fields ) ) {
-			foreach ( $fields as $field ) {
-				if ( in_array( $field['type'], $allowed_types, true ) ) {
-					$res['fields'][] = array(
-						'value' => $field['id'],
-						'label' => $field['name'],
-					);
-				}
-
-				$res['_fields'][] = $field['id'];
-			}
-		}
-
-		return $res;
-	}
-
-	/**
-	 * Get Pods fields
-	 *
-	 * @param int    $post_id
-	 * @param string $field_type
-	 * @param string $post_type
-	 *
-	 * @return array
-	 * @since 4.1.1
-	 */
-	public function get_pods_fields( $post_id, $field_type, $post_type ) {
-		$res = array(
-			'fields'   => array(),
-			'_fields'  => array(),
-			'prefixes' => array(),
-		);
-
-		if ( ! function_exists( 'pods' ) ) {
-			return $res;
-		}
-
-		if ( empty( $post_id ) ) {
-			global $post;
-			$post_id = isset( $post->ID ) ? $post->ID : '';
-		}
-
-		if ( empty( $post_type ) ) {
-			$post_type = get_post_type( $post_id );
-		}
-
-		if ( empty( $post_type ) ) {
-			return $res;
-		}
-
-		$allowed_types = self::get_allowed_pods_field_types( $field_type );
-
-		$pods = pods( $post_type, $post_id );
-		if ( is_object( $pods ) && method_exists( $pods, 'exists' ) && $pods->exists() && method_exists( $pods, 'fields' ) ) {
-			$fields = $pods->fields();
-			if ( is_array( $fields ) ) {
-				foreach ( $fields as $field ) {
-					if ( in_array( $field['type'], $allowed_types, true ) &&
-						'field' === $field['object_type'] &&
-						'post_type' === $field['object_storage_type']
-					) {
-						$res['fields'][] = array(
-							'value' => $field['name'],
-							'label' => $field['label'],
-						);
-					}
-
-					$res['_fields'][] = $field['name'];
-				}
-			}
-		}
-
-		return $res;
-	}
-
-	/**
-	 * Get ACF allowed field types
-	 *
-	 * @param string $type optional, possible values 'text'|'image'|'url'.
-	 *
-	 * @return array
-	 * @since 4.1.1
-	 */
-	public static function get_allowed_acf_field_types( $type = 'text' ) {
-
-		if ( 'image' === $type ) {
-			return array(
-				'image',
-			);
-		} elseif ( 'url' === $type ) {
-			return array(
-				'text',
-				'email',
-				'image',
-				'file',
-				'page_link',
-				'url',
-				'link',
-			);
-		}
-
-		return array(
-			'text',
-			'textarea',
-			'number',
-			'range',
-			'email',
-			'url',
-			'password',
-			'wysiwyg',
-			'select',
-			'checkbox',
-			'radio',
-			'true_false',
-			'date_picker',
-			'time_picker',
-			'date_time_picker',
-			'color_picker',
-		);
-	}
-
-	/**
-	 * Get Meta Box allowed field types
-	 *
-	 * @param string $type optional, possible values 'text'|'image'|'url'.
-	 *
-	 * @return array
-	 * @since 4.1.1
-	 */
-	public static function get_allowed_mb_field_type( $type ) {
-
-		if ( $type === 'image' ) {
-			return array(
-				'image',
-				'image_advanced',
-				'image_upload',
-				'single_image',
-				'url',
-				'file',
-				'file_advanced',
-				'file_input',
-				'file_upload',
-			);
-		} elseif ( $type === 'url' ) {
-			return array(
-				'url',
-				'file',
-				'file_advanced',
-				'file_input',
-				'file_upload',
-			);
-		}
-
-		return array(
-			'text',
-			'email',
-			'number',
-			'textaraa',
-			'select',
-			'radio',
-			'checkbox',
-			'checkbox_list',
-		);
-	}
-
-	/**
-	 * Get Pods allowed field types
-	 *
-	 * @param string $type optional, possible values 'text'|'image'|'url'.
-	 *
-	 * @return array
-	 * @since 4.1.1
-	 */
-	public static function get_allowed_pods_field_types( $type = 'text' ) {
-
-		if ( 'image' === $type ) {
-			return array(
-				'images',
-				'file',
-			);
-		} elseif ( 'url' === $type ) {
-			return array(
-				'text',
-				'email',
-				'images',
-				'file',
-				'link',
-				'website',
-			);
-		}
-
-		return array(
-			'text',
-			'paragraph',
-			'password',
-			'phone',
-			'time',
-			'website',
-			'number',
-			'wysiwyg',
-			'email',
-			'link',
-			'boolean',
-			'code',
-			'number',
-			'currency',
-			'date',
-			'datetime',
 		);
 	}
 

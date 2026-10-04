@@ -1,5 +1,6 @@
 <?php
 defined( 'ABSPATH' ) || exit;
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Included inside block render methods; variables are local.
 
 // Adv Filter Integration
 $adv_filter_dataset = ultimate_post()->get_adv_data_attrs( $attr );
@@ -7,9 +8,9 @@ $adv_filter_dataset = ultimate_post()->get_adv_data_attrs( $attr );
 $pagi_block_html = '';
 
 $paged = ! wp_doing_ajax() &&
-		isset( $_GET[ $attr['blockId'] . '_page' ] ) &&
-		is_numeric( $_GET[ $attr['blockId'] . '_page' ] ) ?
-			intval( $_GET[ $attr['blockId'] . '_page' ] ) : '1';
+		isset( $_GET[ $attr['blockId'] . '_page' ] ) && // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page number for block pagination.
+		is_numeric( $_GET[ $attr['blockId'] . '_page' ] ) ? // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page number for block pagination.
+			intval( $_GET[ $attr['blockId'] . '_page' ] ) : '1'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only page number for block pagination.
 
 // Pagination
 if ( $attr['advPaginationEnable'] && ( $attr['paginationType'] == 'pagination' ) ) {

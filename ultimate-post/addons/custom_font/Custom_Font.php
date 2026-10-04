@@ -12,6 +12,8 @@ class Custom_Font {
 		add_action( 'manage_ultp_custom_font_posts_custom_column', array( $this, 'templates_table_content' ), 10, 2 );
 		add_filter( 'upload_mimes', array( $this, 'add_file_types_to_uploads' ) );
 		add_filter( 'wp_check_filetype_and_ext', array( $this, 'font_correct_filetypes' ), 10, 5 );
+		add_filter( 'wp_handle_upload_prefilter', array( $this, 'sanitize_svg_upload' ) );
+		add_filter( 'wp_handle_sideload_prefilter', array( $this, 'sanitize_svg_upload' ) );
 		add_filter( 'enter_title_here', array( $this, 'update_custom_font_title' ), 10, 2 );
 	}
 
@@ -43,15 +45,91 @@ class Custom_Font {
 			$new_filetypes['woff']  = 'font/woff';
 			$new_filetypes['woff2'] = 'font/woff2';
 			$new_filetypes['ttf']   = 'font/ttf';
-			$new_filetypes['svg']   = 'image/svg+xml';
 			$new_filetypes['eot']   = 'font/ttf';
-			$file_types             = array_merge( $file_types, $new_filetypes );
+			// SVG only for a custom font, where every upload is sanitized by sanitize_svg_upload().
+			if ( $this->is_custom_font_upload() ) {
+				$new_filetypes['svg'] = 'image/svg+xml';
+			}
+			$file_types = array_merge( $file_types, $new_filetypes );
 			return $file_types;
 		} else {
 			return $file_types;
 		}
 	}
 
+	/**
+	 * Whether the current request uploads to, or edits, a custom font the user may edit.
+	 *
+	 * Uploads from the font screen's media modal send the font as `post_id`; async-upload.php
+	 * checks its own nonce and refuses a `post_id` the user cannot edit. The screen itself is
+	 * recognised by the global post.
+	 *
+	 * @return bool
+	 */
+	private function is_custom_font_upload() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return false;
+		}
+		$post_id = isset( $_REQUEST['post_id'] ) ? absint( $_REQUEST['post_id'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read only to choose the context; async-upload.php verifies the media-form nonce.
+		if ( ! $post_id ) {
+			$post_id = (int) get_the_ID();
+		}
+		return $post_id > 0 && 'ultp_custom_font' === get_post_type( $post_id ) && current_user_can( 'edit_post', $post_id );
+	}
+
+
+	/**
+	 * Clean an SVG uploaded to a custom font.
+	 *
+	 * Only runs for custom font uploads, the one place this add-on allows SVG. The file keeps
+	 * only its font markup; an SVG that is not a font is refused. SVG uploads anywhere else
+	 * are not touched here: WordPress refuses them unless another plugin allows SVG.
+	 *
+	 * @param array $file Upload data from `$_FILES`.
+	 * @return array
+	 */
+	public function sanitize_svg_upload( $file ) {
+		if ( empty( $file['name'] ) || empty( $file['tmp_name'] ) || ! empty( $file['error'] ) ) {
+			return $file;
+		}
+		if ( 'svg' !== strtolower( pathinfo( $file['name'], PATHINFO_EXTENSION ) ) ) {
+			return $file;
+		}
+		if ( ! $this->is_custom_font_upload() ) {
+			return $file;
+		}
+
+		require_once __DIR__ . '/Svg_Font_Sanitizer.php';
+		$sanitized = Svg_Font_Sanitizer::sanitize_file( $file['tmp_name'] );
+		if ( is_wp_error( $sanitized ) ) {
+			$file['error'] = $sanitized->get_error_message();
+		}
+		return $file;
+	}
+
+	/**
+	 * Font weight as stored and printed: 100-900 in steps of 100, normal or bold.
+	 *
+	 * @param string $weight Raw weight.
+	 * @return string
+	 */
+	public static function sanitize_font_weight( $weight ) {
+		$weight = strtolower( trim( (string) $weight ) );
+		if ( in_array( $weight, array( 'normal', 'bold', '100', '200', '300', '400', '500', '600', '700', '800', '900' ), true ) ) {
+			return $weight;
+		}
+		return 'normal';
+	}
+
+	/**
+	 * Font family name safe to print inside a CSS string or a style attribute.
+	 *
+	 * @param string $font_name Post title of the font.
+	 * @return string
+	 */
+	public static function sanitize_font_family( $font_name ) {
+		return str_replace( array( '"', '\\', ';', '{', '}', '<', '>' ), '', (string) $font_name );
+	}
 
 	// Template Heading Add
 	public function templates_table_head( $defaults ) {
@@ -89,8 +167,8 @@ class Custom_Font {
 			array_push( $font_src, 'url(' . esc_url( $settings['eot'] ) . ') format("eot")' );
 		}
 		$font_face = '@font-face {
-            font-family: "' . $font_name . '";
-            font-weight: ' . $settings['weight'] . ';
+            font-family: "' . self::sanitize_font_family( $font_name ) . '";
+            font-weight: ' . self::sanitize_font_weight( isset( $settings['weight'] ) ? $settings['weight'] : '' ) . ';
             src: ' . implode( ', ', $font_src ) . ';
         }';
 
@@ -117,7 +195,7 @@ class Custom_Font {
 					$eot = true; }
 			}
 			$font_face = $this->get_font_face( $settings[0], get_the_title( $post_id ) );
-			echo '<style type="text/css">' . $font_face . '</style>'; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo '<style type="text/css">' . $font_face . '</style>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSS from get_font_face(): URLs pass esc_url(), family and weight pass sanitize_font_family()/sanitize_font_weight().
 
 			switch ( $column_id ) {
 				case 0:
@@ -161,7 +239,7 @@ class Custom_Font {
 		<div class="ultp-custom-font-container ultp-custom-font<?php echo empty( $arr ) ? '-copy' : ''; ?>">
 			<div class="ultp-custom-font-heading">
 				<div>
-					<label class="font-label"><?php echo esc_html__( 'Weight:  ', 'ultimate-post' ); ?> <span class="ultp-custom-font-weight"> <?php echo esc_html__( isset( $arr['weight'] ) ? $arr['weight'] : '', 'ultimate-post' ); ?> </span></label>
+					<label class="font-label"><?php echo esc_html__( 'Weight:  ', 'ultimate-post' ); ?> <span class="ultp-custom-font-weight"> <?php echo esc_html( isset( $arr['weight'] ) ? $arr['weight'] : '' ); ?> </span></label>
 					<select name="weight[]">
 						<?php $weight = isset( $arr['weight'] ) ? $arr['weight'] : ''; ?>
 						<option <?php selected( $weight, 'normal' ); ?> value="normal"><?php echo esc_html__( 'Normal', 'ultimate-post' ); ?></option>
@@ -177,14 +255,14 @@ class Custom_Font {
 					</select>
 				</div>
 				<?php
-					$styles = '';
+					$preview_style = '';
 				if ( ! empty( $arr ) ) {
 					$font_face = $this->get_font_face( $arr, $font_name );
-					echo '<style type="text/css">' . $font_face . '</style>'; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					$styles = 'style="font-family: ' . $font_name . '; font-weight: ' . $arr['weight'] . ' "';
+					echo '<style type="text/css">' . $font_face . '</style>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSS from get_font_face(): URLs pass esc_url(), family and weight pass sanitize_font_family()/sanitize_font_weight().
+					$preview_style = 'font-family: "' . self::sanitize_font_family( $font_name ) . '"; font-weight: ' . self::sanitize_font_weight( isset( $arr['weight'] ) ? $arr['weight'] : '' );
 				}
 				?>
-				<span <?php echo $styles; //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> class="ultp-custom-font-preview"><?php echo esc_html__( 'The quick brown fox jumps over the lazy dog', 'ultimate-post' ); ?></span>
+				<span <?php echo '' !== $preview_style ? 'style="' . esc_attr( $preview_style ) . '"' : ''; ?> class="ultp-custom-font-preview"><?php echo esc_html__( 'The quick brown fox jumps over the lazy dog', 'ultimate-post' ); ?></span>
 				<div class="ultp-custom-font-actions">
 					<span class="ultp-custom-font-edit"><span class="dashicons dashicons-edit"></span><?php echo esc_html__( 'Edit', 'ultimate-post' ); ?></span>
 					<span class="ultp-custom-font-close"><span class="dashicons dashicons-no-alt"></span><?php echo esc_html__( 'Close', 'ultimate-post' ); ?></span>
@@ -254,12 +332,12 @@ class Custom_Font {
 					! empty( $_POST['svg'][ $i ] ) ||
 					! empty( $_POST['eot'][ $i ] ) ) ) {
 							$temp           = array();
-							$temp['weight'] = isset( $_POST['weight'][ $i ] ) ? sanitize_text_field( $_POST['weight'][ $i ] ) : '';
-							$temp['woff']   = isset( $_POST['woff'][ $i ] ) ? sanitize_text_field( $_POST['woff'][ $i ] ) : '';
-							$temp['woff2']  = isset( $_POST['woff2'][ $i ] ) ? sanitize_text_field( $_POST['woff2'][ $i ] ) : '';
-							$temp['ttf']    = isset( $_POST['ttf'][ $i ] ) ? sanitize_text_field( $_POST['ttf'][ $i ] ) : '';
-							$temp['svg']    = isset( $_POST['svg'][ $i ] ) ? sanitize_text_field( $_POST['svg'][ $i ] ) : '';
-							$temp['eot']    = isset( $_POST['eot'][ $i ] ) ? sanitize_text_field( $_POST['eot'][ $i ] ) : '';
+							$temp['weight'] = self::sanitize_font_weight( sanitize_text_field( $_POST['weight'][ $i ] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
+							$temp['woff']   = isset( $_POST['woff'][ $i ] ) ? sanitize_text_field( $_POST['woff'][ $i ] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
+							$temp['woff2']  = isset( $_POST['woff2'][ $i ] ) ? sanitize_text_field( $_POST['woff2'][ $i ] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
+							$temp['ttf']    = isset( $_POST['ttf'][ $i ] ) ? sanitize_text_field( $_POST['ttf'][ $i ] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
+							$temp['svg']    = isset( $_POST['svg'][ $i ] ) ? sanitize_text_field( $_POST['svg'][ $i ] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
+							$temp['eot']    = isset( $_POST['eot'][ $i ] ) ? sanitize_text_field( $_POST['eot'][ $i ] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
 							$arr[]          = $temp;
 				}
 			}

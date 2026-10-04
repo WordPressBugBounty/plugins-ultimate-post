@@ -44,7 +44,7 @@ class Post_Content {
 		$post_content   = get_the_content();
 		$post_type      = get_post_type();
 		if ( $post_type != 'ultp_builder' && $post_type != 'revision' && $post_type != 'premade' ) { // premade used for ultp.wpxpo.com
-			$post_content = apply_filters( 'the_content', $post_content );
+			$post_content = apply_filters( 'the_content', $post_content ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core hook.
 			$post_content = str_replace( ']]>', ']]&gt;', $post_content );
 		}
 		if ( $post_content ) {

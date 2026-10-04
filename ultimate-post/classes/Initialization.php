@@ -91,14 +91,8 @@ class ULTP_Initialization {
 		require_once ULTP_PATH . 'includes/deactive/class-deactive.php';
 		require_once ULTP_PATH . 'includes/notice/class-notice.php';
 		require_once ULTP_PATH . 'includes/durbin/class-our-plugins.php';
-		require_once ULTP_PATH . 'includes/notice/class-wow-shipping-promotion.php';
-		require_once ULTP_PATH . 'includes/notice/class-wow-revenue-promotion.php';
-		require_once ULTP_PATH . 'includes/notice/class-wow-addons-promotion.php';
 		new \ULTP\Includes\Deactive\Deactive();
 		new \ULTP\Includes\notice\Notice();
-		new \ULTP\Includes\notice\WowShippingPromotion();
-		new \ULTP\Includes\notice\WowRevenuePromotion();
-		new \ULTP\Includes\notice\WowAddonsPromotion();
 		new \ULTP\Includes\Durbin\OurPlugins();
 	}
 
@@ -163,7 +157,7 @@ class ULTP_Initialization {
 		// add_filter( 'ultp_view_cookies', '__return_false' );
 		$cookies_disable = ultimate_post()->get_setting( 'disable_view_cookies' );
 		if ( $post_id && $isEnable && $cookies_disable != 'yes' ) {
-			$has_cookie = isset( $_COOKIE[ 'ultp_view_' . $post_id ] ) ? sanitize_text_field( $_COOKIE[ 'ultp_view_' . $post_id ] ) : false;
+			$has_cookie = isset( $_COOKIE[ 'ultp_view_' . $post_id ] ) ? sanitize_text_field( wp_unslash( $_COOKIE[ 'ultp_view_' . $post_id ] ) ) : false;
 			if ( ! $has_cookie ) {
 				$count = (int) get_post_meta( $post_id, '__post_views_count', true );
 				update_post_meta( $post_id, '__post_views_count', $count ? (int) $count + 1 : 1 );
@@ -347,7 +341,7 @@ class ULTP_Initialization {
 			return;
 		}
 		if ( $plugin == 'ultimate-post/ultimate-post.php' ) {
-			if ( wp_doing_ajax() || is_network_admin() || isset( $_GET['activate-multi'] ) || isset( $_POST['action'] ) && 'activate-selected' == $_POST['action'] ) {
+			if ( wp_doing_ajax() || is_network_admin() || isset( $_GET['activate-multi'] ) || isset( $_POST['action'] ) && 'activate-selected' == $_POST['action'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.NonceVerification.Missing -- Read-only check for bulk/multi activation.
 				return;
 			}
 			if ( ultimate_post()->get_setting( 'init_setup' ) != 'yes' ) {
@@ -387,9 +381,9 @@ class ULTP_Initialization {
 				'version'            => ULTP_VER,
 				'active'             => $is_active,
 				'expierd'            => $is_expired,
-				'security'           => wp_create_nonce( 'ultp-nonce' ),
+				'security'           => wp_create_nonce( 'ultp-admin-nonce' ),
 				'ajax'               => admin_url( 'admin-ajax.php' ),
-				'settings'           => ultimate_post()->get_setting(),
+				'settings'           => ultimate_post()->get_client_settings(),
 				'post_type'          => $post_type,
 				'saved_template_url' => admin_url( 'admin.php?page=ultp-settings#saved-templates' ),
 				'woocommerce'        => $is_woocommerce_active,
@@ -399,7 +393,8 @@ class ULTP_Initialization {
 		if ( $post_type == 'ultp_custom_font' ) {
 			$font_settings = ultimate_post()->get_setting( 'ultp_custom_font' );
 			if ( $font_settings == 'true' ) {
-				wp_enqueue_media();
+				// Pass the font post so uploads send its ID; Custom_Font allows SVG only for that post.
+				wp_enqueue_media( array( 'post' => get_the_ID() ) );
 			}
 		}
 
@@ -434,12 +429,13 @@ class ULTP_Initialization {
 				array_merge(
 					array(
 						'ajax'              => admin_url( 'admin-ajax.php' ),
-						'security'          => wp_create_nonce( 'ultp-nonce' ),
+						'security'          => wp_create_nonce( 'ultp-admin-nonce' ),
 						'url'               => ULTP_URL,
 						'active'            => $is_active,
 						'expierd'           => $is_expired,
 						'license'           => $license_key,
-						'settings'          => ultimate_post()->get_setting(),
+						// The settings form needs the saved OpenAI key; the menu capability is filterable, so check.
+						'settings'          => current_user_can( 'manage_options' ) ? ultimate_post()->get_setting() : ultimate_post()->get_client_settings(),
 						'addons_settings'   => apply_filters( 'ultp_settings', array() ),
 						'builder_url'       => admin_url( 'admin.php?page=ultp-settings#builder' ),
 						'version'           => ULTP_VER,
@@ -519,13 +515,13 @@ class ULTP_Initialization {
 			array(
 				'url'                => ULTP_URL,
 				'ajax'               => admin_url( 'admin-ajax.php' ),
-				'security'           => wp_create_nonce( 'ultp-nonce' ),
+				'security'           => wp_create_nonce( 'ultp-admin-nonce' ),
 				'hide_import_btn'    => ultimate_post()->get_setting( 'hide_import_btn' ),
 				'premium_link'       => Xpo::generate_utm_link(),
 				'license'            => $is_active ? Xpo::get_lc_key() : '',
 				'active'             => $is_active,
 				'archive'            => ultimate_post()->is_archive_builder(),
-				'settings'           => ultimate_post()->get_setting(),
+				'settings'           => ultimate_post()->get_client_settings(),
 				'post_type'          => $post_type == 'premade' ? 'ultp_builder' : $post_type, // premade used for ultp.wpxpo.com
 				'date_format'        => get_option( 'date_format' ),
 				'time_format'        => get_option( 'time_format' ),

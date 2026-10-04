@@ -1,7 +1,7 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
-class Gutenberg_Post_Blocks_Widget extends \Elementor\Widget_Base {
+class ULTP_Elementor_Post_Blocks_Widget extends \Elementor\Widget_Base {
 
 	public function get_name() {
 		return 'gutenberg-post-blocks';
@@ -59,7 +59,7 @@ class Gutenberg_Post_Blocks_Widget extends \Elementor\Widget_Base {
 
 		if ( $id ) {
 			if ( isset( $_GET['action'] ) || isset( $_POST['action'] ) ) { //phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.NonceVerification.Recommended
-				echo ultimate_post()->build_css_for_inline_print( $id, true ); //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				echo ultimate_post()->build_css_for_inline_print( $id, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- <style> tag from build_css_for_inline_print(): integer post ID, CSS passed through wp_strip_all_tags().
 			}
 			echo '<div class="ultp-shortcode" data-postid="' . esc_attr( $id ) . '">';
 				$args      = array(
@@ -75,8 +75,8 @@ class Gutenberg_Post_Blocks_Widget extends \Elementor\Widget_Base {
 					wp_reset_postdata();
 				}
 				echo '</div>';
-		} elseif ( isset( $_GET['action'] ) && $_GET['action'] == 'elementor' ) {
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.NonceVerification.Recommended	
+		} elseif ( isset( $_GET['action'] ) && $_GET['action'] == 'elementor' ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only check for the Elementor editor screen.
+			/* translators: %s: Menu path to the Saved Templates screen. */
 				echo '<p style="text-align:center;">' . sprintf( esc_html__( 'Pick a Template from your saved ones. Or create a template from: %s.', 'ultimate-post' ) . ' ', '<strong><i>' . esc_html__( 'Dashboard > PostX > Saved Templates', 'ultimate-post' ) . '</i></strong>' ) . '</p>';
 		}
 	}

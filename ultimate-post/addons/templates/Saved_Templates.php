@@ -2,59 +2,16 @@
 
 namespace ULTP;
 
-use ULTP\Includes\Durbin\Xpo;
 
 defined( 'ABSPATH' ) || exit;
 
 class Saved_Templates {
 	public function __construct() {
 		$this->templates_post_type_callback();
-		add_action( 'admin_head', array( $this, 'custom_head_templates' ) );
-		add_action( 'load-post-new.php', array( $this, 'disable_new_post_templates' ) );
 		add_filter( 'manage_ultp_templates_posts_columns', array( $this, 'templates_table_head' ) );
 		add_action( 'manage_ultp_templates_posts_custom_column', array( $this, 'templates_table_content' ), 10, 2 );
 	}
 
-	public function custom_head_templates() {
-		if ( 'ultp_templates' == get_current_screen()->post_type && ( ! defined( 'ULTP_PRO_VER' ) ) ) {
-			$post_count = wp_count_posts( 'ultp_templates' );
-			$post_count = $post_count->publish + $post_count->draft;
-			if ( $post_count > 0 ) { ?>
-				<span class="ultp-saved-templates-action" data-link="
-				<?php
-				echo esc_url(
-					Xpo::generate_utm_link(
-						array(
-							'utmKey' => 'post_type_page',
-						)
-					)
-				);
-				?>
-						" data-text="Go Pro for Unlimited Templates" data-count="<?php echo esc_attr( $post_count ); ?>" style="display:none;"></span>
-				<?php
-			}
-		}
-	}
-
-	public function disable_new_post_templates() {
-		if ( get_current_screen()->post_type == 'ultp_templates' && ( ! defined( 'ULTP_PRO_VER' ) ) ) {
-			$post_count = wp_count_posts( 'ultp_templates' );
-			$post_count = $post_count->publish + $post_count->draft;
-			if ( $post_count > 0 ) {
-				wp_die(
-					'You cannot do that! Only one template can be created in the free version. Please <a target="_blank" href="' . esc_url(
-						Xpo::generate_utm_link(
-							array(
-								'utmKey' => 'post_type_page',
-							)
-						)
-					) . '">Upgrade Pro.</a>'
-				);
-			}
-		}
-	}
-
-	// Template Heading Add
 	public function templates_table_head( $defaults ) {
 		$type_array = array( 'type' => __( 'Shortcode', 'ultimate-post' ) );
 		array_splice( $defaults, 2, 0, $type_array );

@@ -23,9 +23,9 @@ class OurPlugins {
 	public function ultp_install_plugin_callback() {
 
 		$nonce  = isset( $_POST['wpnonce'] ) ? sanitize_key( wp_unslash( $_POST['wpnonce'] ) ) : '';
-		$plugin = isset( $_POST['plugin'] ) ? $_POST['plugin'] : '';
+		$plugin = isset( $_POST['plugin'] ) ? sanitize_key( wp_unslash( $_POST['plugin'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified just below, before $plugin is used.
 
-		if ( ! wp_verify_nonce( $nonce, 'ultp-nonce' ) || ! current_user_can( 'manage_options' ) ) {
+		if ( ! wp_verify_nonce( $nonce, 'ultp-admin-nonce' ) || ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => 'No plugin specified' ) );
 
 		}

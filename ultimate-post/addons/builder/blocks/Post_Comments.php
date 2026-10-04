@@ -113,7 +113,7 @@ class Post_Comments {
 			$comments_args = array(
 				'comment_field'       => '<div class="comment-form-comment ultp-comment-input ultp-field-control">' . wp_kses_post( $comment_label ) . '<textarea class="hi" id="comment" name="comment" placeholder="' . esc_attr( $attr['inputPlaceHolder'] ) . '" cols="45" rows="8" aria-required="true"></textarea></div>',
 				'fields'              => apply_filters(
-					'comment_form_default_fields',
+					'comment_form_default_fields', // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core hook.
 					array(
 						'author'  => '<div class="ultp-field-control ultp-comment-name">' . wp_kses_post( $auth_label ) . '<input id="author" placeholder="Your name" name="author" type="text" value="' . esc_attr( $commenter['comment_author'] ) . '" size="30"' . $aria_req . ' /></div>',
 						'email'   => '<div class="ultp-field-control ultp-comment-email">' . wp_kses_post( $email_label ) . '<input id="email" placeholder="your.email@example.com" name="email" type="text" value="' . esc_attr( $commenter['comment_author_email'] ) . '" size="30"' . $aria_req . ' /></div>',

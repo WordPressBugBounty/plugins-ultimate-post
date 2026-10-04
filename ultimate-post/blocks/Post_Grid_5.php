@@ -229,14 +229,14 @@ class Post_Grid_5 {
 	}
 	public function content( $attr, $noAjax ) {
 		$attr = wp_parse_args( $attr, $this->get_attributes() );
-		global $unique_ID;
+		global $ultp_unique_ID;
 
 		if ( ! $noAjax ) {
 			$paged         = is_front_page() ? get_query_var( 'page' ) : get_query_var( 'paged' );
 			$attr['paged'] = $paged ? $paged : 1;
 		}
 		if ( $attr['queryUnique'] && isset( $attr['savedQueryUnique'] ) ) {
-			$unique_ID = $attr['savedQueryUnique'];
+			$ultp_unique_ID = $attr['savedQueryUnique'];
 		}
 
 		$block_name        = 'post-grid-5';
@@ -250,7 +250,7 @@ class Post_Grid_5 {
 
 		// Loadmore and Unique content
 		if ( $attr['queryUnique'] && isset( $attr['loadMoreQueryUnique'] ) && $attr['paginationShow'] && ( $attr['paginationType'] == 'loadMore' ) ) {
-			$unique_ID            = $attr['loadMoreQueryUnique'];
+			$ultp_unique_ID            = $attr['loadMoreQueryUnique'];
 			$current_unique_posts = $attr['ultp_current_unique_posts'];
 		}
 
@@ -312,7 +312,7 @@ class Post_Grid_5 {
 				include ULTP_PATH . 'blocks/template/category.php';
 
 				if ( $attr['queryUnique'] ) {
-					$unique_ID[ $attr['queryUnique'] ][] = $post_id;
+					$ultp_unique_ID[ $attr['queryUnique'] ][] = $post_id;
 					$current_unique_posts[]              = $post_id;
 				}
 
@@ -416,7 +416,7 @@ class Post_Grid_5 {
 				++$idx;
 			endwhile;
 			if ( $attr['queryUnique'] ) {
-				$post_loop .= "<span style='display: none;' class='ultp-current-unique-posts' data-ultp-unique-ids= " . wp_json_encode( $unique_ID ) . ' data-current-unique-posts= ' . wp_json_encode( $current_unique_posts ) . '> </span>';
+				$post_loop .= "<span style='display: none;' class='ultp-current-unique-posts' data-ultp-unique-ids= " . wp_json_encode( $ultp_unique_ID ) . ' data-current-unique-posts= ' . wp_json_encode( $current_unique_posts ) . '> </span>';
 			}
 
 			// if ( $attr['advPaginationEnable'] && ($attr['paginationType'] == 'loadMore')) {
@@ -434,7 +434,7 @@ class Post_Grid_5 {
 			$wraper_after .= $pagi_block_html;
 			$wraper_after .= '</div>';
 
-			wp_reset_query();
+			wp_reset_postdata();
 		} else {
 			$wraper_before .= ultimate_post()->get_no_result_found_html( $attr['notFoundMessage'] );
 		}

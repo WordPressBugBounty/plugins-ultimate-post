@@ -38,19 +38,19 @@ class DurbinClient {
 
 		if ( self::DEACTIVATE_ACTION === $action_type ) {
 
-			$id = isset( $_POST['cause_id'] ) ? sanitize_key( wp_unslash( $_POST['cause_id'] ) ) : null;
+			$id = isset( $_POST['cause_id'] ) ? sanitize_key( wp_unslash( $_POST['cause_id'] ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce checked by caller (Deactive::send_plugin_data).
 
 			if ( ! empty( $id ) ) {
 				$data['feedback'] = array(
 					'id'      => $id,
-					'details' => isset( $_POST['cause_details'] ) ? sanitize_text_field( wp_unslash( $_POST['cause_details'] ) ) : null,
+					'details' => isset( $_POST['cause_details'] ) ? sanitize_text_field( wp_unslash( $_POST['cause_details'] ) ) : null, // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce checked by caller (Deactive::send_plugin_data).
 				);
 			}
 		}
 
 		if ( self::WIZARD_ACTION === $action_type ) {
 			$data['data'] = array(
-				'site_type' => isset( $_POST['siteType'] ) ? sanitize_text_field( wp_unslash( $_POST['siteType'] ) ) : get_option( '__ultp_site_type', 'other' ),
+				'site_type' => isset( $_POST['siteType'] ) ? sanitize_text_field( wp_unslash( $_POST['siteType'] ) ) : get_option( '__ultp_site_type', 'other' ), // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce checked by caller (Dashboard wizard callbacks).
 			);
 		}
 
@@ -115,6 +115,14 @@ class DurbinClient {
 	/**
 	 * Get Country Code
 	 *
+	 * Calls ipinfo.io, a third-party service, and caches the result for 180 days.
+	 * Disclosed in readme.txt under == Privacy ==.
+	 *
+	 * ⚠ Guideline 7 requires explicit consent before contacting an external
+	 * server; readme disclosure satisfies the guideline's "should" but not its
+	 * "may not". No consent gate exists on this path — see F01b. Kept knowingly,
+	 * at the maintainer's decision, not by oversight.
+	 *
 	 * @return string|null
 	 */
 	private static function get_country_code() {
@@ -156,6 +164,10 @@ class DurbinClient {
 		$plugins_data = self::get_installed_plugins();
 		$user_name    = $user->user_firstname ? $user->user_firstname . ( $user->user_lastname ? ' ' . $user->user_lastname : '' ) : $user->display_name;
 
+		// Every field here is named in the data-collection policy the consent
+		// notice links, and all of them are disclosed in readme.txt under
+		// == Privacy ==. country_code comes from a third-party lookup; see
+		// get_country_code() for the guideline 7 caveat that applies to it.
 		$data = array(
 			'email'        => $user->user_email,
 			'name'         => $user_name,

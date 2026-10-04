@@ -170,7 +170,7 @@ class Taxonomy {
 					$wraper_after     .= '</div>';
 				$wraper_after         .= '</div>';
 			$wraper_after             .= '</div>';
-			wp_reset_query();
+			wp_reset_postdata();
 		} else {
 			$wraper_before .= ultimate_post()->get_no_result_found_html( $attr['notFoundMessage'] );
 		}

@@ -1,5 +1,6 @@
 <?php
 defined( 'ABSPATH' ) || exit;
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Included inside block render methods; variables are local.
 
 $post_loop     .= '<div class="ultp-video-modal">';
 	$post_loop .= '<div class="ultp-video-modal__overlay"></div>';

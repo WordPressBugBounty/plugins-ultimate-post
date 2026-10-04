@@ -2,7 +2,6 @@
 
 namespace ULTP;
 
-use ULTP\Includes\Durbin\Xpo;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -20,7 +19,6 @@ class Builder {
 		add_action( 'save_post', array( $this, 'metabox_save_data' ) );
 		add_action( 'save_post', array( $this, 'metabox_save_video_data' ) );
 		add_action( 'delete_post', array( $this, 'delete_option_meta_action' ) );
-		add_action( 'load-post-new.php', array( $this, 'disable_new_post_templates' ) );
 	}
 
 	public function checkfor_header_footer() {
@@ -108,9 +106,8 @@ class Builder {
 				}
 			}
 			?>
-			<header id="ultp-header-template" class="<?php esc_html_e( 'ultp-builderid-' . $this->header_id ); ?>">
-				<?php echo ultimate_post()->get_post_content($this->header_id);  //phpcs:ignore  
-				?>
+			<header id="ultp-header-template" class="<?php echo esc_attr( 'ultp-builderid-' . $this->header_id ); ?>">
+				<?php ultimate_post()->get_post_content( $this->header_id ); ?>
 			</header>
 			<?php
 		}
@@ -119,9 +116,8 @@ class Builder {
 		if ( $this->footer_id ) {
 
 			?>
-			<footer id="ultp-footer-template" class="<?php esc_html_e( 'ultp-builderid-' . $this->footer_id ); ?>" role="contentinfo">
-				<?php echo ultimate_post()->get_post_content($this->footer_id) //phpcs:ignore 
-				?>
+			<footer id="ultp-footer-template" class="<?php echo esc_attr( 'ultp-builderid-' . $this->footer_id ); ?>" role="contentinfo">
+				<?php ultimate_post()->get_post_content( $this->footer_id ); ?>
 			</footer>
 			<?php
 			if ( ! $this->is_block_theme ) {
@@ -140,24 +136,6 @@ class Builder {
 				if ( $this->theme_name != 'bricks' ) { // Conflict with Bricks Builder Backend
 					ob_get_clean();
 				}
-			}
-		}
-	}
-
-	public function disable_new_post_templates() {
-		if ( get_current_screen()->post_type == 'ultp_builder' && ( ! defined( 'ULTP_PRO_VER' ) ) ) {
-			$post_count = wp_count_posts( 'ultp_builder' );
-			$post_count = $post_count->publish + $post_count->draft;
-			if ( $post_count > 0 ) {
-				wp_die(
-					'You are not allowed to do that! Only one template can be created in the free version. Please <a target="_blank" href="' . esc_url(
-						Xpo::generate_utm_link(
-							array(
-								'utmKey' => 'post_type_page',
-							)
-						)
-					) . '">Upgrade Pro.</a>'
-				);
 			}
 		}
 	}
@@ -249,11 +227,11 @@ class Builder {
 		if ( ! isset( $_POST['feature-video'] ) ) {
 			return;
 		}
-		update_post_meta( $post_id, '__builder_feature_video', sanitize_text_field( $_POST['feature-video'] ) );
+		update_post_meta( $post_id, '__builder_feature_video', sanitize_text_field( $_POST['feature-video'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
 		if ( ! isset( $_POST['video-caption'] ) ) {
 			return;
 		}
-		update_post_meta( $post_id, '__builder_feature_caption', sanitize_text_field( $_POST['video-caption'] ) );
+		update_post_meta( $post_id, '__builder_feature_caption', sanitize_text_field( $_POST['video-caption'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
 	}
 
 
@@ -265,7 +243,7 @@ class Builder {
 		$p_type  = get_post_meta( $post->ID, '__ultp_builder_type', true );
 		$p_type  = $p_type ? $p_type : 'archive';
 
-		$widget_area = wp_get_sidebars_widgets();
+		$widget_area = wp_get_sidebars_widgets(); // phpcs:ignore Generic.PHP.ForbiddenFunctions.Found -- Needs every sidebar ID incl. the sidebars_widgets filter; no public equivalent.
 		if ( isset( $widget_area['wp_inactive_widgets'] ) ) {
 			unset( $widget_area['wp_inactive_widgets'] );
 		}
@@ -274,9 +252,7 @@ class Builder {
 		}
 		?>
 
-		<input type="hidden" name="postx-type" value="<?php echo esc_attr(isset($_GET['postx_type']) ? sanitize_text_field($_GET['postx_type']) : $p_type); // @codingStandardsIgnoreLine 
-		?>
-		" />
+		<input type="hidden" name="postx-type" value="<?php echo esc_attr( isset( $_GET['postx_type'] ) ? sanitize_text_field( wp_unslash( $_GET['postx_type'] ) ) : $p_type ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only: pre-fills the builder type on the new-template screen; the save handler checks its own nonce. ?>" />
 		<p>
 			<label><?php echo esc_html__( 'Container Width', 'ultimate-post' ); ?></label>
 			<input type="number" style="width:100%" name="container-width" value="<?php echo esc_attr( $width ? $width : 1140 ); ?>" />
@@ -306,10 +282,10 @@ class Builder {
 		if ( isset( $_POST['video_meta_box_nonce'] ) ) {
 			if ( wp_verify_nonce( sanitize_key( wp_unslash( $_POST['video_meta_box_nonce'] ) ), 'video_meta_box' ) ) {
 				if ( isset( $_POST['feature-video'] ) ) {
-					update_post_meta( $post_id, '__builder_feature_video', sanitize_text_field( $_POST['feature-video'] ) );
+					update_post_meta( $post_id, '__builder_feature_video', sanitize_text_field( $_POST['feature-video'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
 				}
 				if ( ! isset( $_POST['video-caption'] ) ) {
-					update_post_meta( $post_id, '__builder_feature_caption', sanitize_text_field( $_POST['video-caption'] ) );
+					update_post_meta( $post_id, '__builder_feature_caption', sanitize_text_field( $_POST['video-caption'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
 				}
 			}
 		}
@@ -322,20 +298,20 @@ class Builder {
 			return;
 		}
 		if ( isset( $_POST['container-width'] ) ) {
-			update_post_meta( $post_id, '__container_width', sanitize_text_field( $_POST['container-width'] ) );
+			update_post_meta( $post_id, '__container_width', sanitize_text_field( $_POST['container-width'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
 		}
 		if ( isset( $_POST['builder-sidebar'] ) ) {
-			update_post_meta( $post_id, '__builder_sidebar', sanitize_text_field( $_POST['builder-sidebar'] ) );
+			update_post_meta( $post_id, '__builder_sidebar', sanitize_text_field( $_POST['builder-sidebar'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
 		}
 		if ( isset( $_POST['builder-widget-area'] ) ) {
-			update_post_meta( $post_id, '__builder_widget_area', sanitize_text_field( $_POST['builder-widget-area'] ) );
+			update_post_meta( $post_id, '__builder_widget_area', sanitize_text_field( $_POST['builder-widget-area'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
 		}
 
 		// Save Conditions Data
 		if ( get_post_type( $post_id ) == 'ultp_builder' ) {
 			if ( get_post_type( $post_id ) == 'ultp_builder' ) {
 				$settings = get_option( 'ultp_builder_conditions', array() );
-				$p_type   = isset( $_POST['postx-type'] ) ? sanitize_text_field( $_POST['postx-type'] ) : 'singular';
+				$p_type   = isset( $_POST['postx-type'] ) ? sanitize_text_field( wp_unslash( $_POST['postx-type'] ) ) : 'singular';
 				$up_meta  = '';
 				switch ( $p_type ) {
 					case 'singular':

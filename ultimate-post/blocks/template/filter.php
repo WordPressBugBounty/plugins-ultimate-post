@@ -1,5 +1,6 @@
 <?php
 defined( 'ABSPATH' ) || exit;
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Included inside block render methods; variables are local.
 
 $attr['filterType']       = sanitize_html_class( $attr['filterType'] );
 $attr['blockId']          = sanitize_html_class( $attr['blockId'] );

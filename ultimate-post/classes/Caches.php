@@ -209,8 +209,8 @@ class Caches {
 			if ( ! $wp_filesystem->is_dir( $dir ) ) {
 				$wp_filesystem->mkdir( $dir );
 			}
-			if ( ! file_exists( $dir . $type . '.json' ) ) {
-                fopen( $dir . $type. '.json', "w" );     //phpcs:ignore
+			if ( ! $wp_filesystem->exists( $dir . $type . '.json' ) ) {
+				$wp_filesystem->put_contents( $dir . $type . '.json', '' );
 			}
 			return $dir;
 		} catch ( \Exception $e ) {

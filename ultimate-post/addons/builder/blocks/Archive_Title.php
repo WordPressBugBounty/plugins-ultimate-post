@@ -87,11 +87,11 @@ class Archive_Title {
 			if ( is_archive() ) {
 				if ( is_category() || is_tag() || is_tax() ) {
 					$obj           = get_queried_object();
-					$attachment_id = get_term_meta( $obj->term_id, 'ultp_category_image', true );
+					$attachment_id = ultimate_post()->get_term_image_id( $obj );
 					$_title        = $obj->name;
 					$_image        = $attachment_id ? wp_get_attachment_url( $attachment_id ) : '';
 					$_desc         = $obj->description;
-					$_color        = get_term_meta( $obj->term_id, 'ultp_category_color', true );
+					$_color        = ultimate_post()->get_term_color( $obj );
 				} elseif ( is_date() ) {
 					$_title = is_year() ? get_the_date( 'Y' ) : ( is_month() ? get_the_date( 'F Y' ) : ( is_day() ? get_the_date( 'F j, Y' ) : '' ) );
 				} elseif ( is_author() ) {
@@ -122,6 +122,7 @@ class Archive_Title {
 
 		$attr['className']  = isset( $attr['className'] ) && $attr['className'] ? preg_replace( '/[^A-Za-z0-9_ -]/', '', $attr['className'] ) : '';
 		$attr['align']      = isset( $attr['align'] ) && $attr['align'] ? preg_replace( '/[^A-Za-z0-9_ -]/', '', $attr['align'] ) : '';
+		$attr['blockId']    = isset( $attr['blockId'] ) ? sanitize_html_class( $attr['blockId'] ) : '';
 		$attr['advanceId']  = isset( $attr['advanceId'] ) ? sanitize_html_class( $attr['advanceId'] ) : '';
 		$attr['titleTag']   = in_array( $attr['titleTag'], ultimate_post()->ultp_allowed_block_tags() ) ? $attr['titleTag'] : 'h1';
 		$attr['layout']     = sanitize_html_class( $attr['layout'] );
@@ -131,21 +132,21 @@ class Archive_Title {
 			$wraper_before .= '<div class="ultp-block-wrapper">';
 			$wraper_before .= '<div class="ultp-block-archive-title ultp-archive-layout-' . $attr['layout'] . '">';
 
-			$style  = $attr['layout'] == '2' ? ( $data['image'] ? 'style="background-image: url(' . $data['image'] . ')' : 'style="background-color:' . ( $data['color'] ? $data['color'] : '#28303d' ) ) . '"' : '';
+			$style  = $attr['layout'] == '2' ? ( $data['image'] ? 'style="background-image: url(' . esc_url( $data['image'] ) . ')' : 'style="background-color:' . esc_attr( $data['color'] ? $data['color'] : '#28303d' ) ) . '"' : '';
 			$prefix = ( $attr['prefixShow'] && $attr['prefixText'] ) ? '<span class="ultp-archive-prefix">' . $attr['prefixText'] . '</span> ' : '';
 
-			$name = ( $attr['titleShow'] && $data['title'] ) ? '<' . $attr['titleTag'] . ' class="ultp-archive-name" ' . ( ( $data['color'] && $attr['customTaxTitleColor'] ) ? 'style="color: ' . $data['color'] . '"' : '' ) . '>' . $prefix . $data['title'] . '</' . $attr['titleTag'] . '>' : '';
+			$name = ( $attr['titleShow'] && $data['title'] ) ? '<' . $attr['titleTag'] . ' class="ultp-archive-name" ' . ( ( $data['color'] && $attr['customTaxTitleColor'] ) ? 'style="color: ' . esc_attr( $data['color'] ) . '"' : '' ) . '>' . $prefix . esc_html( $data['title'] ) . '</' . $attr['titleTag'] . '>' : '';
 
-			$excerpt = ( $attr['excerptShow'] && $data['desc'] ) ? '<div class="ultp-archive-desc">' . $data['desc'] . '</div>' : '';
+			$excerpt = ( $attr['excerptShow'] && $data['desc'] ) ? '<div class="ultp-archive-desc">' . wp_kses_post( $data['desc'] ) . '</div>' : '';
 
 				// Prefix
 		switch ( $attr['layout'] ) {
 			case 1:
-				$img        = ( $attr['showImage'] && $data['image'] ) ? '<img class="ultp-archive-image" src="' . $data['image'] . '" alt="' . $data['title'] . '"/>' : '';
+				$img        = ( $attr['showImage'] && $data['image'] ) ? '<img class="ultp-archive-image" src="' . esc_url( $data['image'] ) . '" alt="' . esc_attr( $data['title'] ) . '"/>' : '';
 				$post_loop .= $img . $name . $excerpt;
 				break;
 			case 2:
-				$style_overlay = $attr['customTaxColor'] ? 'style="background-color: ' . $data['color'] . '"' : '';
+				$style_overlay = $attr['customTaxColor'] ? 'style="background-color: ' . esc_attr( $data['color'] ) . '"' : '';
 				$post_loop    .= '<div class="ultp-archive-content" ' . $style . '><div class="ultp-archive-overlay" ' . $style_overlay . '></div>' . $name . $excerpt . '</div>';
 				break;
 		}

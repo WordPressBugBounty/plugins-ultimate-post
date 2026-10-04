@@ -10,13 +10,18 @@ defined( 'ABSPATH' ) || exit;
  */
 class Advanced_Filter {
 	/**
-	 * Types of pro select filters supported by the advanced filter.
+	 * Select filter types rendered by PostX itself.
+	 *
+	 * Further types are added through the `ultp_advanced_filter_select_types` filter.
 	 *
 	 * @var array
 	 */
-	private $pro_select_types = array(
-		'adv_sort',
-		'custom_tax',
+	private $select_types = array(
+		'category',
+		'tags',
+		'author',
+		'order',
+		'order_by',
 	);
 
 	/**
@@ -110,88 +115,6 @@ class Advanced_Filter {
 	}
 
 	/**
-	 * Get_adv_filter_options
-	 *
-	 * @return array
-	 */
-	private function get_adv_filter_options() {
-		return array(
-			array(
-				'id'   => 'popular_post_1_day_view',
-				'name' => __( 'Trending Today', 'ultimate-post' ),
-			),
-			array(
-				'id'   => 'popular_post_7_days_view',
-				'name' => __( 'This Week’s Popular Posts', 'ultimate-post' ),
-			),
-			array(
-				'id'   => 'popular_post_30_days_view',
-				'name' => __( 'Top Posts of the Month', 'ultimate-post' ),
-			),
-			array(
-				'id'   => 'popular_post_all_times_view',
-				'name' => __( 'All-Time Favorites', 'ultimate-post' ),
-			),
-			array(
-				'id'   => 'random_post',
-				'name' => __( 'Random Posts', 'ultimate-post' ),
-			),
-			array(
-				'id'   => 'random_post_7_days',
-				'name' => __( 'Random Posts (7 Days)', 'ultimate-post' ),
-			),
-			array(
-				'id'   => 'random_post_30_days',
-				'name' => __( 'Random Posts (30 Days)', 'ultimate-post' ),
-			),
-			array(
-				'id'   => 'latest_post_published',
-				'name' => __( 'Latest Posts - Published Date', 'ultimate-post' ),
-			),
-			array(
-				'id'   => 'latest_post_modified',
-				'name' => __( 'Latest Posts - Last Modified Date', 'ultimate-post' ),
-			),
-			array(
-				'id'   => 'oldest_post_published',
-				'name' => __( 'Oldest Posts - Published Date', 'ultimate-post' ),
-			),
-			array(
-				'id'   => 'oldest_post_modified',
-				'name' => __( 'Oldest Posts - Last Modified Date', 'ultimate-post' ),
-			),
-			array(
-				'id'   => 'alphabet_asc',
-				'name' => __( 'Alphabetical ASC', 'ultimate-post' ),
-			),
-			array(
-				'id'   => 'alphabet_desc',
-				'name' => __( 'Alphabetical DESC', 'ultimate-post' ),
-			),
-			array(
-				'id'   => 'sticky_posts',
-				'name' => __( 'Sticky Post', 'ultimate-post' ),
-			),
-			array(
-				'id'   => 'most_comment',
-				'name' => __( 'Most Comments', 'ultimate-post' ),
-			),
-			array(
-				'id'   => 'most_comment_1_day',
-				'name' => __( 'Most Comments (1 Day)', 'ultimate-post' ),
-			),
-			array(
-				'id'   => 'most_comment_7_days',
-				'name' => __( 'Most Comments (7 Days)', 'ultimate-post' ),
-			),
-			array(
-				'id'   => 'most_comment_30_days',
-				'name' => __( 'Most Comments (30 Days)', 'ultimate-post' ),
-			),
-		);
-	}
-
-	/**
 	 * Get_select_attributes
 	 *
 	 * @return array
@@ -209,20 +132,6 @@ class Advanced_Filter {
 			'sPlaceholderText'    => 'Search...',
 			'searchEnabled'       => false,
 			'inlineMultiSelect'   => true,
-		);
-	}
-
-	/**
-	 * Get_search_attributes
-	 *
-	 * @return array
-	 */
-	public function get_search_attributes() {
-		return array(
-			'advanceId'   => '',
-			'blockId'     => '',
-			'advanceCss'  => '',
-			'placeholder' => 'Search...',
 		);
 	}
 
@@ -294,19 +203,7 @@ class Advanced_Filter {
 
 		$ids = implode( ',', $data_ids );
 
-		$adv_sort = $this->get_adv_filter_options();
-
 		switch ( $type ) {
-			case 'adv_sort':
-				$adv_sort_id = explode( ',', $ids );
-				foreach ( $adv_sort as $adv ) {
-					foreach ( $adv_sort_id as $id ) {
-						if ( $adv['id'] === $id ) {
-							$res[ $id ] = $adv['name'];
-						}
-					}
-				}
-				break;
 			case 'category':
 				$args = array(
 					'taxonomy'   => 'category',
@@ -375,49 +272,21 @@ class Advanced_Filter {
 					}
 				}
 				break;
-			case 'custom_tax':
-				if ( '' === $post_types ) {
-					break;
-				}
-
-				foreach ( $post_types as $post_type ) {
-					$taxonomies = get_object_taxonomies( $post_type );
-
-					foreach ( $taxonomies as $taxonomy ) {
-						if ( 'category' !== $taxonomy && 'post_tag' !== $taxonomy ) {
-							$terms = get_terms(
-								array(
-									'taxonomy'   => $taxonomy,
-									'hide_empty' => false,
-								)
-							);
-							foreach ( $terms as $term ) {
-								$should_add = true;
-								if ( 'specific' === $option ) {
-									$should_add = false;
-									if ( is_array( $data_ids ) ) {
-										$should_add = in_array( $term->slug, $data_ids, true );
-									} elseif ( is_string( $data_ids ) ) {
-										$data_ids_arr = array_filter( array_map( 'trim', explode( ',', $data_ids ) ), 'strlen' );
-										$should_add   = in_array( $term->slug, $data_ids_arr, true );
-									}
-								}
-								if ( $should_add ) {
-									$res[ $term->slug ] = array(
-										'name'     => $term->name,
-										'taxonomy' => $taxonomy,
-									);
-								}
-							}
-						}
-					}
-				}
-
 			default:
+				/**
+				 * Inline (button) options for a select filter type PostX does not render itself.
+				 *
+				 * @param array        $res        Options keyed by value. Holds '_all' when that button is enabled.
+				 * @param string       $type       Filter type.
+				 * @param array        $data_ids   Values chosen in the block settings.
+				 * @param array|string $post_types Post types the filter applies to, or ''.
+				 * @param string       $option     'all' or 'specific'.
+				 */
+				$res = apply_filters( 'ultp_advanced_filter_button_data', $res, $type, $data_ids, $post_types, $option );
 				break;
 		}
 
-		return $res;
+		return is_array( $res ) ? $res : array();
 	}
 
 	/**
@@ -455,8 +324,6 @@ class Advanced_Filter {
 				}
 			);
 		}
-
-		$adv_sort = $this->get_adv_filter_options();
 
 		switch ( $type ) {
 
@@ -553,72 +420,43 @@ class Advanced_Filter {
 				$this->filter_select_options( $this->order_by, $filtered_specific )
 				: $this->order_by;
 
-			case 'adv_sort':
-				$data = 'specific' === $mode ?
-				$this->filter_select_options( $adv_sort, $filtered_specific )
-				: $adv_sort;
+			default:
+				/**
+				 * Dropdown options for a select filter type PostX does not render itself.
+				 *
+				 * Return a list of array( 'id' => ..., 'name' => ... ) items, without the
+				 * '_all' item: PostX inserts that. Return null to render no options at all.
+				 *
+				 * @param array|null   $data       Options. Null when no callback handles the type.
+				 * @param string       $type       Filter type.
+				 * @param array|string $post_types Post types the filter applies to, or ''.
+				 * @param array        $specific   Values chosen in the block settings, without '_all'.
+				 * @param string       $mode       'all' or 'specific'.
+				 */
+				$data = apply_filters( 'ultp_advanced_filter_select_data', null, $type, $post_types, $filtered_specific, $mode );
 
-				$this->maybe_insert_all_option( $data, $all, $all_idx, $mode );
-
-				return $data;
-
-			case 'custom_tax':
-				if ( '' === $post_types ) {
+				if ( ! is_array( $data ) ) {
 					return array();
 				}
 
-				$data = array();
-
-				foreach ( $post_types as $post_type ) {
-					$taxonomies = get_object_taxonomies( sanitize_text_field( $post_type ) );
-					foreach ( $taxonomies as $taxonomy ) {
-						if ( 'category' !== $taxonomy && 'post_tag' !== $taxonomy ) {
-							$terms = array();
-
-							if ( 'specific' === $mode && count( $filtered_specific ) > 0 ) {
-								foreach ( $filtered_specific as $s ) {
-									$res = get_term_by( 'slug', $s, $taxonomy );
-									if ( ! empty( $res ) ) {
-										$terms[] = $res;
-									}
-								}
-							} else {
-								$terms = get_terms(
-									array(
-										'taxonomy'   => $taxonomy,
-										'hide_empty' => false,
-									)
-								);
-							}
-
-							foreach ( $terms as $term ) {
-								$existing_ids = array_column( $data, 'id' );
-								if ( ! in_array( $term->slug, $existing_ids, true ) ) {
-									$data[] = array(
-										'id'       => $term->slug,
-										'name'     => $term->name,
-										'taxonomy' => $taxonomy,
-									);
-								}
-							}
-						}
-					}
-				}
-
 				$this->maybe_insert_all_option( $data, $all, $all_idx, $mode );
 
 				return $data;
-			default:
-				return array();
 		}
 	}
 
 	public function select_content( $attr ) {
 		$block_name = 'filter-select';
-		$is_active  = ultimate_post()->is_lc_active();
 		$attr       = wp_parse_args( $attr, $this->get_select_attributes() );
 
-		if ( ! $is_active && in_array( $attr['type'], $this->pro_select_types ) ) {
+		/**
+		 * Select filter types that render on the front end.
+		 *
+		 * @param array $types Types PostX renders itself.
+		 */
+		$types = apply_filters( 'ultp_advanced_filter_select_types', $this->select_types );
+
+		if ( ! empty( $attr['type'] ) && ! in_array( $attr['type'], (array) $types, true ) ) {
 			return '';
 		}
 
@@ -671,13 +509,13 @@ class Advanced_Filter {
 					<?php
 					if ( is_array( $value ) ) {
 						$name = $value['name'];
-						$tax  = isset( $value['taxonomy'] ) ? 'data-tax="' . esc_attr( $value['taxonomy'] ) . '"' : '';
+						$tax  = isset( $value['taxonomy'] ) ? $value['taxonomy'] : null;
 					} else {
 						$name = $value;
-						$tax  = '';
+						$tax  = null;
 					}
 					?>
-				<div <?php echo $btn_wrapper_attrs; ?> <?php echo $tax; ?> data-selected="<?php echo esc_attr( $key ); ?>" data-type="<?php echo esc_attr( $attr['type'] ); ?>">
+				<div <?php echo $btn_wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() returns pre-escaped attribute HTML; escaping it again would corrupt it. ?> <?php echo null !== $tax ? 'data-tax="' . esc_attr( $tax ) . '"' : ''; ?> data-selected="<?php echo esc_attr( $key ); ?>" data-type="<?php echo esc_attr( $attr['type'] ); ?>">
 					<?php echo esc_html( $name ); ?>
 				</div>
 				<?php endforeach ?>
@@ -724,7 +562,7 @@ class Advanced_Filter {
 
 			ob_start();
 			?>
-			<div <?php echo $wrapper_attrs; ?>>
+			<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() returns pre-escaped attribute HTML; escaping it again would corrupt it. ?>>
 				<div class="ultp-filter-select-field ultp-filter-select__parent">
 					<span class="ultp-filter-select-field-selected ultp-filter-select__parent-inner">
 				<?php echo esc_html( isset( $def_value['name'] ) ? $def_value['name'] : '' ); ?>
@@ -746,10 +584,7 @@ class Advanced_Filter {
 					<?php endif; ?>
 
 						<?php foreach ( $data as $item ) : ?>
-							<?php
-							$tax = isset( $item['taxonomy'] ) ? 'data-tax="' . esc_attr( $item['taxonomy'] ) . '"' : '';
-							?>
-						<li class="ultp-filter-select__dropdown-inner" <?php echo $tax; ?> data-id="<?php echo esc_attr( $item['id'] ); ?>">
+						<li class="ultp-filter-select__dropdown-inner" <?php echo isset( $item['taxonomy'] ) ? 'data-tax="' . esc_attr( $item['taxonomy'] ) . '"' : ''; ?> data-id="<?php echo esc_attr( $item['id'] ); ?>">
 							<?php echo esc_html( $item['name'] ); ?>
 						</li>
 					<?php endforeach; ?>
@@ -768,46 +603,22 @@ class Advanced_Filter {
 		/**
 		 * Search_content
 		 *
+		 * The search filter is rendered by PostX Pro through the
+		 * `ultp_advanced_filter_search_content` filter; PostX itself outputs nothing.
+		 *
 		 * @param  mixed $attr array.
 		 * @return string
 		 */
 	public function search_content( $attr ) {
-		$block_name = 'filter-search-adv';
-		$is_active  = ultimate_post()->is_lc_active();
+		/**
+		 * Front-end markup for the Advanced Filter search block.
+		 *
+		 * @param string $content Markup. Empty by default.
+		 * @param array  $attr    Block attributes, unsanitized.
+		 */
+		$content = apply_filters( 'ultp_advanced_filter_search_content', '', (array) $attr );
 
-		if ( ! $is_active ) {
-			return '';
-		}
-
-		$attr = wp_parse_args( $attr, $this->get_search_attributes() );
-
-		$attr['blockId']     = ultimate_post()->sanitize_attr( $attr, 'blockId', 'sanitize_html_class', 'missing_block_id' );
-		$attr['placeholder'] = ultimate_post()->sanitize_attr( $attr, 'placeholder', 'sanitize_text_field' );
-
-		$wrapper_attrs = get_block_wrapper_attributes(
-			array(
-				'class'      => 'ultp-block-' . $attr['blockId'] . ' ultp-filter-search',
-				'aria-label' => 'Search Filter',
-				'role'       => 'searchbox',
-			)
-		);
-
-		ob_start();
-		?>
-		<div <?php echo $wrapper_attrs; ?>>
-			<div class="ultp-filter-search-input">
-				<input
-					type="search"
-					placeholder="<?php echo esc_attr( $attr['placeholder'] ); ?>"
-				/>
-				<span class="ultp-filter-search-input-icon">
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 47.05 47.05" fill="currentColor"><path stroke="currentColor" strokeMiterlimit="10" d="m43.051 45.948-9.618-9.616a20.183 20.183 0 1 1 2.9-2.9l9.617 9.616a2.05 2.05 0 1 1-2.9 2.9Zm-22.367-9.179A16.084 16.084 0 1 0 4.6 20.684a16.1 16.1 0 0 0 16.084 16.085Z"/></svg>
-				</span>
-			</div>
-		</div>
-			<?php
-			$content = ob_get_clean();
-			return $content;
+		return is_string( $content ) ? $content : '';
 	}
 
 		/**
@@ -818,7 +629,6 @@ class Advanced_Filter {
 		 */
 	public function clear_content( $attr ) {
 		$block_name = 'filter-clear';
-		// $is_active     = ultimate_post()->is_lc_active();
 		$attr = wp_parse_args( $attr, $this->get_clear_attributes() );
 
 		$attr['blockId']         = ultimate_post()->sanitize_attr( $attr, 'blockId', 'sanitize_html_class', 'missing_block_id' );
@@ -841,8 +651,8 @@ class Advanced_Filter {
 		ob_start();
 		?>
 
-		<div class="ultp-block-<?php echo $attr['blockId']; ?>-wrapper">
-			<div <?php echo $selected_filter_wrapper_attr; ?>>
+		<div class="ultp-block-<?php echo sanitize_html_class( $attr['blockId'] ); ?>-wrapper">
+			<div <?php echo $selected_filter_wrapper_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() returns pre-escaped attribute HTML; escaping it again would corrupt it. ?>>
 				<div class="ultp-selected-filter">
 					<span class="ultp-selected-filter-icon" role="button">
 						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 31.1 31.25"><path stroke="rgba(0,0,0,0)" strokeMiterlimit="10" d="M27.1 30.153 15.549 18.601 4 30.153a2.05 2.05 0 0 1-2.9-2.9l11.551-11.55L1.1 4.153a2.05 2.05 0 0 1 2.9-2.9l11.549 11.552L27.1 1.253a2.05 2.05 0 0 1 2.9 2.9l-11.553 11.55L30 27.253a2.05 2.05 0 1 1-2.9 2.9Z"/></svg>
@@ -852,7 +662,7 @@ class Advanced_Filter {
 				</div>
 			</div>
 
-			<div <?php echo $wrapper_attrs; ?>>
+			<div <?php echo $wrapper_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() returns pre-escaped attribute HTML; escaping it again would corrupt it. ?>>
 				<button class="ultp-clear-button">
 				<?php echo esc_html( $attr['clearButtonText'] ); ?>
 				</button>

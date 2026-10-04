@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 
 class PostXOxygenElement extends OxyEl {
 
@@ -35,8 +36,8 @@ class PostXOxygenElement extends OxyEl {
 		$templates = $options['templates'];
 
 		if ( $templates ) {
-			if ( isset( $_GET['action'] ) && strpos( sanitize_key( $_GET['action'] ), 'oxy_render_oxy' ) !== false ) {
-				echo ultimate_post()->build_css_for_inline_print( $templates, true ); //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			if ( isset( $_GET['action'] ) && strpos( sanitize_key( $_GET['action'] ), 'oxy_render_oxy' ) !== false ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only Oxygen editor detection.
+				echo ultimate_post()->build_css_for_inline_print( $templates, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- <style> tag from build_css_for_inline_print(): integer post ID, CSS passed through wp_strip_all_tags().
 			}
 
 			$args      = array(
@@ -51,7 +52,7 @@ class PostXOxygenElement extends OxyEl {
 				}
 				wp_reset_postdata();
 			}
-		} elseif ( isset( $_GET['action'] ) && strpos( sanitize_key( $_GET['action'] ), 'oxy_render_oxy' ) !== false ) {
+		} elseif ( isset( $_GET['action'] ) && strpos( sanitize_key( $_GET['action'] ), 'oxy_render_oxy' ) !== false ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only Oxygen editor detection.
 			// @codingStandardsIgnoreLine
 				echo '<p style="text-align:center;">' . sprintf( esc_html__( 'Pick a Template from your saved ones. Or create a template from: %s.', 'ultimate-post' ) . ' ', '<strong><i>' . esc_html__( 'Dashboard > PostX > Saved Templates', 'ultimate-post' ) . '</i></strong>' ) . '</p>';
 		}

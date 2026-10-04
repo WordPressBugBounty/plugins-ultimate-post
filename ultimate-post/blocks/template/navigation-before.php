@@ -1,5 +1,6 @@
 <?php
 defined( 'ABSPATH' ) || exit;
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Included inside block render methods; variables are local.
 
 // Adv Filter Integration
 $adv_filter_dataset = ultimate_post()->get_adv_data_attrs( $attr );

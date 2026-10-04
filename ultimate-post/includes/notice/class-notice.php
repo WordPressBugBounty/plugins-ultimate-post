@@ -113,8 +113,15 @@ class Notice {
 		$type           = isset( $request_params['type'] ) ? $request_params['type'] : '';
 		$id             = isset( $request_params['id'] ) ? $request_params['id'] : '';
 
-		if ( 'hello_bar' === $type && ! empty( $id ) ) {
-			Xpo::set_transient_without_cache( $id, 'hide', 1296000 );
+		// Guideline 11 — a dismissal must stick. This previously expired after 15
+		// days (1296000s), so a dismissed sale bar came back on its own. Passing 0
+		// stores it with no timeout, which Xpo::get_transient_without_cache() reads
+		// back indefinitely.
+		//
+		// $id names the option that gets written, so it is checked against the
+		// known hellobar keys rather than trusted from the request.
+		if ( 'hello_bar' === $type && ! empty( $id ) && array_key_exists( $id, self::get_hellobar_config() ) ) {
+			Xpo::set_transient_without_cache( $id, 'hide', 0 );
 		}
 
 		return new \WP_REST_Response(
@@ -133,7 +140,7 @@ class Notice {
 	 */
 	public function set_dismiss_notice_callback() {
 
-		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['wpnonce'] ?? '' ) ), 'ultp-nonce' ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['wpnonce'] ?? '' ) ), 'ultp-admin-nonce' ) ) {
 			return;
 		}
 
@@ -194,7 +201,7 @@ class Notice {
 	 * @return void
 	 */
 	public function ultp_dashboard_banner_notice( $return_bool = false ) {
-		$ultp_db_nonce  = wp_create_nonce( 'ultp-nonce' );
+		$ultp_db_nonce  = wp_create_nonce( 'ultp-admin-nonce' );
 		$banner_notices = array(
 			// FLash sale.
 			array(
@@ -563,6 +570,13 @@ class Notice {
 	public function ultp_dashboard_durbin_notice_callback() {
 		$durbin_key = 'ultp_durbin_dc1';
 
+		// Guideline 11 — the consent notice is allowed on PostX's own screens and,
+		// as is standard immediately after activation, on plugins.php. Nowhere else.
+		global $pagenow;
+		if ( ! $this->is_postx_screen() && 'plugins.php' !== $pagenow ) {
+			return;
+		}
+
 		if (
 			isset( $_GET['ultp_durbin_key'] ) || // phpcs:ignore
 			'off' === Xpo::get_transient_without_cache( 'ultp_durbin_notice_' . $durbin_key )
@@ -574,7 +588,7 @@ class Notice {
 			$this->notice_js_css_applied = true;
 		}
 
-		$ultp_db_nonce = wp_create_nonce( 'ultp-nonce' );
+		$ultp_db_nonce = wp_create_nonce( 'ultp-admin-nonce' );
 
 		?>
 		<style>
@@ -728,11 +742,11 @@ class Notice {
 
 		);
 
-			$ultp_db_nonce = wp_create_nonce( 'ultp-nonce' );
+			$ultp_db_nonce = wp_create_nonce( 'ultp-admin-nonce' );
 
 		foreach ( $content_notices as $key => $notice ) {
 			$notice_key = isset( $notice['key'] ) ? $notice['key'] : $this->notice_version;
-			if ( isset( $_GET['ultp_notice'] ) && $notice_key === $_GET['ultp_notice'] ) {
+			if ( isset( $_GET['ultp_notice'] ) && $notice_key === sanitize_text_field( wp_unslash( $_GET['ultp_notice'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only; hides the notice on this page view.
 				continue;
 			} else {
 				$border_color = $notice['border_color'];
@@ -927,7 +941,32 @@ class Notice {
 	 *
 	 * @return bool
 	 */
+	/**
+	 * Whether the current admin screen belongs to PostX.
+	 *
+	 * Guideline 11 limits promotional UI to the plugin's own screens. Every PostX
+	 * screen carries `ultp` in its screen id — `toplevel_page_ultp-settings`,
+	 * `postx_page_ultp-setup-wizard`, and the `ultp_builder` / `ultp_templates` /
+	 * `ultp_custom_font` post-type screens.
+	 *
+	 * @return BOOL True when the current screen is a PostX screen.
+	 */
+	public function is_postx_screen() {
+		if ( ! function_exists( 'get_current_screen' ) ) {
+			return false;
+		}
+		$screen = get_current_screen();
+		return $screen && false !== strpos( $screen->id, 'ultp' );
+	}
+
 	public function is_available_for_notice() {
+		// Guideline 11 — sale banners and upgrade prompts belong on PostX's own
+		// screens, not on core screens or other plugins' pages.
+		if ( ! $this->is_postx_screen() ) {
+			return false;
+		}
+
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Shared across WPXPO plugins (ProductX, WholesaleX, …); renaming breaks them.
 		$active_notices = apply_filters( 'xpo_active_notice_lists', array() );
 		if ( empty( $active_notices ) ) {
 			return true;
@@ -937,7 +976,7 @@ class Notice {
 	}
 
 	public function ultp_dashboard_image_banner_notice( $return_bool = false ) {
-		$ultp_db_nonce  = wp_create_nonce( 'ultp-nonce' );
+		$ultp_db_nonce  = wp_create_nonce( 'ultp-admin-nonce' );
 		$banner_notices = array(
 			array(
 				'key'         => 'ultp_summer_sale_2612',

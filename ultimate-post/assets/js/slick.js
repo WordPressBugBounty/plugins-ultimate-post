@@ -12,6 +12,8 @@ Website: http://kenwheeler.github.io
 	Docs: http://kenwheeler.github.io/slick
 	Repo: http://github.com/kenwheeler/slick
 	Issues: http://github.com/kenwheeler/slick/issues
+	@license MIT. Copyright (c) 2013-2016 Ken Wheeler.
+	https://github.com/kenwheeler/slick/blob/v1.8.1/LICENSE
 
  */
 /* global window, document, define, jQuery, setInterval, clearInterval */

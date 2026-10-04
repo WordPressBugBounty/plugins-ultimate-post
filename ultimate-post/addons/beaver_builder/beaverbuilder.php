@@ -1,11 +1,13 @@
 <?php
+defined( 'ABSPATH' ) || exit;
+
 class PostXBeaverTemplate extends FLBuilderModule {
 
 	public function __construct() {
 		parent::__construct(
 			array(
 				'name'            => __( 'PostX Template', 'ultimate-post' ),
-				'description'     => __( 'An basic example module using jQuery TwentyTwenty.', 'fl-builder' ),
+				'description'     => __( 'An basic example module using jQuery TwentyTwenty.', 'ultimate-post' ),
 				'category'        => __( 'Basic', 'ultimate-post' ),
 				'dir'             => __DIR__,
 				'partial_refresh' => true,

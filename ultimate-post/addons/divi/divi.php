@@ -1,4 +1,6 @@
 <?php
+defined( 'ABSPATH' ) || exit;
+
 add_action( 'et_builder_ready', 'ultp_postx_template_divi_modules' );
 
 function ultp_postx_template_divi_modules() {
@@ -45,7 +47,7 @@ function ultp_postx_template_divi_modules() {
 						$the_query->the_post();
 						ob_start();
 						if ( in_array( 'et-fb', $body_class ) ) {
-							echo ultimate_post()->build_css_for_inline_print( $templates, true ); //phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							echo ultimate_post()->build_css_for_inline_print( $templates, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- <style> tag from build_css_for_inline_print(): integer post ID, CSS passed through wp_strip_all_tags().
 						}
 							the_content();
 						$content = ob_get_clean();

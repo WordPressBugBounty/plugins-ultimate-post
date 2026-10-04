@@ -1,5 +1,6 @@
 <?php
 defined( 'ABSPATH' ) || exit;
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Included inside block render methods; variables are local.
 
 
 if ( $attr['enablePopup'] || ( isset( $vid_icon_redirect ) && ! $vid_icon_redirect ) ) {

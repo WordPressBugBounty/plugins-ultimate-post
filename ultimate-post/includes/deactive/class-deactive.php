@@ -37,6 +37,9 @@ class Deactive {
 	 * @return void
 	 */
 	public function send_plugin_data() {
+		if ( ! check_ajax_referer( 'ultp_deactive_plugin', 'wpnonce', false ) ) {
+			wp_die();
+		}
 		DurbinClient::send( DurbinClient::DEACTIVATE_ACTION );
 	}
 
@@ -112,7 +115,7 @@ class Deactive {
 									<input type="radio" <?php echo 0 == $key ? 'checked="checked"' : ''; ?> id="<?php echo esc_attr( $setting['id'] ); ?>" name="<?php echo esc_attr( $this->plugin_slug ); ?>" value="<?php echo esc_attr( $setting['text'] ); ?>">
 									<div class="ultp-reason-text"><?php echo esc_html( $setting['text'] ); ?></div>
 									<?php if ( isset( $setting['input'] ) && $setting['input'] ) { ?>
-										<textarea placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>" class="ultp-reason-input <?php echo $key == 0 ? 'ultp-active' : ''; ?> <?php echo esc_html( $setting['id'] ); ?>"></textarea>
+										<textarea placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>" class="ultp-reason-input <?php echo esc_attr( 0 == $key ? 'ultp-active' : '' ); ?> <?php echo esc_attr( $setting['id'] ); ?>"></textarea>
 									<?php } ?>
 								</label>
 							</li>
@@ -356,6 +359,7 @@ class Deactive {
 						type: 'POST',
 						data: { 
 							action: 'ultp_deactive_plugin',
+							wpnonce: '<?php echo esc_js( wp_create_nonce( 'ultp_deactive_plugin' ) ); ?>',
 							cause_id: $('#ultp-deactive-modal input[type=radio]:checked').attr('id'),
 							cause_title: $('#ultp-deactive-modal .ultp-modal-input input[type=radio]:checked').val(),
 							cause_details: $('#ultp-deactive-modal .ultp-reason-input.ultp-active').val()

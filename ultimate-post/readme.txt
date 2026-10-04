@@ -1,10 +1,10 @@
 === Post Grid Gutenberg Blocks - PostX ===
 Contributors: wpxpo, anik4e, jakirhasan
 Tags: post grid, gutenberg blocks, blog grid, Gutenberg, grid
-Requires at least: 5.0
+Requires at least: 6.0
 Tested up to: 7.1
-Requires PHP: 5.6
-Stable tag: 5.0.41
+Requires PHP: 7.4
+Stable tag: 5.1.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -158,19 +158,19 @@ Keep users engaged with seamless Ajax-powered pagination that loads content inst
 
 Take your blog to the next level with advanced features designed to improve engagement, usability, and content management.
 
-[**Front End Post Submission**](https://www.wpxpo.com/product/postx/features/front-end-post-submission/)
+[**Front End Post Submission**](https://www.wpxpo.com/product/postx/features/front-end-post-submission/) (Pro)
 Allow writers to submit content directly from the front end without giving them access to the WordPress dashboard. Perfect for managing guest and freelance writers.
 
 **Dynamic Content**
-Pull data dynamically from any post type and display information such as post meta, custom fields, and more. 
+Pull data dynamically from any post type and display information such as post meta, custom fields, and more. ACF, Meta Box and Pods fields come with PostX Pro.
 
 [**Table of Contents**](https://www.wpxpo.com/product/postx/features/table-of-content-wordpress/)
 Add a structured table of contents to posts that improves readability and navigation – which also helps in SEO.
 
-[**Reading Progress Bar**](https://www.wpxpo.com/product/postx/features/reading-progress-bar/)
+[**Reading Progress Bar**](https://www.wpxpo.com/product/postx/features/reading-progress-bar/) (Pro)
 Show a visual progress bar on posts to highlight how much the visitor has read or scrolled. You can also add the progress bar to any page of your WordPress site.
 
-[**Taxonomy Image & Color**](https://www.wpxpo.com/product/postx/features/wordpress-taxonomy-image-and-color/)
+[**Taxonomy Image & Color**](https://www.wpxpo.com/product/postx/features/wordpress-taxonomy-image-and-color/) (Pro)
 Add featured images and desired colors to categories, tags, and custom post types – making the taxonomies more visually appealing.
 
 == Header, Footer & Mega Menu Builder ==
@@ -228,7 +228,7 @@ Love the comfort of your favorite page builders? Easily use Gutenberg blocks and
 
 Design and reuse any set of designs with the help of the [Saved Template](https://www.wpxpo.com/product/postx/features/saved-template/) feature of PostX.
 
-== SEO Plugins Support ==
+== SEO Plugins Support (Pro) ==
 Fully compatible with major SEO plugins like Rank Math, Yoast, All-in-One SEO, Squirrly, SEOPress and others to display custom meta descriptions easily inside content. 
 
 == PostX Recommended Themes ==
@@ -277,7 +277,14 @@ You can Translate PostX on [translate.wordpress.org](https://translate.wordpress
 
 == Author ==
 
-Developed by [WPXPO](https://www.wpxpo.com). [Contribute to Gutenberg Post Blocks on Bitbucket](https://bitbucket.org/wpstabon/ultimate-post/src/master/) and join the party.
+Developed by [WPXPO](https://www.wpxpo.com). [Contribute to Gutenberg Post Blocks on Bitbucket](https://bitbucket.org/wpstabon/ultimate-post/src/release/) and join the party.
+
+== Development ==
+
+PostX is developed in the open. The full source for this release — including the React sources
+behind the block editor UI, the dashboard and the setup wizard, and every build tool — lives at:
+
+https://bitbucket.org/wpstabon/ultimate-post/src/release/
 
 == Other Plugins by WPXPO ==
 
@@ -298,12 +305,110 @@ We are glad that you are considering PostX. We have more amazing plugins that yo
 📦 [**WholesaleX:**](https://wordpress.org/plugins/wholesalex/) A complete WooCommerce Wholesale solution with additional features like a bulk order form, dynamic pricing & discount rules.
 
 
+== Privacy ==
+
+PostX connects to the following external services. Each one is listed with what
+is sent, when, and why.
+
+= Usage analytics =
+
+PostX sends usage and diagnostic information to WPXPO at
+`inside.wpxpo.com/wp-json/durbin/v1/analytics`. It is sent only from an
+administrator's action, at these points:
+
+* When you click "Accept & Close" on the PostX data-collection notice.
+* When you import a starter site with "Stay updated with exciting features and
+  news" checked.
+* In the setup wizard, when you move on from the site-type step, and when you
+  finish the wizard with data sharing or updates turned on.
+* When you submit the deactivation survey. Skipping the survey sends nothing.
+
+WPXPO's data-collection policy is at https://www.wpxpo.com/data-collection-policy/,
+its privacy policy at https://www.wpxpo.com/privacy-policy/ and its terms at
+https://www.wpxpo.com/terms-and-conditions/
+
+= Country lookup =
+
+To determine the country for the analytics above, PostX makes a request to
+`ipinfo.io/json`, a third-party IP geolocation service operated by IPinfo. The
+request is made only when analytics are sent and no country is cached yet.
+
+* What is sent: nothing from your site is added to the request. Your server's
+  public IP address is visible to IPinfo as the origin of the request, which is
+  how the service works out the country.
+* What is kept: only the two-letter country code from the response (for example
+  `US`). It is stored in your site's database as the `durbin_country_code`
+  transient for 180 days, so the lookup happens at most once per 180 days.
+* What is not kept: PostX does not store the IP address or anything else from
+  the response, and does not add the IP address to the analytics data.
+* Where it goes: the country code is included in the usage analytics sent to
+  WPXPO.
+
+IPinfo is not operated by WPXPO. Their terms of service are at
+https://ipinfo.io/terms-of-service and their privacy policy is at
+https://ipinfo.io/privacy-policy
+
+= Starter sites and templates =
+
+When you open the starter sites, patterns or design templates, or import one,
+PostX requests the list or the template from WPXPO's template service at
+`postxkit.wpxpo.com`, from your server and from the block editor.
+
+What is sent: the PostX version and the ID of the template or site you picked. No other personal data is sent. WPXPO's privacy policy is at
+https://www.wpxpo.com/privacy-policy/ and its terms at
+https://www.wpxpo.com/terms-and-conditions/
+
+= Support form =
+
+If you submit the support form in the PostX dashboard, your name, email address,
+subject and message are sent to `wpxpo.com/wp-json/v2/support_mail`. This only
+happens when you submit that form. WPXPO's privacy policy is at
+https://www.wpxpo.com/privacy-policy/
+
+= ChatGPT =
+
+The ChatGPT add-on does nothing until you enter your own OpenAI API key in
+PostX > Settings. After that, when you use ChatGPT in the block editor, your
+site's server sends the text you selected or typed, the model you chose and your
+API key to OpenAI at `api.openai.com`. The key stays on the server and is never
+sent to the browser. Nothing is sent until you run a ChatGPT action. OpenAI's terms of use are at https://openai.com/policies/terms-of-use and
+its privacy policy at https://openai.com/policies/privacy-policy
+
+= Google Fonts =
+
+Blocks that use Google Fonts load them from `fonts.googleapis.com` on the front
+end, which exposes your visitors' IP addresses to Google. You can switch this
+off with "Disable All Google Fonts" in PostX > Settings, which serves fonts
+locally instead. Google's privacy policy is at https://policies.google.com/privacy
+
+= YouTube Gallery block =
+
+The YouTube Gallery block needs your own YouTube Data API key and contacts
+nothing until you enter one. Once it has a key, pages that contain the block load
+their video list from the YouTube Data API at `www.googleapis.com/youtube/v3`, in
+your visitors' browsers on the front end and in yours in the editor. The request
+carries the channel, playlist or search term set in the block, the IDs of the
+videos shown, and your API key. Videos play in an embedded YouTube player from
+`www.youtube.com`.
+Both expose your visitors' IP addresses to Google. The block uses YouTube API
+Services: see the YouTube Terms of Service at https://www.youtube.com/t/terms and
+the Google Privacy Policy at https://policies.google.com/privacy
+
+= YouTube and Vimeo videos in post blocks =
+
+Blocks displaying a YouTube video thumbnail load the image from
+`img.youtube.com` on the front end, which exposes your visitors' IP addresses to
+Google. This only applies to posts that have a YouTube video attached. When a
+visitor clicks play on such a video, the player is loaded from `www.youtube.com`
+or, for Vimeo videos, `player.vimeo.com`. Vimeo's privacy policy is at
+https://vimeo.com/privacy
+
 == Installation ==
 
 = Minimum Requirements =
 
-* WordPress 5.0.0 or greater
-* PHP version 7.3 or greater
+* WordPress 6.0 or greater
+* PHP version 7.4 or greater
 * MySQL version 5.6 or greater
 
 = Automatic installation =
@@ -346,7 +451,8 @@ Bugs can be reported on the WordPress support forum.
 
 = Is it working with older version of WordPress? =
 
-It is a Gutenberg plugin it works great with WordPress version 5.x.x or more. And WordPress older version with Gutenberg plugin.
+PostX requires WordPress 6.0 or greater. It uses block editor APIs that were not available in
+earlier releases, so it is not supported on WordPress 5.x.
 
 
 == Screenshots ==
@@ -358,12 +464,23 @@ It is a Gutenberg plugin it works great with WordPress version 5.x.x or more. An
 5. There are multiple starter packs for different niches that include News, Magazine, Blog, Travel, Health, Sports News, Food, Gaming News, Crypto News, Beauty etc.
 6. All the Post Blocks have multiple premade designs that will be available to change once you add a block to any page.
 7. All blocks have multiple layout variations that will be available to change once you add a block to any page.
-8. PostX offers multiple addons to expand its functionalities that include Category, Builder, Progress Bar, Elementor, Table of Contents, Saved Templates, SEO Meta addons.
+8. PostX offers multiple addons to expand its functionalities that include Builder, Elementor, Table of Contents and Saved Templates. Taxonomy Image & Color, Progress Bar and the SEO Meta addons come with PostX Pro.
 9. The Gutenberg Table of Contents blocks is a complete solution multiple design, features and customization options.
 10. The Scrolling Breaking News Ticker is finely crafted for all types of News Magazine sites with lots of variations and customization options.
 11. With the help of the Elementor and Saved Template addons, you can use any of the post blocks of PostX to any pages while editing with Elementor builder.
 
 == Changelog ==
+= 5.1.0 – 04 October 2026 =
+* Update: Now requires WordPress 6.0 and PHP 7.4
+* Update: Readme now lists every external service PostX connects to, and Pro features are labelled
+* Update: Third-party licence notices now ship with the plugin
+* Fix: ChatGPT requests are sent from your server, so the OpenAI key is no longer exposed in the browser
+* Fix: SVG font uploads are sanitized and allowed only for custom fonts
+* Fix: Builder premade import accepts only the PostX template service
+* Fix: Escaping in the post filter, Archive Title, Dark/Light and Advanced Filter output
+* Fix: Expired security tokens now recover instead of failing requests
+* Fix: Accessible names for icon-only social links
+
 = 5.0.41 – 16 September 2026 =
 * Fix: Pattern library filter navigation showing incorrectly on homepage
 
@@ -642,4 +759,4 @@ It is a Gutenberg plugin it works great with WordPress version 5.x.x or more. An
 * New: Sticky Row
 * Fix: Default value in Advance filter dropdown was not correctly set in some instances.
 
-[See changelog for all versions](https://bitbucket.org/wpstabon/ultimate-post/raw/master/changelog.txt).
+[See changelog for all versions](https://bitbucket.org/wpstabon/ultimate-post/raw/release/changelog.txt).

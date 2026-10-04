@@ -1,15 +1,15 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
-$is_block_theme = wp_is_block_theme();
+$ultp_is_block_theme = wp_is_block_theme();
 
 global $ULTP_HEADER_ID;
 global $ULTP_FOOTER_ID;
-$builder_active = ultimate_post()->get_setting( 'ultp_builder' ) != 'false';
-$has_header     = $builder_active ? $ULTP_HEADER_ID : '';
-$has_footer     = $builder_active ? $ULTP_FOOTER_ID : '';
+$ultp_builder_active = ultimate_post()->get_setting( 'ultp_builder' ) != 'false';
+$ultp_has_header     = $ultp_builder_active ? $ULTP_HEADER_ID : '';
+$ultp_has_footer     = $ultp_builder_active ? $ULTP_FOOTER_ID : '';
 
-if ( $is_block_theme ) {
+if ( $ultp_is_block_theme ) {
 	?><!DOCTYPE html>
 	<html <?php language_attributes(); ?>>
 	<head>
@@ -22,11 +22,11 @@ if ( $is_block_theme ) {
 	<?php
 	wp_body_open();
 
-	if ( ! $has_header ) {
+	if ( ! $ultp_has_header ) {
 		ob_start();
 		block_template_part( 'header' );
-		$header = ob_get_clean();
-		echo '<header class="wp-block-template-part">' . $header . '</header>';
+		$ultp_header = ob_get_clean();
+		echo '<header class="wp-block-template-part">' . $ultp_header . '</header>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core-rendered block template part.
 	}
 } else {
 	get_header();
@@ -34,10 +34,10 @@ if ( $is_block_theme ) {
 
 do_action( 'ultp_before_content' );
 
-$width = ultimate_post()->get_setting( 'container_width' );
-$width = $width ? $width : '1140';
+$ultp_width = ultimate_post()->get_setting( 'container_width' );
+$ultp_width = $ultp_width ? $ultp_width : '1140';
 ?>
-<div class="ultp-template-container" style="margin:0 auto;max-width:<?php echo esc_attr( $width ); ?>px; padding: 0 15px; width: -webkit-fill-available; width: -moz-available;">
+<div class="ultp-template-container" style="margin:0 auto;max-width:<?php echo esc_attr( $ultp_width ); ?>px; padding: 0 15px; width: -webkit-fill-available; width: -moz-available;">
 	<?php
 	while ( have_posts() ) :
 		the_post();
@@ -51,16 +51,16 @@ $width = $width ? $width : '1140';
 
 <?php
 do_action( 'ultp_after_content' );
-if ( $is_block_theme ) {
+if ( $ultp_is_block_theme ) {
 	?>
 	</body>
 	</html>
 	<?php
-	if ( ! $has_footer ) {
+	if ( ! $ultp_has_footer ) {
 		ob_start();
 		block_template_part( 'footer' );
-		$footer = ob_get_clean();
-		echo '<footer class="wp-block-template-part">' . $footer . '</footer>';
+		$ultp_footer = ob_get_clean();
+		echo '<footer class="wp-block-template-part">' . $ultp_footer . '</footer>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core-rendered block template part.
 	}
 	// wp_head(); // all ready wp head declared in header, i can not find any conflict to check that, if you find any conflict for removing then use it
 	wp_footer();

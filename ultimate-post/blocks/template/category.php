@@ -1,5 +1,6 @@
 <?php
 defined( 'ABSPATH' ) || exit;
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Included inside block render methods; variables are local.
 
 $attr['catStyle']    = sanitize_html_class( $attr['catStyle'] );
 $attr['catPosition'] = sanitize_html_class( $attr['catPosition'] );
@@ -18,7 +19,7 @@ if ( $attr['catShow'] ) {
 			$color = '';
 			if ( isset( $attr['customCatColor'] ) ) {
 				if ( $attr['customCatColor'] ) {
-					$color = get_term_meta( $val->term_id, 'ultp_category_color', true );
+					$color = ultimate_post()->get_term_color( $val );
 					$color = $color == 1 ? '#CE2746' : $color;
 					if ( isset( $attr['onlyCatColor'] ) ) {
 						if ( $attr['onlyCatColor'] ) {

@@ -10,7 +10,6 @@
 namespace ULTP;
 
 use ULTP\Includes\Durbin\DurbinClient;
-use ULTP\Includes\Durbin\Xpo;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -109,7 +108,7 @@ class Importer {
 		if ( ! current_user_can( 'install_plugins' ) ) {
 			return wp_send_json_success( 'You are not allowed to install plugin' );
 		}
-		if ( ! wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['wpnonce'] ) ), 'ultp-nonce' ) ) {
+		if ( ! isset( $_REQUEST['wpnonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['wpnonce'] ) ), 'ultp-admin-nonce' ) ) {
 			return '';
 		}
 		if ( ! current_user_can( 'install_plugins' ) ) {
@@ -129,10 +128,10 @@ class Importer {
 		$msg = '';
 
 		$all_plugins = get_plugins();
-		$plugin      = ultimate_post()->ultp_rest_sanitize_params( json_decode( stripslashes( $_POST['plugin'] ) ) );
+		$plugin      = isset( $_POST['plugin'] ) ? ultimate_post()->ultp_rest_sanitize_params( json_decode( wp_unslash( $_POST['plugin'] ) ) ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- JSON object; ->path must match an installed plugin key or is used as a WordPress.org slug.
 
 		if ( $plugin && isset( $all_plugins ) && is_array( $all_plugins ) && array_key_exists( $plugin->path, $all_plugins ) ) {
-			$activated_plugins = apply_filters( 'active_plugins', get_option( 'active_plugins' ) );
+			$activated_plugins = apply_filters( 'active_plugins', get_option( 'active_plugins' ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core option filter.
 			if ( is_array( $activated_plugins ) && in_array( $plugin->path, $activated_plugins ) ) {
 				$msg = '_already_installed_activated';
 			} else {
@@ -208,10 +207,12 @@ class Importer {
 			array(
 				'method'  => 'POST',
 				'timeout' => 120,
-				'body'    => array(
-					'type'     => 'site_posts',
-					'license'  => Xpo::get_lc_key(),
-					'ultp_ver' => ULTP_VER,
+				'body'    => ultimate_post()->get_template_request_body(
+					array(
+						'type'     => 'site_posts',
+						'ultp_ver' => ULTP_VER,
+					),
+					'starter_posts'
 				),
 			)
 		);
@@ -282,9 +283,11 @@ class Importer {
 			array(
 				'method'  => 'POST',
 				'timeout' => 120,
-				'body'    => array(
-					'license'  => Xpo::get_lc_key(),
-					'ultp_ver' => ULTP_VER,
+				'body'    => ultimate_post()->get_template_request_body(
+					array(
+						'ultp_ver' => ULTP_VER,
+					),
+					'starter_content'
 				),
 			)
 		);
@@ -690,8 +693,8 @@ class Importer {
 		if ( $deletePrevious == 'yes' ) {
 			$site_logo = get_option( 'site_logo', '' );
 			global $wpdb;
-			$post_ids = $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='__ultp_starter_pack_post'" ) );
-			$terms    = $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->termmeta} WHERE meta_key='__ultp_starter_pack_term'" ) );
+			$post_ids = $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s", '__ultp_starter_pack_post' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- One-off cleanup before import; must read live data.
+			$terms    = $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->termmeta} WHERE meta_key = %s", '__ultp_starter_pack_term' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- One-off cleanup before import; must read live data.
 
 			if ( isset( $post_ids ) && is_array( $post_ids ) ) {
 				foreach ( $post_ids as $post_id ) {
@@ -754,11 +757,13 @@ class Importer {
 					)
 				);
 			}
-			$import_single = array(
-				'id'       => $id,
-				'type'     => 'single',
-				'license'  => Xpo::get_lc_key(),
-				'ultp_ver' => ULTP_VER,
+			$import_single = ultimate_post()->get_template_request_body(
+				array(
+					'id'       => $id,
+					'type'     => 'single',
+					'ultp_ver' => ULTP_VER,
+				),
+				'single_page'
 			);
 			$response      = wp_safe_remote_post(
 				$api_endpoint . '/wp-json/importer/single',
@@ -768,9 +773,17 @@ class Importer {
 					'body'    => $import_single,
 				)
 			);
-			$response_data = json_decode( $response['body'] );
-			if ( ! $response_data->success ) {
-				wp_send_json(
+			if ( is_wp_error( $response ) ) {
+				return rest_ensure_response(
+					array(
+						'success'       => false,
+						'response_data' => $response,
+					)
+				);
+			}
+			$response_data = json_decode( wp_remote_retrieve_body( $response ) );
+			if ( empty( $response_data->success ) || ! isset( $response_data->content[0] ) ) {
+				return rest_ensure_response(
 					array(
 						'success' => false,
 					)
@@ -911,27 +924,6 @@ class Importer {
 	 * @return bool True if allowed, false otherwise.
 	 */
 	private function is_allowed_api_endpoint( $url ) {
-		$allowed_domains = array(
-			'starter.postx.io',
-			'postxkit.wpxpo.com',
-		);
-
-		$parsed_url = wp_parse_url( $url );
-		if ( ! $parsed_url || empty( $parsed_url['host'] ) ) {
-			return false;
-		}
-
-		$host = strtolower( $parsed_url['host'] );
-
-		foreach ( $allowed_domains as $domain ) {
-			$domain = strtolower( $domain );
-
-			// Exact match OR valid subdomain
-			if ( $host === $domain || substr( $host, - ( strlen( $domain ) + 1 ) ) === '.' . $domain ) {
-				return true;
-			}
-		}
-
-		return false;
+		return ultimate_post()->is_allowed_template_endpoint( $url );
 	}
 }

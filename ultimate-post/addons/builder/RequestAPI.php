@@ -9,8 +9,6 @@
 
 namespace ULTP;
 
-use ULTP\Includes\Durbin\Xpo;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -412,28 +410,30 @@ class RequestAPI {
 	 */
 	public function get_single_premade_callback( $server ) {
 
-		$is_active = ultimate_post()->is_lc_active();
-		$obj_count = wp_count_posts( 'ultp_builder' );
-		if ( ! $is_active ) {
-			$p_count = isset( $obj_count->publish ) ? $obj_count->publish : 0;
-			$d_count = isset( $obj_count->draft ) ? $obj_count->draft : 0;
-			if ( ( $p_count + $d_count ) > 0 ) {
-				return array( 'success' => false );
-			}
-		}
-
 		$post         = $server->get_params();
 		$id           = isset( $post['ID'] ) ? sanitize_text_field( $post['ID'] ) : '';
 		$api_endpoint = isset( $post['apiEndPoint'] ) ? sanitize_text_field( $post['apiEndPoint'] ) : '';
 		$s_type       = isset( $post['type'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['type'] ) : '';
 
 		if ( $id ) {
-			$import_single = array(
-				'id'      => $id,
-				'type'    => 'single',
-				'license' => Xpo::get_lc_key(),
+			// SSRF protection: only the template service, over HTTPS.
+			if ( 0 !== strpos( $api_endpoint, 'https://' ) || ! ultimate_post()->is_allowed_template_endpoint( $api_endpoint ) ) {
+				return rest_ensure_response(
+					array(
+						'success' => false,
+						'message' => __( 'Invalid API endpoint. Only trusted domains are allowed.', 'ultimate-post' ),
+					)
+				);
+			}
+
+			$import_single = ultimate_post()->get_template_request_body(
+				array(
+					'id'   => $id,
+					'type' => 'single',
+				),
+				'builder_premade'
 			);
-			$response      = wp_remote_get(
+			$response      = wp_safe_remote_post(
 				$api_endpoint . '/wp-json/importer/single',
 				array(
 					'method'  => 'POST',
@@ -442,13 +442,21 @@ class RequestAPI {
 				)
 			);
 
-			$response_data = json_decode( $response['body'] );
-
-			if ( ! $response_data->success ) {
-				wp_send_json(
+			if ( is_wp_error( $response ) ) {
+				return rest_ensure_response(
 					array(
 						'success' => false,
 						'data'    => 'Something went wrong:' . $response->get_error_message(),
+					)
+				);
+			}
+
+			$response_data = json_decode( wp_remote_retrieve_body( $response ) );
+
+			if ( empty( $response_data->success ) || ! isset( $response_data->content[0]->content ) ) {
+				return rest_ensure_response(
+					array(
+						'success' => false,
 					)
 				);
 			}

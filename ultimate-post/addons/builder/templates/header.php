@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<title>
 			<?php
 				// PHPCS - already escaped by WordPress.
-				echo wp_get_document_title(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				echo wp_get_document_title(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core escapes it: esc_html is a default filter on document_title, as in _wp_render_title_tag().
 			?>
 		</title>
 	<?php endif; ?>

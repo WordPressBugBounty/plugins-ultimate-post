@@ -191,6 +191,7 @@ class Dashboard {
 			foreach ( $data as $key => $val ) {
 				ultimate_post()->set_setting( $key, $val );
 			}
+			// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public hook; renaming breaks existing callbacks.
 			do_action( 'ultimate_post_after_setting_save' );
 		}
 		return rest_ensure_response(
@@ -396,11 +397,11 @@ class Dashboard {
 	 * @return OBJECT. REST response object.
 	 */
 	public static function wizard_site_status_callback() {
-		if ( ! ( isset( $_POST['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['wpnonce'] ) ), 'ultp-nonce' ) ) ) {
+		if ( ! ( isset( $_POST['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['wpnonce'] ) ), 'ultp-admin-nonce' ) ) ) {
 			die();
 		}
 		if ( isset( $_POST['siteType'] ) ) {
-			$site_type = ultimate_post()->ultp_rest_sanitize_params( $_POST['siteType'] );
+			$site_type = ultimate_post()->ultp_rest_sanitize_params( wp_unslash( $_POST['siteType'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by ultp_rest_sanitize_params().
 			update_option( '__ultp_site_type', $site_type );
 		}
 		DurbinClient::send( DurbinClient::WIZARD_ACTION );
@@ -416,7 +417,7 @@ class Dashboard {
 	 */
 	public function send_initial_plugin_data_callback( $server ) {
 		$post = $server->get_params();
-		if ( ! ( isset( $post['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $post['wpnonce'] ) ), 'ultp-nonce' ) ) ) {
+		if ( ! ( isset( $post['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $post['wpnonce'] ) ), 'ultp-admin-nonce' ) ) ) {
 			die();
 		}
 
@@ -434,7 +435,7 @@ class Dashboard {
 	 */
 	public static function initial_setup_complete_callback( $server ) {
 		$post = $server->get_params();
-		if ( ! ( isset( $post['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $post['wpnonce'] ) ), 'ultp-nonce' ) ) ) {
+		if ( ! ( isset( $post['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $post['wpnonce'] ) ), 'ultp-admin-nonce' ) ) ) {
 			die();
 		}
 		ultimate_post()->set_setting( 'init_setup', 'yes' );
