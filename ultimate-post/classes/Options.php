@@ -71,70 +71,13 @@ class Options {
 	 * @return array Modified plugin action links.
 	 */
 	public function plugin_action_links_callback( $links ) {
-		$offer_config = array(
-			array(
-				'start'  => '2026-07-06 00:00 Asia/Dhaka',
-				'end'    => '2026-08-01 23:59 Asia/Dhaka',
-				'text'   => __(
-					'Summer Sale - Up to 50% OFF',
-					'ultimate-post'
-				),
-				'utmKey' => 'summer_sale_meta',
-			),
-			array(
-				'start'  => '2026-09-02 00:00 Asia/Dhaka',
-				'end'    => '2026-10-10 23:59 Asia/Dhaka',
-				'text'   => __(
-					'Get Pro at $39',
-					'ultimate-post'
-				),
-				'utmKey' => 'base_price_meta',
-			),
-		);
-
 		$setting_link = array(
 			'ultp_options' => '<a href="' . esc_url( admin_url( 'admin.php?page=ultp-settings#startersites' ) ) . '">' . esc_html__( 'Starter Sites', 'ultimate-post' ) . '</a>',
 		);
 
-		$upgrade_link = array();
-
-		// Free user or expired license user.
-		if ( ! defined( 'ULTP_PRO_VER' ) || Xpo::is_lc_expired() ) {
-
-			$license_key = Xpo::get_lc_key() ?? '';
-
-			if ( Xpo::is_lc_expired() ) {
-				$text = esc_html__( 'Renew License', 'ultimate-post' );
-				$url  = 'https://account.wpxpo.com/checkout/?edd_license_key=' . $license_key;
-			} else {
-
-				$text = esc_html__( 'Upgrade to Pro', 'ultimate-post' );
-				$url  = Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'sub_menu',
-					)
-				);
-
-				foreach ( $offer_config as $offer ) {
-					$current_time = gmdate( 'U' );
-					$notice_start = gmdate( 'U', strtotime( $offer['start'] ) );
-					$notice_end   = gmdate( 'U', strtotime( $offer['end'] ) );
-					if ( $current_time >= $notice_start && $current_time <= $notice_end ) {
-						$url  = Xpo::generate_utm_link(
-							array(
-								'utmKey' => $offer['utmKey'],
-							)
-						);
-						$text = $offer['text'];
-						break;
-					}
-				}
-			}
-
-			$upgrade_link['ultp_pro'] = '<a style="color: #0062ff; font-weight: bold;" target="_blank" href="' . esc_url( $url ) . '">' . esc_html( $text ) . '</a>';
-		}
-
-		return array_merge( $setting_link, $links, $upgrade_link );
+		// The "Upgrade to Pro" / "Renew License" link is added after this by
+		// includes/notice/class-promo-links.php.
+		return array_merge( $setting_link, $links );
 	}
 
 
@@ -197,49 +140,7 @@ class Options {
 			array( __CLASS__, 'ultp_wizard_page' )
 		);
 
-		$pro_link      = '';
-		$pro_link_text = '';
-
-		// Check if current date is between November 5th and December 10th
-		$current_date         = current_time( 'Y-m-d' );
-		$start_date           = gmdate( 'Y' ) . '-01-01'; // January 1st of current year
-		$end_date             = gmdate( 'Y' ) . '-02-15';   // February 15th of current year
-		$menu_pro_text_period = ( $current_date >= $start_date && $current_date <= $end_date );
-
-		if ( ! Xpo::is_lc_active() ) {
-			$pro_link      = Xpo::generate_utm_link(
-				array(
-					'utmKey' => 'sub_menu',
-				)
-			);
-			$pro_link_text = $menu_pro_text_period ? __( 'New Year Offer!', 'ultimate-post' ) : __( 'Upgrade to Pro', 'ultimate-post' );
-		} elseif ( Xpo::is_lc_expired() ) {
-			$license_key   = Xpo::get_lc_key();
-			$pro_link      = 'https://account.wpxpo.com/checkout/?edd_license_key=' . $license_key;
-			$pro_link_text = __( 'Renew License', 'ultimate-post' );
-		}
-
-		if ( ! empty( $pro_link ) ) {
-			ob_start();
-			?>
-			<a href="<?php echo esc_url( $pro_link ); ?>" target="_blank" class="ultp-go-pro">
-				<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M2.86 6.553a.5.5 0 01.823-.482l3.02 2.745c.196.178.506.13.64-.098L9.64 4.779a.417.417 0 01.72 0l2.297 3.939a.417.417 0 00.64.098l3.02-2.745a.5.5 0 01.823.482l-1.99 8.63a.833.833 0 01-.813.646H5.663a.833.833 0 01-.812-.646L2.86 6.553z" stroke="currentColor" stroke-width="1.5"></path>
-				</svg>
-				<span><?php echo esc_html( $pro_link_text ); ?></span>
-			</a>
-			<?php
-			$submenu_content = ob_get_clean();
-
-			add_submenu_page(
-				'ultp-settings',
-				'',
-				$submenu_content,
-				'manage_options',
-				'ultp-pro',
-				array( self::class, 'handle_external_redirects' )
-			);
-		}
+		// The "Upgrade to Pro" / "Renew License" item is added last by includes/notice/class-promo-links.php.
 
 		add_theme_page(
 			__( 'Starter Sites', 'ultimate-post' ),

@@ -4,7 +4,15 @@ namespace ULTP\Includes\Notice;
 defined( 'ABSPATH' ) || exit;
 
 use ULTP\Includes\Durbin\Xpo;
-use ULTP\Includes\Durbin\DurbinClient;
+
+require_once __DIR__ . '/interface-notice-type.php';
+require_once __DIR__ . '/class-notice-assets.php';
+require_once __DIR__ . '/class-abstract-campaign-notice.php';
+require_once __DIR__ . '/types/class-banner-notice.php';
+require_once __DIR__ . '/types/class-content-notice.php';
+require_once __DIR__ . '/types/class-image-notice.php';
+require_once __DIR__ . '/types/class-consent-notice.php';
+require_once __DIR__ . '/class-promo-links.php';
 
 /**
  * Plugin Notice
@@ -13,18 +21,18 @@ class Notice {
 
 
 	/**
-	 * Notice version
+	 * Campaigns showing on this request. Null until first worked out.
 	 *
-	 * @var string
+	 * @var Abstract_Campaign_Notice[]|null
 	 */
-	private $notice_version = 'v5132';
+	private $active_campaigns = null;
 
 	/**
-	 * Notice JS/CSS applied
+	 * Data-collection consent notice. Null until first needed.
 	 *
-	 * @var boolean
+	 * @var Consent_Notice|null
 	 */
-	private $notice_js_css_applied = false;
+	private $consent_notice = null;
 
 	/**
 	 * Notice Priority
@@ -46,13 +54,15 @@ class Notice {
 	public function __construct() {
 		add_action( 'admin_notices', array( $this, 'admin_notices_callback' ) );
 		add_action( 'admin_init', array( $this, 'set_dismiss_notice_callback' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 
 		// REST API routes.
 		add_action( 'rest_api_init', array( $this, 'register_rest_route' ) );
 
-		// Woocommerce Install Action
-		// add_action( 'wp_ajax_ultp_install', array( $this, 'install_activate_plugin' ) ); // this ajax not called anywhere in future need to removed, that is arise patchstack security issue
 		add_filter( 'xpo_active_notice_lists', array( $this, 'handle_xpo_active_notice_lists' ), 99, 1 );
+
+		// Upgrade link on the Plugins page and upgrade item in the PostX menu.
+		new Promo_Links();
 	}
 
 	/**
@@ -70,6 +80,18 @@ class Notice {
 				'permission_callback' => function () {
 					return current_user_can( 'manage_options' );
 				},
+				'args'                => array(
+					'type' => array(
+						'type'     => 'string',
+						'required' => true,
+						'enum'     => array( 'hello_bar' ),
+					),
+					'id'   => array(
+						'type'     => 'string',
+						'required' => true,
+						'enum'     => self::get_hellobar_keys(),
+					),
+				),
 			),
 		);
 
@@ -82,6 +104,7 @@ class Notice {
 						'methods'             => $route['methods'],
 						'callback'            => $route['callback'],
 						'permission_callback' => $route['permission_callback'],
+						'args'                => isset( $route['args'] ) ? $route['args'] : array(),
 					),
 				)
 			);
@@ -94,12 +117,29 @@ class Notice {
 	 * @return array
 	 */
 	public static function get_hellobar_config() {
-		return array(
-			// Final hours sale.
-			'ultp_helloBar_summer_sale_2026_v1'   => Xpo::get_transient_without_cache( 'ultp_helloBar_summer_sale_2026_v1' ),
-			'ultp_helloBar_summer_sale_2026_v1_2' => Xpo::get_transient_without_cache( 'ultp_helloBar_summer_sale_2026_v1_2' ),
-			'ultp_helloBar_base_price_2026'       => Xpo::get_transient_without_cache( 'ultp_helloBar_base_price_2026' ),
-		);
+		$config = array();
+		foreach ( self::get_hellobar_keys() as $key ) {
+			$config[ $key ] = Xpo::get_transient_without_cache( $key );
+		}
+		return $config;
+	}
+
+	/**
+	 * Hello bar ids the dashboard may dismiss, from Campaigns::hellobar_keys().
+	 *
+	 * class-campaigns.php is edited for every sale, so it is loaded inside a try: a mistake in it
+	 * empties this list (hello bars can't be closed until it's fixed) instead of breaking wp-admin.
+	 *
+	 * @return string[]
+	 */
+	private static function get_hellobar_keys() {
+		try {
+			require_once __DIR__ . '/class-campaigns.php';
+			$keys = Campaigns::hellobar_keys();
+		} catch ( \Throwable $e ) {
+			return array();
+		}
+		return is_array( $keys ) ? array_values( array_filter( $keys, 'is_string' ) ) : array();
 	}
 
 	/**
@@ -109,19 +149,12 @@ class Notice {
 	 * @return \WP_REST_Response
 	 */
 	public function hello_bar_callback( \WP_REST_Request $request ) {
-		$request_params = $request->get_params();
-		$type           = isset( $request_params['type'] ) ? $request_params['type'] : '';
-		$id             = isset( $request_params['id'] ) ? $request_params['id'] : '';
+		$type = $request->get_param( 'type' );
+		$id   = $request->get_param( 'id' );
 
-		// Guideline 11 — a dismissal must stick. This previously expired after 15
-		// days (1296000s), so a dismissed sale bar came back on its own. Passing 0
-		// stores it with no timeout, which Xpo::get_transient_without_cache() reads
-		// back indefinitely.
-		//
-		// $id names the option that gets written, so it is checked against the
-		// known hellobar keys rather than trusted from the request.
-		if ( 'hello_bar' === $type && ! empty( $id ) && array_key_exists( $id, self::get_hellobar_config() ) ) {
-			Xpo::set_transient_without_cache( $id, 'hide', 0 );
+		// The route's args already reject unknown ids; check again in case this is called directly.
+		if ( 'hello_bar' === $type && is_string( $id ) && in_array( $id, self::get_hellobar_keys(), true ) ) {
+			Xpo::set_transient_without_cache( $id, 'hide', 1296000 );
 		}
 
 		return new \WP_REST_Response(
@@ -140,20 +173,12 @@ class Notice {
 	 */
 	public function set_dismiss_notice_callback() {
 
-		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['wpnonce'] ?? '' ) ), 'ultp-admin-nonce' ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['wpnonce'] ?? '' ) ), 'ultp-nonce' ) ) {
 			return;
 		}
 
-		$durbin_key = sanitize_text_field( wp_unslash( $_GET['ultp_durbin_key'] ?? '' ) );
-
 		// Durbin notice dismiss.
-		if ( ! empty( $durbin_key ) ) {
-			Xpo::set_transient_without_cache( 'ultp_durbin_notice_' . $durbin_key, 'off' );
-
-			if ( 'get' === sanitize_text_field( wp_unslash( $_GET['ultp_get_durbin'] ?? '' ) ) ) {
-				DurbinClient::send( DurbinClient::ACTIVATE_ACTION );
-			}
-		}
+		Consent_Notice::handle_dismiss_request();
 
 		// Install notice dismiss.
 		$install_key = sanitize_text_field( wp_unslash( $_GET['ultp_install_key'] ?? '' ) );
@@ -198,369 +223,42 @@ class Notice {
 	/**
 	 * Dashboard Banner Notice
 	 *
-	 * @return void
+	 * @param bool $return_bool True to only report whether a banner would show.
+	 * @return bool|void
 	 */
 	public function ultp_dashboard_banner_notice( $return_bool = false ) {
-		$ultp_db_nonce  = wp_create_nonce( 'ultp-admin-nonce' );
-		$banner_notices = array(
-			// FLash sale.
-			array(
-				'key'                => 'ultp_banner_flash_sale_2026_1',
-				'start'              => '2026-05-18 00:00 Asia/Dhaka',
-				'end'                => '2026-05-21 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka.
+		return $this->render_campaigns( Banner_Notice::class, $return_bool );
+	}
 
-				'brand_color'        => '#0322ff',
-
-				'left_image'         => ULTP_URL . 'assets/img/dashboard_banner/flash_sale/offer.png',
-				'right_image'        => ULTP_URL . 'assets/img/dashboard_banner/flash_sale/btn.png',
-				'bg_image'           => ULTP_URL . 'assets/img/dashboard_banner/flash_sale/bg.png',
-				'text'               => 'Deal ending soon',
-				'countdown_duration' => 259200, // Duration in seconds.
-				// 'countdown_color'    => '#0322ff',
-				'countdown_color'    => '#3CF357',
-				'url'                => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'flash_sale_content',
-					)
-				),
-
-				'visibility'         => ! Xpo::is_lc_active(),
-			),
-			// surprise sale
-			array(
-				'key'                => 'ultp_banner_surprise_sale_2026_1',
-				'start'              => '2026-05-29 00:00 Asia/Dhaka',
-				'end'                => '2026-06-01 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka.
-
-				'brand_color'        => '#0322ff',
-
-				'left_image'         => ULTP_URL . 'assets/img/dashboard_banner/surprise_sale/offer.png',
-				'right_image'        => ULTP_URL . 'assets/img/dashboard_banner/surprise_sale/btn.png',
-				'bg_image'           => ULTP_URL . 'assets/img/dashboard_banner/surprise_sale/bg.png',
-				'text'               => 'Limited Time Offer',
-				'countdown_duration' => 259200, // Duration in seconds.
-				// 'countdown_color'    => '#0322ff',
-				'countdown_color'    => '#3CF357',
-				'url'                => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'surprise_sale_content',
-					)
-				),
-
-				'visibility'         => ! Xpo::is_lc_active(),
-			),
-			// massive sale
-			array(
-				'key'                => 'ultp_banner_massive_sale_2026_1',
-				'start'              => '2026-06-17 00:00 Asia/Dhaka',
-				'end'                => '2026-06-20 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka.
-
-				'brand_color'        => '#0322ff',
-
-				'left_image'         => ULTP_URL . 'assets/img/dashboard_banner/massive_sale/offer.png',
-				'right_image'        => ULTP_URL . 'assets/img/dashboard_banner/massive_sale/btn.png',
-				'bg_image'           => ULTP_URL . 'assets/img/dashboard_banner/massive_sale/bg.png',
-				'text'               => 'Deal ending soon',
-				'countdown_duration' => 259200, // Duration in seconds.
-				// 'countdown_color'    => '#0322ff',
-				'countdown_color'    => '#3CF357',
-				'url'                => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'massive_sale_content',
-					)
-				),
-
-				'visibility'         => ! Xpo::is_lc_active(),
-			),
-			// Final hours sale
-			array(
-				'key'                => 'ultp_banner_final_hours_sale_2026_1',
-				'start'              => '2026-06-28 00:00 Asia/Dhaka',
-				'end'                => '2026-06-30 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka.
-
-				'brand_color'        => '#0322ff',
-
-				'left_image'         => ULTP_URL . 'assets/img/dashboard_banner/final_hours_sale/offer.png',
-				'right_image'        => ULTP_URL . 'assets/img/dashboard_banner/final_hours_sale/btn.png',
-				'bg_image'           => ULTP_URL . 'assets/img/dashboard_banner/final_hours_sale/bg.png',
-				'text'               => 'Hurry Before It Ends!',
-				'countdown_duration' => 259200, // Duration in seconds.
-				// 'countdown_color'    => '#0322ff',
-				'countdown_color'    => '#3CF357',
-				'url'                => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'final_hours_content',
-					)
-				),
-				'visibility'         => ! Xpo::is_lc_active(),
-			),
-		);
-		foreach ( $banner_notices as $notice ) {
-			$notice_key = isset( $notice['key'] ) ? $notice['key'] : $this->notice_version;
-
-			if ( isset( $_GET['ultp_notice'] ) && $notice_key === sanitize_text_field(wp_unslash($_GET['ultp_notice'])) ) { // phpcs:ignore
-				continue;
+	/**
+	 * Queue the stylesheets and scripts for the notices that will show on this page.
+	 *
+	 * Runs on admin_enqueue_scripts, before admin_notices, so the styles load in <head>.
+	 *
+	 * @return void
+	 */
+	public function enqueue_assets() {
+		if ( $this->is_available_for_notice() ) {
+			foreach ( $this->get_active_campaigns() as $campaign ) {
+				$campaign->enqueue_assets();
 			}
-
-			$current_time = gmdate( 'U' );
-			$notice_start = gmdate( 'U', strtotime( $notice['start'] ) );
-			$notice_end   = gmdate( 'U', strtotime( $notice['end'] ) );
-			if ( $current_time >= $notice_start && $current_time <= $notice_end && $notice['visibility'] ) {
-
-				$notice_transient = Xpo::get_transient_without_cache( 'ultp_get_pro_notice_' . $notice_key );
-
-				if ( 'off' === $notice_transient ) {
-					continue;
-				}
-				if ( $return_bool ) { // Early return for Other plugin notice.
-					return true;
-				}
-				if ( ! $this->notice_js_css_applied ) {
-					$this->ultp_banner_notice_js();
-					$this->notice_js_css_applied = true;
-				}
-				$query_args = array(
-					'ultp_notice' => $notice_key,
-					'wpnonce'     => $ultp_db_nonce,
-				);
-				if ( isset( $notice['repeat_interval'] ) && $notice['repeat_interval'] ) {
-					$query_args['ultp_interval'] = $notice['repeat_interval'];
-				}
-				?>
-					<style type="text/css">
-					.ultp-notice-wrapper.ultp-banner-notice {
-						height: auto !important;
-						padding: 0 !important;
-						position: relative;
-						box-sizing: border-box;
-						background-repeat: no-repeat;
-						background-size: cover;
-						background-position: center;
-					}
-					.ultp-notice-wrapper.ultp-banner-notice .ultp-banner-link {
-						width: 100%;
-						text-decoration: none;
-						display: block;
-					}
-					.ultp-notice-wrapper.ultp-banner-notice .ultp-banner-content {
-						display: flex;
-						justify-content: space-between;
-						align-items: center;
-						max-width: 700px;
-						margin: 0 auto;
-						padding: 10px 16px;
-						gap: 16px;
-					}
-					.ultp-notice-wrapper.ultp-banner-notice .ultp-banner-side-image {
-						display: block;
-						max-width: 100%;
-						height: auto;
-						max-height: 32px;
-					}
-					.ultp-notice-wrapper.ultp-banner-notice .ultp-banner-main .ultp-banner-main-text {
-						color: #ffffff;
-					}
-					.ultp-notice-wrapper.ultp-banner-notice .ultp-banner-main {
-						display: flex;
-						flex-direction: column;
-						gap: 4px;
-						align-items: center;
-						justify-content: center;
-						font-weight: 700;
-						font-size: 18px;
-						color: #333333;
-						line-height: 1.2;
-						text-align: center;
-					}
-
-					@media screen and (max-width: 1100px) {
-						/* .ultp-notice-wrapper.ultp-banner-notice .ultp-banner-content {
-							flex-direction: column;
-						} */
-						.ultp-notice-wrapper.ultp-banner-notice .ultp-banner-content .ultp-banner-main-text {
-							display: none;
-						}
-					}
-					@media screen and (max-width: 490px) {
-						.ultp-notice-wrapper.ultp-banner-notice {
-							display: none;
-						}
-					}
-					@media screen and (max-width: 782px) {
-						.ultp-notice-wrapper.ultp-banner-notice .ultp-banner-content {
-							justify-content: center;
-							padding: 12px 32px 12px 12px;
-						}
-						.ultp-notice-wrapper.ultp-banner-notice .ultp-banner-main {
-							font-size: 22px;
-							line-height: 28px;
-						}
-					}
-					@media screen and (max-width: 480px) {
-						.ultp-notice-wrapper.ultp-banner-notice .ultp-banner-content {
-							padding: 10px 32px 10px 10px;
-						}
-						.ultp-notice-wrapper.ultp-banner-notice .ultp-banner-main {
-							font-size: 18px;
-							line-height: 24px;
-						}
-					}
-				</style>
-				<div 
-					class="ultp-notice-wrapper ultp-banner-notice notice" 
-					style="
-						border-left: 3px solid <?php echo esc_attr( $notice['brand_color'] ); ?>;
-						background-image: url('<?php echo esc_attr( $notice['bg_image'] ); ?>');
-				">
-					<a 
-						class="wc-dismiss-notice dashicons dashicons-no-alt" 
-						style="
-							position: absolute;
-							top: 1px;
-							right: 1px;
-							border-radius: 50%;
-							background-color: black;
-							color: white;
-							font-size: 14px;
-							display: flex;
-							align-items: center;
-							justify-content: center;
-						"
-						aria-label="<?php esc_html_e( 'Close Banner', 'ultimate-post' ); ?>"
-						href="<?php echo esc_url( add_query_arg( $query_args ) ); ?>">
-					</a>
-
-					<a class="ultp-banner-link" target="_blank" href="<?php echo esc_url( $notice['url'] ); ?>">
-						<div class="ultp-banner-content">
-							<img class="ultp-banner-side-image" loading="lazy" src="<?php echo esc_url( $notice['left_image'] ); ?>" />
-							<div class="ultp-banner-main">
-								<span class="ultp-banner-main-text">
-									<?php echo esc_html( $notice['text'] ); ?>
-								</span>	
-								<div 
-									class="ultp-notice-countdown" 
-									style="
-										color: <?php echo esc_attr( $notice['countdown_color'] ); ?>;
-									"
-									data-notice-key="<?php echo esc_attr( $notice_key . '-countdown' ); ?>" 
-									data-duration="<?php echo esc_attr( $notice['countdown_duration'] ); ?>">
-									00:00:00:00
-								</div>
-							</div>
-							<img class="ultp-banner-side-image" loading="lazy" src="<?php echo esc_url( $notice['right_image'] ); ?>" />
-						</div>
-					</a>
-				</div>
-				<?php
-			}
+		}
+		$consent = $this->get_consent_notice();
+		if ( $consent->should_display() ) {
+			$consent->enqueue_assets();
 		}
 	}
 
 	/**
 	 * Banner JS
 	 *
+	 * @deprecated The countdown script is now the file assets/js/ultp-notice-countdown.js. This queues it.
+	 *
 	 * @return void
 	 */
 	public function ultp_banner_notice_js() {
-		?>
-		<script type="text/javascript">
-			jQuery(function($) {
-				'use strict';
-
-				const storagePrefix = 'ultp_notice_countdown_';
-
-				const formatCountdown = function(seconds) {
-					const days = Math.floor(seconds / 86400);
-					const hours = Math.floor((seconds % 86400) / 3600);
-					const minutes = Math.floor((seconds % 3600) / 60);
-					const secs = seconds % 60;
-
-					return String(days).padStart(2, '0') + ':' + String(hours).padStart(2, '0') + ':' + String(minutes).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
-				};
-
-				const parseDurationToSeconds = function(duration) {
-					if (typeof duration === 'number' && Number.isFinite(duration) && duration > 0) {
-						return Math.floor(duration);
-					}
-
-					const durationString = String(duration || '').trim();
-					if (/^\d+$/.test(durationString)) {
-						return parseInt(durationString, 10);
-					}
-
-					return 0;
-				};
-
-				const nowInSeconds = function() {
-					return Math.floor(Date.now() / 1000);
-				};
-
-				$('.ultp-notice-countdown').each(function() {
-					const countdownElement = $(this);
-					const noticeKey = String(countdownElement.data('noticeKey') || '');
-					const duration = parseDurationToSeconds(countdownElement.data('duration'));
-
-					if (!noticeKey || duration <= 0) {
-						return;
-					}
-
-					const storageKey = storagePrefix + noticeKey;
-					let endAt = 0;
-
-					try {
-						const storedDataRaw = window.localStorage.getItem(storageKey);
-						if (storedDataRaw) {
-							const storedData = JSON.parse(storedDataRaw);
-							if (storedData && parseInt(storedData.duration, 10) === duration) {
-								endAt = parseInt(storedData.endAt, 10) || 0;
-							}
-						}
-					} catch (error) {
-						endAt = 0;
-					}
-
-					const saveTimerState = function(nextEndAt) {
-						try {
-							window.localStorage.setItem(
-								storageKey,
-								JSON.stringify({
-									endAt: nextEndAt,
-									duration: duration,
-								})
-							);
-						} catch (error) {
-							// No-op.
-						}
-					};
-
-					const resetTimer = function(currentTime) {
-						endAt = currentTime + duration;
-						saveTimerState(endAt);
-					};
-
-					const tick = function() {
-						const currentTime = nowInSeconds();
-
-						if (endAt <= currentTime) {
-							resetTimer(currentTime);
-						}
-
-						const remaining = Math.max(endAt - currentTime, 0);
-						countdownElement.text(formatCountdown(remaining));
-					};
-
-					if (endAt <= nowInSeconds()) {
-						resetTimer(nowInSeconds());
-					}
-
-					tick();
-					window.setInterval(tick, 1000);
-				});
-			});
-		</script>
-		<?php
+		Notice_Assets::enqueue_countdown_script();
 	}
-
 
 	/**
 	 * The Durbin Html
@@ -568,359 +266,31 @@ class Notice {
 	 * @return void
 	 */
 	public function ultp_dashboard_durbin_notice_callback() {
-		$durbin_key = 'ultp_durbin_dc1';
-
-		// Guideline 11 — the consent notice is allowed on PostX's own screens and,
-		// as is standard immediately after activation, on plugins.php. Nowhere else.
-		global $pagenow;
-		if ( ! $this->is_postx_screen() && 'plugins.php' !== $pagenow ) {
-			return;
+		$consent = $this->get_consent_notice();
+		if ( $consent->should_display() ) {
+			$this->render_safely( $consent );
 		}
+	}
 
-		if (
-			isset( $_GET['ultp_durbin_key'] ) || // phpcs:ignore
-			'off' === Xpo::get_transient_without_cache( 'ultp_durbin_notice_' . $durbin_key )
-		) {
-			return;
+	/**
+	 * The data-collection consent notice, created once per request.
+	 *
+	 * @return Consent_Notice
+	 */
+	private function get_consent_notice() {
+		if ( null === $this->consent_notice ) {
+			$this->consent_notice = new Consent_Notice();
 		}
-
-		if ( ! $this->notice_js_css_applied ) {
-			$this->notice_js_css_applied = true;
-		}
-
-		$ultp_db_nonce = wp_create_nonce( 'ultp-admin-nonce' );
-
-		?>
-		<style>
-				.ultp-consent-box {
-					width: 656px;
-					padding: 16px !important;
-					border: 1px solid #070707;
-					border-left-width: 4px;
-					border-radius: 4px;
-					background-color: #fff;
-					position: relative;
-					width: 100%;
-					box-sizing: border-box;
-				}
-				.ultp-consent-content {
-					display: flex;
-					justify-content: flex-start;
-					align-items: flex-end;
-					gap: 26px;
-				}
-
-				.ultp-consent-text-first {
-					font-size: 14px;
-					font-weight: 600;
-					color: #070707;
-				}
-				.ultp-consent-text-last {
-					margin: 4px 0 0;
-					font-size: 14px;
-					color: #070707;
-				}
-
-				.ultp-consent-accept {
-					background-color: #070707;
-					color: #fff !important; 
-					border: none;
-					padding: 6px 10px;
-					border-radius: 4px;
-					cursor: pointer;
-					font-size: 12px;
-					font-weight: 600;
-					text-decoration: none;
-				}
-				.ultp-consent-accept:hover {
-					background-color:rgb(38, 38, 38);
-					color: #fff;
-				}
-			</style>
-			<div class="ultp-consent-box ultp-notice-wrapper notice data_collection_notice">
-			<div class="ultp-consent-content">
-			<div class="ultp-consent-text">
-			<div class="ultp-consent-text-first"><?php esc_html_e( 'Want to help make PostX even more awesome?', 'ultimate-post' ); ?></div>
-			<div class="ultp-consent-text-last">
-					<?php esc_html_e( 'Allow us to collect diagnostic data and usage information. see ', 'ultimate-post' ); ?>
-			<a href="https://www.wpxpo.com/data-collection-policy/" target="_blank" ><?php esc_html_e( 'what we collect.', 'ultimate-post' ); ?></a>
-			</div>
-			</div>
-			<a
-					class="ultp-consent-accept"
-					href=
-					<?php
-									echo esc_url(
-										add_query_arg(
-											array(
-												'ultp_durbin_key' => $durbin_key,
-												'ultp_get_durbin' => 'get',
-												'wpnonce' => $ultp_db_nonce,
-											)
-										)
-									);
-					?>
-									class="ultp-notice-close"
-			><?php esc_html_e( 'Accept & Close', 'ultimate-post' ); ?></a>
-			</div>
-			<a href=
-				<?php
-							echo esc_url(
-								add_query_arg(
-									array(
-										'ultp_durbin_key' => $durbin_key,
-										'wpnonce'         => $ultp_db_nonce,
-									)
-								)
-							);
-				?>
-				class="ultp-notice-close"
-				style="
-					position: absolute;
-					right: 2px;
-					top: 5px;
-					text-decoration: unset;
-					color: #b6b6b6;
-					font-family: dashicons;
-					font-size: 16px;
-					font-style: normal;
-					font-weight: 400;
-					line-height: 20px;
-				"
-			>
-				<span 
-				style="font-size: 14px;"
-				class="ultp-notice-close-icon dashicons dashicons-dismiss"> </span></a>
-			</div>
-		<?php
+		return $this->consent_notice;
 	}
 	/**
 	 * Dashboard Content Notice
 	 *
-	 * @return void
+	 * @param bool $return_bool True to only report whether a content notice would show.
+	 * @return bool|void
 	 */
 	public function ultp_dashboard_content_notice( $return_bool = false ) {
-		$content_notices = array(
-			array(
-				'key'                => 'ultp_dashboard_content_notice_summer_sale_2026_vv1',
-				'start'              => '2026-07-06 00:00 Asia/Dhaka',
-				'end'                => '2026-07-12 23:59 Asia/Dhaka',
-				'url'                => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'summer_db',
-					)
-				),
-				'visibility'         => ! Xpo::is_lc_active(),
-				'content_heading'    => __( 'Summer Sale:', 'ultimate-post' ),
-				/* translators: %s: discount percentage */
-				'content_subheading' => __( 'Enjoy up to %s on PostX Pro.', 'ultimate-post' ),
-				'discount_content'   => '  50% OFF',
-				'border_color'       => '#0322ff',
-				'icon'               => ULTP_URL . 'assets/img/dashboard_banner/brand_logo.svg',
-				'button_text'        => __( 'Upgrade Now!', 'ultimate-post' ),
-				'is_discount_logo'   => true,
-			),
-			array(
-				'key'                => 'ultp_dashboard_content_notice_summer_sale_2026_vv3',
-				'start'              => '2026-08-02 00:00 Asia/Dhaka',
-				'end'                => '2026-08-08 23:59 Asia/Dhaka',
-				'url'                => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'summer_db',
-					)
-				),
-				'visibility'         => ! Xpo::is_lc_active(),
-				'content_heading'    => __( 'Summer Sale:', 'ultimate-post' ),
-				/* translators: %s: discount percentage */
-				'content_subheading' => __( 'Enjoy up to %s on PostX Pro.', 'ultimate-post' ),
-				'discount_content'   => '  50% OFF',
-				'border_color'       => '#0322ff',
-				'icon'               => ULTP_URL . 'assets/img/dashboard_banner/flash_sale_50_discount_logo.png',
-				'button_text'        => __( 'Upgrade Now!', 'ultimate-post' ),
-				'is_discount_logo'   => true,
-			),
-
-		);
-
-			$ultp_db_nonce = wp_create_nonce( 'ultp-admin-nonce' );
-
-		foreach ( $content_notices as $key => $notice ) {
-			$notice_key = isset( $notice['key'] ) ? $notice['key'] : $this->notice_version;
-			if ( isset( $_GET['ultp_notice'] ) && $notice_key === sanitize_text_field( wp_unslash( $_GET['ultp_notice'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only; hides the notice on this page view.
-				continue;
-			} else {
-				$border_color = $notice['border_color'];
-
-				$current_time = gmdate( 'U' );
-				$notice_start = gmdate( 'U', strtotime( $notice['start'] ) );
-				$notice_end   = gmdate( 'U', strtotime( $notice['end'] ) );
-				if ( $current_time >= $notice_start && $current_time <= $notice_end && $notice['visibility'] ) {
-					$notice_transient = Xpo::get_transient_without_cache( 'ultp_get_pro_notice_' . $notice_key );
-
-					if ( 'off' !== $notice_transient ) {
-						if ( $return_bool ) { // Early return for Other plugin notice.
-							return true;
-						}
-						$query_args = array(
-							'ultp_notice' => $notice_key,
-							'wpnonce'     => $ultp_db_nonce,
-						);
-						if ( isset( $notice['repeat_interval'] ) && $notice['repeat_interval'] ) {
-							$query_args['ultp_interval'] = $notice['repeat_interval'];
-						}
-
-						$url = isset( $notice['url'] ) ? $notice['url'] : Xpo::generate_utm_link(
-							array(
-								'utmKey' => 'content_notice',
-							)
-						);
-
-						?>
-
-						<style id="ultp-notice-css" type="text/css">
-							.ultp-content-notice-wrapper {
-								border: 1px solid #c3c4c7;
-								border-left: 3px solid #037fff;
-								margin: 15px 0 !important;
-								display: flex;
-								align-items: center;
-								background-color: #eef0f4;
-								width: 100%;
-								padding: 10px 0;
-								position: relative;
-								box-sizing: border-box;
-							}
-
-							.ultp-content-notice-wrapper.notice {
-								margin: 10px 0;
-								width: calc(100% - 20px);
-							}
-
-							.wrap .ultp-content-notice-wrapper.notice {
-								width: 100%;
-							}
-
-							.ultp-content-notice-icon {
-								margin-left: 15px;
-							}
-
-							.ultp-content-notice-discout-icon {
-								margin-left: 10px;
-							}
-
-							.ultp-content-notice-icon img {
-								max-width: 42px;
-								height: 70px;
-							}
-
-							.ultp-content-notice-discout-icon img {
-								height: 70px;
-								width: 70px;
-								object-fit: contain;
-							}
-
-							.ultp-notice-content-wrapper {
-								display: flex;
-								flex-direction: column;
-								gap: 8px;
-								font-size: 14px;
-								line-height: 20px;
-								margin-left: 15px;
-							}
-
-							.ultp-content-notice-buttons {
-								display: flex;
-								align-items: center;
-								gap: 15px;
-							}
-
-							.ultp-content-notice-btn {
-								font-weight: 600;
-								text-transform: uppercase !important;
-								padding: 2px 10px !important;
-								background-color: #0322ff;
-								border: none !important;
-							}
-
-							.ultp-content-discount_btn {
-								background-color: #ffffff;
-								text-decoration: none;
-								border: 1px solid #0322ff;
-								padding: 5px 10px;
-								border-radius: 5px;
-								font-weight: 500;
-								text-transform: uppercase;
-								color: #0322ff !important;
-							}
-
-							.ultp-content-notice-close {
-								position: absolute;
-								right: 2px;
-								top: 5px;
-								text-decoration: none;
-								color: #b6b6b6;
-								font-family: dashicons;
-								font-size: 16px;
-								line-height: 20px;
-							}
-
-							.ultp-content-notice-close-icon {
-								font-size: 14px;
-							}
-						</style>
-					<div class="ultp-content-notice-wrapper notice data_collection_notice" 
-					style="border-left: 3px solid <?php echo esc_attr( $border_color ); ?>;"
-					> 
-							<?php
-							if ( $notice['is_discount_logo'] ) {
-								?>
-								<div class="ultp-content-notice-discout-icon"> <img src="<?php echo esc_url( $notice['icon'] ); ?>"/>  </div>
-								<?php
-							} else {
-								?>
-								<div class="ultp-content-notice-icon"> <img src="<?php echo esc_url( $notice['icon'] ); ?>"/>  </div>
-								<?php
-							}
-							?>
-						
-						<div class="ultp-notice-content-wrapper">
-							<div class="">
-								<strong><?php printf( esc_html( $notice['content_heading'] ) ); ?> </strong>
-							<?php
-							printf(
-								wp_kses_post( $notice['content_subheading'] ),
-								'<strong>' . esc_html( $notice['discount_content'] ) . '</strong>'
-							);
-							?>
-							</div>
-							<div class="ultp-content-notice-buttons">
-						<?php if ( isset( $notice['is_discount_logo'] ) && $notice['is_discount_logo'] ) : ?>
-									<a class="ultp-content-discount_btn" href="<?php echo esc_url( $url ); ?>" target="_blank">
-										<?php echo esc_html( $notice['button_text'] ); ?>
-									</a>
-								<?php else : ?>
-									<a class="ultp-content-notice-btn button button-primary" href="<?php echo esc_url( $url ); ?>" target="_blank" style="background-color: <?php echo ! empty( $notice['background_color'] ) ? esc_attr( $notice['background_color'] ) : '#86a62c'; ?>;">
-									<?php echo esc_html( $notice['button_text'] ); ?>
-										
-									</a>
-								<?php endif; ?>
-							</div>
-						</div>
-						<a href=
-							<?php
-							echo esc_url(
-								add_query_arg(
-									$query_args
-								)
-							);
-							?>
-						class="ultp-content-notice-close"><span class="ultp-content-notice-close-icon dashicons dashicons-dismiss"> </span></a>
-					</div>
-							<?php
-					}
-				}
-			}
-		}
+		return $this->render_campaigns( Content_Notice::class, $return_bool );
 	}
 
 	/**
@@ -930,7 +300,7 @@ class Notice {
 	 * @return array
 	 */
 	public function handle_xpo_active_notice_lists( $active_lists ) {
-		if ( $this->ultp_dashboard_banner_notice( true ) || $this->ultp_dashboard_content_notice( true ) || $this->ultp_dashboard_image_banner_notice( true ) ) {
+		if ( ! empty( $this->get_active_campaigns() ) ) {
 			$active_lists[ $this->plugin_notice_priority_key ] = $this->plugin_notice_priority;
 		}
 		return $active_lists;
@@ -941,32 +311,7 @@ class Notice {
 	 *
 	 * @return bool
 	 */
-	/**
-	 * Whether the current admin screen belongs to PostX.
-	 *
-	 * Guideline 11 limits promotional UI to the plugin's own screens. Every PostX
-	 * screen carries `ultp` in its screen id — `toplevel_page_ultp-settings`,
-	 * `postx_page_ultp-setup-wizard`, and the `ultp_builder` / `ultp_templates` /
-	 * `ultp_custom_font` post-type screens.
-	 *
-	 * @return BOOL True when the current screen is a PostX screen.
-	 */
-	public function is_postx_screen() {
-		if ( ! function_exists( 'get_current_screen' ) ) {
-			return false;
-		}
-		$screen = get_current_screen();
-		return $screen && false !== strpos( $screen->id, 'ultp' );
-	}
-
 	public function is_available_for_notice() {
-		// Guideline 11 — sale banners and upgrade prompts belong on PostX's own
-		// screens, not on core screens or other plugins' pages.
-		if ( ! $this->is_postx_screen() ) {
-			return false;
-		}
-
-		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Shared across WPXPO plugins (ProductX, WholesaleX, …); renaming breaks them.
 		$active_notices = apply_filters( 'xpo_active_notice_lists', array() );
 		if ( empty( $active_notices ) ) {
 			return true;
@@ -975,141 +320,108 @@ class Notice {
 		return array_key_first( $active_notices ) === $this->plugin_notice_priority_key;
 	}
 
+	/**
+	 * Dashboard Image Banner Notice
+	 *
+	 * @param bool $return_bool True to only report whether an image banner would show.
+	 * @return bool|void
+	 */
 	public function ultp_dashboard_image_banner_notice( $return_bool = false ) {
-		$ultp_db_nonce  = wp_create_nonce( 'ultp-admin-nonce' );
-		$banner_notices = array(
-			array(
-				'key'         => 'ultp_summer_sale_2612',
-				'start'       => '2026-07-20 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
-				'end'         => '2026-08-01 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
-				'banner_src'  => ULTP_URL . 'assets/img/dashboard_banner/dashboard_banner_summer_sale.png',
-				'url'         => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'sub_menu_offer',
-					)
-				),
-				'close_color' => '#000000',
-				'visibility'  => ! Xpo::is_lc_active(),
-			),
-			array(
-				'key'         => 'ultp_summer_sale_2613',
-				'start'       => '2026-08-09 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
-				'end'         => '2026-08-16 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
-				'banner_src'  => ULTP_URL . 'assets/img/dashboard_banner/dashboard_banner_summer_sale.png',
-				'url'         => Xpo::generate_utm_link(
-					array(
-						'utmKey' => 'sub_menu_offer',
-					)
-				),
-				'close_color' => '#000000',
-				'visibility'  => ! Xpo::is_lc_active(),
-			),
-			array(
-				'key'         => 'ultp_preco_sale_campaign_262_1',
-				'start'       => '2026-08-23 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka
-				'end'         => '2026-08-29 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka
-				'banner_src'  => ULTP_URL . 'assets/img/dashboard_banner/preco_banner_insider_deal.png',
-				'url'         => 'https://www.wpxpo.com/product/wowrecommend/?utm_source=db-postx-notice&utm_medium=insider-deal&utm_campaign=postx-dashboard/#pricing',
-				'close_color' => '#ffffff',
-				'visibility'  => ! Xpo::is_lc_active(),
-			),
-			array(
-				'key'         => 'ultp_preco_sale_campaign_262_2',
-				'start'       => '2026-08-30 00:00 Asia/Dhaka', // format YY-MM-DD always set time 00:00 and zone Asia/Dhaka.
-				'end'         => '2026-09-19 23:59 Asia/Dhaka', // format YY-MM-DD always set time 23:59 and zone Asia/Dhaka.
-				'banner_src'  => ULTP_URL . 'assets/img/dashboard_banner/preco_banner_early_bird.png',
-				'url'         => 'https://www.wpxpo.com/product/wowrecommend/?utm_source=db-postx-notice&utm_medium=early-bird&utm_campaign=postx-dashboard/#pricing',
-				'close_color' => '#ffffff',
-				'visibility'  => ! Xpo::is_lc_active(),
-			),
+		return $this->render_campaigns( Image_Notice::class, $return_bool );
+	}
+
+	/**
+	 * Campaigns that should show on this request, in display order.
+	 *
+	 * Worked out once per request: the xpo_active_notice_lists filter and the render pass both need it,
+	 * and each campaign's dismissal check is an uncached database read.
+	 *
+	 * @param string $type Optional class name to keep only one kind of campaign.
+	 * @return Abstract_Campaign_Notice[]
+	 */
+	private function get_active_campaigns( $type = '' ) {
+		if ( null === $this->active_campaigns ) {
+			$this->active_campaigns = array();
+
+			// The registry is the file edited for every sale. Load it here, not at the top, so a
+			// mistake in it (even a syntax error) hides the campaigns instead of breaking wp-admin.
+			try {
+				require_once __DIR__ . '/class-campaigns.php';
+				$campaigns = Campaigns::all();
+			} catch ( \Throwable $e ) {
+				self::log_error( $e );
+				$campaigns = array();
+			}
+
+			foreach ( $campaigns as $campaign ) {
+				try {
+					if ( $campaign instanceof Abstract_Campaign_Notice && $campaign->should_display() ) {
+						$this->active_campaigns[] = $campaign;
+					}
+				} catch ( \Throwable $e ) {
+					self::log_error( $e );
+				}
+			}
+		}
+
+		if ( '' === $type ) {
+			return $this->active_campaigns;
+		}
+		return array_values(
+			array_filter(
+				$this->active_campaigns,
+				function ( $campaign ) use ( $type ) {
+					return $campaign instanceof $type;
+				}
+			)
 		);
+	}
 
-		foreach ( $banner_notices as $notice ) {
-			$notice_key = isset( $notice['key'] ) ? $notice['key'] : $this->notice_version;
-			if ( isset( $_GET['ultp_notice'] ) && $notice_key === sanitize_text_field(wp_unslash($_GET['ultp_notice'])) ) { // phpcs:ignore
-				continue;
-			}
+	/**
+	 * Print every live campaign of one kind, or report whether there is one.
+	 *
+	 * @param string $type        Campaign class name.
+	 * @param bool   $return_bool True to only report whether one would show.
+	 * @return bool|void
+	 */
+	private function render_campaigns( $type, $return_bool ) {
+		$campaigns = $this->get_active_campaigns( $type );
 
-			$current_time = gmdate( 'U' );
-			$notice_start = gmdate( 'U', strtotime( $notice['start'] ) );
-			$notice_end   = gmdate( 'U', strtotime( $notice['end'] ) );
-			if ( $current_time >= $notice_start && $current_time <= $notice_end && $notice['visibility'] ) {
+		if ( $return_bool ) { // Early return for Other plugin notice.
+			return ! empty( $campaigns );
+		}
 
-				$notice_transient = Xpo::get_transient_without_cache( 'ultp_get_pro_notice_' . $notice_key );
+		foreach ( $campaigns as $campaign ) {
+			$this->render_safely( $campaign );
+		}
+	}
 
-				if ( 'off' === $notice_transient ) {
-					continue;
-				}
+	/**
+	 * Print one notice. It's buffered, so a notice that fails halfway leaves no broken markup behind.
+	 *
+	 * @param Notice_Type $notice Notice to print.
+	 * @return void
+	 */
+	private function render_safely( Notice_Type $notice ) {
+		ob_start();
+		try {
+			$notice->render();
+			ob_end_flush();
+		} catch ( \Throwable $e ) {
+			ob_end_clean();
+			self::log_error( $e );
+		}
+	}
 
-				if ( $return_bool ) { // Early return for Other plugin notice.
-					return true;
-				}
-
-				if ( ! $this->notice_js_css_applied ) {
-					$this->ultp_banner_notice_js();
-					$this->notice_js_css_applied = true;
-				}
-				$query_args = array(
-					'ultp_notice' => $notice_key,
-					'wpnonce'     => $ultp_db_nonce,
-				);
-				if ( isset( $notice['repeat_interval'] ) && $notice['repeat_interval'] ) {
-					$query_args['ultp_interval'] = $notice['repeat_interval'];
-				}
-				?>
-				<style type="text/css">
-					.ultp-notice-wrapper.ultp-image-notice-wrapper {
-						padding: 0 !important;
-						position: relative;
-						box-sizing: border-box;
-						overflow: hidden;
-						border-radius: 0px;
-						border: none !important;
-					}
-					.ultp-notice-wrapper.ultp-image-notice-wrapper .ultp-image-banner {
-						position: relative;
-						line-height: 0;
-					}
-					.ultp-notice-wrapper.ultp-image-notice-wrapper .ultp-btn-image {
-						display: block;
-					}
-					.ultp-notice-wrapper.ultp-image-notice-wrapper .ultp-btn-image img {
-						display: block;
-						width: 100%;
-						height: auto;
-						border-radius: 0;
-					}
-					.ultp-notice-wrapper.ultp-image-notice-wrapper .ultp-content-notice-close {
-						top: 4px;
-						right: 4px;
-						position: absolute;
-						z-index: 999;
-					}
-					@media screen and (max-width: 650px) {
-						.ultp-image-notice-wrapper {
-							display: none;
-						}
-					}
-				</style>
-				<div class="ultp-notice-wrapper ultp-image-notice-wrapper notice wc-install ultp-free-notice">
-					<div class="wc-install-body ultp-image-banner">
-						<a class="wc-dismiss-notice ultp-content-notice-close"  href="
-						<?php
-						echo esc_url(
-							add_query_arg(
-								$query_args
-							)
-						);
-						?>
-						"><span class="ultp-content-notice-close-icon dashicons dashicons-dismiss" style="color: <?php echo esc_attr( $notice['close_color'] ); ?>;"> </span></a>
-						<a class="ultp-btn-image" target="_blank" href="<?php echo esc_url( $notice['url'] ); ?>">
-							<img loading="lazy" src="<?php echo esc_url( $notice['banner_src'] ); ?>" alt="Discount Banner"/>
-						</a>
-					</div>
-				</div>
-				
-				<?php
-			}
+	/**
+	 * Record a notice failure when debugging. Notices are never worth breaking wp-admin for.
+	 *
+	 * @param \Throwable $e What went wrong.
+	 * @return void
+	 */
+	private static function log_error( \Throwable $e ) {
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			error_log( 'PostX notice: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Debug-only.
 		}
 	}
 }

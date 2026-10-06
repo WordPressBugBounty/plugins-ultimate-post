@@ -247,6 +247,11 @@ class Xpo {
 				'medium'   => 'summer-sale',
 				'campaign' => 'postx-dashboard',
 			),
+			'birthday'             => array(
+				'source'   => 'db-postx-notice',
+				'medium'   => 'birthday',
+				'campaign' => 'postx-dashboard',
+			),
 			'plugin_dir_pro'        => array(
 				'source'   => 'db-postx-plugin',
 				'medium'   => 'upgrade-pro',

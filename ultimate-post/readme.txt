@@ -4,7 +4,7 @@ Tags: post grid, gutenberg blocks, blog grid, Gutenberg, grid
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 5.1.0
+Stable tag: 5.1.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -307,101 +307,23 @@ We are glad that you are considering PostX. We have more amazing plugins that yo
 
 == Privacy ==
 
-PostX connects to the following external services. Each one is listed with what
-is sent, when, and why.
 
-= Usage analytics =
+PostX connects to external services only when related features are used.
 
-PostX sends usage and diagnostic information to WPXPO at
-`inside.wpxpo.com/wp-json/durbin/v1/analytics`. It is sent only from an
-administrator's action, at these points:
+**Usage Analytics:** PostX sends usage and diagnostic data to WPXPO at inside.wpxpo.com/wp-json/durbin/v1/analytics after specific administrator actions, such as accepting data collection, importing starter sites with updates enabled, completing setup with sharing enabled, or submitting the deactivation survey. Skipping the survey sends nothing. See [**Data Collection Policy**](https://www.wpxpo.com/data-collection-policy/), [**Privacy Policy**](https://www.wpxpo.com/privacy-policy/), and [**Terms**](https://www.wpxpo.com/terms-and-conditions/).
 
-* When you click "Accept & Close" on the PostX data-collection notice.
-* When you import a starter site with "Stay updated with exciting features and
-  news" checked.
-* In the setup wizard, when you move on from the site-type step, and when you
-  finish the wizard with data sharing or updates turned on.
-* When you submit the deactivation survey. Skipping the survey sends nothing.
+**Country Lookup:** When analytics are sent and no country is cached, PostX requests ipinfo.io/json. IPinfo can see the server’s public IP, but PostX stores only the two-letter country code for 180 days. The IP is not stored or sent to WPXPO. See [**IPinfo Terms**](https://ipinfo.io/terms-of-service) and [**Privacy Policy**](https://ipinfo.io/privacy-policy).
 
-WPXPO's data-collection policy is at https://www.wpxpo.com/data-collection-policy/,
-its privacy policy at https://www.wpxpo.com/privacy-policy/ and its terms at
-https://www.wpxpo.com/terms-and-conditions/
+**Templates:** Starter sites and templates are loaded from postxkit.wpxpo.com. Only the PostX version and selected template/site ID are sent.
 
-= Country lookup =
+**Support:** The support form sends your name, email, subject, and message to WPXPO.
 
-To determine the country for the analytics above, PostX makes a request to
-`ipinfo.io/json`, a third-party IP geolocation service operated by IPinfo. The
-request is made only when analytics are sent and no country is cached yet.
+**ChatGPT:** After adding your API key, selected text, model, and API key are sent to OpenAI only when you run a ChatGPT action. See [**OpenAI Terms**](https://openai.com/policies/terms-of-use) and [**Privacy Policy**](https://openai.com/policies/privacy-policy).
 
-* What is sent: nothing from your site is added to the request. Your server's
-  public IP address is visible to IPinfo as the origin of the request, which is
-  how the service works out the country.
-* What is kept: only the two-letter country code from the response (for example
-  `US`). It is stored in your site's database as the `durbin_country_code`
-  transient for 180 days, so the lookup happens at most once per 180 days.
-* What is not kept: PostX does not store the IP address or anything else from
-  the response, and does not add the IP address to the analytics data.
-* Where it goes: the country code is included in the usage analytics sent to
-  WPXPO.
+**Google Fonts:** Fonts may load from fonts.googleapis.com, exposing visitor IP addresses to Google. They can be disabled and served locally. See [**Google Privacy Policy**](https://policies.google.com/privacy).
 
-IPinfo is not operated by WPXPO. Their terms of service are at
-https://ipinfo.io/terms-of-service and their privacy policy is at
-https://ipinfo.io/privacy-policy
+**YouTube Gallery:** After adding a YouTube API key, the block connects to the YouTube Data API and embedded YouTube player, which may expose visitor IP addresses to Google. See [**YouTube Terms**](https://www.youtube.com/t/terms) and [**Google Privacy Policy**](https://policies.google.com/privacy).
 
-= Starter sites and templates =
-
-When you open the starter sites, patterns or design templates, or import one,
-PostX requests the list or the template from WPXPO's template service at
-`postxkit.wpxpo.com`, from your server and from the block editor.
-
-What is sent: the PostX version and the ID of the template or site you picked. No other personal data is sent. WPXPO's privacy policy is at
-https://www.wpxpo.com/privacy-policy/ and its terms at
-https://www.wpxpo.com/terms-and-conditions/
-
-= Support form =
-
-If you submit the support form in the PostX dashboard, your name, email address,
-subject and message are sent to `wpxpo.com/wp-json/v2/support_mail`. This only
-happens when you submit that form. WPXPO's privacy policy is at
-https://www.wpxpo.com/privacy-policy/
-
-= ChatGPT =
-
-The ChatGPT add-on does nothing until you enter your own OpenAI API key in
-PostX > Settings. After that, when you use ChatGPT in the block editor, your
-site's server sends the text you selected or typed, the model you chose and your
-API key to OpenAI at `api.openai.com`. The key stays on the server and is never
-sent to the browser. Nothing is sent until you run a ChatGPT action. OpenAI's terms of use are at https://openai.com/policies/terms-of-use and
-its privacy policy at https://openai.com/policies/privacy-policy
-
-= Google Fonts =
-
-Blocks that use Google Fonts load them from `fonts.googleapis.com` on the front
-end, which exposes your visitors' IP addresses to Google. You can switch this
-off with "Disable All Google Fonts" in PostX > Settings, which serves fonts
-locally instead. Google's privacy policy is at https://policies.google.com/privacy
-
-= YouTube Gallery block =
-
-The YouTube Gallery block needs your own YouTube Data API key and contacts
-nothing until you enter one. Once it has a key, pages that contain the block load
-their video list from the YouTube Data API at `www.googleapis.com/youtube/v3`, in
-your visitors' browsers on the front end and in yours in the editor. The request
-carries the channel, playlist or search term set in the block, the IDs of the
-videos shown, and your API key. Videos play in an embedded YouTube player from
-`www.youtube.com`.
-Both expose your visitors' IP addresses to Google. The block uses YouTube API
-Services: see the YouTube Terms of Service at https://www.youtube.com/t/terms and
-the Google Privacy Policy at https://policies.google.com/privacy
-
-= YouTube and Vimeo videos in post blocks =
-
-Blocks displaying a YouTube video thumbnail load the image from
-`img.youtube.com` on the front end, which exposes your visitors' IP addresses to
-Google. This only applies to posts that have a YouTube video attached. When a
-visitor clicks play on such a video, the player is loaded from `www.youtube.com`
-or, for Vimeo videos, `player.vimeo.com`. Vimeo's privacy policy is at
-https://vimeo.com/privacy
 
 == Installation ==
 
@@ -470,6 +392,9 @@ earlier releases, so it is not supported on WordPress 5.x.
 11. With the help of the Elementor and Saved Template addons, you can use any of the post blocks of PostX to any pages while editing with Elementor builder.
 
 == Changelog ==
+= 5.1.1 – 06 October 2026 =
+* Update: Shorter, clearer Privacy section in the readme
+
 = 5.1.0 – 04 October 2026 =
 * Update: Now requires WordPress 6.0 and PHP 7.4
 * Update: Readme now lists every external service PostX connects to, and Pro features are labelled
