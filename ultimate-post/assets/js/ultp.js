@@ -137,7 +137,7 @@
 		// Prefer a nonce fetched live over whatever the caller passed. A caller's
 		// nonce comes either from page HTML, which a full-page cache can serve
 		// stale, or from a value captured once at init and reused for the life of
-		// the page (UltpInfiniteScroll does this). Reading storage first costs
+		// the page (the infinite scroll script does this). Reading storage first costs
 		// nothing and stops those callers replaying a known-dead nonce forever.
 		const storedNonce = readStoredNonce();
 		if (storedNonce || initialNonce) {
@@ -264,12 +264,8 @@
 	function scrollTopButton() {
 		if ($(document).scrollTop() > 1000) {
 			$(".ultp-toc-backtotop").addClass("tocshow");
-			$(".wp-block-ultimate-post-table-of-content").addClass("ultp-toc-scroll");
 		} else {
 			$(".ultp-toc-backtotop").removeClass("tocshow");
-			$(".wp-block-ultimate-post-table-of-content").removeClass(
-				"ultp-toc-scroll",
-			);
 		}
 	}
 	scrollTopButton();
@@ -427,10 +423,6 @@
 			let widget_items = widgetBlock.attr("id").split("-");
 			widgetBlockId = widget_items[widget_items.length - 1];
 		}
-		const ultpUniqueIds = sessionStorage.getItem("ultp_uniqueIds");
-		const ultpCurrentUniquePosts = JSON.stringify(
-			wrap.find(".ultp-current-unique-posts").data("current-unique-posts"),
-		);
 
 		// Adv Filter Integration
 		const filterValue = parents.data("filter-value") || "";
@@ -450,22 +442,23 @@
 			url: ultp_data_frontend.ajax,
 			type: "POST",
 			nonce: ultp_data_frontend.security,
-			data: {
-				action: "ultp_next_prev",
-				paged: paged,
-				blockId: parents.data("blockid"),
-				postId: post_ID,
-				exclude: parents.data("expost"),
-				blockName: parents.data("blockname"),
-				builder: parents.data("builder"),
-				filterValue: filterValue,
-				filterType: parents.data("filter-type") || "",
-				widgetBlockId: widgetBlockId,
-				ultpUniqueIds: ultpUniqueIds || [],
-				ultpCurrentUniquePosts: ultpCurrentUniquePosts || [],
+			data: postsRequestData(
+				{
+					action: "ultp_next_prev",
+					paged: paged,
+					blockId: parents.data("blockid"),
+					postId: post_ID,
+					exclude: parents.data("expost"),
+					blockName: parents.data("blockname"),
+					builder: parents.data("builder"),
+					filterValue: filterValue,
+					filterType: parents.data("filter-type") || "",
+					widgetBlockId: widgetBlockId,
 
-				...advFilterData,
-			},
+					...advFilterData,
+				},
+				wrap,
+			),
 			beforeSend: function () {
 				if (blockWrapper.length < 1 && postBlock.length > 0) {
 					postBlock.find(".ultp-block-wrapper").addClass("ultp-loading-active");
@@ -476,12 +469,7 @@
 			success: function (data) {
 				if (data) {
 					wrap.html(data);
-					setSession(
-						"ultp_uniqueIds",
-						JSON.stringify(
-							wrap.find(".ultp-current-unique-posts").data("ultp-unique-ids"),
-						),
-					);
+					postsLoaded(wrap, "replace");
 					if ($(window).scrollTop() > wrap.offset().top) {
 						$([document.documentElement, document.body]).animate(
 							{
@@ -500,7 +488,7 @@
 				} else {
 					blockWrapper.removeClass("ultp-loading-active");
 				}
-				handleDailyMotion();
+				contentUpdated();
 			},
 			error: function (xhr) {
 				console.log(
@@ -566,11 +554,6 @@
 			widgetBlockId = widget_items[widget_items.length - 1];
 		}
 
-		const ultpUniqueIds = sessionStorage.getItem("ultp_uniqueIds");
-		const ultpCurrentUniquePosts = JSON.stringify(
-			parents.find(".ultp-current-unique-posts").data("current-unique-posts"),
-		);
-
 		// Adv Filter Integration
 		const filterValue = that.data("filter-value") || "";
 		const advFilterData = {};
@@ -589,22 +572,23 @@
 			url: ultp_data_frontend.ajax,
 			type: "POST",
 			nonce: ultp_data_frontend.security,
-			data: {
-				action: "ultp_next_prev",
-				paged: paged,
-				blockId: that.data("blockid"),
-				postId: post_ID,
-				blockName: that.data("blockname"),
-				builder: that.data("builder"),
-				exclude: that.data("expost"),
-				filterValue: filterValue,
-				filterType: that.data("filter-type") || "",
-				widgetBlockId: widgetBlockId,
-				ultpUniqueIds: ultpUniqueIds || [],
-				ultpCurrentUniquePosts: ultpCurrentUniquePosts || [],
+			data: postsRequestData(
+				{
+					action: "ultp_next_prev",
+					paged: paged,
+					blockId: that.data("blockid"),
+					postId: post_ID,
+					blockName: that.data("blockname"),
+					builder: that.data("builder"),
+					exclude: that.data("expost"),
+					filterValue: filterValue,
+					filterType: that.data("filter-type") || "",
+					widgetBlockId: widgetBlockId,
 
-				...advFilterData,
-			},
+					...advFilterData,
+				},
+				parents,
+			),
 			beforeSend: function () {
 				parents.addClass("ultp-loading-active");
 
@@ -617,8 +601,6 @@
 				if (data) {
 					// Fix for grids that have fixed max-height (Adv Pagination Block integration)
 					parents.find(".ultp-block-row").css("max-height", "unset");
-
-					parents.find(".ultp-current-unique-posts").remove();
 
 					const insertPoint = parents.find(".ultp-loadmore-insert-before");
 
@@ -645,14 +627,7 @@
 						cardDiv.append(data);
 					}
 
-					setSession(
-						"ultp_uniqueIds",
-						JSON.stringify(
-							parents
-								.find(".ultp-current-unique-posts")
-								.data("ultp-unique-ids"),
-						),
-					);
+					postsLoaded(parents, "append");
 				}
 			},
 
@@ -710,27 +685,23 @@
 				widgetBlockId = widget_items[widget_items.length - 1];
 			}
 
-			const ultpUniqueIds = sessionStorage.getItem("ultp_uniqueIds");
-			const ultpCurrentUniquePosts = JSON.stringify(
-				wrap.find(".ultp-current-unique-posts").data("current-unique-posts"),
-			);
-
 			if (parents.data("blockid")) {
 				ultpAjax({
 					url: ultp_data_frontend.ajax,
 					type: "POST",
 					nonce: ultpNonce,
-					data: {
-						action: "ultp_filter",
-						taxtype: parents.data("taxtype"),
-						taxonomy: that.data("taxonomy"),
-						blockId: parents.data("blockid"),
-						postId: post_ID,
-						blockName: parents.data("blockname"),
-						widgetBlockId: widgetBlockId,
-						ultpUniqueIds: ultpUniqueIds || [],
-						ultpCurrentUniquePosts: ultpCurrentUniquePosts || [],
-					},
+					data: postsRequestData(
+						{
+							action: "ultp_filter",
+							taxtype: parents.data("taxtype"),
+							taxonomy: that.data("taxonomy"),
+							blockId: parents.data("blockid"),
+							postId: post_ID,
+							blockName: parents.data("blockname"),
+							widgetBlockId: widgetBlockId,
+						},
+						wrap,
+					),
 					beforeSend: function () {
 						wrap.addClass("ultp-loading-active");
 					},
@@ -793,13 +764,8 @@
 					},
 					complete: function () {
 						wrap.removeClass("ultp-loading-active");
-						setSession(
-							"ultp_uniqueIds",
-							JSON.stringify(
-								wrap.find(".ultp-current-unique-posts").data("ultp-unique-ids"),
-							),
-						);
-						handleDailyMotion();
+						postsLoaded(wrap, "replace");
+						contentUpdated();
 					},
 					error: function (xhr) {
 						console.log(
@@ -875,15 +841,6 @@
 		parents.find(".ultp-next-page-numbers a").blur();
 	}
 
-	// set session value for unique content on page reload
-	if ($(".ultp-current-unique-posts").length > 0) {
-		$(".ultp-current-unique-posts").each(function () {
-			setSession(
-				"ultp_uniqueIds",
-				JSON.stringify($(this).data("ultp-unique-ids")),
-			);
-		});
-	}
 	// session value set function
 	function setSession(key, value) {
 		if (value != undefined) {
@@ -927,15 +884,12 @@
 		blockName,
 		filterType,
 		widgetBlockId,
-		ultpCurrentUniquePosts,
 		filterValue,
 		advFilterData = {},
 		onSuccess,
 		onBeforeSend,
 	}) {
 		if (!pageNum) return;
-
-		const ultpUniqueIds = sessionStorage.getItem("ultp_uniqueIds");
 
 		// console.log({
 		// 	exclude,
@@ -946,8 +900,6 @@
 		// 	blockName,
 		// 	builder,
 		// 	widgetBlockId,
-		// 	ultpUniqueIds: ultpUniqueIds || [],
-		// 	ultpCurrentUniquePosts: ultpCurrentUniquePosts || [],
 		// 	filterType: filterType || "",
 		// 	wpnonce: ultpNonce,
 		// 	filterValue,
@@ -958,21 +910,22 @@
 			url: ultp_data_frontend.ajax,
 			type: "POST",
 			nonce: ultpNonce,
-			data: {
-				exclude,
-				action: "ultp_pagination",
-				paged: pageNum,
-				blockId: blockid,
-				postId: post_ID,
-				blockName,
-				builder,
-				widgetBlockId,
-				ultpUniqueIds: ultpUniqueIds || [],
-				ultpCurrentUniquePosts: ultpCurrentUniquePosts || [],
-				filterType: filterType || "",
-				filterValue,
-				...advFilterData,
-			},
+			data: postsRequestData(
+				{
+					exclude,
+					action: "ultp_pagination",
+					paged: pageNum,
+					blockId: blockid,
+					postId: post_ID,
+					blockName,
+					builder,
+					widgetBlockId,
+					filterType: filterType || "",
+					filterValue,
+					...advFilterData,
+				},
+				wrap,
+			),
 			beforeSend() {
 				if (typeof onBeforeSend === "function") {
 					onBeforeSend();
@@ -985,7 +938,7 @@
 			},
 			complete() {
 				wrap.removeClass("ultp-loading-active");
-				handleDailyMotion();
+				contentUpdated();
 			},
 			error(xhr) {
 				console.log(
@@ -1068,10 +1021,6 @@
 				widgetBlockId = widget_items[widget_items.length - 1];
 			}
 
-			const ultpCurrentUniquePosts = JSON.stringify(
-				wrap.find(".ultp-current-unique-posts").data("current-unique-posts"),
-			);
-
 			let post_ID =
 				parents.parents(".ultp-shortcode").length != 0 &&
 				parents.data("selfpostid") == "no"
@@ -1107,7 +1056,6 @@
 				blockName,
 				post_ID,
 				filterType,
-				ultpCurrentUniquePosts,
 				widgetBlockId,
 				exclude,
 				builder,
@@ -1115,12 +1063,7 @@
 				advFilterData,
 				onSuccess(data) {
 					wrap.find(".ultp-block-items-wrap").html(data);
-					setSession(
-						"ultp_uniqueIds",
-						JSON.stringify(
-							wrap.find(".ultp-current-unique-posts").data("ultp-unique-ids"),
-						),
-					);
+					postsLoaded(wrap, "replace");
 					if ($(window).scrollTop() > wrap.offset().top) {
 						$([document.documentElement, document.body]).animate(
 							{ scrollTop: wrap.offset().top - 80 },
@@ -1179,13 +1122,6 @@
 				nextArrow: selector.parent().find(".ultp-slick-next").html(),
 			};
 
-			let layTemp =
-				selector.data("layout") == "slide2" ||
-				selector.data("layout") == "slide3" ||
-				selector.data("layout") == "slide5" ||
-				selector.data("layout") == "slide6" ||
-				selector.data("layout") == "slide8";
-
 			if (!selector.data("layout")) {
 				// Slider 1
 				if (selector.data("slidelg") < 2) {
@@ -1209,27 +1145,11 @@
 					];
 				}
 			} else {
-				// Slider 2
-				if (selector.data("fade") && layTemp) {
-					settings.fade = selector.data("fade") ? true : false;
-				} else if (!selector.data("fade") && layTemp) {
-					((settings.slidesToShow = selector.data("slidelg") || 1),
-						(settings.responsive = [
-							{
-								breakpoint: 991,
-								settings: {
-									slidesToShow: selector.data("slidesm") || 1,
-									slidesToScroll: 1,
-								},
-							},
-							{
-								breakpoint: 767,
-								settings: {
-									slidesToShow: selector.data("slidexs") || 1,
-									slidesToScroll: 1,
-								},
-							},
-						]));
+				// Slider 2: the centred carousel. A registered Slider 2 hook may answer with the settings
+				// of another carousel (see slider2Settings()); null keeps this one.
+				const otherSettings = slider2Settings(settings, selector);
+				if (otherSettings) {
+					settings = otherSettings;
 				} else {
 					((settings.slidesToShow = selector.data("slidelg") || 1),
 						(settings.centerMode = true));
@@ -1257,7 +1177,21 @@
 			selector.not(".slick-initialized").slick(settings);
 		});
 	}
-	slideshowDisplay();
+
+	// Slider 2 hook. `window.ultpFrontendApi.slider2Settings( settings, $wrap )` is called for each
+	// Slider 2 before it starts. It returns the slick settings of another carousel (built from
+	// `settings`), or null to keep this carousel. Nothing is set by default.
+	function slider2Settings(settings, selector) {
+		const api = window.ultpFrontendApi;
+		if (!api || typeof api.slider2Settings !== "function") {
+			return null;
+		}
+		return api.slider2Settings(settings, selector) || null;
+	}
+
+	// Started once the page is ready, so scripts loaded after this one (footer scripts) can register
+	// their Slider 2 hook before the sliders start.
+	$(document).ready(slideshowDisplay);
 
 	// *************************************
 	// Accessibility for Loadmore Added
@@ -1274,50 +1208,6 @@
 			this.click();
 		}
 	});
-	// *************************************
-	//  Video Scroll
-	// *************************************
-	let isSticky = true;
-	$(window).on("scroll", function () {
-		let windowHeight = $(this).scrollTop();
-		$(".wp-block-ultimate-post-post-image").each(function () {
-			let contentSelector = $(this).find(
-				".ultp-builder-video video , .ultp-builder-video iframe",
-			);
-			if ($(this).find(".ultp-video-block").hasClass("ultp-sticky-video")) {
-				// block height and position
-				let blockContent = $(this).find(".ultp-image-wrapper");
-				let blockPosition = blockContent.offset();
-				// Video Html height and position
-				let videoContent = contentSelector.height();
-				let videoPosition = contentSelector.offset();
-				// Exclude Adminbar height
-				let windowTotalHeight = windowHeight + ($("#wpadminbar").height() || 0);
-				let totalHeight = videoPosition.top + videoContent;
-				// Scrolling Top to bottom
-				if (windowTotalHeight > videoPosition.top) {
-					if (windowTotalHeight > totalHeight && isSticky) {
-						$(this)
-							.find(".ultp-image-wrapper")
-							.css("height", blockContent.height());
-						$(this).find(".ultp-sticky-video").addClass("ultp-sticky-active");
-					}
-				}
-				// Scrolling bottom to top
-				if (windowTotalHeight < blockContent.height() + blockPosition.top) {
-					$(this).find(".ultp-sticky-video").removeClass("ultp-sticky-active");
-					$(this).find(".ultp-image-wrapper").css("height", "auto");
-				}
-				// Close Button
-				$(".ultp-sticky-close").on("click", function () {
-					$(this).find(".ultp-image-wrapper").css("height", "auto");
-					$(".ultp-sticky-video").removeClass("ultp-sticky-active");
-					isSticky = false;
-				});
-			}
-		});
-	});
-
 	// *************************************
 	// Advanced Filter
 	// *************************************
@@ -1373,7 +1263,8 @@
 				filterData.adv_sort = selected;
 				return;
 			}
-			if (getTax(type) === "custom_tax") {
+			// A choice of any type other than category or tag is sent with the taxonomy its option names (`data-tax`), if any.
+			if (!["category", "post_tag"].includes(getTax(type))) {
 				if (cTax) {
 					selectedFilters.push({
 						value: cTax + "###" + selected,
@@ -1413,7 +1304,8 @@
 				return;
 			}
 
-			if (getTax(type) === "custom_tax") {
+			// A choice of any type other than category or tag is sent with the taxonomy its option names (`data-tax`), if any.
+			if (!["category", "post_tag"].includes(getTax(type))) {
 				if (cTax) {
 					selectedFilters.push({
 						value: cTax + "###" + selected,
@@ -1428,17 +1320,7 @@
 
 		filterData.taxonomy = selectedFilters;
 
-		const searchVal = parent.find(".ultp-filter-search input");
-
-		if (searchVal.length > 0) {
-			filterData.search = searchVal.val();
-		}
-
-		const ultpUniqueIds = sessionStorage.getItem("ultp_uniqueIds");
-		const ultpCurrentUniquePosts = JSON.stringify(
-			parent.find(".ultp-current-unique-posts").data("current-unique-posts"),
-		);
-
+		// The search term is added by an add-on from the `ultp_ajax_request` event (action `ultp_adv_filter`).
 		let widgetBlockId = "";
 		let widgetBlock = parent.parents(".widget_block:first");
 		if (widgetBlock.length > 0) {
@@ -1453,18 +1335,19 @@
 				url: ultp_data_frontend.ajax,
 				type: "POST",
 				nonce: ultp_data_frontend.security,
-				data: {
-					action: "ultp_adv_filter",
+				data: postsRequestData(
+					{
+						action: "ultp_adv_filter",
 
-					...filterData,
-					builder_id: builder,
-					blockId: blockId,
-					blockName: blockName,
-					postId: postId,
-					ultpUniqueIds: ultpUniqueIds || [],
-					ultpCurrentUniquePosts: ultpCurrentUniquePosts || [],
-					widgetBlockId: widgetBlockId,
-				},
+						...filterData,
+						builder_id: builder,
+						blockId: blockId,
+						blockName: blockName,
+						postId: postId,
+						widgetBlockId: widgetBlockId,
+					},
+					parent,
+				),
 				beforeSend: function () {
 					grid.addClass("ultp-loading-active");
 				},
@@ -1473,7 +1356,6 @@
 					// 	JSON.parse(response.data.filteredData.data_attrs),
 					// 	"response",
 					// );
-					console.log("testing", searchVal);
 					grid
 						.closest(".wp-block-ultimate-post-post-grid-parent")
 						?.find(".ultp-not-found-message")
@@ -1516,23 +1398,11 @@
 							.replaceWith(response?.data?.filteredData?.pagination);
 					}
 
-					if (grid.parent().is(".ultp-iscroll-active")) {
-						const dataAttrs = JSON.parse(response.data.filteredData.data_attrs);
-
-						Object.entries(dataAttrs).forEach(([key, value]) => {
-							if (value !== null && value !== undefined) {
-								grid.attr("data-" + key, value);
-							}
-						});
-
-						const iscrollBlock = grid.parent();
-						iscrollBlock.UltpInfiniteScroll(
-							iscrollBlock,
-							setSession,
-							getUltpNonce,
-							paginationAjaxCall,
-						);
-					}
+					// Lets other scripts react to the block being filtered. Nobody listens by default.
+					$(document).trigger("ultp_block_filtered", [
+						grid,
+						response.data.filteredData,
+					]);
 
 					if (response?.data?.filteredData?.pagination) {
 						pagis?.map((pagiClass) => {
@@ -1561,12 +1431,7 @@
 				},
 				complete: function () {
 					grid.removeClass("ultp-loading-active");
-					setSession(
-						"ultp_uniqueIds",
-						JSON.stringify(
-							parent.find(".ultp-current-unique-posts").data("ultp-unique-ids"),
-						),
-					);
+					postsLoaded(parent, "replace");
 				},
 				error: function (xhr) {
 					console.log(
@@ -1606,8 +1471,8 @@
 			}
 			selectedFilter.remove();
 
-			// Resetting search input
-			that.find(".ultp-filter-search input").val("");
+			// Add-on search boxes empty themselves on this event, before the fetch below.
+			that.trigger("ultp_filter_reset");
 
 			// Resetting filter buttons
 			that.find('.ultp-filter-button[data-is-active="true"]').each(function () {
@@ -1835,30 +1700,11 @@
 			fetchPostsWithFilter();
 		});
 
-		let searchTimeout;
-
-		function performSearch(isDebounce) {
-			clearTimeout(searchTimeout);
-			searchTimeout = isDebounce
-				? setTimeout(fetchPostsWithFilter, 500)
-				: fetchPostsWithFilter();
-		}
-
-		parent
-			.find(".ultp-filter-search input")
-			.off("input")
-			.on("input", function () {
-				performSearch(true);
-			});
-
-		parent.find(".ultp-filter-search input").on("keydown", function (e) {
-			if (e.key === "Enter") {
-				performSearch(false);
-			}
-		});
-
-		parent.find(".ultp-filter-search-icon").on("click", function () {
-			performSearch(false);
+		// An add-on's search box asks for a fetch by triggering `ultp_filter_request` on an element inside
+		// this grid's parent. The add-on debounces its input; this only fetches. The last filter block of
+		// the parent answers, as it did for the search input.
+		parent.off("ultp_filter_request").on("ultp_filter_request", function () {
+			fetchPostsWithFilter();
 		});
 	});
 
@@ -1894,69 +1740,13 @@
 			const iconrev = currentParents.data("iconrev");
 
 			let delay = 0;
-			if (["layout5", "layout6", "layout7"].includes(iconlay)) {
-				delay = iconlay == "layout7" ? 500 : 400;
-				const extraSize =
-					iconlay == "layout7"
-						? $(this).find(".ultp-dl-text").width()
-						: iconsize / 2;
-				if (lightMode) {
-					$(this)
-						.find(".ultp-dl-svg-con")
-						.css({
-							transform: `translateX(calc(${100 * (iconrev ? -1 : 1)}% ${
-								iconrev ? "-" : "+"
-							} ${extraSize}px))`,
-							transition: `transform ${delay / 1000}s ease`,
-						});
-					if (iconlay == "layout6") {
-						$(this)
-							.find(".ultp-dl-text")
-							.css({
-								transform: `translateX(calc(${100 * (iconrev ? 1 : -1)}% ${
-									iconrev ? "+" : "-"
-								} ${extraSize}px))`,
-								transition: `transform ${delay / 1000}s ease`,
-							});
-					} else if (iconlay == "layout7") {
-						$(this)
-							.find(".ultp-dl-text")
-							.css({
-								transform: `translateX(calc(${
-									(iconrev ? 1 : -1) * iconsize
-								}px))`,
-								transition: `transform ${delay / 1000}s ease`,
-							});
-					}
-				} else {
-					$(this)
-						.find(".ultp-dl-svg-con")
-						.css({
-							transform: `translateX(calc(${100 * (iconrev ? 1 : -1)}% ${
-								iconrev ? "+" : "-"
-							} ${extraSize}px))`,
-							transition: `transform ${delay / 1000}s ease`,
-						});
-					if (iconlay == "layout6") {
-						$(this)
-							.find(".ultp-dl-text")
-							.css({
-								transform: `translateX(calc(${100 * (iconrev ? -1 : 1)}% ${
-									iconrev ? "-" : "+"
-								} ${extraSize}px))`,
-								transition: `transform ${delay / 1000}s ease`,
-							});
-					} else if (iconlay == "layout7") {
-						$(this)
-							.find(".ultp-dl-text")
-							.css({
-								transform: `translateX(calc(${
-									(iconrev ? -1 : 1) * iconsize
-								}px))`,
-								transition: `transform ${delay / 1000}s ease`,
-							});
-					}
-				}
+			// A layout that animates the switch (PostX Pro) registers a function that does it and
+			// returns the delay in milliseconds.
+			const animate = window.ultpDarkLightAnimations
+				? window.ultpDarkLightAnimations[iconlay]
+				: null;
+			if (typeof animate === "function") {
+				delay = animate($(this), { lightMode, iconsize, iconrev }) || 0;
 			}
 			setCookie("ultplocalDLMode", lightMode ? "ultpdark" : "ultplight", 60);
 			setTimeout(() => {
@@ -2091,28 +1881,23 @@
 		}
 	}
 
-	function handleDailyMotion() {
-		$(
-			".ultp-video-modal .ultp-video-modal__content .ultp-video-wrapper > iframe",
-		).each(function () {
-			const that = $(this);
-			const videoSrc = that.attr("src");
-			if (
-				videoSrc &&
-				videoSrc.includes("dailymotion.com/player") &&
-				videoSrc[videoSrc.length - 1] == "&"
-			) {
-				that.attr(
-					"src",
-					videoSrc.slice(0, videoSrc.length - 1) + "?autoplay=0",
-				);
-			}
-		});
-	}
-	if (isFront) {
-		handleDailyMotion();
+	// Posts were added or replaced by an AJAX request. Other scripts listen to fix up the new markup.
+	function contentUpdated() {
+		$(document).trigger("ultp_content_updated");
 	}
 
+	// The data of a request for a block's posts. Other scripts may add fields to `data` from the
+	// `ultp_ajax_request` event; `scope` is the element of the block the request is for.
+	function postsRequestData(data, scope) {
+		$(document).trigger("ultp_ajax_request", [data, scope]);
+		return data;
+	}
+
+	// A request put posts into `scope`. `mode` is "replace" or "append" (posts added after the
+	// ones already shown). Nobody listens by default.
+	function postsLoaded(scope, mode) {
+		$(document).trigger("ultp_posts_loaded", [scope, mode]);
+	}
 	// /*************************************
 	//      Tab Block
 	//   *************************************/
@@ -2145,14 +1930,12 @@
 	// 		)
 	// 		.addClass("pt-active");
 	// }
-	if ($(".ultp-iscroll-active").length > 0) {
-		$(".ultp-iscroll-active").each(function () {
-			$(this).UltpInfiniteScroll(
-				$(this),
-				setSession, // set Unique Post Id
-				getUltpNonce, // Get Nonce
-				paginationAjaxCall, // Pagination API Call Function
-			);
-		});
-	}
+
+	// Helpers for add-on front-end scripts. Keep the names and the arguments: other scripts use them.
+	window.ultpFrontendApi = Object.assign(window.ultpFrontendApi || {}, {
+		level: 1,
+		setSession, // Store a value in sessionStorage (skipped when undefined)
+		getUltpNonce, // Get Nonce
+		paginationAjaxCall, // Pagination API Call Function
+	});
 })(jQuery);

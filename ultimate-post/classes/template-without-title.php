@@ -23,10 +23,9 @@ if ( $ultp_is_block_theme ) {
 	wp_body_open();
 
 	if ( ! $ultp_has_header ) {
-		ob_start();
-		block_template_part( 'header' );
-		$ultp_header = ob_get_clean();
-		echo '<header class="wp-block-template-part">' . $ultp_header . '</header>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core-rendered block template part.
+		// Returned instead of echoed, so no output buffer is needed.
+		$ultp_header = ultimate_post()->get_block_template_part( 'header' );
+		echo '<header class="wp-block-template-part">' . wp_kses( $ultp_header, ultimate_post()->rendered_content_allowed_html() ) . '</header>';
 	}
 } else {
 	get_header();
@@ -52,18 +51,19 @@ $ultp_width = $ultp_width ? $ultp_width : '1140';
 <?php
 do_action( 'ultp_after_content' );
 if ( $ultp_is_block_theme ) {
+	if ( ! $ultp_has_footer ) {
+		// Returned instead of echoed, so no output buffer is needed.
+		$ultp_footer = ultimate_post()->get_block_template_part( 'footer' );
+		if ( $ultp_footer ) {
+			echo '<footer class="wp-block-template-part">' . wp_kses( $ultp_footer, ultimate_post()->rendered_content_allowed_html() ) . '</footer>';
+		}
+	}
+	// wp_head(); // all ready wp head declared in header, i can not find any conflict to check that, if you find any conflict for removing then use it
+	wp_footer();
 	?>
 	</body>
 	</html>
 	<?php
-	if ( ! $ultp_has_footer ) {
-		ob_start();
-		block_template_part( 'footer' );
-		$ultp_footer = ob_get_clean();
-		echo '<footer class="wp-block-template-part">' . $ultp_footer . '</footer>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core-rendered block template part.
-	}
-	// wp_head(); // all ready wp head declared in header, i can not find any conflict to check that, if you find any conflict for removing then use it
-	wp_footer();
 } else {
 	get_footer();
 }

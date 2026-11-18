@@ -11,8 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php if ( ! current_theme_supports( 'title-tag' ) ) : ?>
 		<title>
 			<?php
-				// PHPCS - already escaped by WordPress.
-				echo wp_get_document_title(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core escapes it: esc_html is a default filter on document_title, as in _wp_render_title_tag().
+				// Core already runs esc_html on document_title; esc_html() does not double-encode.
+				echo esc_html( wp_get_document_title() );
 			?>
 		</title>
 	<?php endif; ?>

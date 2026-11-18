@@ -32,7 +32,6 @@ class Heading {
 			'hideExtraLarge' => false,
 			'hideTablet'     => false,
 			'hideMobile'     => false,
-			'advanceCss'     => '',
 		);
 	}
 
@@ -58,7 +57,7 @@ class Heading {
 		$attr['advanceId']   = isset( $attr['advanceId'] ) ? sanitize_html_class( $attr['advanceId'] ) : '';
 		$attr['blockId']     = isset( $attr['blockId'] ) ? sanitize_html_class( $attr['blockId'] ) : '';
 
-		$wraper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '' . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '">';
+		$wraper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . esc_attr( $attr['advanceId'] ) . '" ' : '' ) . ' class="wp-block-ultimate-post-' . esc_attr( $block_name ) . ' ultp-block-' . esc_attr( $attr['blockId'] ) . '' . ( $attr['align'] ? ' align' . esc_attr( $attr['align'] ) : '' ) . '' . ( $attr['className'] ? ' ' . esc_attr( $attr['className'] ) : '' ) . '">';
 			$wraper_before .= '<div class="ultp-block-wrapper">';
 				include ULTP_PATH . 'blocks/template/heading.php';
 			$wraper_before .= '</div>';

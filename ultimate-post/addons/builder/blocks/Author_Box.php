@@ -74,7 +74,6 @@ class Author_Box {
 			'hideDesktop'     => false,
 			'hideTablet'      => false,
 			'hideMobile'      => false,
-			'advanceCss'      => '',
 		);
 	}
 
@@ -94,6 +93,8 @@ class Author_Box {
 			$attr['blockId']       = isset( $attr['blockId'] ) ? sanitize_html_class( $attr['blockId'] ) : '';
 			$attr['authorNameTag'] = in_array( $attr['authorNameTag'], ultimate_post()->ultp_allowed_block_tags() ) ? $attr['authorNameTag'] : 'h4';
 			$attr['layout']        = sanitize_html_class( $attr['layout'] );
+			// Layout class of the card. The default can be changed through ultp_author_box_layout_class.
+			$layout_class          = sanitize_html_class( apply_filters( 'ultp_author_box_layout_class', 'layout1', $attr ) );
 			$attr['writtenByText'] = wp_kses( $attr['writtenByText'], ultimate_post()->ultp_allowed_html_tags() );
 
 			$_post       = get_post( $page_post_id );
@@ -101,37 +102,43 @@ class Author_Box {
 
 			// Author Image
 			$author_image  = '<div class="ultp-post-author-image-section">';
-			$author_image .= get_avatar( $post_author->ID, $attr['imgRatio'] );
+			// get_userdata() returns false when the post has no valid author (author 0 or a deleted user).
+			$author_image .= wp_kses( get_avatar( $post_author ? $post_author->ID : null, $attr['imgRatio'] ), ultimate_post()->rendered_content_allowed_html() );
 			$author_image .= '</div>';
+
+			// The photo sits before the details by default. The two image slots let a replacement move it after them.
+			$image_ctx       = array( 'image' => $author_image );
+			$image_html      = $attr['imgShow'] ? ultimate_post()->esc_filtered_markup( apply_filters( 'ultp_author_box_image_html', $author_image, $attr, $image_ctx ), $author_image ) : '';
+			$image_last_html = $attr['imgShow'] ? ultimate_post()->esc_filtered_markup( apply_filters( 'ultp_author_box_image_last_html', '', $attr, $image_ctx ), '' ) : '';
 
 			// Author Meta
 			$author_meta  = '<div class="ultp-post-author-meta">';
-			$author_meta .= '<span class="ultp-total-post">' . count_user_posts( $_post->post_author, $post_type = 'post' ) . ' Posts</span>';
-			$author_meta .= '<span class="ultp-total-comment">' . get_comments_number( $page_post_id ) . ' Comments</span>';
+			$author_meta .= '<span class="ultp-total-post">' . esc_html( count_user_posts( $_post->post_author, $post_type = 'post' ) ) . ' Posts</span>';
+			$author_meta .= '<span class="ultp-total-comment">' . esc_html( get_comments_number( $page_post_id ) ) . ' Comments</span>';
 			$author_meta .= '</div>';
 
 			// Author Description
-			if ( $post_author->description ) {
+			if ( $post_author && $post_author->description ) {
 				$author_bio .= '<div class="ultp-post-author-bio">';
-				$author_bio .= '<span class="ultp-post-author-bio-meta">' . $post_author->description . '</span>';
+				$author_bio .= '<span class="ultp-post-author-bio-meta">' . wp_kses_post( $post_author->description ) . '</span>';
 				$author_bio .= '</div>';
 			}
 
 			// Author Url
 			if ( get_author_posts_url( $_post->post_author ) ) {
 				$all_post_link  = '<div class="ultp-author-post-link">';
-				$all_post_link .= '<a class="ultp-author-post-link-text" href="' . get_author_posts_url( $_post->post_author ) . '">' . $attr['viewAllPostText'] . '</a>';
+				$all_post_link .= '<a class="ultp-author-post-link-text" href="' . esc_url( get_author_posts_url( $_post->post_author ) ) . '">' . wp_kses( $attr['viewAllPostText'], ultimate_post()->ultp_allowed_html_tags() ) . '</a>';
 				$all_post_link .= '</div>';
 			}
 
-			$wrapper_before                  .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '">';
+			$wrapper_before                  .= '<div ' . ( $attr['advanceId'] ? 'id="' . esc_attr( $attr['advanceId'] ) . '" ' : '' ) . ' class="wp-block-ultimate-post-' . esc_attr( $block_name ) . ' ultp-block-' . esc_attr( $attr['blockId'] ) . ( $attr['className'] ? ' ' . esc_attr( $attr['className'] ) : '' ) . '' . ( $attr['align'] ? ' align' . esc_attr( $attr['align'] ) : '' ) . '">';
 				$wrapper_before              .= '<div class="ultp-block-wrapper">';
-					$content                 .= '<div class="ultp-author-box ultp-author-box-' . $attr['layout'] . '-content">';
-						$content             .= ( $attr['imgShow'] && $attr['layout'] !== 'layout4' ? $author_image : '' );
+					$content                 .= '<div class="ultp-author-box ultp-author-box-' . esc_attr( $layout_class ) . '-content">';
+						$content             .= $image_html;
 							$content         .= '<div class="ultp-post-author-details">';
 								$content     .= '<div class="ultp-post-author-title">';
-									$content .= $attr['writtenByShow'] ? '<span class="ultp-post-author-written-by">' . $attr['writtenByText'] . '</span>' : '';
-									$content .= '<' . $attr['authorNameTag'] . ' class="ultp-post-author-name"><a href="' . get_author_posts_url( $_post->post_author ) . '">' . $post_author->display_name . '</a></' . $attr['authorNameTag'] . '>';
+									$content .= $attr['writtenByShow'] ? '<span class="ultp-post-author-written-by">' . wp_kses( $attr['writtenByText'], ultimate_post()->ultp_allowed_html_tags() ) . '</span>' : '';
+									$content .= '<' . tag_escape( $attr['authorNameTag'] ) . ' class="ultp-post-author-name"><a href="' . esc_url( get_author_posts_url( $_post->post_author ) ) . '">' . esc_html( $post_author ? $post_author->display_name : '' ) . '</a></' . tag_escape( $attr['authorNameTag'] ) . '>';
 								$content     .= '</div>';
 
 								$content .= ( $attr['metaShow'] && $attr['metaPosition'] == 'top' ? $author_meta : '' );
@@ -140,7 +147,7 @@ class Author_Box {
 								$content .= ( $attr['metaShow'] && $attr['metaPosition'] == 'bottom' ? $author_meta : '' );
 								$content .= ( $attr['allPostLinkShow'] ? $all_post_link : '' );
 							$content     .= '</div>';
-							$content     .= ( $attr['imgShow'] && $attr['layout'] === 'layout4' ? $author_image : '' );
+							$content     .= $image_last_html;
 						$content         .= '</div>';
 				$wrapper_after           .= '</div>';
 			$wrapper_after               .= '</div>';

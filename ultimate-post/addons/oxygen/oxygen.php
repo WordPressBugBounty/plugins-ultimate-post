@@ -37,7 +37,7 @@ class PostXOxygenElement extends OxyEl {
 
 		if ( $templates ) {
 			if ( isset( $_GET['action'] ) && strpos( sanitize_key( $_GET['action'] ), 'oxy_render_oxy' ) !== false ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only Oxygen editor detection.
-				echo ultimate_post()->build_css_for_inline_print( $templates, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- <style> tag from build_css_for_inline_print(): integer post ID, CSS passed through wp_strip_all_tags().
+				ultimate_post()->print_inline_css( $templates, true );
 			}
 
 			$args      = array(

@@ -9,12 +9,12 @@ namespace ULTP\Includes\Notice;
 
 defined( 'ABSPATH' ) || exit;
 
-use ULTP\Includes\Durbin\Xpo;
+use ULTP\Includes\Helper\Xpo;
 
 /**
  * The "Upgrade to Pro" link on the Plugins page and the "Upgrade to Pro" item in the PostX menu.
  *
- * Both switch to "Renew License" when the licence has expired, and to a sale's text during a sale.
+ * Both switch to a sale's text during a sale, and neither shows while PostX Pro is active.
  * The sale texts and dates live in Campaigns: plugin_link_offers() and menu_offers().
  */
 class Promo_Links {
@@ -34,39 +34,31 @@ class Promo_Links {
 	}
 
 	/**
-	 * Append the upgrade (or renew) link to PostX's row on the Plugins page.
+	 * Append the upgrade link to PostX's row on the Plugins page.
 	 *
 	 * @param array $links Plugin action links.
 	 * @return array
 	 */
 	public function add_plugin_action_link( $links ) {
-		// Free user or expired license user.
-		if ( defined( 'ULTP_PRO_VER' ) && ! Xpo::is_lc_expired() ) {
+		if ( ! Xpo::show_upsell() ) {
 			return $links;
 		}
 
-		$license_key = Xpo::get_lc_key() ?? '';
+		$text = esc_html__( 'Upgrade to Pro', 'ultimate-post' );
+		$url  = Xpo::generate_utm_link(
+			array(
+				'utmKey' => 'sub_menu',
+			)
+		);
 
-		if ( Xpo::is_lc_expired() ) {
-			$text = esc_html__( 'Renew License', 'ultimate-post' );
-			$url  = 'https://account.wpxpo.com/checkout/?edd_license_key=' . $license_key;
-		} else {
-			$text = esc_html__( 'Upgrade to Pro', 'ultimate-post' );
+		$offer = self::live_offer( self::campaign( 'plugin_link_offers', array() ) );
+		if ( $offer ) {
 			$url  = Xpo::generate_utm_link(
 				array(
-					'utmKey' => 'sub_menu',
+					'utmKey' => $offer['utm_key'],
 				)
 			);
-
-			$offer = self::live_offer( self::campaign( 'plugin_link_offers', array() ) );
-			if ( $offer ) {
-				$url  = Xpo::generate_utm_link(
-					array(
-						'utmKey' => $offer['utm_key'],
-					)
-				);
-				$text = $offer['text'];
-			}
+			$text = $offer['text'];
 		}
 
 		$links['ultp_pro'] = '<a style="color: #0062ff; font-weight: bold;" target="_blank" href="' . esc_url( $url ) . '">' . esc_html( $text ) . '</a>';
@@ -74,7 +66,7 @@ class Promo_Links {
 	}
 
 	/**
-	 * Add the upgrade (or renew) item at the end of the PostX menu.
+	 * Add the upgrade item at the end of the PostX menu.
 	 *
 	 * @return void
 	 */
@@ -85,7 +77,8 @@ class Promo_Links {
 		}
 
 		ob_start();
-		?>
+		try {
+			?>
 		<a href="<?php echo esc_url( $link['url'] ); ?>" target="_blank" class="ultp-go-pro">
 			<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 				<path d="M2.86 6.553a.5.5 0 01.823-.482l3.02 2.745c.196.178.506.13.64-.098L9.64 4.779a.417.417 0 01.72 0l2.297 3.939a.417.417 0 00.64.098l3.02-2.745a.5.5 0 01.823.482l-1.99 8.63a.833.833 0 01-.813.646H5.663a.833.833 0 01-.812-.646L2.86 6.553z" stroke="currentColor" stroke-width="1.5"></path>
@@ -93,7 +86,9 @@ class Promo_Links {
 			<span><?php echo esc_html( $link['text'] ); ?></span>
 		</a>
 		<?php
-		$submenu_content = ob_get_clean();
+		} finally {
+			$submenu_content = ob_get_clean();
+		}
 
 		add_submenu_page(
 			'ultp-settings',
@@ -156,7 +151,6 @@ class Promo_Links {
 	 */
 	private static function campaign( $method, $fallback ) {
 		try {
-			require_once __DIR__ . '/class-campaigns.php';
 			$value = call_user_func( array( Campaigns::class, $method ) );
 		} catch ( \Throwable $e ) {
 			return $fallback;
@@ -165,14 +159,14 @@ class Promo_Links {
 	}
 
 	/**
-	 * The menu item's link and text, or nothing when the licence is active.
+	 * The menu item's link and text, or nothing when PostX Pro is active.
 	 *
 	 * @return array{url: string, text: string}|array Empty when no item should show.
 	 */
 	private function get_menu_link() {
 		$offer = self::live_offer( self::campaign( 'menu_offers', array() ) );
 
-		if ( ! Xpo::is_lc_active() ) {
+		if ( Xpo::show_upsell() ) {
 			return array(
 				'url'  => Xpo::generate_utm_link(
 					array(
@@ -180,13 +174,6 @@ class Promo_Links {
 					)
 				),
 				'text' => $offer ? $offer['text'] : __( 'Upgrade to Pro', 'ultimate-post' ),
-			);
-		}
-
-		if ( Xpo::is_lc_expired() ) {
-			return array(
-				'url'  => 'https://account.wpxpo.com/checkout/?edd_license_key=' . Xpo::get_lc_key(),
-				'text' => __( 'Renew License', 'ultimate-post' ),
 			);
 		}
 

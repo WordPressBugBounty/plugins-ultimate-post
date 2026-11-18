@@ -60,9 +60,10 @@ class Custom_Font {
 	/**
 	 * Whether the current request uploads to, or edits, a custom font the user may edit.
 	 *
-	 * Uploads from the font screen's media modal send the font as `post_id`; async-upload.php
-	 * checks its own nonce and refuses a `post_id` the user cannot edit. The screen itself is
-	 * recognised by the global post.
+	 * Uploads from the font screen's media modal send the font as `post_id`, with the media
+	 * uploader's nonce in `_wpnonce` (action 'media-form', see wp_plupload_default_settings()).
+	 * That nonce is checked here too; without a valid one the request is not a custom font
+	 * upload. The screen itself is recognised by the global post.
 	 *
 	 * @return bool
 	 */
@@ -70,11 +71,24 @@ class Custom_Font {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return false;
 		}
-		$post_id = isset( $_REQUEST['post_id'] ) ? absint( $_REQUEST['post_id'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read only to choose the context; async-upload.php verifies the media-form nonce.
+		if ( ! current_user_can( 'upload_files' ) ) {
+			return false;
+		}
+		$post_id = 0;
+		if ( isset( $_REQUEST['post_id'] ) ) {
+			$nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : '';
+			if ( ! wp_verify_nonce( $nonce, 'media-form' ) ) {
+				return false;
+			}
+			$post_id = absint( wp_unslash( $_REQUEST['post_id'] ) );
+		}
 		if ( ! $post_id ) {
 			$post_id = (int) get_the_ID();
 		}
-		return $post_id > 0 && 'ultp_custom_font' === get_post_type( $post_id ) && current_user_can( 'edit_post', $post_id );
+		if ( $post_id <= 0 || 'ultp_custom_font' !== get_post_type( $post_id ) ) {
+			return false;
+		}
+		return current_user_can( 'edit_post', $post_id );
 	}
 
 
@@ -98,8 +112,6 @@ class Custom_Font {
 		if ( ! $this->is_custom_font_upload() ) {
 			return $file;
 		}
-
-		require_once __DIR__ . '/Svg_Font_Sanitizer.php';
 		$sanitized = Svg_Font_Sanitizer::sanitize_file( $file['tmp_name'] );
 		if ( is_wp_error( $sanitized ) ) {
 			$file['error'] = $sanitized->get_error_message();
@@ -131,17 +143,33 @@ class Custom_Font {
 		return str_replace( array( '"', '\\', ';', '{', '}', '<', '>' ), '', (string) $font_name );
 	}
 
+	/**
+	 * Font family name as one quoted CSS string, for a @font-face rule or a style attribute.
+	 *
+	 * The name is the post title, which is also the name the block's font lookup matches. Control
+	 * characters are removed, and an ampersand becomes a CSS hex escape. An HTML attribute decodes
+	 * entities such as &#59; before the browser reads the CSS, and esc_attr() keeps an existing entity
+	 * as it is, so the value must not contain an ampersand.
+	 *
+	 * @param string $font_name Post title of the font.
+	 * @return string The name in double quotes, for example "Open Sans".
+	 */
+	private static function font_family_value( $font_name ) {
+		$name = preg_replace( '/[\x00-\x1F\x7F]/', '', self::sanitize_font_family( $font_name ) );
+		return '"' . str_replace( '&', '\26 ', $name ) . '"';
+	}
+
 	// Template Heading Add
 	public function templates_table_head( $defaults ) {
 		$type_array        = array(
-			'preview' => '<span class="ultp-custom-font-preview-th">' . __( 'Preview', 'ultimate-post' ) . '</span>',
-			'woff'    => __( 'WOFF', 'ultimate-post' ),
-			'woff2'   => __( 'WOFF2', 'ultimate-post' ),
-			'ttf'     => __( 'TTF', 'ultimate-post' ),
-			'svg'     => __( 'SVG', 'ultimate-post' ),
-			'eot'     => __( 'EOT', 'ultimate-post' ),
+			'preview' => '<span class="ultp-custom-font-preview-th">' . esc_html__( 'Preview', 'ultimate-post' ) . '</span>',
+			'woff'    => esc_html__( 'WOFF', 'ultimate-post' ),
+			'woff2'   => esc_html__( 'WOFF2', 'ultimate-post' ),
+			'ttf'     => esc_html__( 'TTF', 'ultimate-post' ),
+			'svg'     => esc_html__( 'SVG', 'ultimate-post' ),
+			'eot'     => esc_html__( 'EOT', 'ultimate-post' ),
 		);
-		$defaults['title'] = __( 'Font Family', 'ultimate-post' );
+		$defaults['title'] = esc_html__( 'Font Family', 'ultimate-post' );
 		array_splice( $defaults, 2, 0, $type_array );
 
 		return $defaults;
@@ -152,22 +180,22 @@ class Custom_Font {
 	public function get_font_face( $settings, $font_name ) {
 		$font_src = array();
 		if ( $settings['woff'] ) {
-			array_push( $font_src, 'url(' . esc_url( $settings['woff'] ) . ') format("woff")' );
+			array_push( $font_src, 'url("' . esc_url_raw( $settings['woff'] ) . '") format("woff")' );
 		}
 		if ( $settings['woff2'] ) {
-			array_push( $font_src, 'url(' . esc_url( $settings['woff2'] ) . ') format("woff2")' );
+			array_push( $font_src, 'url("' . esc_url_raw( $settings['woff2'] ) . '") format("woff2")' );
 		}
 		if ( $settings['ttf'] ) {
-			array_push( $font_src, 'url(' . esc_url( $settings['ttf'] ) . ') format("TrueType")' );
+			array_push( $font_src, 'url("' . esc_url_raw( $settings['ttf'] ) . '") format("TrueType")' );
 		}
 		if ( $settings['svg'] ) {
-			array_push( $font_src, 'url(' . esc_url( $settings['svg'] ) . ') format("svg")' );
+			array_push( $font_src, 'url("' . esc_url_raw( $settings['svg'] ) . '") format("svg")' );
 		}
 		if ( $settings['eot'] ) {
-			array_push( $font_src, 'url(' . esc_url( $settings['eot'] ) . ') format("eot")' );
+			array_push( $font_src, 'url("' . esc_url_raw( $settings['eot'] ) . '") format("eot")' );
 		}
 		$font_face = '@font-face {
-            font-family: "' . self::sanitize_font_family( $font_name ) . '";
+            font-family: ' . self::font_family_value( $font_name ) . ';
             font-weight: ' . self::sanitize_font_weight( isset( $settings['weight'] ) ? $settings['weight'] : '' ) . ';
             src: ' . implode( ', ', $font_src ) . ';
         }';
@@ -176,10 +204,31 @@ class Custom_Font {
 	}
 
 
+	/**
+	 * Queue the @font-face of a font preview on the Custom Fonts screens.
+	 *
+	 * The list table and the meta box render in the admin body, after the <head> has printed its
+	 * styles, so WordPress prints this one in the admin footer (print_late_styles()). One handle per
+	 * distinct @font-face: each font variation gets its own, and a row rendered once per column adds
+	 * its CSS only once.
+	 *
+	 * @param string $font_face The @font-face rule from get_font_face().
+	 * @return void
+	 */
+	private function enqueue_font_face( $font_face ) {
+		$handle = 'ultp-custom-font-' . md5( $font_face );
+		if ( wp_style_is( $handle, 'registered' ) ) {
+			return;
+		}
+		wp_register_style( $handle, false, array(), ULTP_VER );
+		wp_enqueue_style( $handle );
+		wp_add_inline_style( $handle, CSS_Sanitizer::ultp_esc_css( $font_face ) );
+	}
+
 	// Column Content
 	public function templates_table_content( $column_id, $post_id ) {
 		$woff     = $woff2 = $ttf = $svg = $eot = false;
-		$settings = get_post_meta( $post_id, '__font_settings', true );
+		$settings = get_post_meta( $post_id, '_ultp_font_settings', true );
 
 		if ( $settings ) {
 			foreach ( $settings as $key => $value ) {
@@ -194,12 +243,17 @@ class Custom_Font {
 				if ( $value['eot'] ) {
 					$eot = true; }
 			}
-			$font_face = $this->get_font_face( $settings[0], get_the_title( $post_id ) );
-			echo '<style type="text/css">' . $font_face . '</style>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSS from get_font_face(): URLs pass esc_url(), family and weight pass sanitize_font_family()/sanitize_font_weight().
+			// The raw title, as the meta box and the block's font lookup use it. get_the_title() would
+			// texturize quotes into entities, which are not part of the name.
+			$font_name = (string) get_post_field( 'post_title', $post_id, 'raw' );
+			$this->enqueue_font_face( $this->get_font_face( $settings[0], $font_name ) );
 
-			switch ( $column_id ) {
+			// Strict: a column ID added by another plugin (e.g. 'seo') must not match case 0. PHP 7.4's loose
+			// switch would match it, because 'seo' == 0 there. Only integers and digit strings map to a column.
+			$column_index = ( is_int( $column_id ) || ( is_string( $column_id ) && preg_match( '/^[0-9]+$/', $column_id ) ) ) ? (int) $column_id : -1;
+			switch ( $column_index ) {
 				case 0:
-					echo '<span class="ultp-custom-font-preview" style="font-family: ' . esc_attr( get_the_title( $post_id ) ) . '">' . esc_html__( 'The quick brown fox jumps over the lazy dog.', 'ultimate-post' ) . '</span>';
+					echo '<span class="ultp-custom-font-preview" style="' . esc_attr( 'font-family: ' . self::font_family_value( $font_name ) ) . '">' . esc_html__( 'The quick brown fox jumps over the lazy dog.', 'ultimate-post' ) . '</span>';
 					break;
 				case 1:
 					echo '<span class="dashicons ' . ( $woff ? 'dashicons-yes' : 'dashicons-no-alt' ) . '"></span>';
@@ -257,9 +311,8 @@ class Custom_Font {
 				<?php
 					$preview_style = '';
 				if ( ! empty( $arr ) ) {
-					$font_face = $this->get_font_face( $arr, $font_name );
-					echo '<style type="text/css">' . $font_face . '</style>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSS from get_font_face(): URLs pass esc_url(), family and weight pass sanitize_font_family()/sanitize_font_weight().
-					$preview_style = 'font-family: "' . self::sanitize_font_family( $font_name ) . '"; font-weight: ' . self::sanitize_font_weight( isset( $arr['weight'] ) ? $arr['weight'] : '' );
+					$this->enqueue_font_face( $this->get_font_face( $arr, $font_name ) );
+					$preview_style = 'font-family: ' . self::font_family_value( $font_name ) . '; font-weight: ' . self::sanitize_font_weight( isset( $arr['weight'] ) ? $arr['weight'] : '' );
 				}
 				?>
 				<span <?php echo '' !== $preview_style ? 'style="' . esc_attr( $preview_style ) . '"' : ''; ?> class="ultp-custom-font-preview"><?php echo esc_html__( 'The quick brown fox jumps over the lazy dog', 'ultimate-post' ); ?></span>
@@ -303,7 +356,7 @@ class Custom_Font {
 
 	function custom_font_callback( $post ) {
 		wp_nonce_field( 'font_meta_box', 'custom_font_nonce' );
-		$settings = get_post_meta( $post->ID, '__font_settings', true );
+		$settings = get_post_meta( $post->ID, '_ultp_font_settings', true );
 
 		$this->set_data(); // Set Empty Data
 
@@ -321,27 +374,36 @@ class Custom_Font {
 			return; }
 		if ( ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['custom_font_nonce'] ) ), 'font_meta_box' ) ) {
 			return; }
+		// A nonce proves the form, not the right to edit this post: check the post type, autosave and capability too.
+		if ( 'ultp_custom_font' !== get_post_type( $post_id ) || ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || ! current_user_can( 'edit_post', $post_id ) ) {
+			return;
+		}
 
 		$arr = array();
 		if ( isset( $_POST['weight'] ) && is_array( $_POST['weight'] ) ) {
-            foreach ($_POST['weight'] as $i => $value) { //phpcs:ignore
-				if ( isset( $_POST['weight'][ $i ] ) &&
-					( ! empty( $_POST['woff'][ $i ] ) ||
-					! empty( $_POST['woff2'][ $i ] ) ||
-					! empty( $_POST['ttf'][ $i ] ) ||
-					! empty( $_POST['svg'][ $i ] ) ||
-					! empty( $_POST['eot'][ $i ] ) ) ) {
+			// One list per field, unslashed and sanitized once. A non-array field counts as empty.
+			$posted = array();
+			foreach ( array( 'weight', 'woff', 'woff2', 'ttf', 'svg', 'eot' ) as $field ) {
+				$posted[ $field ] = isset( $_POST[ $field ] ) && is_array( $_POST[ $field ] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST[ $field ] ) ) : array();
+			}
+			foreach ( $posted['weight'] as $i => $weight ) {
+				if ( ! empty( $posted['woff'][ $i ] ) ||
+					! empty( $posted['woff2'][ $i ] ) ||
+					! empty( $posted['ttf'][ $i ] ) ||
+					! empty( $posted['svg'][ $i ] ) ||
+					! empty( $posted['eot'][ $i ] ) ) {
 							$temp           = array();
-							$temp['weight'] = self::sanitize_font_weight( sanitize_text_field( $_POST['weight'][ $i ] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
-							$temp['woff']   = isset( $_POST['woff'][ $i ] ) ? sanitize_text_field( $_POST['woff'][ $i ] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
-							$temp['woff2']  = isset( $_POST['woff2'][ $i ] ) ? sanitize_text_field( $_POST['woff2'][ $i ] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
-							$temp['ttf']    = isset( $_POST['ttf'][ $i ] ) ? sanitize_text_field( $_POST['ttf'][ $i ] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
-							$temp['svg']    = isset( $_POST['svg'][ $i ] ) ? sanitize_text_field( $_POST['svg'][ $i ] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
-							$temp['eot']    = isset( $_POST['eot'][ $i ] ) ? sanitize_text_field( $_POST['eot'][ $i ] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
+							$temp['weight'] = self::sanitize_font_weight( $weight );
+							$temp['woff']   = isset( $posted['woff'][ $i ] ) ? $posted['woff'][ $i ] : '';
+							$temp['woff2']  = isset( $posted['woff2'][ $i ] ) ? $posted['woff2'][ $i ] : '';
+							$temp['ttf']    = isset( $posted['ttf'][ $i ] ) ? $posted['ttf'][ $i ] : '';
+							$temp['svg']    = isset( $posted['svg'][ $i ] ) ? $posted['svg'][ $i ] : '';
+							$temp['eot']    = isset( $posted['eot'][ $i ] ) ? $posted['eot'][ $i ] : '';
 							$arr[]          = $temp;
 				}
 			}
-			update_post_meta( $post_id, '__font_settings', $arr );
+			// update_post_meta() unslashes again, so the value goes back slashed.
+			update_post_meta( $post_id, '_ultp_font_settings', wp_slash( $arr ) );
 		}
 	}
 

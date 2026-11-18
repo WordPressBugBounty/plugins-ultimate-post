@@ -80,6 +80,41 @@
 			}, SEARCH_DEBOUNCE_MS);
 		});
 
+		// The route checks the front-end nonce for visitors. The one in the page HTML
+		// (ultp_data_frontend.security) can be stale under a full-page cache, so use
+		// the nonce ultp.js fetches live, and on an expired-nonce 403 fetch a fresh
+		// one and retry once. ultp.js loads after this file, so look it up per call.
+		const fetchSearchResults = (requestData, signal, retried = false) => {
+			const api = window.ultpFrontendApi;
+			const getNonce =
+				api && typeof api.getUltpNonce === "function"
+					? api.getUltpNonce(retried)
+					: Promise.resolve(null);
+			return getNonce
+				.then((nonce) =>
+					wp.apiFetch({
+						path: "/ultp/ultp_search_data",
+						method: "POST",
+						signal: signal,
+						data: {
+							...requestData,
+							wpnonce: nonce || requestData.wpnonce,
+						},
+					})
+				)
+				.catch((err) => {
+					if (
+						!retried &&
+						!signal.aborted &&
+						err &&
+						err.code === "ultp_invalid_nonce"
+					) {
+						return fetchSearchResults(requestData, signal, true);
+					}
+					throw err;
+				});
+		};
+
 		const searchResultAPI = (
 			that,
 			searchText,
@@ -115,27 +150,21 @@
 					abortSearchRequest(blockId);
 					const controller = new AbortController();
 					searchAbortControllers[blockId] = controller;
-					wp.apiFetch({
-						path: "/ultp/ultp_search_data",
-						method: "POST",
-						signal: controller.signal,
-						data: {
-							searchText: searchText,
-							date: parseInt(el.data("date")),
-							image: parseInt(el.data("image")),
-							author: parseInt(el.data("author")),
-							excerpt: parseInt(el.data("excerpt")),
-							category: parseInt(el.data("catenable")),
-							excerptLimit: parseInt(el.data("excerptlimit")),
-							postPerPage: el.data("allresult") ? el.data("postno") : 10,
-							exclude:
-								typeof el.data("searchposttype") !== "string" &&
-								el.data("searchposttype").length > 0 &&
-								el.data("searchposttype"),
-							paged: postPages,
-							wpnonce: ultp_data_frontend.security,
-						},
-					}).then((res) => {
+					const requestData = {
+						searchText: searchText,
+						date: parseInt(el.data("date")),
+						image: parseInt(el.data("image")),
+						author: parseInt(el.data("author")),
+						excerpt: parseInt(el.data("excerpt")),
+						category: parseInt(el.data("catenable")),
+						excerptLimit: parseInt(el.data("excerptlimit")),
+						postPerPage: el.data("allresult") ? el.data("postno") : 10,
+						paged: postPages,
+						wpnonce: ultp_data_frontend.security,
+					};
+					// An add-on may add parameters to the request.
+					$(document).trigger("ultp_search_request", [requestData, el]);
+					fetchSearchResults(requestData, controller.signal).then((res) => {
 						if (res.post_data) {
 							if (isAppend) {
 								selector
@@ -285,19 +314,11 @@
 					const el = $(
 						`.wp-block-ultimate-post-advanced-search.ultp-block-${blockId}`
 					).find(".ultp-search-frontend");
-					let exclude =
-						typeof el.data("searchposttype") !== "string" &&
-						el.data("searchposttype")?.length > 0 &&
-						el?.data("searchposttype");
-					exclude = exclude.length
-						? `&ultp_exclude=${JSON.stringify(
-								exclude.map((e) => {
-									return e.value;
-								})
-						  )}`
-						: "";
+					// An add-on may append query parameters to the search page URL.
+					const extra = { query: "" };
+					$(document).trigger("ultp_search_url", [extra, el]);
 					window.open(
-						`${ultp_data_frontend.home_url}/?s=${$(this).val()}${exclude}`,
+						`${ultp_data_frontend.home_url}/?s=${$(this).val()}${extra.query}`,
 						tabTarget
 					);
 				}
@@ -328,22 +349,14 @@
 				const el = $(
 					`.wp-block-ultimate-post-advanced-search.ultp-block-${blockId}`
 				).find(".ultp-search-frontend");
-				let exclude =
-					typeof el.data("searchposttype") !== "string" &&
-					el.data("searchposttype")?.length > 0 &&
-					el?.data("searchposttype");
-				exclude = exclude.length
-					? `&ultp_exclude=${JSON.stringify(
-							exclude.map((e) => {
-								return e.value;
-							})
-					  )}`
-					: "";
+				// An add-on may append query parameters to the search page URL.
+				const extra = { query: "" };
+				$(document).trigger("ultp_search_url", [extra, el]);
 				window.open(
 					`${ultp_data_frontend.home_url}/?s=${$(this)
 						.closest(".ultp-searchform-content")
 						.find(".ultp-searchres-input")
-						.val()}${exclude}`,
+						.val()}${extra.query}`,
 					tabTarget
 				);
 			} else {

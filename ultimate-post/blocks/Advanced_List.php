@@ -33,6 +33,7 @@ class Advanced_List {
 			$content = \ULTP\DCService::replace( $content, $text );
 		}
 
-		return $content;
+		// The block's saved markup, filtered by wp_kses() (keeps its icons; style="" goes through safecss).
+		return wp_kses( $content, ultimate_post()->rendered_content_allowed_html() );
 	}
 }

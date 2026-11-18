@@ -27,7 +27,6 @@ class Post_Excerpt {
 			'hideDesktop'    => false,
 			'hideTablet'     => false,
 			'hideMobile'     => false,
-			'advanceCss'     => '',
 		);
 	}
 
@@ -54,10 +53,11 @@ class Post_Excerpt {
 
 		$excerpt = $this->excerpt_word( $attr['excerptLimit'] );
 		if ( $excerpt ) {
-			$wrapper_before      .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '">';
+			$wrapper_before      .= '<div ' . ( $attr['advanceId'] ? 'id="' . esc_attr( $attr['advanceId'] ) . '" ' : '' ) . ' class="wp-block-ultimate-post-' . esc_attr( $block_name ) . ' ultp-block-' . esc_attr( $attr['blockId'] ) . ( $attr['className'] ? ' ' . esc_attr( $attr['className'] ) : '' ) . '' . ( $attr['align'] ? ' align' . esc_attr( $attr['align'] ) : '' ) . '">';
 				$wrapper_before  .= '<div class="ultp-block-wrapper">';
 					$content     .= '<div class="ultp-builder-excerpt">';
-						$content .= $excerpt;
+						// A hand-written excerpt may hold markup, so permitted HTML is kept.
+						$content .= wp_kses_post( $excerpt );
 					$content     .= '</div>';
 				$wrapper_after   .= '</div>';
 			$wrapper_after       .= '</div>';

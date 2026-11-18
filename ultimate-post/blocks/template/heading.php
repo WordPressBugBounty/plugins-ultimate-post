@@ -2,7 +2,6 @@
 defined( 'ABSPATH' ) || exit;
 // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Included inside block render methods; variables are local.
 
-global $post_id;
 $attr['headingStyle'] = sanitize_html_class( $attr['headingStyle'] );
 $attr['headingAlign'] = sanitize_html_class( $attr['headingAlign'] );
 $allowed_html_tags    = ultimate_post()->ultp_allowed_html_tags();
@@ -36,17 +35,17 @@ $attr['headingTag']     = in_array( $attr['headingTag'], ultimate_post()->ultp_a
 
 if ( $attr['headingShow'] ) {
 	$new_tab        = isset( $attr['openInTab'] ) && $attr['openInTab'] == true ? 'target="_blank"' : '';
-	$wraper_before .= '<div class="ultp-heading-wrap ultp-heading-' . $attr['headingStyle'] . ' ultp-heading-' . $attr['headingAlign'] . '">';
+	$wraper_before .= '<div class="ultp-heading-wrap ultp-heading-' . esc_attr( $attr['headingStyle'] ) . ' ultp-heading-' . esc_attr( $attr['headingAlign'] ) . '">';
 	if ( $finalHeadingURL ) {
-		$wraper_before .= '<' . $attr['headingTag'] . ' class="ultp-heading-inner"><a href="' . $finalHeadingURL . '" ' . $new_tab . '><span>' . $finalHeadingText . '</span></a></' . $attr['headingTag'] . '>';
+		$wraper_before .= '<' . tag_escape( $attr['headingTag'] ) . ' class="ultp-heading-inner"><a href="' . esc_url( $finalHeadingURL ) . '" ' . $new_tab . '><span>' . wp_kses( $finalHeadingText, $allowed_html_tags ) . '</span></a></' . tag_escape( $attr['headingTag'] ) . '>';
 	} else {
-		$wraper_before .= '<' . $attr['headingTag'] . ' class="ultp-heading-inner"><span>' . $finalHeadingText . '</span></' . $attr['headingTag'] . '>';
+		$wraper_before .= '<' . tag_escape( $attr['headingTag'] ) . ' class="ultp-heading-inner"><span>' . wp_kses( $finalHeadingText, $allowed_html_tags ) . '</span></' . tag_escape( $attr['headingTag'] ) . '>';
 	}
 	if ( $attr['headingStyle'] == 'style11' && $finalHeadingURL && $attr['headingBtnText'] ) {
-		$wraper_before .= '<a class="ultp-heading-btn" href="' . $finalHeadingURL . '" ' . $new_tab . '>' . $attr['headingBtnText'] . ultimate_post()->get_svg_icon( 'rightAngle2' ) . '</a>';
+		$wraper_before .= '<a class="ultp-heading-btn" href="' . esc_url( $finalHeadingURL ) . '" ' . $new_tab . '>' . wp_kses( $attr['headingBtnText'], $allowed_html_tags ) . wp_kses( ultimate_post()->get_svg_icon( 'rightAngle2' ), ultimate_post()->rendered_content_allowed_html() ) . '</a>';
 	}
 	if ( $attr['subHeadingShow'] ) {
-		$wraper_before .= '<div class="ultp-sub-heading"><div class="ultp-sub-heading-inner">' . $finalSubHeadingText . '</div></div>';
+		$wraper_before .= '<div class="ultp-sub-heading"><div class="ultp-sub-heading-inner">' . wp_kses( $finalSubHeadingText, $allowed_html_tags ) . '</div></div>';
 	}
 	$wraper_before .= '</div>';
 }

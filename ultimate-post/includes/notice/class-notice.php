@@ -3,16 +3,7 @@ namespace ULTP\Includes\Notice;
 
 defined( 'ABSPATH' ) || exit;
 
-use ULTP\Includes\Durbin\Xpo;
-
-require_once __DIR__ . '/interface-notice-type.php';
-require_once __DIR__ . '/class-notice-assets.php';
-require_once __DIR__ . '/class-abstract-campaign-notice.php';
-require_once __DIR__ . '/types/class-banner-notice.php';
-require_once __DIR__ . '/types/class-content-notice.php';
-require_once __DIR__ . '/types/class-image-notice.php';
-require_once __DIR__ . '/types/class-consent-notice.php';
-require_once __DIR__ . '/class-promo-links.php';
+use ULTP\Includes\Helper\Xpo;
 
 /**
  * Plugin Notice
@@ -26,13 +17,6 @@ class Notice {
 	 * @var Abstract_Campaign_Notice[]|null
 	 */
 	private $active_campaigns = null;
-
-	/**
-	 * Data-collection consent notice. Null until first needed.
-	 *
-	 * @var Consent_Notice|null
-	 */
-	private $consent_notice = null;
 
 	/**
 	 * Notice Priority
@@ -71,44 +55,32 @@ class Notice {
 	 * @return void
 	 */
 	public function register_rest_route() {
-		$routes = array(
-			// Hello Bar.
+		// Hello Bar dismissal: hides a site-wide promotion, so it is for administrators.
+		register_rest_route(
+			'ultp',
+			'hello_bar',
 			array(
-				'endpoint'            => 'hello_bar',
-				'methods'             => 'POST',
-				'callback'            => array( $this, 'hello_bar_callback' ),
-				'permission_callback' => function () {
-					return current_user_can( 'manage_options' );
-				},
-				'args'                => array(
-					'type' => array(
-						'type'     => 'string',
-						'required' => true,
-						'enum'     => array( 'hello_bar' ),
-					),
-					'id'   => array(
-						'type'     => 'string',
-						'required' => true,
-						'enum'     => self::get_hellobar_keys(),
+				array(
+					'methods'             => 'POST',
+					'callback'            => array( $this, 'hello_bar_callback' ),
+					'permission_callback' => function () {
+						return current_user_can( 'manage_options' );
+					},
+					'args'                => array(
+						'type' => array(
+							'type'     => 'string',
+							'required' => true,
+							'enum'     => array( 'hello_bar' ),
+						),
+						'id'   => array(
+							'type'     => 'string',
+							'required' => true,
+							'enum'     => self::get_hellobar_keys(),
+						),
 					),
 				),
-			),
+			)
 		);
-
-		foreach ( $routes as $route ) {
-			register_rest_route(
-				'ultp',
-				$route['endpoint'],
-				array(
-					array(
-						'methods'             => $route['methods'],
-						'callback'            => $route['callback'],
-						'permission_callback' => $route['permission_callback'],
-						'args'                => isset( $route['args'] ) ? $route['args'] : array(),
-					),
-				)
-			);
-		}
 	}
 
 	/**
@@ -134,12 +106,42 @@ class Notice {
 	 */
 	private static function get_hellobar_keys() {
 		try {
-			require_once __DIR__ . '/class-campaigns.php';
 			$keys = Campaigns::hellobar_keys();
 		} catch ( \Throwable $e ) {
 			return array();
 		}
 		return is_array( $keys ) ? array_values( array_filter( $keys, 'is_string' ) ) : array();
+	}
+
+	/**
+	 * Campaign keys the dismiss link may name, from Campaigns::all(). Past campaigns stay in the
+	 * registry, so a dismissal made while a campaign was live still matches.
+	 *
+	 * @return string[]
+	 */
+	private static function get_campaign_keys() {
+		try {
+			$campaigns = Campaigns::all();
+		} catch ( \Throwable $e ) {
+			return array();
+		}
+		$keys = array();
+		foreach ( (array) $campaigns as $campaign ) {
+			if ( $campaign instanceof Abstract_Campaign_Notice && '' !== $campaign->get_key() ) {
+				$keys[] = $campaign->get_key();
+			}
+		}
+		return $keys;
+	}
+
+	/**
+	 * Install notice ids the install dismiss link may name. 'woocommerce' is the only one this link has
+	 * ever been given.
+	 *
+	 * @return string[]
+	 */
+	private static function get_install_notice_keys() {
+		return array( 'woocommerce' );
 	}
 
 	/**
@@ -173,20 +175,22 @@ class Notice {
 	 */
 	public function set_dismiss_notice_callback() {
 
+		// Only users who can see these notices (is_notice_screen()) may dismiss them.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
 		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['wpnonce'] ?? '' ) ), 'ultp-nonce' ) ) {
 			return;
 		}
 
-		// Durbin notice dismiss.
-		Consent_Notice::handle_dismiss_request();
-
-		// Install notice dismiss.
+		// Install notice dismiss. Only the keys this link has ever been given are accepted.
 		$install_key = sanitize_text_field( wp_unslash( $_GET['ultp_install_key'] ?? '' ) );
-		if ( ! empty( $install_key ) ) {
+		if ( in_array( $install_key, self::get_install_notice_keys(), true ) ) {
 			Xpo::set_transient_without_cache( 'ultp_install_notice_' . $install_key, 'off' );
 		}
 		$notice_key = sanitize_text_field( wp_unslash( $_GET['ultp_notice'] ?? '' ) );
-		if ( ! empty( $notice_key ) ) {
+		if ( '' !== $notice_key && in_array( $notice_key, self::get_campaign_keys(), true ) ) {
 			$interval = (int) sanitize_text_field( wp_unslash( $_GET['ultp_interval'] ?? '' ) );
 			if ( ! empty( $interval ) ) {
 				Xpo::set_transient_without_cache( 'ultp_get_pro_notice_' . $notice_key, 'off', $interval );
@@ -197,13 +201,37 @@ class Notice {
 	}
 
 	/**
+	 * Whether PostX promotions may show on the current screen.
+	 *
+	 * Only to users who manage the site, and only on the Dashboard, the Plugins page and PostX's own
+	 * screens (its settings pages and post types). Everywhere else wp-admin is left alone.
+	 *
+	 * @return bool
+	 */
+	public function is_notice_screen() {
+		if ( ! current_user_can( 'manage_options' ) || ! function_exists( 'get_current_screen' ) ) {
+			return false;
+		}
+		$screen = get_current_screen();
+		if ( ! $screen ) {
+			return false;
+		}
+		if ( in_array( $screen->id, array( 'dashboard', 'plugins' ), true ) ) {
+			return true;
+		}
+		return false !== strpos( (string) $screen->id, 'ultp' ) || 0 === strpos( (string) $screen->post_type, 'ultp' );
+	}
+
+	/**
 	 * Admin Notices Callback
 	 *
 	 * @return void
 	 */
 	public function admin_notices_callback() {
+		if ( ! $this->is_notice_screen() ) {
+			return;
+		}
 		$this->ultp_dashboard_notice_callback();
-		$this->ultp_dashboard_durbin_notice_callback();
 	}
 
 	/**
@@ -238,14 +266,13 @@ class Notice {
 	 * @return void
 	 */
 	public function enqueue_assets() {
+		if ( ! $this->is_notice_screen() ) {
+			return;
+		}
 		if ( $this->is_available_for_notice() ) {
 			foreach ( $this->get_active_campaigns() as $campaign ) {
 				$campaign->enqueue_assets();
 			}
-		}
-		$consent = $this->get_consent_notice();
-		if ( $consent->should_display() ) {
-			$consent->enqueue_assets();
 		}
 	}
 
@@ -260,29 +287,6 @@ class Notice {
 		Notice_Assets::enqueue_countdown_script();
 	}
 
-	/**
-	 * The Durbin Html
-	 *
-	 * @return void
-	 */
-	public function ultp_dashboard_durbin_notice_callback() {
-		$consent = $this->get_consent_notice();
-		if ( $consent->should_display() ) {
-			$this->render_safely( $consent );
-		}
-	}
-
-	/**
-	 * The data-collection consent notice, created once per request.
-	 *
-	 * @return Consent_Notice
-	 */
-	private function get_consent_notice() {
-		if ( null === $this->consent_notice ) {
-			$this->consent_notice = new Consent_Notice();
-		}
-		return $this->consent_notice;
-	}
 	/**
 	 * Dashboard Content Notice
 	 *
@@ -300,7 +304,7 @@ class Notice {
 	 * @return array
 	 */
 	public function handle_xpo_active_notice_lists( $active_lists ) {
-		if ( ! empty( $this->get_active_campaigns() ) ) {
+		if ( $this->is_notice_screen() && ! empty( $this->get_active_campaigns() ) ) {
 			$active_lists[ $this->plugin_notice_priority_key ] = $this->plugin_notice_priority;
 		}
 		return $active_lists;
@@ -312,7 +316,7 @@ class Notice {
 	 * @return bool
 	 */
 	public function is_available_for_notice() {
-		$active_notices = apply_filters( 'xpo_active_notice_lists', array() );
+		$active_notices = apply_filters( 'xpo_active_notice_lists', array() ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Shared across WPXPO plugins to pick one notice per screen; renaming breaks that.
 		if ( empty( $active_notices ) ) {
 			return true;
 		}
@@ -346,7 +350,6 @@ class Notice {
 			// The registry is the file edited for every sale. Load it here, not at the top, so a
 			// mistake in it (even a syntax error) hides the campaigns instead of breaking wp-admin.
 			try {
-				require_once __DIR__ . '/class-campaigns.php';
 				$campaigns = Campaigns::all();
 			} catch ( \Throwable $e ) {
 				self::log_error( $e );

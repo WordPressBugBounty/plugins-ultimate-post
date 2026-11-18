@@ -24,8 +24,10 @@ if ( ! class_exists( 'PostX_WPBakery_Widget' ) ) {
 			$templates = $atts['saved_template'];
 
 			if ( $templates && $templates != 'empty' ) {
-                if (isset($_GET['vc_editable'])) {  // @codingStandardsIgnoreLine
-					$output .= ultimate_post()->build_css_for_inline_print( $templates, true );
+				if ( isset( $_GET['vc_editable'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only WPBakery editor detection.
+					// The <style> element is printed by WordPress (build_css_for_inline_print()). It stays outside
+					// wp_kses(), which would turn the `>` of a child selector into `&gt;`.
+					$output .= ultimate_post()->build_css_for_inline_print( $templates, true, true );
 				}
 
 				$args      = array(
@@ -37,9 +39,10 @@ if ( ! class_exists( 'PostX_WPBakery_Widget' ) ) {
 				if ( $the_query->have_posts() ) {
 					while ( $the_query->have_posts() ) {
 						$the_query->the_post();
-						ob_start();
-						the_content();
-						$output .= ob_get_clean();
+						// The same steps as the_content(), returned instead of echoed, so no output buffer is needed.
+						$post_content = str_replace( ']]>', ']]&gt;', apply_filters( 'the_content', get_the_content() ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core hook.
+						// The template's rendered content, filtered by wp_kses().
+						$output .= wp_kses( $post_content, ultimate_post()->rendered_content_allowed_html() );
 					}
 					wp_reset_postdata();
 				}

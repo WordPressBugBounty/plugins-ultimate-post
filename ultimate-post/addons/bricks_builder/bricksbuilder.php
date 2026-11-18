@@ -4,6 +4,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+// set_controls() writes $this->controls. If Bricks\Element does not declare it, PHP 8.2+ raises a
+// "Creation of dynamic property" deprecation. The attribute suppresses that without redeclaring a parent
+// property, because redeclaring a typed parent property would be a fatal error.
+#[\AllowDynamicProperties]
 class PostX_Bricks_Integration extends \Bricks\Element {
 	// Element properties
 	public $category = 'general';
@@ -41,12 +45,14 @@ class PostX_Bricks_Integration extends \Bricks\Element {
 		$root_classes[] = 'bricks-postx-wrapper';
 		$this->set_attribute( '_root', 'class', $root_classes );
 
-		$current_url = isset( $_SERVER['REQUEST_URI'] ) ? esc_url( $_SERVER['REQUEST_URI'] ) : ''; //phpcs:ignore
+		// Only read by the two strpos() tests below, never printed.
+		$current_url = isset( $_SERVER['REQUEST_URI'] ) && is_string( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 
 		// Render element HTML
-		echo "<div {$this->render_attributes( '_root' )}>"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Bricks API attribute string; the only attribute this element sets is the fixed class bricks-postx-wrapper.
+		// Bricks builds the root attributes (its element id, classes and any custom attributes).
+		echo wp_kses( '<div ' . $this->render_attributes( '_root' ) . '>', ultimate_post()->rendered_content_allowed_html() );
 		if ( $id ) {
-			echo ultimate_post()->build_css_for_inline_print( $id, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- <style> tag from build_css_for_inline_print(): integer post ID, CSS passed through wp_strip_all_tags().
+			ultimate_post()->print_inline_css( $id, true );
 			echo '<div class="ultp-shortcode" data-postid="' . esc_attr( $id ) . '">';
 				$args      = array(
 					'p'         => $id,
@@ -61,7 +67,7 @@ class PostX_Bricks_Integration extends \Bricks\Element {
 					wp_reset_postdata();
 				}
 				echo '</div>';
-		} elseif ( strpos( 'bricks=run', $current_url ) !== false || strpos( $current_url, 'bricks/v1/render_element' ) !== false ) {
+		} elseif ( strpos( $current_url, 'bricks=run' ) !== false || strpos( $current_url, 'bricks/v1/render_element' ) !== false ) {
 				/* translators: %s: Menu path to the Saved Templates screen. */
 				echo '<p style="text-align:center; font-size: 20px;">' . sprintf( esc_html__( 'Pick a Template from your saved ones. Or create a template from: %s.', 'ultimate-post' ) . ' ', '<strong><i>' . esc_html__( 'Dashboard > PostX > Saved Templates', 'ultimate-post' ) . '</i></strong>' ) . '</p>';
 		}

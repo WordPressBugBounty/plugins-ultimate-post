@@ -32,7 +32,6 @@ class Post_Featured_Image {
 			============================*/
 			'enableVideoCaption' => false,
 			'videoWidth'         => (object) array( 'lg' => '100' ),
-			'stickyEnable'       => false,
 
 			/*
 			============================
@@ -44,7 +43,6 @@ class Post_Featured_Image {
 			'hideDesktop'        => false,
 			'hideTablet'         => false,
 			'hideMobile'         => false,
-			'advanceCss'         => '',
 		);
 	}
 
@@ -70,8 +68,8 @@ class Post_Featured_Image {
 		$attr['blockId']   = isset( $attr['blockId'] ) ? sanitize_html_class( $attr['blockId'] ) : '';
 		$attr['altText']   = wp_kses( $attr['altText'], ultimate_post()->ultp_allowed_html_tags() );
 
-		$post_video = get_post_meta( get_the_ID(), '__builder_feature_video', true );
-		$caption    = get_post_meta( get_the_ID(), '__builder_feature_caption', true );
+		$post_video = get_post_meta( get_the_ID(), '_ultp_builder_feature_video', true );
+		$caption    = get_post_meta( get_the_ID(), '_ultp_builder_feature_caption', true );
 
 		$embeded       = $post_video ? ultimate_post()->get_embeded_video( $post_video, false, true, false, true, true, false, true, array( 'width' => array( 'width' => $attr['videoWidth'] ) ), 'from-block' ) : '';
 		$post_thumb_id = get_post_thumbnail_id( get_the_ID() );
@@ -80,19 +78,24 @@ class Post_Featured_Image {
 
 		if ( $embeded || has_post_thumbnail() ) {
 			$isvideo                     = $embeded ? ( isset( $attr['defImgShow'] ) && $attr['defImgShow'] && $post_thumb_id ? false : true ) : false;
-			$wrapper_before             .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '">';
+			// Extra class and closing markup of the media box; an add-on may supply them.
+			$media_class = apply_filters( 'ultp_post_image_media_class', '', $attr, array( 'is_video' => $isvideo ) );
+			$media_class = is_string( $media_class ) ? esc_attr( $media_class ) : '';
+			$media_after = apply_filters( 'ultp_post_image_media_after', '', $attr, array( 'is_video' => $isvideo ) );
+			$media_after = is_string( $media_after ) ? wp_kses_post( $media_after ) : '';
+			$wrapper_before             .= '<div ' . ( $attr['advanceId'] ? 'id="' . esc_attr( $attr['advanceId'] ) . '" ' : '' ) . ' class="wp-block-ultimate-post-' . esc_attr( $block_name ) . ' ultp-block-' . esc_attr( $attr['blockId'] ) . ( $attr['className'] ? ' ' . esc_attr( $attr['className'] ) : '' ) . '' . ( $attr['align'] ? ' align' . esc_attr( $attr['align'] ) : '' ) . '">';
 				$wrapper_before         .= '<div class="ultp-block-wrapper">';
 					$wrapper_before     .= '<div class="ultp-image-wrapper">';
 						$wrapper_before .= '<div  class="ultp-builder-' . ( $isvideo ? 'video' : 'image' ) . '">';
-							$content    .= '<div class="ultp-' . ( $isvideo ? 'video' : 'image' ) . '-block' . ( $attr['stickyEnable'] ? ' ultp-sticky-video' : '' ) . '">';
-							$content    .= $isvideo ? $embeded : $img_content;
-						$wrapper_after  .= '<span class="ultp-sticky-close"></span></div>';
+							$content    .= '<div class="ultp-' . ( $isvideo ? 'video' : 'image' ) . '-block' . $media_class . '">';
+							$content    .= wp_kses( $isvideo ? $embeded : $img_content, ultimate_post()->rendered_content_allowed_html() );
+						$wrapper_after  .= $media_after . '</div>';
 						$wrapper_after  .= '</div>';
 					$wrapper_after      .= '</div>';
 
 			if ( $attr['enableCaption'] && $img_caption || $caption && $attr['enableVideoCaption'] ) {
 				$wrapper_after .= '<div class="ultp-featureImg-caption">';
-				$wrapper_after .= $isvideo ? $caption : $img_caption;
+				$wrapper_after .= wp_kses_post( $isvideo ? $caption : $img_caption );
 				$wrapper_after .= '</div>';
 			}
 				$wrapper_after .= '</div>';

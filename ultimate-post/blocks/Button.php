@@ -36,6 +36,7 @@ class Button {
 			$content = \ULTP\DCService::replace( $content, wp_kses( $text, ultimate_post()->ultp_allowed_html_tags() ) );
 		}
 
-		return $content;
+		// The block's saved markup, filtered by wp_kses() (keeps its icons; style="" goes through safecss).
+		return wp_kses( $content, ultimate_post()->rendered_content_allowed_html() );
 	}
 }

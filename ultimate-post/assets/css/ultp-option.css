@@ -61,46 +61,6 @@
 .toplevel_page_ultp-settings #wpcontent , .postx_page_ultp-setup-wizard #wpcontent{
 	padding-left: 0;
 }
-#toplevel_page_ultp-settings .wp-submenu a[href="admin.php?page=ultp-setup-wizard"] {
-	display: none;
-}
-#toplevel_page_ultp-settings .wp-submenu a[href="admin.php?page=ultp-settings#support"] {
-	color: #FFF2D1;
-	margin-top: 10px;
-	border-top: 1px solid #565656;
-	padding-top: 14px;
-	padding-bottom: 8px;
-}
-#toplevel_page_ultp-settings .wp-submenu a[href="admin.php?page=go_postx_pro"] {
-	padding-bottom: 18px;
-}
-#toplevel_page_ultp-settings a[href="admin.php?page=go_postx_pro"],
-#toplevel_page_ultp-settings a[href="admin.php?page=go_postx_pro"]:hover {
-	color: #2BCC3B;
-}
-
-#toplevel_page_ultp-settings .wp-submenu a[href*="ultp-pro"] {
-	display:none;
-}
-#toplevel_page_ultp-settings .wp-submenu a.ultp-go-pro {
-	display: flex;
-	align-items: center;
-	gap: 5px;
-	color: white;
-	/* background-color: #86a62c; */
-	margin-inline: 10px;
-	border-radius: 6px;
-	margin-top: 6px;
-	padding-block: 6px;
-	box-shadow: none;
-	white-space: nowrap;
-	transition: background-color 200ms ease;
-}
-#toplevel_page_ultp-settings .wp-submenu a.ultp-go-pro:hover {
-	/* background-color: #7c9731; */
-	background-color: var(--postx-primary-hover-color);
-	color: white;
-}
 /* =========================
 	Button
 ============================ */
@@ -172,7 +132,7 @@ button.ultp-btn {
 	font-size: 16px;
 }
 /* ====================
-	TemplateKit CHatGPT Predefined Popup Style
+	TemplateKit Predefined Popup Style
 =======================*/
 
 /* ========== Header Part ========== */
@@ -1386,36 +1346,6 @@ th:has(.ultp-custom-font-preview-th) {
 	background-color: var(--postx-primary-color);
 	color: #fff;
 }
-.row-actions.visible:has(.ultp_pro) {
-	max-width: 240px;
-}
-.row-actions.visible .ultp_support a {
-	color: #037FFF;
-}
-.row-actions.visible .ultp_pro a {
-	color: #CE1F92;
-	font-weight: 600;
-}
-
-#postx-submenu-addons {
-	border-top: 1px solid #565656;
-	padding-top: 9px !important;
-	margin-top: 0px !important;
-}
-#postx-submenu-startersites {
-	border-bottom: 1px solid #565656;
-	padding-bottom: 9px !important;
-	margin-bottom: 0px !important;
-}
-
-.ultp-go-pro {
-	background: linear-gradient(180deg, #ff9336, transparent) #de521e !important;
-	/* animation: ultp-bg-fill .5s infinite alternate; */
-	/* border: 2px solid; */
-	font-weight: 500;
-	color: #ffffff !important;
-}
-
 /* Animation */
 @keyframes ultp-bg-fill {
 	0% {

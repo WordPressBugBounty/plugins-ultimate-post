@@ -28,7 +28,6 @@ class Archive_Title {
 				Title Setting/Style
 			============================*/
 			'titleTag'              => 'h1',
-			'customTaxTitleColor'   => false,
 			'seperatorTaxTitleLink' => admin_url( 'edit-tags.php?taxonomy=category' ),
 
 			/*
@@ -42,7 +41,6 @@ class Archive_Title {
 			============================
 				Custom Wrapper Style
 			============================*/
-			'customTaxColor'        => false,
 			'seperatorTaxLink'      => admin_url( 'edit-tags.php?taxonomy=category' ),
 
 			/*
@@ -58,7 +56,6 @@ class Archive_Title {
 			'hideExtraLarge'        => false,
 			'hideTablet'            => false,
 			'hideMobile'            => false,
-			'advanceCss'            => '',
 		);
 	}
 
@@ -128,14 +125,20 @@ class Archive_Title {
 		$attr['layout']     = sanitize_html_class( $attr['layout'] );
 		$attr['prefixText'] = wp_kses( $attr['prefixText'], ultimate_post()->ultp_allowed_html_tags() );
 
-		$wraper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '' . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '">';
+		$wraper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . esc_attr( $attr['advanceId'] ) . '" ' : '' ) . ' class="wp-block-ultimate-post-' . esc_attr( $block_name ) . ' ultp-block-' . esc_attr( $attr['blockId'] ) . '' . ( $attr['align'] ? ' align' . esc_attr( $attr['align'] ) : '' ) . '' . ( $attr['className'] ? ' ' . esc_attr( $attr['className'] ) : '' ) . '">';
 			$wraper_before .= '<div class="ultp-block-wrapper">';
-			$wraper_before .= '<div class="ultp-block-archive-title ultp-archive-layout-' . $attr['layout'] . '">';
+			$wraper_before .= '<div class="ultp-block-archive-title ultp-archive-layout-' . esc_attr( $attr['layout'] ) . '">';
 
-			$style  = $attr['layout'] == '2' ? ( $data['image'] ? 'style="background-image: url(' . esc_url( $data['image'] ) . ')' : 'style="background-color:' . esc_attr( $data['color'] ? $data['color'] : '#28303d' ) ) . '"' : '';
-			$prefix = ( $attr['prefixShow'] && $attr['prefixText'] ) ? '<span class="ultp-archive-prefix">' . $attr['prefixText'] . '</span> ' : '';
+			$style  = $attr['layout'] == '2' ? ( $data['image'] ? 'style="background-image: url(' . str_replace( array( '(', ')', ';', '\\', "'" ), array( '%28', '%29', '%3B', '%5C', '%27' ), esc_url( $data['image'] ) ) . ')' : 'style="background-color:' . esc_attr( $data['color'] ? $data['color'] : '#28303d' ) ) . '"' : '';
+			$prefix = ( $attr['prefixShow'] && $attr['prefixText'] ) ? '<span class="ultp-archive-prefix">' . wp_kses( $attr['prefixText'], ultimate_post()->ultp_allowed_html_tags() ) . '</span> ' : '';
 
-			$name = ( $attr['titleShow'] && $data['title'] ) ? '<' . $attr['titleTag'] . ' class="ultp-archive-name" ' . ( ( $data['color'] && $attr['customTaxTitleColor'] ) ? 'style="color: ' . esc_attr( $data['color'] ) . '"' : '' ) . '>' . $prefix . esc_html( $data['title'] ) . '</' . $attr['titleTag'] . '>' : '';
+			// Inline style of the title and of the layout 2 overlay; an add-on may supply them.
+			$name_style    = apply_filters( 'ultp_archive_title_name_style', '', $attr, $data );
+			$name_style    = ultimate_post()->filtered_style_value( $name_style );
+			$overlay_style = apply_filters( 'ultp_archive_title_overlay_style', '', $attr, $data );
+			$overlay_style = ultimate_post()->filtered_style_value( $overlay_style );
+
+			$name = ( $attr['titleShow'] && $data['title'] ) ? '<' . tag_escape( $attr['titleTag'] ) . ' class="ultp-archive-name" ' . ( null !== $name_style ? 'style="' . esc_attr( $name_style ) . '"' : '' ) . '>' . $prefix . esc_html( $data['title'] ) . '</' . tag_escape( $attr['titleTag'] ) . '>' : '';
 
 			$excerpt = ( $attr['excerptShow'] && $data['desc'] ) ? '<div class="ultp-archive-desc">' . wp_kses_post( $data['desc'] ) . '</div>' : '';
 
@@ -146,8 +149,7 @@ class Archive_Title {
 				$post_loop .= $img . $name . $excerpt;
 				break;
 			case 2:
-				$style_overlay = $attr['customTaxColor'] ? 'style="background-color: ' . esc_attr( $data['color'] ) . '"' : '';
-				$post_loop    .= '<div class="ultp-archive-content" ' . $style . '><div class="ultp-archive-overlay" ' . $style_overlay . '></div>' . $name . $excerpt . '</div>';
+				$post_loop .= '<div class="ultp-archive-content" ' . $style . '><div class="ultp-archive-overlay" ' . ( null !== $overlay_style ? 'style="' . esc_attr( $overlay_style ) . '"' : '' ) . '></div>' . $name . $excerpt . '</div>';
 				break;
 		}
 

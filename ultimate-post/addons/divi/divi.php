@@ -8,6 +8,9 @@ function ultp_postx_template_divi_modules() {
 	if ( ! class_exists( 'ET_Builder_Module' ) ) {
 		return; }
 
+	// init() writes $name and $icon_path, which ET_Builder_Module may not declare. The attribute stops
+	// PHP 8.2+ deprecation notices without redeclaring a parent property.
+	#[\AllowDynamicProperties]
 	class PostX_Template_Module extends ET_Builder_Module {
 
 		public $slug       = 'ultp_postx_template';
@@ -45,12 +48,14 @@ function ultp_postx_template_divi_modules() {
 				if ( $the_query->have_posts() ) {
 					while ( $the_query->have_posts() ) {
 						$the_query->the_post();
-						ob_start();
-						if ( in_array( 'et-fb', $body_class ) ) {
-							echo ultimate_post()->build_css_for_inline_print( $templates, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- <style> tag from build_css_for_inline_print(): integer post ID, CSS passed through wp_strip_all_tags().
-						}
-							the_content();
-						$content = ob_get_clean();
+						// Builder preview only. The <style> element is printed by WordPress (build_css_for_inline_print()).
+						$css = in_array( 'et-fb', $body_class ) ? ultimate_post()->build_css_for_inline_print( $templates, true, true ) : '';
+						// The same steps as the_content(), returned instead of echoed, so no output buffer is needed.
+						$post_content = str_replace( ']]>', ']]&gt;', apply_filters( 'the_content', get_the_content() ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Core hook.
+						// The template's CSS (Divi builder preview only), printed by WordPress and outside
+						// wp_kses(), which would turn the `>` of a child selector into `&gt;`; then the
+						// template's rendered content, filtered by wp_kses().
+						$content = $css . wp_kses( $post_content, ultimate_post()->rendered_content_allowed_html() );
 					}
 					wp_reset_postdata();
 				}
@@ -62,7 +67,7 @@ function ultp_postx_template_divi_modules() {
 			// Render module content
 			$output = sprintf(
 				'<div class="ultp-shortcode" data-postid="%1$s">%2$s</div>',
-				esc_html( $templates ),
+				esc_attr( $templates ),
 				et_sanitized_previously( $content )
 			);
 

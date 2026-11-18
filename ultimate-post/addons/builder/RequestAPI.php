@@ -38,7 +38,7 @@ class RequestAPI {
 					'permission_callback' => function () {
 						return current_user_can( 'manage_options' );
 					},
-					'args'                => array(),
+					'args'                => Request_Validation::args( 'get_single_premade_callback' ),
 				),
 			)
 		);
@@ -52,7 +52,7 @@ class RequestAPI {
 					'permission_callback' => function () {
 						return current_user_can( 'manage_options' );
 					},
-					'args'                => array(),
+					'args'                => Request_Validation::args( 'condition_settings_action' ),
 				),
 			)
 		);
@@ -66,7 +66,7 @@ class RequestAPI {
 					'permission_callback' => function () {
 						return current_user_can( 'manage_options' );
 					},
-					'args'                => array(),
+					'args'                => Request_Validation::args( 'condition_save_action' ),
 				),
 			)
 		);
@@ -80,7 +80,7 @@ class RequestAPI {
 					'permission_callback' => function () {
 						return current_user_can( 'manage_options' );
 					},
-					'args'                => array(),
+					'args'                => Request_Validation::args( 'data_builder_action' ),
 				),
 			)
 		);
@@ -94,6 +94,10 @@ class RequestAPI {
 	 * @return ARRAY | Information of Builder Post
 	 */
 	public function data_builder_action( $server ) {
+		$valid = Request_Validation::validate( $server->get_params(), 'data_builder_action' );
+		if ( is_wp_error( $valid ) ) {
+			return $valid;
+		}
 		$post  = $server->get_params();
 		$s_pid = isset( $post['pid'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['pid'] ) : '';
 
@@ -110,7 +114,7 @@ class RequestAPI {
 			while ( $post_results->have_posts() ) {
 				$post_results->the_post();
 				$id          = get_the_ID();
-				$meta_type   = get_post_meta( $id, '__ultp_builder_type', true );
+				$meta_type   = get_post_meta( $id, '_ultp_builder_type', true );
 				$post_list[] = array(
 					'id'     => $id,
 					'title'  => get_the_title(),
@@ -131,7 +135,7 @@ class RequestAPI {
 			'defaults' => $this->builder_data(),
 		);
 		if ( $s_pid ) {
-			$post_meta   = get_post_meta( $s_pid, '__ultp_builder_type', true );
+			$post_meta   = get_post_meta( $s_pid, '_ultp_builder_type', true );
 			$arg['type'] = $post_meta ? $post_meta : 'archive';
 		}
 		return $arg;
@@ -266,6 +270,10 @@ class RequestAPI {
 	 * @return ARRAY | Message of the Condition Success
 	 */
 	public function condition_save_action( $server ) {
+		$valid = Request_Validation::validate( $server->get_params(), 'condition_save_action' );
+		if ( is_wp_error( $valid ) ) {
+			return $valid;
+		}
 		$post       = $server->get_params();
 		$s_settings = isset( $post['settings'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['settings'] ) : '';
 
@@ -288,6 +296,10 @@ class RequestAPI {
 	 * @return ARRAY | Data of the Condition
 	 */
 	public function condition_settings_action( $server ) {
+		$valid = Request_Validation::validate( $server->get_params(), 'condition_settings_action' );
+		if ( is_wp_error( $valid ) ) {
+			return $valid;
+		}
 		global $wpdb;
 		$post           = $server->get_params();
 		$s_type         = isset( $post['type'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['type'] ) : '';
@@ -342,7 +354,20 @@ class RequestAPI {
 					$args['term_taxonomy_id'] = array( $s_term );
 					unset( $args['name__like'] );
 				}
+				$args['taxonomy'] = ultimate_post()->allowed_picker_taxonomies( $args['taxonomy'] );
+				if ( empty( $args['taxonomy'] ) ) {
+					return array(
+						'success' => true,
+						'data'    => array(),
+					);
+				}
 				$post_results = get_terms( $args );
+				if ( is_wp_error( $post_results ) ) {
+					return array(
+						'success' => true,
+						'data'    => array(),
+					);
+				}
 				$title        = '';
 				$data         = array();
 				if ( ! empty( $post_results ) ) {
@@ -361,19 +386,7 @@ class RequestAPI {
 				break;
 
 			case 'author':
-				$term         = $s_title_return ? $wpdb->esc_like( $s_term ) : '%' . $wpdb->esc_like( $s_term ) . '%';
-				$post_results = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-					$wpdb->prepare(
-						"SELECT ID, display_name 
-                        FROM $wpdb->users 
-                        WHERE user_login LIKE %s OR ID LIKE %s OR user_nicename LIKE %s OR user_email LIKE %s OR display_name LIKE %s LIMIT 10",
-						$term,
-						$term,
-						$term,
-						$term,
-						$term
-					)
-				);
+				$post_results = ultimate_post()->search_public_authors( $s_term, (bool) $s_title_return );
 				$title        = '';
 				$data         = array();
 				if ( ! empty( $post_results ) ) {
@@ -409,11 +422,28 @@ class RequestAPI {
 	 * @return ARRAY | Data of the Premade
 	 */
 	public function get_single_premade_callback( $server ) {
+		$valid = Request_Validation::validate( $server->get_params(), 'get_single_premade_callback' );
+		if ( is_wp_error( $valid ) ) {
+			return $valid;
+		}
+		if ( ! Functions::can_create_post_type( 'ultp_builder' ) ) {
+			return new \WP_Error( 'rest_forbidden', __( 'You are not allowed to create builder templates.', 'ultimate-post' ), array( 'status' => rest_authorization_required_code() ) );
+		}
 
 		$post         = $server->get_params();
 		$id           = isset( $post['ID'] ) ? sanitize_text_field( $post['ID'] ) : '';
 		$api_endpoint = isset( $post['apiEndPoint'] ) ? sanitize_text_field( $post['apiEndPoint'] ) : '';
 		$s_type       = isset( $post['type'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['type'] ) : '';
+
+		// Every template, blank or imported, is created for a template type.
+		if ( ! is_string( $s_type ) || '' === $s_type ) {
+			return rest_ensure_response(
+				array(
+					'success' => false,
+					'message' => __( 'The template type is missing.', 'ultimate-post' ),
+				)
+			);
+		}
 
 		if ( $id ) {
 			// SSRF protection: only the template service, over HTTPS.
@@ -463,6 +493,9 @@ class RequestAPI {
 
 			$content = $response_data->content[0]->content;
 			$post_id = $this->set_post_content( $s_type, wp_slash( $content ) );
+			if ( is_wp_error( $post_id ) ) {
+				return $post_id;
+			}
 
 			return rest_ensure_response(
 				array(
@@ -472,6 +505,9 @@ class RequestAPI {
 			);
 		} else {
 			$post_id = $this->set_post_content( $s_type, '' );
+			if ( is_wp_error( $post_id ) ) {
+				return $post_id;
+			}
 			return array(
 				'success' => true,
 				'link'    => get_edit_post_link( $post_id ),
@@ -484,25 +520,32 @@ class RequestAPI {
 	 *
 	 * @since v.2.7.0
 	 * @param ARRAY
-	 * @return INT | Post ID
+	 * @return int|\WP_Error Post ID or creation error.
 	 */
 	public function set_post_content( $type, $body = '' ) {
+		if ( ! Functions::can_create_post_type( 'ultp_builder' ) ) {
+			return new \WP_Error( 'rest_forbidden', __( 'You are not allowed to create builder templates.', 'ultimate-post' ), array( 'status' => rest_authorization_required_code() ) );
+		}
 		$post_id  = wp_insert_post(
 			array(
 				'post_title'   => ucfirst( $type ) . ' Template',
 				'post_content' => $body,
 				'post_type'    => 'ultp_builder',
 				'post_status'  => 'draft',
-			)
+			),
+			true
 		);
+		if ( is_wp_error( $post_id ) || ! $post_id ) {
+			return is_wp_error( $post_id ) ? $post_id : new \WP_Error( 'ultp_insert_failed', __( 'The builder template could not be created.', 'ultimate-post' ), array( 'status' => 500 ) );
+		}
 		$settings = get_option( 'ultp_builder_conditions', array() );
 		switch ( $type ) {
 			case 'singular':
-				update_post_meta( $post_id, '__ultp_builder_type', 'singular' );
+				update_post_meta( $post_id, '_ultp_builder_type', 'singular' );
 				$settings['singular'][ $post_id ] = array( 'include/singular/post' );
 				break;
 			case 'front_page':
-				update_post_meta( $post_id, '__ultp_builder_type', 'front_page' );
+				update_post_meta( $post_id, '_ultp_builder_type', 'front_page' );
 				$settings['singular'][ $post_id ] = array( 'include/front_page' );
 				break;
 			case 'author':
@@ -511,20 +554,20 @@ class RequestAPI {
 			case 'search':
 			case 'archive':
 			case 'category':
-				update_post_meta( $post_id, '__ultp_builder_type', 'archive' );
+				update_post_meta( $post_id, '_ultp_builder_type', 'archive' );
 				$extra                           = $type != 'archive' ? '/' . $type : '';
 				$settings['archive'][ $post_id ] = array( 'include/archive' . $extra );
 				break;
 			case 'header':
-				update_post_meta( $post_id, '__ultp_builder_type', 'header' );
+				update_post_meta( $post_id, '_ultp_builder_type', 'header' );
 				$settings['header'][ $post_id ] = array( 'include/header/entire_site' );
 				break;
 			case 'footer':
-				update_post_meta( $post_id, '__ultp_builder_type', 'footer' );
+				update_post_meta( $post_id, '_ultp_builder_type', 'footer' );
 				$settings['footer'][ $post_id ] = array( 'include/footer/entire_site' );
 				break;
 			case '404':
-				update_post_meta( $post_id, '__ultp_builder_type', '404' );
+				update_post_meta( $post_id, '_ultp_builder_type', '404' );
 				$settings['404'][ $post_id ] = array( 'include/404' );
 				break;
 			default:

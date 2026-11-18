@@ -40,7 +40,6 @@ class Post_Tag {
 			'hideDesktop'    => false,
 			'hideTablet'     => false,
 			'hideMobile'     => false,
-			'advanceCss'     => '',
 		);
 	}
 
@@ -69,19 +68,20 @@ class Post_Tag {
 			$attr['blockId']   = isset( $attr['blockId'] ) ? sanitize_html_class( $attr['blockId'] ) : '';
 			$attr['tagLabel']  = wp_kses( $attr['tagLabel'], ultimate_post()->ultp_allowed_html_tags() );
 
-			$wrapper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '">';
+			$wrapper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . esc_attr( $attr['advanceId'] ) . '" ' : '' ) . ' class="wp-block-ultimate-post-' . esc_attr( $block_name ) . ' ultp-block-' . esc_attr( $attr['blockId'] ) . ( $attr['className'] ? ' ' . esc_attr( $attr['className'] ) : '' ) . '' . ( $attr['align'] ? ' align' . esc_attr( $attr['align'] ) : '' ) . '">';
 				$wrapper_before .= '<div class="ultp-block-wrapper">';
 					$content    .= '<div class="ultp-builder-tag">';
 			if ( $attr['tagIconShow'] ) {
-				$content .= ultimate_post()->get_svg_icon( '' . $attr['tagIconStyle'] . '' );
+				$content .= wp_kses( ultimate_post()->get_svg_icon( '' . $attr['tagIconStyle'] . '' ), ultimate_post()->rendered_content_allowed_html() );
 			}
 			if ( $attr['tagLabelShow'] ) {
 				$content     .= '<div class="tag-builder-label">';
-					$content .= $attr['tagLabel'];
+					$content .= wp_kses( $attr['tagLabel'], ultimate_post()->ultp_allowed_html_tags() );
 				$content     .= '</div>';
 			}
 						$content     .= '<div class="tag-builder-content">';
-							$content .= $tag_list;
+							// Core builds the links (esc_url) but prints term names as stored.
+							$content .= wp_kses_post( $tag_list );
 						$content     .= '</div>';
 					$content         .= '</div>';
 				$wrapper_after       .= '</div>';

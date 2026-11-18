@@ -170,7 +170,7 @@
 						const imgSrc = lightboxSelector.data("img");
 						const imgCaption = lightboxSelector
 							.closest(".ultp-gallery-item")
-							.data("caption");
+							.attr("data-caption") || "";
 						const glSelector = lightboxSelector.parent().parent();
 						handleLightBox(
 							lightboxSelector,
@@ -213,7 +213,7 @@
 					.find(".ultp-gallery-media img")
 					.attr("src");
 				const itemId = $targetItem.data("id");
-				const newCaption = $targetItem.data("caption");
+				const newCaption = $targetItem.attr("data-caption") || "";
 
 				// Animate image fade out -> change src -> fade in
 				$mainImg.fadeOut(200, function () {
@@ -265,7 +265,7 @@
 					const glSelector = $(this);
 					galleryIndex = glSelector.data("index");
 					const imgId = glSelector.data("id");
-					const imgCaption = glSelector.data("caption");
+					const imgCaption = glSelector.attr("data-caption") || "";
 					const imgIndex = glSelector.data("index");
 					const imgSrc = glSelector.find(".ultp-gallery-media img").attr("src");
 					const appendSelector = glSelector.find(
@@ -332,40 +332,49 @@
 		) {
 			galleryControl.css({ display: "flex" });
 			$(".ultp-lightbox").remove();
-			const indicatorHtml = gallery
-				.map(function (index) {
-					const imgSrc = $(this).find("img").attr("src");
-					const caption = $(this).data("caption");
-					if (imgId == $(this).data("id")) {
-						galleryIndex = index;
-					}
-					console.log(imgSrc, "imgSrc");
-					return `<div  data-index=${index} class="${imgId == $(this).data("id") ? "ultp-lightbox-indicator__item lightbox-active" : "ultp-lightbox-indicator__item"}" data-id=${$(this).data("id")} data-caption=${caption}><img class="ultp-lightbox-indicator__item-img" src="${imgSrc}" /></div>`;
-				})
-				.get()
-				.join("");
-
-			const galleryData = `<div class="ultp-lightbox" data-id=${imgId} data-index=${imgIndex}>
+			// Only static markup is parsed. Saved gallery values are assigned below as text/attributes.
+			const galleryData = $(`<div class="ultp-lightbox">
                         <div class="ultp-lightbox__container">
                             <div class="ultp-lightbox__inside">
                                 <div class="ultp-lightbox__left-icon"><svg  fill="currentColor"xmlns="http://www.w3.org/2000/svg" viewBox="0 0 49.16 37.25"><path  stroke-miterlimit="10" d="M18.157 36.154 2.183 20.179l-.053-.053-1.423-1.423 17.45-17.449a2.05 2.05 0 0 1 2.9 2.9l-12.503 12.5h38.053a2.05 2.05 0 1 1 0 4.1H8.555l12.5 12.5a2.05 2.05 0 1 1-2.9 2.9Z"></path></svg></div>
                                 <div class="ultp-lightbox__img-container">
-                                    <img class="ultp-lightbox__img" src="${imgSrc}" />
-                                    ${
-																			lightboxCaption
-																				? `<span class="ultp-lightbox__caption">${imgCaption}</span>`
-																				: ""
-																		}
+                                    <img class="ultp-lightbox__img" />
                                 </div>
                                 <div class="ultp-lightbox__right-icon"><svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 49.16 37.25"><path  stroke-miterlimit="10" d="M28.1 36.154a2.048 2.048 0 0 1 0-2.9l12.5-12.5H2.55a2.05 2.05 0 1 1 0-4.1H40.6l-12.5-12.5a2.05 2.05 0 1 1 2.9-2.9l17.45 17.448L31 36.154a2.047 2.047 0 0 1-2.9 0Z"></path></svg></div>
                             </div>
-                            ${
-															lightboxIndicator
-																? `<div class="ultp-lightbox-indicator">${indicatorHtml}</div>`
-																: ""
-														}
                         </div>
-                    </div>`;
+                    </div>`);
+			galleryData.attr({ "data-id": imgId, "data-index": imgIndex });
+			galleryData.find(".ultp-lightbox__img").attr("src", imgSrc);
+			if (lightboxCaption) {
+				$("<span>")
+					.addClass("ultp-lightbox__caption")
+					.text(imgCaption)
+					.appendTo(galleryData.find(".ultp-lightbox__img-container"));
+			}
+			const indicators = $("<div>").addClass("ultp-lightbox-indicator");
+			gallery.each(function (index) {
+				const item = $(this);
+				const isActive = imgId == item.data("id");
+				if (isActive) galleryIndex = index;
+				if (!lightboxIndicator) return;
+				const indicator = $("<div>")
+					.addClass("ultp-lightbox-indicator__item")
+					.toggleClass("lightbox-active", isActive)
+					.attr({
+						"data-index": index,
+						"data-id": item.data("id"),
+						"data-caption": item.attr("data-caption") || "",
+					});
+				$("<img>")
+					.addClass("ultp-lightbox-indicator__item-img")
+					.attr("src", item.find("img").attr("src"))
+					.appendTo(indicator);
+				indicators.append(indicator);
+			});
+			if (lightboxIndicator) {
+				galleryData.find(".ultp-lightbox__container").append(indicators);
+			}
 			appendSelector.append(galleryData);
 		}
 	}
@@ -375,7 +384,6 @@
 		let loader = $gallery.find(".ultp-gallery-loader");
 		let $noItems = $gallery.find(".ultp-no-gallery-message");
 		const container = $gallery.find(".ultp-gallery-container");
-		const filterItem = $gallery.find(".ultp-gallery-filter__item");
 		const loadMoreButton = $gallery.find(".ultp-gallery-loadMore");
 		const tiled = $gallery.find(".ultp-gallery-container.ultp-gallery-tiled");
 
@@ -480,13 +488,19 @@
 			masonry.css("height", Math.max(...columnHeights) + "px");
 		}
 
-		function updateVisibleItemsByFilter(selectedTag, limit) {
+		// Whether an item is listed. An add-on may narrow the list by setting a function as the
+		// gallery's `ultpGalleryMatch` data and triggering `ultp_gallery_refresh` on the gallery.
+		function itemIncluded($item) {
+			const match = $gallery.data("ultpGalleryMatch");
+			return typeof match === "function" ? match($item) : true;
+		}
+
+		function updateVisibleItems(limit) {
 			let imgCount = 0;
 			let totalMatch = 0;
 			galleryItems.each(function () {
 				const $this = $(this);
-				const tag = $this.data("tag") || "";
-				if (selectedTag === "All" || tag.includes(selectedTag)) {
+				if (itemIncluded($this)) {
 					totalMatch++;
 					if (imgCount < limit) {
 						$this.css({ display: "block" });
@@ -510,19 +524,11 @@
 			}, 400);
 		}
 
-		filterItem.on("click", function () {
-			const item = $(this);
-			const selectedTag = item.text();
-			item.siblings().removeClass("active-gallery-filter");
-			item.addClass("active-gallery-filter");
-
+		$gallery.on("ultp_gallery_refresh", function () {
 			rootImgCount = loadMoreCount;
 
 			showLoader(() => {
-				const { visibleCount, totalMatch } = updateVisibleItemsByFilter(
-					selectedTag,
-					rootImgCount,
-				);
+				const { visibleCount, totalMatch } = updateVisibleItems(rootImgCount);
 				loadMoreButton.css({
 					display: visibleCount < totalMatch ? "block" : "none",
 				});
@@ -533,15 +539,13 @@
 
 		loadMoreButton.on("click", function (e) {
 			e.preventDefault();
-			const activeTag = $gallery.find(".active-gallery-filter").text() || "All";
 
 			let visibleCount = 0;
 			let totalMatch = 0;
 
 			galleryItems.each(function () {
 				const $this = $(this);
-				const tag = $this.data("tag") || "";
-				if (activeTag === "All" || tag.includes(activeTag)) {
+				if (itemIncluded($this)) {
 					totalMatch++;
 					if ($this.is(":visible")) visibleCount++;
 				}
@@ -555,8 +559,7 @@
 				let currentVisible = 0;
 				galleryItems.each(function () {
 					const $this = $(this);
-					const tag = $this.data("tag") || "";
-					if (activeTag === "All" || tag.includes(activeTag)) {
+					if (itemIncluded($this)) {
 						$this.css({
 							display: currentVisible < rootImgCount ? "block" : "none",
 						});
@@ -653,14 +656,7 @@
 		}
 
 		setTimeout(() => {
-			const initialFilter =
-				$gallery
-					.find(".ultp-gallery-filter__item.active-gallery-filter")
-					.text() || "All";
-			const { visibleCount, totalMatch } = updateVisibleItemsByFilter(
-				initialFilter,
-				rootImgCount,
-			);
+			const { visibleCount, totalMatch } = updateVisibleItems(rootImgCount);
 			loadMoreButton.css({
 				display: visibleCount < totalMatch ? "block" : "none",
 			});

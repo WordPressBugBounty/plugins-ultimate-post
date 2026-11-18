@@ -43,7 +43,6 @@ class Post_Date_Meta {
 			'hideDesktop'       => false,
 			'hideTablet'        => false,
 			'hideMobile'        => false,
-			'advanceCss'        => '',
 		);
 	}
 
@@ -72,30 +71,30 @@ class Post_Date_Meta {
 
 		$wrapper_before = $wrapper_after = $content = '';
 
-			$wrapper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class=" wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '">';
+			$wrapper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . esc_attr( $attr['advanceId'] ) . '" ' : '' ) . ' class=" wp-block-ultimate-post-' . esc_attr( $block_name ) . ' ultp-block-' . esc_attr( $attr['blockId'] ) . ( $attr['className'] ? ' ' . esc_attr( $attr['className'] ) : '' ) . '' . ( $attr['align'] ? ' align' . esc_attr( $attr['align'] ) : '' ) . '">';
 				$wrapper_before .= '<div class="ultp-block-wrapper">';
 					$content    .= '<div class="ultp-date-meta">';
 		if ( $attr['prefixEnable'] ) {
 			$content .= '<span class="ultp-date-meta-prefix">';
 			if ( $attr['dateFormat'] == 'publish' ) {
-							$content .= $attr['datePubLabel'];
+							$content .= wp_kses( $attr['datePubLabel'], $allowed_html_tags );
 			} else {
-								$content .= $attr['dateUpLabel'];
+								$content .= wp_kses( $attr['dateUpLabel'], $allowed_html_tags );
 			}
 
 											$content .= '</span>';
 		}
 		if ( $attr['metaDateIconShow'] && $attr['metaDateIconStyle'] ) {
 			$content     .= '<span class="ultp-date-meta-icon">';
-				$content .= ultimate_post()->get_svg_icon( $attr['metaDateIconStyle'] );
+				$content .= wp_kses( ultimate_post()->get_svg_icon( $attr['metaDateIconStyle'] ), ultimate_post()->rendered_content_allowed_html() );
 			$content     .= '</span>';
 		}
 		if ( $attr['metaDateFormat'] ) {
 			$content .= '<span class="ultp-date-meta-format">';
 			if ( $attr['dateFormat'] == 'updated' ) {
-							$content .= get_the_modified_date( ultimate_post()->get_format( $attr['metaDateFormat'] ) );
+							$content .= esc_html( ultimate_post()->get_builder_date( 'ultp_builder_post_date_format', $attr['metaDateFormat'], true, null, $attr ) );
 			} else {
-								$content .= get_the_date( ultimate_post()->get_format( $attr['metaDateFormat'] ) );
+								$content .= esc_html( ultimate_post()->get_builder_date( 'ultp_builder_post_date_format', $attr['metaDateFormat'], false, null, $attr ) );
 			}
 
 											$content .= '</span>';

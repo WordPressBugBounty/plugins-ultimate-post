@@ -22,13 +22,6 @@ final class DCController {
 	 * @since v.4.1.1
 	 */
 	public function __construct() {
-		require_once ULTP_PATH . '/addons/dynamic_content/includes/DCService.php';
-
-		// PostX Pro before 1.9.0 does not answer the custom field filters below.
-		if ( \ULTP\Includes\Durbin\Xpo::is_pro_before_1_9_0() ) {
-			require_once ULTP_PATH . '/addons/dynamic_content/includes/DCLegacyFields.php';
-			new DCLegacyFields();
-		}
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 	}
@@ -64,7 +57,7 @@ final class DCController {
 
 						return true;
 					},
-					'args'                => array(),
+					'args'                => Request_Validation::args( 'handle_dynamic_data' ),
 				),
 			)
 		);
@@ -78,9 +71,9 @@ final class DCController {
 					'callback'            => array( $this, 'handle_custom_fields' ),
 					// custom field keys can reveal the meta-field schema of posts the caller shouldn't be able to see (private/draft/pending/scheduled/password-protected), so require the same access check as get_dynamic_content.
 					'permission_callback' => function ( $request ) {
-						return $this->user_can_access_post( $this->get_request_post_id( $request ) );
+						return $this->user_can_access_custom_fields( $this->get_request_post_id( $request ), $request->get_param( 'post_type' ) ?? '' );
 					},
-					'args'                => array(),
+					'args'                => Request_Validation::args( 'handle_custom_fields' ),
 				),
 			)
 		);
@@ -96,6 +89,28 @@ final class DCController {
 		return method_exists( $request, 'get_param' )
 			? intval( $request->get_param( 'post_id' ) )
 			: ( isset( $request['post_id'] ) ? intval( $request['post_id'] ) : 0 );
+	}
+
+	/**
+	 * Authorize an explicit post or an editorial post type before listing field sources.
+	 *
+	 * @param int    $post_id   Target post ID, or zero for a post-type picker.
+	 * @param string $post_type Requested post type, optional for an explicit post.
+	 * @return bool
+	 */
+	private function user_can_access_custom_fields( $post_id, $post_type ) {
+		if ( ! is_user_logged_in() || $post_id < 0 || ! is_string( $post_type ) ) {
+			return false;
+		}
+
+		$post_type = sanitize_key( $post_type );
+		if ( $post_id > 0 ) {
+			$post = get_post( $post_id );
+			return $post && ( '' === $post_type || $post->post_type === $post_type ) && $this->user_can_access_post( $post_id );
+		}
+
+		$type = get_post_type_object( $post_type );
+		return $type && ( $type->show_ui || is_post_type_viewable( $type ) ) && current_user_can( $type->cap->edit_posts );
 	}
 
 	/**
@@ -149,10 +164,16 @@ final class DCController {
 	 * @return WP_REST_Response
 	 */
 	public function handle_dynamic_data( $server ) {
-		$args      = $server->get_params();
-		$post_id   = isset( $args['post_id'] ) ? intval( $args['post_id'] ) : '';
-		$data_type = isset( $args['data_type'] ) ? $args['data_type'] : '';
-		$key       = isset( $args['key'] ) ? $args['key'] : '';
+		$valid = Request_Validation::validate( $server->get_params(), 'handle_dynamic_data' );
+		if ( is_wp_error( $valid ) ) {
+			return $valid;
+		}
+		$args    = $server->get_params();
+		$post_id = isset( $args['post_id'] ) ? intval( $args['post_id'] ) : '';
+		// Only the types DCService::get_dynamic_data() handles; anything else gets no data, as before.
+		$data_type = isset( $args['data_type'] ) && in_array( $args['data_type'], array( 'link', 'post_types', 'post_info', 'author_info', 'site_info', 'cf', 'comment_count' ), true ) ? $args['data_type'] : '';
+		// Not sanitize_key(): custom field keys (ACF, Meta Box, Pods) can be mixed case.
+		$key = isset( $args['key'] ) && is_string( $args['key'] ) ? sanitize_text_field( $args['key'] ) : '';
 
 		return rest_ensure_response(
 			array(
@@ -175,55 +196,40 @@ final class DCController {
 	 * @return WP_REST_Response
 	 */
 	public function handle_custom_fields( $server ) {
+		$valid = Request_Validation::validate( $server->get_params(), 'handle_custom_fields' );
+		if ( is_wp_error( $valid ) ) {
+			return $valid;
+		}
 		$args = $server->get_params();
 
-		$post_id    = isset( $args['post_id'] ) ? intval( $args['post_id'] ) : 0;
-		$post_type  = isset( $args['post_type'] ) ? $args['post_type'] : '';
-		$field_type = isset( $args['acf_field_type'] ) ? $args['acf_field_type'] : '';
+		$post_id = isset( $args['post_id'] ) ? intval( $args['post_id'] ) : 0;
+		// register_post_type() runs names through sanitize_key(), so a real post type is unchanged.
+		$post_type  = isset( $args['post_type'] ) && is_string( $args['post_type'] ) ? sanitize_key( $args['post_type'] ) : '';
+		$field_type = isset( $args['acf_field_type'] ) && is_string( $args['acf_field_type'] ) ? sanitize_text_field( $args['acf_field_type'] ) : '';
+
+		if ( ! $this->user_can_access_custom_fields( $post_id, $post_type ) ) {
+			return new \WP_Error( 'rest_forbidden', __( 'You are not allowed to access these custom fields.', 'ultimate-post' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+		if ( $post_id > 0 ) {
+			$post_type = get_post_type( $post_id );
+		}
 
 		$res = array();
 
 		// All metas
 		$all_custom_metas = $this->get_custom_metas( $post_id, $post_type );
 
-		// Field sources other than plain custom metas, added by PostX Pro.
-		$sources = apply_filters(
-			'ultp_dc_custom_field_sources',
-			array(),
-			array(
-				'post_id'    => $post_id,
-				'post_type'  => $post_type,
-				'field_type' => $field_type,
-			)
+		$context = array(
+			'post_id'    => $post_id,
+			'post_type'  => $post_type,
+			'field_type' => $field_type,
 		);
-		$sources = is_array( $sources ) ? $sources : array();
 
-		// Keys and key prefixes that belong to those sources are not plain custom metas.
-		$source_keys     = array();
-		$source_prefixes = array();
-		foreach ( $sources as $source ) {
-			if ( ! empty( $source['_fields'] ) && is_array( $source['_fields'] ) ) {
-				$source_keys = array_merge( $source_keys, $source['_fields'] );
-			}
-			if ( ! empty( $source['prefixes'] ) && is_array( $source['prefixes'] ) ) {
-				$source_prefixes = array_merge( $source_prefixes, $source['prefixes'] );
-			}
-		}
+		// Field sources other than plain custom metas. Each one returns the `fields` list the editor shows.
+		$sources = apply_filters( 'ultp_dc_custom_field_sources', array(), $context );
 
-		$filtered_custom_metas = array_values( array_diff( $all_custom_metas, $source_keys ) );
-		$filtered_custom_metas = array_values(
-			array_filter(
-				$filtered_custom_metas,
-				function ( $item ) use ( $source_prefixes ) {
-					foreach ( $source_prefixes as $prefix ) {
-						if ( str_starts_with( $item, $prefix ) ) {
-							return false;
-						}
-					}
-					return true;
-				}
-			)
-		);
+		// Plain custom meta keys offered to the editor. A filter may remove keys that a source above lists.
+		$filtered_custom_metas = array_values( apply_filters( 'ultp_dc_custom_metas', $all_custom_metas, $context, $sources ) );
 
 		// Return value
 		$res['custom_metas'] = array(
@@ -266,29 +272,38 @@ final class DCController {
 		$meta_keys = array();
 		$all_keys  = array();
 
+		if ( ! $this->user_can_access_custom_fields( $post_id, $post_type ) ) {
+			return $meta_keys;
+		}
+		$post_type = sanitize_key( $post_type );
+
 		if ( $post_id !== 0 ) {
 			$all_keys = get_post_custom_keys( $post_id );
 
 		} else {
-			if ( ! isset( $post_type ) ) {
-				return $meta_keys;
+			$type  = get_post_type_object( $post_type );
+			$query = array(
+				'post_type'      => $post_type,
+				'post_status'    => 'attachment' === $post_type ? 'inherit' : 'publish',
+				'posts_per_page' => 100,
+				'fields'         => 'ids',
+			);
+			if ( ! current_user_can( $type->cap->edit_others_posts ) ) {
+				$query['author'] = get_current_user_id();
 			}
 
-			$posts = get_posts(
-				array(
-					'post_type'      => $post_type,
-					'posts_per_page' => -1,
-					'fields'         => 'id',
-				)
-			);
+			$posts = get_posts( $query );
 
 			if ( empty( $posts ) ) {
 				return $meta_keys;
 			}
 
-			foreach ( $posts as $post ) {
-				$post_id = isset( $post->ID ) ? $post->ID : 0;
-				$keys    = get_post_custom_keys( $post_id );
+			foreach ( $posts as $post_id ) {
+				$post_id = (int) $post_id;
+				if ( ! $this->user_can_access_post( $post_id ) ) {
+					continue;
+				}
+				$keys = get_post_custom_keys( $post_id );
 				if ( is_array( $keys ) ) {
 					foreach ( $keys as $key ) {
 						$all_keys[] = $key;

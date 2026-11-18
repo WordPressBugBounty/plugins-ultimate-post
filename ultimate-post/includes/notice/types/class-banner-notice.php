@@ -76,4 +76,15 @@ class Banner_Notice extends Abstract_Campaign_Notice {
 	public function uses_countdown_script() {
 		return true;
 	}
+
+	/**
+	 * Unix time the campaign ends. The countdown runs to this time.
+	 *
+	 * @return int 0 when the end date can't be read.
+	 */
+	public function get_end_timestamp() {
+		$end       = $this->get( 'end' );
+		$timestamp = is_string( $end ) ? strtotime( $end ) : false;
+		return false === $timestamp ? 0 : $timestamp;
+	}
 }

@@ -41,17 +41,13 @@ class Dark_Light {
 
 		$attr['className'] = isset( $attr['className'] ) && $attr['className'] ? preg_replace( '/[^A-Za-z0-9_ -]/', '', $attr['className'] ) : '';
 		$attr['align']     = isset( $attr['align'] ) && $attr['align'] ? preg_replace( '/[^A-Za-z0-9_ -]/', '', $attr['align'] ) : '';
-		$layout            = isset( $attr['layout'] ) ? sanitize_html_class( $attr['layout'] ) : 'layout1';
+		// The layout is layout 1 unless ultp_dark_light_layout gives another.
+		$layout            = sanitize_html_class( apply_filters( 'ultp_dark_light_layout', 'layout1', $attr ) );
 		$reverseSwitcher   = isset( $attr['reverseSwitcher'] ) && $attr['reverseSwitcher'] ? 'ultp-dl-reverse' : '';
 		$enableText        = isset( $attr['enableText'] ) ? $attr['enableText'] == true : false;
 		$textAppears       = isset( $attr['textAppears'] ) ? sanitize_html_class( $attr['textAppears'] ) : 'both';
 		$iconType          = isset( $attr['iconType'] ) ? sanitize_html_class( $attr['iconType'] ) : 'solid';
 		$iconSize          = isset( $attr['iconSize'] ) ? sanitize_html_class( $attr['iconSize'] ) : '24';
-
-		// Free ships layout1 only. Further layouts are added through these filters by PostX Pro.
-		if ( ! in_array( $layout, (array) apply_filters( 'ultp_dark_light_layouts', array( 'layout1' ) ), true ) ) {
-			$layout = 'layout1';
-		}
 
 		$allowed_html_tags = ultimate_post()->ultp_allowed_html_tags();
 		$lightText         = isset( $attr['lightText'] ) ? wp_kses( $attr['lightText'], $allowed_html_tags ) : 'Light Mode';
@@ -87,10 +83,11 @@ class Dark_Light {
 		$wraper_before = '';
 		$block_name    = 'dark-light';
 
-		$wraper_before .= '<div ' . ( $attr['advanceId'] ? 'id="' . sanitize_html_class( $attr['advanceId'] ) . '" ' : '' ) . ' class="wp-block-ultimate-post-' . $block_name . ' ultp-block-' . sanitize_html_class( $attr['blockId'] ) . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '' . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '">';
-		$wraper_before .= '<div class="ultp-dark-light-block-wrapper ultp-block-wrapper ' . $layout . '">';
+		$wraper_before .= '<div ' . ( $attr['advanceId'] ? 'id="' . esc_attr( sanitize_html_class( $attr['advanceId'] ) ) . '" ' : '' ) . ' class="wp-block-ultimate-post-' . esc_attr( $block_name ) . ' ultp-block-' . esc_attr( sanitize_html_class( $attr['blockId'] ) ) . '' . ( $attr['align'] ? ' align' . esc_attr( $attr['align'] ) : '' ) . '' . ( $attr['className'] ? ' ' . esc_attr( $attr['className'] ) : '' ) . '">';
+		$wraper_before .= '<div class="ultp-dark-light-block-wrapper ultp-block-wrapper ' . esc_attr( $layout ) . '">';
 		ob_start();
-		?>
+		try {
+			?>
 		<div class="ultp-dark-light-block-wrapper-content ultp-frontend <?php echo esc_attr( $layout ); ?>">
 			<div class="ultp-dl-after-before-con ultp-dl-light <?php echo esc_attr( 'ultplight' == $dlMode ? '' : 'inactive' ); ?> <?php echo esc_attr( $reverseSwitcher ); ?>" data-iconlay="<?php echo esc_attr( $layout ); ?>" data-iconsize="<?php echo esc_attr( $iconSize ); ?>" data-iconrev="<?php echo esc_attr( $reverseSwitcher ); ?>">
 				<?php if ( $sideText && in_array( $textAppears, array( 'left', 'both' ) ) ) : ?>
@@ -122,7 +119,9 @@ class Dark_Light {
 			</div>
 		</div>
 		<?php
-		$wraper_before .= ob_get_clean();
+		} finally {
+			$wraper_before .= wp_kses( ob_get_clean(), ultimate_post()->rendered_content_allowed_html() );
+		}
 		$wraper_before .= '</div>';
 		$wraper_before .= '</div>';
 

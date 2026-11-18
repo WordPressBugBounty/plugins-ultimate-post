@@ -80,7 +80,7 @@ class REST_API {
 			array(
 				array(
 					'methods'             => 'POST',
-					'args'                => array(),
+					'args'                => Request_Validation::args( 'ultp_route_post_data' ),
 					'callback'            => array( $this, 'ultp_route_post_data' ),
 					'permission_callback' => function () {
 						return current_user_can( 'edit_posts' );
@@ -94,7 +94,7 @@ class REST_API {
 			array(
 				array(
 					'methods'             => 'POST',
-					'args'                => array(),
+					'args'                => Request_Validation::args( 'ultp_route_taxonomy_info_data' ),
 					'callback'            => array( $this, 'ultp_route_taxonomy_info_data' ),
 					'permission_callback' => function () {
 						return current_user_can( 'edit_others_posts' );
@@ -112,7 +112,7 @@ class REST_API {
 					'permission_callback' => function () {
 						return current_user_can( 'edit_others_posts' );
 					},
-					'args'                => array(),
+					'args'                => Request_Validation::args( 'search_settings_action' ),
 				),
 			)
 		);
@@ -123,10 +123,13 @@ class REST_API {
 				array(
 					'methods'             => 'POST',
 					'callback'            => array( $this, 'premade_wishlist_save' ),
-					'permission_callback' => function () {
-						return current_user_can( 'edit_others_posts' );
+					'permission_callback' => function ( $request ) {
+						// The wishlist is one site-wide option: changing it is for administrators.
+						// Mirrors the write condition in premade_wishlist_save().
+						$is_write = ! empty( $request['id'] ) && 'fetchData' !== $request['type'];
+						return current_user_can( $is_write ? 'manage_options' : 'edit_others_posts' );
 					},
-					'args'                => array(),
+					'args'                => Request_Validation::args( 'premade_wishlist_save' ),
 				),
 			)
 		);
@@ -137,21 +140,18 @@ class REST_API {
 				array(
 					'methods'             => 'POST',
 					'callback'            => array( $this, 'ultp_search_result' ),
-					'permission_callback' => '__return_true',
-				),
-			)
-		);
-		register_rest_route(
-			'ultp/v2',
-			'/custom_tax/',
-			array(
-				array(
-					'methods'             => 'POST',
-					'callback'            => array( $this, 'custom_tax_callback' ),
-					'permission_callback' => function () {
-						return current_user_can( 'manage_options' );
-					},
-					'args'                => array(),
+					// Public on purpose (live results for visitors), but not unchecked: see the callback.
+					'permission_callback' => array( $this, 'search_permission_check' ),
+					'args'                => array_merge(
+						Request_Validation::args( 'ultp_search_result' ),
+						array(
+							'searchText' => array(
+								'type'              => 'string',
+								'required'          => true,
+								'validate_callback' => 'rest_validate_request_arg',
+							),
+						)
+					),
 				),
 			)
 		);
@@ -163,9 +163,10 @@ class REST_API {
 					'methods'             => 'POST',
 					'callback'            => array( $this, 'init_site_dark_logo_callback' ),
 					'permission_callback' => function () {
-						return current_user_can( 'edit_others_posts' );
+						// Sets the site-wide dark logo option.
+						return current_user_can( 'manage_options' );
 					},
-					'args'                => array(),
+					'args'                => Request_Validation::args( 'init_site_dark_logo_callback' ),
 				),
 			)
 		);
@@ -179,7 +180,7 @@ class REST_API {
 					'permission_callback' => function () {
 						return current_user_can( 'edit_posts' );
 					},
-					'args'                => array(),
+					'args'                => Request_Validation::args( 'get_custom_image_size' ),
 				),
 			)
 		);
@@ -195,17 +196,25 @@ class REST_API {
 	 * @return array The response data.
 	 */
 	public function premade_wishlist_save( $server ) {
+		$valid = Request_Validation::validate( $server->get_params(), 'premade_wishlist_save' );
+		if ( is_wp_error( $valid ) ) {
+			return $valid;
+		}
 		$post         = $server->get_params();
 		$id           = isset( $post['id'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['id'] ) : '';
 		$action       = isset( $post['action'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['action'] ) : '';
 		$wishListArr  = get_option( 'ultp_premade_wishlist', array() );
 		$request_type = isset( $post['type'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['type'] ) : '';
 
-		if ( $id && $request_type != 'fetchData' ) {
+		// Older saves left gaps in the keys, which encode as a JSON object. Keep the same IDs as a plain list.
+		$wishListArr = is_array( $wishListArr ) ? array_values( $wishListArr ) : array();
+
+		if ( $id && $request_type != 'fetchData' && current_user_can( 'manage_options' ) ) {
 			if ( $action == 'remove' ) {
 				$index = array_search( $id, $wishListArr );
 				if ( $index !== false ) {
 					unset( $wishListArr[ $index ] );
+					$wishListArr = array_values( $wishListArr );
 				}
 			} elseif ( ! in_array( $id, $wishListArr ) ) {
 					array_push( $wishListArr, $id );
@@ -230,6 +239,10 @@ class REST_API {
 	 * @return array
 	 */
 	public function search_settings_action( $server ) {
+		$valid = Request_Validation::validate( $server->get_params(), 'search_settings_action' );
+		if ( is_wp_error( $valid ) ) {
+			return $valid;
+		}
 		global $wpdb;
 		$post           = $server->get_params();
 		$request_type   = isset( $post['type'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['type'] ) : '';
@@ -237,23 +250,54 @@ class REST_API {
 		$term_type      = isset( $post['term'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['term'] ) : '';
 		// get post type
 		$get_multiple_post_type = isset( $post['postType'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['postType'] ) : array();
-		$multiple_post_type     = is_array( $get_multiple_post_type ) ? $get_multiple_post_type : json_decode( $get_multiple_post_type, true );
-		$split                  = explode( '###', $condition_type );
-		$post_type_condition    = array();
-		if ( $split[0] == 'customPostType' && count( $multiple_post_type ) ) {
-			$post_type_condition = get_object_taxonomies( $multiple_post_type );
+		$multiple_post_type     = is_array( $get_multiple_post_type ) ? $get_multiple_post_type : array();
+		/**
+		 * Answers the list of post types whose taxonomies the picker offers.
+		 *
+		 * @param array|null $post_types The sanitized list, or null when nothing answers.
+		 * @param mixed      $request    The sanitized `postType` value as sent.
+		 * @param array      $args       `condition` and `term` of the request.
+		 */
+		$post_types_answer = apply_filters(
+			'ultp_taxvalue_post_types',
+			null,
+			$get_multiple_post_type,
+			array(
+				'condition' => $condition_type,
+				'term'      => $term_type,
+			)
+		);
+		if ( is_array( $post_types_answer ) ) {
+			$multiple_post_type = $post_types_answer;
 		}
-
+		// Only registered post types are asked for their taxonomies.
+		$multiple_post_type  = array_values(
+			array_filter(
+				$multiple_post_type,
+				function ( $type ) {
+					return is_string( $type ) && post_type_exists( $type );
+				}
+			)
+		);
 		switch ( $request_type ) {
 			case 'posts':
 			case 'allpost':
 			case 'postExclude':
 				$post_type = array( 'post' );
-				if ( $request_type == 'allpost' || $condition_type == 'customPostType' ) {
+				if ( $request_type == 'allpost' ) {
 					$post_type = array_keys( ultimate_post()->get_post_type() );
-				} elseif ( $request_type == 'postExclude' && $condition_type != 'customPostType' ) {
+				} elseif ( $request_type == 'postExclude' ) {
 					$post_type = array( $condition_type );
 				}
+				/**
+				 * Post types the post picker searches.
+				 *
+				 * @param array  $post_type      `post`; every public post type for `allpost`; the condition's post type for `postExclude`.
+				 * @param string $request_type   `posts`, `allpost` or `postExclude`.
+				 * @param string $condition_type The sanitized `condition` of the request.
+				 */
+				$post_type = apply_filters( 'ultp_post_search_post_types', $post_type, $request_type, $condition_type );
+				$post_type = ultimate_post()->allowed_query_post_types( $post_type, true );
 				$args = array(
 					'post_type'      => $post_type,
 					'post_status'    => 'publish',
@@ -265,6 +309,7 @@ class REST_API {
 					$args['s'] = $term_type;
 				}
 
+				$args         = ultimate_post()->restrict_query_access( $args, true );
 				$post_results = new \WP_Query( $args );
 				$data         = array();
 				if ( ! empty( $post_results ) ) {
@@ -286,19 +331,7 @@ class REST_API {
 				break;
 
 			case 'author':
-				$term         = '%' . $wpdb->esc_like( $term_type ) . '%';
-				$post_results = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-					$wpdb->prepare(
-						"SELECT ID, display_name 
-                        FROM $wpdb->users 
-                        WHERE user_login LIKE %s OR ID LIKE %s OR user_nicename LIKE %s OR user_email LIKE %s OR display_name LIKE %s LIMIT 10",
-						$term,
-						$term,
-						$term,
-						$term,
-						$term
-					)
-				);
+				$post_results = ultimate_post()->search_public_authors( $term_type );
 				$data         = array();
 				if ( ! empty( $post_results ) ) {
 					foreach ( $post_results as $key => $val ) {
@@ -315,35 +348,43 @@ class REST_API {
 				break;
 
 			case 'taxvalue':
-				$split     = explode( '###', $condition_type );
-				$condition = $split[1] != 'multiTaxonomy' ? array( $split[1] ) : get_object_taxonomies( $split[0] );
+				$split = explode( '###', $condition_type );
+				$data  = array();
+				// The rows of a multi-taxonomy condition are added by the filter below, not here.
+				if ( $split[1] != 'multiTaxonomy' ) {
+					/**
+					 * Answers the taxonomies whose terms the term picker lists for a single-taxonomy condition.
+					 *
+					 * @param array $taxonomies Default: the taxonomy of the condition.
+					 * @param array $args       `condition` (`postType###taxonomy`), `post_types` (the registered post types of the
+					 *                          request) and `term` (the search text or ID).
+					 */
+					$condition = apply_filters(
+						'ultp_taxvalue_taxonomies',
+						array( $split[1] ),
+						array(
+							'condition'  => $condition_type,
+							'post_types' => $multiple_post_type,
+							'term'       => $term_type,
+						)
+					);
 
-				if ( $post_type_condition && count( $post_type_condition ) ) {
-					$condition = $post_type_condition;
-				}
+					$args = array(
+						'taxonomy'   => $condition,
+						'fields'     => 'all',
+						'orderby'    => 'id',
+						'order'      => 'ASC',
+						'name__like' => $term_type,
+					);
+					if ( is_numeric( $term_type ) ) {
+						unset( $args['name__like'] );
+						$args['include'] = array( $term_type );
+					}
 
-				$args = array(
-					'taxonomy'   => $condition,
-					'fields'     => 'all',
-					'orderby'    => 'id',
-					'order'      => 'ASC',
-					'name__like' => $term_type,
-				);
-				if ( is_numeric( $term_type ) ) {
-					unset( $args['name__like'] );
-					$args['include'] = array( $term_type );
-				}
-
-				$post_results = get_terms( $args );
-				$data         = array();
-				if ( ! empty( $post_results ) ) {
-					foreach ( $post_results as $key => $val ) {
-						if ( $split[1] == 'multiTaxonomy' ) {
-							$data[] = array(
-								'value' => $val->taxonomy . '###' . $val->slug,
-								'title' => '[ID: ' . $val->term_id . '] ' . $val->taxonomy . ': ' . $val->name,
-							);
-						} else {
+					$args['taxonomy'] = ultimate_post()->allowed_picker_taxonomies( $args['taxonomy'] );
+					$post_results     = empty( $args['taxonomy'] ) ? array() : get_terms( $args );
+					if ( ! empty( $post_results ) && ! is_wp_error( $post_results ) ) {
+						foreach ( $post_results as $key => $val ) {
 							$data[] = array(
 								'value'      => urldecode( $val->slug ),
 								'title'      => '[ID: ' . $val->term_id . '] ' . $val->name,
@@ -352,6 +393,22 @@ class REST_API {
 						}
 					}
 				}
+				/**
+				 * Answers the rows of the term picker.
+				 *
+				 * @param array $rows Rows PostX builds: `value` and `title` (and `live_title` for one taxonomy).
+				 * @param array $args `condition` (`postType###taxonomy` or `postType###multiTaxonomy`), `post_types`
+				 *                    (the registered post types of the request) and `term` (the search text or ID).
+				 */
+				$data = apply_filters(
+					'ultp_taxvalue_rows',
+					$data,
+					array(
+						'condition'  => $condition_type,
+						'post_types' => $multiple_post_type,
+						'term'       => $term_type,
+					)
+				);
 				return array(
 					'success' => true,
 					'data'    => $data,
@@ -359,31 +416,27 @@ class REST_API {
 				break;
 
 			case 'taxExclude':
-				$condition = get_object_taxonomies( $condition_type );
-				if ( $post_type_condition && count( $post_type_condition ) ) {
-					$condition = $post_type_condition;
-				}
-				$args = array(
-					'taxonomy'   => $condition,
-					'fields'     => 'all',
-					'orderby'    => 'id',
-					'order'      => 'ASC',
-					'name__like' => $term_type,
+				/**
+				 * Answers the rows of the term picker of an exclude-terms condition.
+				 *
+				 * @param array $rows Default: one empty "- Select -" row.
+				 * @param array $args `condition` (the post type), `post_types` (the registered post types of the request)
+				 *                    and `term` (the search text or ID).
+				 */
+				$data = apply_filters(
+					'ultp_taxvalue_exclude_rows',
+					array(
+						array(
+							'value' => '',
+							'title' => '- Select -',
+						),
+					),
+					array(
+						'condition'  => $condition_type,
+						'post_types' => $multiple_post_type,
+						'term'       => $term_type,
+					)
 				);
-				if ( is_numeric( $term_type ) ) {
-					unset( $args['name__like'] );
-					$args['include'] = array( $term_type );
-				}
-				$post_results = get_terms( $args );
-				$data         = array();
-				if ( ! empty( $post_results ) ) {
-					foreach ( $post_results as $key => $val ) {
-						$data[] = array(
-							'value' => $val->taxonomy . '###' . $val->slug,
-							'title' => '[ID: ' . $val->term_id . '] ' . $val->taxonomy . ': ' . $val->name,
-						);
-					}
-				}
 				return array(
 					'success' => true,
 					'data'    => $data,
@@ -426,12 +479,29 @@ class REST_API {
 	 * @return ARRAY | Response Image Size as Array
 	 */
 	public function ultp_route_post_data( $prams ) {
+		$valid = Request_Validation::validate( $prams->get_params(), 'ultp_route_post_data' );
+		if ( is_wp_error( $valid ) ) {
+			return $valid;
+		}
 		$prams = $prams->get_params();
-		if ( ! ( isset( $prams['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $prams['wpnonce'] ) ), 'ultp-admin-nonce' ) ) ) {
+		$nonce = isset( $prams['wpnonce'] ) ? sanitize_text_field( wp_unslash( $prams['wpnonce'] ) ) : '';
+		if ( ! wp_verify_nonce( $nonce, 'ultp-admin-nonce' ) ) {
 			die();
 		}
-		$data    = array();
-		$loop    = new \WP_Query( ultimate_post()->get_query( ultimate_post()->ultp_rest_sanitize_params( $prams ) ) );
+		// Editor preview of a block's posts: same capability as the route's permission_callback.
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			die();
+		}
+		$data = array();
+		$args = ultimate_post()->get_query( ultimate_post()->ultp_rest_sanitize_params( $prams ), true );
+		// The request picks the post type, so keep it to types the user may see.
+		if ( is_array( $args ) && ! empty( $args['post_type'] ) ) {
+			$args['post_type'] = $this->restrict_preview_post_types( $args['post_type'] );
+			if ( empty( $args['post_type'] ) ) {
+				return rest_ensure_response( $data );
+			}
+		}
+		$loop    = new \WP_Query( $args );
 		$max_tax = isset( $prams['maxTaxonomy'] ) && $prams['maxTaxonomy'] ? ( ultimate_post()->ultp_rest_sanitize_params( $prams['maxTaxonomy'] ) == '0' ? 0 : ultimate_post()->ultp_rest_sanitize_params( $prams['maxTaxonomy'] ) ) : 30;
 
 		if ( $loop->have_posts() ) {
@@ -450,7 +520,7 @@ class REST_API {
 				$var['time']         = (int) get_the_date( 'U' ) * 1000;
 				$var['timeModified'] = (int) get_the_modified_date( 'U' ) * 1000;
 				$var['post_time']    = human_time_diff( get_the_time( 'U' ), current_time( 'U' ) );
-				$var['view']         = get_post_meta( get_the_ID(), '__post_views_count', true );
+				$var['view']         = get_post_meta( get_the_ID(), '_ultp_post_views_count', true );
 				$var['comments']     = get_comments_number();
 				$var['author_link']  = get_author_posts_url( $user_id );
 				$var['avatar_url']   = get_avatar_url( $user_id );
@@ -458,11 +528,12 @@ class REST_API {
 				$var['reading_time'] = ceil( strlen( $content_data ) / 1200 );
 				$var['acf']          = null;
 
-				if ( function_exists( 'get_field_objects' ) ) {
-					$var['acf'] = get_field_objects();
+				// Field values go only to users who can edit this post, and only name, label, type and value are sent.
+				if ( function_exists( 'get_field_objects' ) && current_user_can( 'edit_post', $post_id ) ) {
+					$var['acf'] = $this->editor_acf_fields( get_field_objects() );
 				}
 
-				$post_video = get_post_meta( $post_id, '__builder_feature_video', true );
+				$post_video = get_post_meta( $post_id, '_ultp_builder_feature_video', true );
 				// Video.
 				if ( $post_video ) {
 					$var['has_video'] = ultimate_post()->get_youtube_id( $post_video );
@@ -480,15 +551,18 @@ class REST_API {
 					}
 					$var['image'] = $image_src;
 				} elseif ( isset( $prams['fallbackImg']['id'] ) ) {
+					$fallback_id = absint( $prams['fallbackImg']['id'] );
 					foreach ( $image_sizes as $key => $value ) {
-						$image_src[ $key ] = wp_get_attachment_image_src( esc_attr( $prams['fallbackImg']['id'] ), $key, false )[0];
+						$image             = wp_get_attachment_image_src( $fallback_id, $key, false );
+						$image_src[ $key ] = $image ? $image[0] : null;
 					}
 					$var['image']       = $image_src;
 					$var['is_fallback'] = true;
 				}
 
 				// tag.
-				$tag = get_the_terms( $post_id, ( isset( $prams['tag'] ) ? esc_attr( $prams['tag'] ) : 'post_tag' ) );
+				$tag_taxonomy = isset( $prams['tag'] ) && is_string( $prams['tag'] ) ? sanitize_text_field( $prams['tag'] ) : 'post_tag';
+				$tag          = taxonomy_exists( $tag_taxonomy ) ? get_the_terms( $post_id, $tag_taxonomy ) : false;
 				if ( ! empty( $tag ) ) {
 					$v = array();
 					foreach ( $tag as $k => $val ) {
@@ -503,8 +577,10 @@ class REST_API {
 					$var['tag'] = $v;
 				}
 
-				// Taxonomy.
-				$cat = get_the_terms( $post_id, ( isset( $prams['taxonomy'] ) ? esc_attr( $prams['taxonomy'] ) : 'category' ) );
+				// Taxonomy. An add-on may take the terms from another taxonomy (same filter as the front end).
+				$cat_taxonomy = apply_filters( 'ultp_post_category_taxonomy', 'category', $prams );
+				$cat_taxonomy = is_string( $cat_taxonomy ) && '' !== $cat_taxonomy ? $cat_taxonomy : 'category';
+				$cat          = taxonomy_exists( $cat_taxonomy ) ? get_the_terms( $post_id, $cat_taxonomy ) : false;
 
 				if ( ! empty( $cat ) ) {
 					$v = array();
@@ -529,6 +605,96 @@ class REST_API {
 
 
 	/**
+	 * Keep the parts of ACF field objects that the editor preview uses: name, label, type and value.
+	 *
+	 * Field settings (choices, conditional logic, return formats and similar) are not sent.
+	 *
+	 * @param array|false $fields Result of get_field_objects().
+	 * @return array|false The reduced field list, or the input when it is not an array.
+	 */
+	private function editor_acf_fields( $fields ) {
+		if ( ! is_array( $fields ) ) {
+			return $fields;
+		}
+		$reduced = array();
+		foreach ( $fields as $key => $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+			$reduced[ $key ] = array(
+				'name'  => isset( $field['name'] ) ? $field['name'] : $key,
+				'label' => isset( $field['label'] ) ? $field['label'] : '',
+				'type'  => isset( $field['type'] ) ? $field['type'] : '',
+				'value' => $this->editor_acf_value( $field['value'] ?? null ),
+			);
+		}
+		return $reduced;
+	}
+
+	/**
+	 * Preserve field formats without exposing account credentials through nested values.
+	 *
+	 * @param mixed $value Provider value.
+	 * @param int   $depth Recursion depth, including objects supplied by field integrations.
+	 * @return mixed JSON-safe field value.
+	 */
+	private function editor_acf_value( $value, $depth = 0 ) {
+		if ( $depth > 32 ) {
+			return null;
+		}
+		if ( $value instanceof \WP_User ) {
+			// Keep the existing ID/data shape and explicitly selected display/email fields.
+			$value = (object) array(
+				'ID'   => $value->ID,
+				'data' => (object) array_intersect_key(
+					(array) $value->data,
+					array_flip( array( 'ID', 'user_login', 'user_nicename', 'user_email', 'user_url', 'user_registered', 'display_name' ) )
+				),
+			);
+		}
+		if ( is_array( $value ) || is_object( $value ) ) {
+			$clean = array();
+			foreach ( is_object( $value ) ? get_object_vars( $value ) : $value as $key => $item ) {
+				if ( in_array( strtolower( (string) $key ), array( 'user_pass', 'user_activation_key', 'session_tokens' ), true ) ) {
+					continue;
+				}
+				$clean[ $key ] = $this->editor_acf_value( $item, $depth + 1 );
+			}
+			return is_object( $value ) ? (object) $clean : $clean;
+		}
+		return is_scalar( $value ) || null === $value ? $value : null;
+	}
+
+	/**
+	 * Keep the post types of an editor preview query to those the current user may see.
+	 *
+	 * A post type is kept when it is registered and either viewable on the front end or
+	 * editable by the current user. 'any' (alone or inside a list, as WP_Query reads it) is
+	 * expanded to the types WP_Query would search, then filtered the same way.
+	 *
+	 * @param string|array $post_type Post type, or list of post types, from the query arguments.
+	 * @return string|array Allowed post type(s); empty array when none is left.
+	 */
+	private function restrict_preview_post_types( $post_type ) {
+		$is_any = 'any' === $post_type || ( is_array( $post_type ) && in_array( 'any', $post_type, true ) );
+		$types  = $is_any ? get_post_types( array( 'exclude_from_search' => false ) ) : (array) $post_type;
+		$allow  = array();
+		foreach ( $types as $type ) {
+			if ( ! is_string( $type ) || ! post_type_exists( $type ) ) {
+				continue;
+			}
+			$object = get_post_type_object( $type );
+			if ( is_post_type_viewable( $object ) || current_user_can( $object->cap->edit_posts ) ) {
+				$allow[] = $type;
+			}
+		}
+		if ( ! $is_any && is_string( $post_type ) && 1 === count( $allow ) ) {
+			return $allow[0];
+		}
+		return $allow;
+	}
+
+	/**
 	 * STaxonomy Data Response of REST API
 	 *
 	 * @since v.1.0.0
@@ -536,7 +702,13 @@ class REST_API {
 	 * @return ARRAY | Response Taxonomy List as Array
 	 */
 	public function ultp_route_common_data( $prams ) {
-		if ( ! ( isset( $_REQUEST['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['wpnonce'] ) ), 'ultp-admin-nonce' ) ) ) {
+		$nonce = $prams->get_param( 'wpnonce' );
+		$nonce = is_string( $nonce ) ? sanitize_text_field( $nonce ) : '';
+		if ( ! wp_verify_nonce( $nonce, 'ultp-admin-nonce' ) ) {
+			return rest_ensure_response( array() );
+		}
+		// Editor data (taxonomies, image sizes, post types): same capability as the route's permission_callback.
+		if ( ! current_user_can( 'edit_posts' ) ) {
 			return rest_ensure_response( array() );
 		}
 
@@ -544,7 +716,7 @@ class REST_API {
 		$data          = array();
 		foreach ( $all_post_type as $post_type_slug => $post_type ) {
 			$data_term  = array();
-			$taxonomies = get_object_taxonomies( $post_type_slug );
+			$taxonomies = ultimate_post()->allowed_picker_taxonomies( get_object_taxonomies( $post_type_slug ) );
 			foreach ( $taxonomies as $key => $taxonomy_slug ) {
 				$taxonomy_value = get_terms(
 					array(
@@ -565,7 +737,7 @@ class REST_API {
 			$data[ $post_type_slug ] = $data_term;
 		}
 		// Global Customizer.
-		$global = get_option( 'postx_global', array() );
+		$global = GlobalStyles::without_legacy_css( get_option( 'postx_global', array() ) );
 		// Image Size.
 		$image_sizes = ultimate_post()->get_image_size();
 
@@ -587,65 +759,70 @@ class REST_API {
 	 * @return ARRAY | Response Taxonomy List as Array
 	 */
 	public function ultp_route_taxonomy_info_data( $prams ) {
+		$valid = Request_Validation::validate( $prams->get_params(), 'ultp_route_taxonomy_info_data' );
+		if ( is_wp_error( $valid ) ) {
+			return $valid;
+		}
 		$prams = $prams->get_params();
-		if ( ! ( isset( $prams['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $prams['wpnonce'] ) ), 'ultp-admin-nonce' ) ) ) {
+		$nonce = isset( $prams['wpnonce'] ) ? sanitize_text_field( wp_unslash( $prams['wpnonce'] ) ) : '';
+		if ( ! wp_verify_nonce( $nonce, 'ultp-admin-nonce' ) ) {
 			return rest_ensure_response( array() );
 		}
-		$taxValue       = isset( $prams['taxValue'] ) ? ultimate_post()->ultp_rest_sanitize_params( $prams['taxValue'] ) : '';
-		$queryNumber    = isset( $prams['queryNumber'] ) ? ultimate_post()->ultp_rest_sanitize_params( $prams['queryNumber'] ) : '';
-		$taxType        = isset( $prams['taxType'] ) ? ultimate_post()->ultp_rest_sanitize_params( $prams['taxType'] ) : '';
-		$taxSlug        = isset( $prams['taxSlug'] ) ? ultimate_post()->ultp_rest_sanitize_params( $prams['taxSlug'] ) : '';
-		$archiveBuilder = isset( $prams['archiveBuilder'] ) ? ultimate_post()->ultp_rest_sanitize_params( $prams['archiveBuilder'] ) : '';
+		// Same capability as the route's permission_callback.
+		if ( ! current_user_can( 'edit_others_posts' ) ) {
+			return rest_ensure_response( array() );
+		}
+		$tax_value       = isset( $prams['taxValue'] ) ? ultimate_post()->ultp_rest_sanitize_params( $prams['taxValue'] ) : '';
+		$query_number    = isset( $prams['queryNumber'] ) ? ultimate_post()->ultp_rest_sanitize_params( $prams['queryNumber'] ) : '';
+		$tax_type        = isset( $prams['taxType'] ) ? ultimate_post()->ultp_rest_sanitize_params( $prams['taxType'] ) : '';
+		$tax_slug        = isset( $prams['taxSlug'] ) ? ultimate_post()->ultp_rest_sanitize_params( $prams['taxSlug'] ) : '';
+		$archive_builder = isset( $prams['archiveBuilder'] ) ? ultimate_post()->ultp_rest_sanitize_params( $prams['archiveBuilder'] ) : '';
 
-		return rest_ensure_response( ultimate_post()->get_category_data( json_decode( $taxValue ), $queryNumber, $taxType, $taxSlug, $archiveBuilder ) );
+		// taxValue is the block's JSON list of term slugs.
+		$tax_slugs = array();
+		if ( is_array( $tax_value ) ) {
+			$tax_slugs = $tax_value;
+		} elseif ( is_string( $tax_value ) && '' !== $tax_value ) {
+			$decoded = json_decode( $tax_value );
+			if ( JSON_ERROR_NONE === json_last_error() && is_array( $decoded ) ) {
+				$tax_slugs = ultimate_post()->ultp_rest_sanitize_params( $decoded );
+			}
+		}
+
+		if ( empty( ultimate_post()->allowed_picker_taxonomies( $tax_slug ) ) ) {
+			return rest_ensure_response( array() );
+		}
+
+		return rest_ensure_response( ultimate_post()->get_category_data( $tax_slugs, $query_number, $tax_type, $tax_slug, $archive_builder ) );
 	}
 
 	/**
-	 * Get Taxonomies for Custom Post Type
+	 * Who may call the Search block's live results route.
 	 *
-	 * @since v.3.2.8
-	 * @param array $prams .
-	 * @return array
+	 * The route is public on purpose: the Search block shows live results to visitors, and every
+	 * result is a published post. What can be checked is checked:
+	 * - a logged-in user is already authenticated (WordPress checks the REST nonce for a cookie login);
+	 * - a visitor must send the front-end nonce 'ultp-public-nonce', the same check as the blocks'
+	 *   other front-end requests (see Blocks::ultp_get_nonce_callback()).
+	 *
+	 * @since v.5.1.4
+	 * @param \WP_REST_Request $request The REST request.
+	 * @return true|\WP_Error
 	 */
-	public function custom_tax_callback( $prams ) {
-
-		$post_types = isset( $prams['postTypes'] ) ? ultimate_post()->ultp_rest_sanitize_params( $prams['postTypes'] ) : array();
-
-		if ( is_string( $post_types ) ) {
-			$post_types = json_decode( $post_types, true );
-			if ( ! is_array( $post_types ) ) {
-				$post_types = array();
-			}
+	public function search_permission_check( $request ) {
+		if ( is_user_logged_in() ) {
+			return true;
 		}
-
-		$data = array(
-			array(
-				'id'   => '_all',
-				'name' => __( 'All', 'ultimate-post' ),
-			),
+		$nonce = $request->get_param( 'wpnonce' );
+		if ( is_string( $nonce ) && wp_verify_nonce( $nonce, 'ultp-public-nonce' ) ) {
+			return true;
+		}
+		// Same code as the AJAX handlers, so the script knows to fetch a fresh nonce and retry.
+		return new \WP_Error(
+			'ultp_invalid_nonce',
+			__( 'Security token expired. Please try again.', 'ultimate-post' ),
+			array( 'status' => 403 )
 		);
-
-		foreach ( $post_types as $post_type ) {
-			$taxonomies = get_object_taxonomies( $post_type );
-			foreach ( $taxonomies as $taxonomy ) {
-				if ( 'category' !== $taxonomy && 'post_tag' !== $taxonomy ) {
-					$terms = get_terms(
-						array(
-							'taxonomy'   => $taxonomy,
-							'hide_empty' => false,
-						)
-					);
-					foreach ( $terms as $term ) {
-						$data[] = array(
-							'id'   => $term->slug,
-							'name' => $term->name,
-						);
-					}
-				}
-			}
-		}
-
-		return rest_ensure_response( $data );
 	}
 
 	/**
@@ -656,6 +833,10 @@ class REST_API {
 	 * @return ARRAY | Inserted Post Url
 	 */
 	public function ultp_search_result( $server ) {
+		$valid = Request_Validation::validate( $server->get_params(), 'ultp_search_result' );
+		if ( is_wp_error( $valid ) ) {
+			return $valid;
+		}
 		$post        = $server->get_params();
 		$searchText  = isset( $post['searchText'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['searchText'] ) : '';
 		$paged       = isset( $post['paged'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['paged'] ) : '';
@@ -668,33 +849,53 @@ class REST_API {
 		// casting that to string is an "Array to string conversion" warning.
 		$searchText = is_scalar( $searchText ) ? mb_substr( (string) $searchText, 0, self::SEARCH_TEXT_MAX_LENGTH ) : '';
 
+		// Both callers search only from 3 characters. A shorter term (an empty one matches every
+		// post) is not a search, so it can't be used to page through the whole site.
+		if ( mb_strlen( $searchText ) < 3 ) {
+			return array(
+				'post_data'  => '',
+				'post_count' => 0,
+			);
+		}
+
 		$query_args = array(
 			's'              => $searchText,
 			'paged'          => $paged,
 			'orderby'        => 'relevance',
 			'posts_per_page' => $postPerPage,
+			// Published posts only, also for a logged-in user who could read private ones.
+			'post_status'    => 'publish',
 		);
-		if ( isset( $post['exclude'] ) && is_array( $post['exclude'] ) && count( $post['exclude'] ) > 0 ) {
-			$all_types    = get_post_types( array( 'public' => true ), 'names' );
-			$post_exclude = array();
-
-			// Bound before sanitising: this route is public, and sanitising an array
-			// whose length the caller picks is itself the attack. Excluding more post
-			// types than exist is meaningless, so nothing valid is dropped.
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Length is bounded here only; every element is sanitized below before use.
-			$exclude_input = array_slice( $post['exclude'], 0, count( $all_types ) );
-
-			foreach ( $exclude_input as $data ) {
-				// A flat array of strings would index a string here and warn.
-				if ( ! is_array( $data ) || ! isset( $data['title'] ) || ! is_scalar( $data['title'] ) ) {
-					continue;
-				}
-				$exclude_type                  = sanitize_text_field( $data['title'] );
-				$post_exclude[ $exclude_type ] = $exclude_type;
-			}
-
-			$query_args['post_type'] = array_diff_key( $all_types, $post_exclude );
+		// An add-on may narrow the search from the request parameters. The paging, ordering,
+		// search text and post status set above are kept whatever it returns.
+		$filtered_args = apply_filters( 'ultp_search_result_query_args', $query_args, $post );
+		if ( is_array( $filtered_args ) ) {
+			$query_args = array_merge( $filtered_args, $query_args );
 		}
+
+		// Public post types only. With no post_type, WP_Query searches every type not excluded from
+		// search, which can include one registered as not public. An add-on may narrow the types
+		// (Pro's "Exclude Post Type"), but not widen them past the public ones.
+		if ( empty( $query_args['post_type'] ) || 'any' === $query_args['post_type'] ) {
+			$query_args['post_type'] = get_post_types(
+				array(
+					'public'              => true,
+					'exclude_from_search' => false,
+				),
+				'names'
+			);
+		} else {
+			$query_args['post_type'] = array_intersect( (array) $query_args['post_type'], get_post_types( array( 'public' => true ), 'names' ) );
+		}
+		// An empty list would make WP_Query fall back to searching every type.
+		if ( empty( $query_args['post_type'] ) ) {
+			return array(
+				'post_data'  => '',
+				'post_count' => 0,
+			);
+		}
+		$query_args['post_type'] = array_values( $query_args['post_type'] );
+
 		$output       = '';
 		$query_result = new \WP_Query( $query_args );
 
@@ -717,7 +918,11 @@ class REST_API {
 			while ( $query_result->have_posts() ) {
 				$query_result->the_post();
 				$post_id = get_the_ID();
-				$title   = get_the_title();
+				// Last check per post: published, and of a type visitors can view.
+				if ( ! is_post_publicly_viewable( $post_id ) ) {
+					continue;
+				}
+				$title = get_the_title();
 
 				$output .= '<div class="ultp-search-result__item">';
 
@@ -748,8 +953,9 @@ class REST_API {
 				}
 
 				// Author.
-				if ( $show_author ) {
-					$user_id = get_the_author_meta( 'ID' );
+				// Only the author of this published post: the name its author archive already shows.
+				$user_id = $show_author ? (int) get_the_author_meta( 'ID' ) : 0;
+				if ( $user_id ) {
 					$output .= '<a href="' . esc_url( get_author_posts_url( $user_id ) ) . '" class="ultp-searchresult-author">' . esc_html( get_the_author_meta( 'display_name' ) ) . '</a>';
 				}
 
@@ -787,10 +993,15 @@ class REST_API {
 	 * @return BOOOLEAN | Inserted Post Url
 	 */
 	public function init_site_dark_logo_callback( $server ) {
+		$valid = Request_Validation::validate( $server->get_params(), 'init_site_dark_logo_callback' );
+		if ( is_wp_error( $valid ) ) {
+			return $valid;
+		}
 		$logo_data = $server->get_params();
 		$success   = true;
-		if ( isset( $logo_data['logo']['url'] ) ) {
-			update_option( 'ultp_site_dark_logo', $logo_data['logo']['url'] );
+		$logo_url  = isset( $logo_data['logo']['url'] ) && is_string( $logo_data['logo']['url'] ) ? sanitize_url( $logo_data['logo']['url'] ) : '';
+		if ( $logo_url ) {
+			update_option( 'ultp_site_dark_logo', $logo_url );
 		} else {
 			$success = false;
 		}
@@ -810,17 +1021,22 @@ class REST_API {
 	 * @return ARRAY | Image Size List as Array
 	 */
 	public function get_custom_image_size( $server ) {
-		$img         = $server->get_params();
+		$valid = Request_Validation::validate( $server->get_params(), 'get_custom_image_size' );
+		if ( is_wp_error( $valid ) ) {
+			return $valid;
+		}
+		$id          = absint( $server->get_param( 'id' ) );
 		$image_src   = array();
 		$image_sizes = ultimate_post()->get_image_size();
 		foreach ( $image_sizes as $key => $value ) {
-			$image_src[ $key ] = wp_get_attachment_image_src( $img['id'], $key, false )[0];
+			$image             = wp_get_attachment_image_src( $id, $key, false );
+			$image_src[ $key ] = $image ? $image[0] : null;
 		}
 		return rest_ensure_response(
 			array(
 				'success' => true,
 				'size'    => $image_src,
-				'id'      => $img,
+				'id'      => $id,
 			)
 		);
 	}

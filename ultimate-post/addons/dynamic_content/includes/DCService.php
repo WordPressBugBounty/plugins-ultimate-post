@@ -15,6 +15,50 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class DCService {
 
 	/**
+	 * Resolve a target under the public-render or explicit editor-preview policy.
+	 *
+	 * @param int|string|null $post_id Target, or the current loop post when empty.
+	 * @param bool            $preview Explicit editor service call, never a saved block flag.
+	 * @return \WP_Post|null Authorized target.
+	 */
+	private static function get_target_post( $post_id, $preview = false, $visited = array() ) {
+		if ( ! is_scalar( $post_id ) && null !== $post_id ) {
+			return null;
+		}
+		if ( empty( $post_id ) ) {
+			$post_id = in_the_loop() ? get_the_ID() : ( isset( $GLOBALS['post']->ID ) ? $GLOBALS['post']->ID : 0 );
+		}
+		if ( ! is_numeric( $post_id ) || (int) $post_id <= 0 ) {
+			return null;
+		}
+		$post = get_post( (int) $post_id );
+		if ( ! $post instanceof \WP_Post ) {
+			return null;
+		}
+		if ( isset( $visited[ $post->ID ] ) || count( $visited ) >= 32 ) {
+			return null;
+		}
+		$visited[ $post->ID ] = true;
+		if ( 'attachment' === $post->post_type && ! empty( $post->post_parent ) && get_post( $post->post_parent ) ) {
+			$parent = self::get_target_post( $post->post_parent, false, $visited );
+			if ( ! $parent && ( ! $preview || ! self::get_target_post( $post->post_parent, true, $visited ) ) ) {
+				return null;
+			}
+		}
+		if ( $preview ) {
+			return current_user_can( 'edit_post', $post->ID ) ? $post : null;
+		}
+		if ( ! is_post_type_viewable( $post->post_type ) || post_password_required( $post ) ) {
+			return null;
+		}
+		if ( is_post_publicly_viewable( $post ) ) {
+			return $post;
+		}
+		// A logged-in viewer may retain WordPress-authorized access to a private post.
+		return 'private' === get_post_status( $post->ID ) && is_user_logged_in() && current_user_can( 'read_post', $post->ID ) ? $post : null;
+	}
+
+	/**
 	 * Gets the dynamic data to show in the editor
 	 *
 	 * @since 4.1.1
@@ -33,7 +77,7 @@ final class DCService {
 
 		switch ( $data_type ) {
 			case 'link':
-				$res            = self::get_link( $post_id, $key );
+				$res            = self::get_link( $post_id, $key, true );
 				$process_string = false;
 				break;
 			case 'post_types':
@@ -41,20 +85,20 @@ final class DCService {
 				$process_string = false;
 				break;
 			case 'post_info':
-				$res = self::get_post_info( $post_id, $key );
+				$res = self::get_post_info( $post_id, $key, true );
 				break;
 			case 'author_info':
-				$res = self::get_author_info( $post_id, $key );
+				$res = self::get_author_info( $post_id, $key, true );
 				break;
 			case 'site_info':
 				$res = self::get_site_info( $key );
 				break;
 			case 'cf':
-				$res            = self::get_field_value( $post_id, $key );
+				$res            = self::get_field_value( $post_id, $key, true );
 				$process_string = false;
 				break;
 			case 'comment_count':
-				$res = self::get_comment_count( $post_id );
+				$res = self::get_comment_count( $post_id, true );
 				break;
 		}
 
@@ -68,9 +112,16 @@ final class DCService {
 	 *
 	 * @param string|int|null $post_id - Post Id.
 	 *
+	 * @param bool            $preview Explicit capability-checked editor preview.
+	 *
 	 * @return string
 	 */
-	public static function get_comment_count( $post_id ) {
+	public static function get_comment_count( $post_id, $preview = false ) {
+		$post = self::get_target_post( $post_id, $preview );
+		if ( ! $post ) {
+			return '';
+		}
+		$post_id = $post->ID;
 		$res = '';
 
 		if ( $post_id !== 0 ) {
@@ -170,14 +221,34 @@ final class DCService {
 		for ( $i = 0; $i < count( $attr['dcFields'] ); $i++ ) {
 			$dcGroup = $attr['dcFields'][ $i ];
 
-			if ( ! isset( $dcGroup['fields'] ) || ! isset( $dcGroup['id'] ) ) {
+			if ( ! isset( $dcGroup['fields'] ) || ! is_array( $dcGroup['fields'] ) || ! isset( $dcGroup['id'] ) ) {
 				continue;
 			}
 
-			$dcContent[ $i ] .= '<div class="ultp-dynamic-content-group-common ultp-dynamic-content-group-' . $dcGroup['id'] . '">';
+			$dcContent[ $i ] .= '<div class="ultp-dynamic-content-group-common ultp-dynamic-content-group-' . esc_attr( $dcGroup['id'] ) . '">';
 
 			for ( $j = 0; $j < count( $dcGroup['fields'] ); $j++ ) {
-				$dcField = $dcGroup['fields'][ $j ];
+				if ( ! is_array( $dcGroup['fields'][ $j ] ) ) {
+					continue;
+				}
+
+				// A field saved without every key (hand-written, imported or older content) reads as empty.
+				$dcField = wp_parse_args(
+					$dcGroup['fields'][ $j ],
+					array(
+						'id'          => '',
+						'icon'        => '',
+						'postId'      => '',
+						'dataSrc'     => '',
+						'contentSrc'  => '',
+						'linkEnabled' => false,
+						'linkSrc'     => '',
+						'beforeText'  => '',
+						'afterText'   => '',
+						'maxCharLen'  => '',
+						'fallback'    => '',
+					)
+				);
 
 				$url = '';
 
@@ -187,14 +258,14 @@ final class DCService {
 				}
 
 				if ( ! empty( $url ) ) {
-					$dcContent[ $i ] .= '<a class="ultp-dynamic-content-field-anchor" href="' . $url . '">';
+					$dcContent[ $i ] .= '<a class="ultp-dynamic-content-field-anchor" href="' . esc_url( $url ) . '">';
 				}
 
-				$dcContent[ $i ] .= '<div class="ultp-dynamic-content-field-common ultp-dynamic-content-field-' . $dcField['id'] . '">';
+				$dcContent[ $i ] .= '<div class="ultp-dynamic-content-field-common ultp-dynamic-content-field-' . esc_attr( $dcField['id'] ) . '">';
 				if ( ! empty( $dcField['icon'] ) ) {
-					$dcContent[ $i ] .= '<span class="ultp-dynamic-content-field-icon">' . ultimate_post()->get_svg_icon( $dcField['icon'] ) . '</span>';
+					$dcContent[ $i ] .= '<span class="ultp-dynamic-content-field-icon">' . wp_kses( ultimate_post()->get_svg_icon( $dcField['icon'] ), ultimate_post()->rendered_content_allowed_html() ) . '</span>';
 				}
-				$dcContent[ $i ] .= $dcField['beforeText'] ? '<p class="ultp-dynamic-content-field-before">' . $dcField['beforeText'] . '</p>' : '';
+				$dcContent[ $i ] .= $dcField['beforeText'] ? '<p class="ultp-dynamic-content-field-before">' . wp_kses( $dcField['beforeText'], ultimate_post()->ultp_allowed_html_tags() ) . '</p>' : '';
 
 				$text = '';
 
@@ -216,9 +287,9 @@ final class DCService {
 					$text = $dcField['fallback'];
 				}
 
-				$dcContent[ $i ] .= '<p class="ultp-dynamic-content-field-dc">' . sanitize_text_field( $text ) . '</p>';
+				$dcContent[ $i ] .= '<p class="ultp-dynamic-content-field-dc">' . esc_html( sanitize_text_field( $text ) ) . '</p>';
 
-				$dcContent[ $i ] .= $dcField['afterText'] ? '<p class="ultp-dynamic-content-field-after">' . $dcField['afterText'] . '</p>' : '';
+				$dcContent[ $i ] .= $dcField['afterText'] ? '<p class="ultp-dynamic-content-field-after">' . wp_kses( $dcField['afterText'], ultimate_post()->ultp_allowed_html_tags() ) . '</p>' : '';
 				$dcContent[ $i ] .= '</div>';
 
 				if ( ! empty( $url ) ) {
@@ -241,36 +312,68 @@ final class DCService {
 	 * @param int    $post_id
 	 * @param string $meta_key
 	 *
+	 * @param bool   $preview Explicit capability-checked editor preview.
+	 *
 	 * @return string
 	 */
-	public static function get_field_value( $post_id, $meta_key ) {
-		if ( empty( $meta_key ) ) {
+	public static function get_field_value( $post_id, $meta_key, $preview = false ) {
+		if ( ! is_string( $meta_key ) || '' === $meta_key ) {
 			return '';
 		}
 
-		if ( empty( $post_id ) ) {
-			if ( in_the_loop() ) {
-				$post_id = get_the_ID();
-			} else {
-				global $post;
-				$post_id = isset( $post->ID ) ? $post->ID : '';
-			}
+		$post = self::get_target_post( $post_id, $preview );
+		if ( ! $post ) {
+			return '';
 		}
+		$post_id = $post->ID;
 
 		if ( self::check_prefix( $meta_key, 'cmeta_' ) ) {
 			if ( empty( $post_id ) ) {
 				return '';
 			}
-			return get_post_meta( $post_id, self::maybe_remove_prefix( $meta_key, 'cmeta_' ), true );
+			$key = self::maybe_remove_prefix( $meta_key, 'cmeta_' );
+			if ( '' === $key || '0' === $key || is_protected_meta( $key, 'post' ) ) {
+				return '';
+			}
+			// The publisher selected this non-protected key. REST exposure and edit-meta callbacks
+			// do not define frontend read access; target visibility is checked above.
+			return self::public_field_value( get_post_meta( $post_id, $key, true ) );
 		}
 
 		// Other field sources are answered by PostX Pro.
 		$value = apply_filters( 'ultp_dc_field_value', null, $meta_key, $post_id );
 		if ( null !== $value ) {
-			return $value;
+			return self::public_field_value( $value );
 		}
 
 		return '';
+	}
+
+	/**
+	 * Keep display values and safe image/repeater arrays; never serialize account internals.
+	 *
+	 * @param mixed $value Field provider value.
+	 * @param int   $depth Nested-array depth.
+	 * @return mixed Display value, preserving supported scalar and array formats.
+	 */
+	private static function public_field_value( $value, $depth = 0 ) {
+		if ( $depth > 32 ) {
+			return '';
+		}
+		if ( $value instanceof \WP_User ) {
+			return (string) $value->display_name;
+		}
+		if ( is_array( $value ) ) {
+			$clean = array();
+			foreach ( $value as $key => $item ) {
+				if ( in_array( $key, array( 'user_pass', 'user_activation_key', 'session_tokens' ), true ) ) {
+					continue;
+				}
+				$clean[ $key ] = self::public_field_value( $item, $depth + 1 );
+			}
+			return $clean;
+		}
+		return is_scalar( $value ) ? $value : '';
 	}
 
 	/**
@@ -281,10 +384,12 @@ final class DCService {
 	 * @param int    $post_id Post ID.
 	 * @param string $key Key value.
 	 *
+	 * @param bool   $preview Explicit capability-checked editor preview.
+	 *
 	 * @return string
 	 */
-	public static function get_post_info( $post_id, $key ) {
-		if ( empty( $key ) ) {
+	public static function get_post_info( $post_id, $key, $preview = false ) {
+		if ( ! is_string( $key ) || '' === $key ) {
 			return '';
 		}
 
@@ -292,14 +397,11 @@ final class DCService {
 
 		$res = '';
 
-		if ( empty( $post_id ) ) {
-			if ( in_the_loop() ) {
-				$post_id = get_the_ID();
-			} else {
-				global $post;
-				$post_id = isset( $post->ID ) ? $post->ID : '';
-			}
+		$post = self::get_target_post( $post_id, $preview );
+		if ( ! $post ) {
+			return '';
 		}
+		$post_id = $post->ID;
 
 		switch ( $key ) {
 			case 'id':
@@ -332,31 +434,21 @@ final class DCService {
 	 * @param int    $post_id
 	 * @param string $key
 	 *
+	 * @param bool   $preview Explicit capability-checked editor preview.
+	 *
 	 * @return string
 	 */
-	public static function get_author_info( $post_id, $key ) {
-		if ( empty( $key ) ) {
+	public static function get_author_info( $post_id, $key, $preview = false ) {
+		if ( ! is_string( $key ) ) {
 			return '';
 		}
-
-		// Removes prefix if present
 		$key = self::maybe_remove_prefix( $key, 'a_' );
-
-		if ( empty( $post_id ) ) {
-			if ( in_the_loop() ) {
-				$post = get_post();
-			} else {
-				global $post;
-			}
-		} else {
-			$post = get_post( $post_id );
-		}
-
-		if ( ! $post instanceof \WP_Post ) {
+		// These are the explicit author fields offered by the editor, including selected email.
+		if ( ! in_array( $key, array( 'display_name', 'first_name', 'last_name', 'nickname', 'description', 'email', 'url' ), true ) ) {
 			return '';
 		}
-
-		return get_the_author_meta( $key, intval( $post->post_author ) );
+		$post = self::get_target_post( $post_id, $preview );
+		return $post ? get_the_author_meta( $key, (int) $post->post_author ) : '';
 	}
 
 	/**
@@ -369,7 +461,7 @@ final class DCService {
 	 * @return string
 	 */
 	public static function get_site_info( $key ) {
-		if ( empty( $key ) ) {
+		if ( ! is_string( $key ) || '' === $key ) {
 			return '';
 		}
 
@@ -403,22 +495,21 @@ final class DCService {
 	 * @param string $post_id Post ID.
 	 * @param string $key Key value.
 	 *
+	 * @param bool   $preview Explicit capability-checked editor preview.
+	 *
 	 * @return string
 	 */
-	public static function get_link( $post_id, $key ) {
+	public static function get_link( $post_id, $key, $preview = false ) {
 		$res = '';
 
-		if ( empty( $post_id ) ) {
-			if ( in_the_loop() ) {
-				$post_id = get_the_ID();
-			} else {
-				global $post;
-				$post_id = isset( $post->ID ) ? $post->ID : '';
-			}
+		$post = self::get_target_post( $post_id, $preview );
+		if ( ! $post ) {
+			return '';
 		}
+		$post_id = $post->ID;
 
 		if ( self::is_field_key( $key ) ) {
-			$res = self::get_field_value( $post_id, $key );
+			$res = self::get_field_value( $post_id, $key, $preview );
 		} else {
 			$author_id = absint( get_post_field( 'post_author', $post_id ) );
 			$key       = self::maybe_remove_prefix( $key, 'link_' );

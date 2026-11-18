@@ -96,12 +96,15 @@ class Builder {
 				$templates[] = 'header.php';
 				remove_all_actions( 'wp_head' );
 				if ( $this->theme_name != 'bricks' ) {  // Conflict with Bricks Builder Backend
+					// Load the theme's header.php and discard what it prints. Closed in `finally`, so nothing can leave the buffer open.
 					ob_start();
-				}
-				locate_template( $templates, true );
-				if ( $this->theme_name != 'bricks' ) { // Conflict with Bricks Builder Backend
-					ob_get_clean();
+					try {
+						locate_template( $templates, true );
+					} finally {
+						ob_end_clean();
+					}
 				} else {
+					locate_template( $templates, true );
 					wp_enqueue_style( 'wp-block-library' );  // Gutenberg CSS issue Bricks Builder frontend
 				}
 			}
@@ -130,11 +133,15 @@ class Builder {
 				$templates[] = 'footer.php';
 				remove_all_actions( 'wp_footer' );
 				if ( $this->theme_name != 'bricks' ) { // Conflict with Bricks Builder Backend
+					// Load the theme's footer.php and discard what it prints. Closed in `finally`, so nothing can leave the buffer open.
 					ob_start();
-				}
-				locate_template( $templates, true );
-				if ( $this->theme_name != 'bricks' ) { // Conflict with Bricks Builder Backend
-					ob_get_clean();
+					try {
+						locate_template( $templates, true );
+					} finally {
+						ob_end_clean();
+					}
+				} else {
+					locate_template( $templates, true );
 				}
 			}
 		}
@@ -197,11 +204,11 @@ class Builder {
 
 	function video_source_callback( $post ) {
 		wp_nonce_field( 'video_meta_box', 'video_meta_box_nonce' );
-		$video   = get_post_meta( $post->ID, '__builder_feature_video', true );
-		$caption = get_post_meta( $post->ID, '__builder_feature_caption', true );
+		$video   = get_post_meta( $post->ID, '_ultp_builder_feature_video', true );
+		$caption = get_post_meta( $post->ID, '_ultp_builder_feature_caption', true );
 		?>
 		<div class="ultp-meta-video">
-			<?php if ( current_user_can( 'administrator' ) ) { ?>
+			<?php if ( current_user_can( 'manage_options' ) ) { ?>
 				<a class="ultp-dash-builder-btn" target="_blank" href="<?php echo esc_url( admin_url( 'admin.php?page=ultp-settings#builder' ) ); ?>"><?php echo esc_html__( 'Enable PostX Single Builder', 'ultimate-post' ); ?> </a>
 			<?php } ?>
 			<label><?php echo esc_html__( 'Featured Video', 'ultimate-post' ); ?></label>
@@ -217,6 +224,24 @@ class Builder {
 	}
 
 
+	/**
+	 * A nonce proves the form, not the right to edit this post. Builder meta is written only for the post type
+	 * its box belongs to, on a real save (not an autosave or revision), and only when the user can edit that post.
+	 *
+	 * @param int    $post_id   The post being saved.
+	 * @param string $post_type The post type this meta box is registered for.
+	 * @return bool
+	 */
+	private function can_save_meta_box( $post_id, $post_type ) {
+		if ( get_post_type( $post_id ) !== $post_type ) {
+			return false;
+		}
+		if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
+			return false;
+		}
+		return current_user_can( 'edit_post', $post_id );
+	}
+
 	function metabox_save_video_data( $post_id ) {
 		if ( ! isset( $_POST['video_meta_box_nonce'] ) ) {
 			return;
@@ -224,31 +249,35 @@ class Builder {
 		if ( ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['video_meta_box_nonce'] ) ), 'video_meta_box' ) ) {
 			return;
 		}
+		if ( ! $this->can_save_meta_box( $post_id, 'post' ) ) {
+			return;
+		}
 		if ( ! isset( $_POST['feature-video'] ) ) {
 			return;
 		}
-		update_post_meta( $post_id, '__builder_feature_video', sanitize_text_field( $_POST['feature-video'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
+		update_post_meta( $post_id, '_ultp_builder_feature_video', wp_slash( sanitize_text_field( wp_unslash( $_POST['feature-video'] ) ) ) ); // update_post_meta() unslashes again, so the value goes back slashed.
 		if ( ! isset( $_POST['video-caption'] ) ) {
 			return;
 		}
-		update_post_meta( $post_id, '__builder_feature_caption', sanitize_text_field( $_POST['video-caption'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
+		update_post_meta( $post_id, '_ultp_builder_feature_caption', wp_slash( sanitize_text_field( wp_unslash( $_POST['video-caption'] ) ) ) ); // update_post_meta() unslashes again, so the value goes back slashed.
 	}
 
 
 	function container_width_callback( $post ) {
 		wp_nonce_field( 'container_meta_box', 'container_meta_box_nonce' );
-		$width   = get_post_meta( $post->ID, '__container_width', true );
-		$sidebar = get_post_meta( $post->ID, '__builder_sidebar', true );
-		$widget  = get_post_meta( $post->ID, '__builder_widget_area', true );
-		$p_type  = get_post_meta( $post->ID, '__ultp_builder_type', true );
+		$width   = get_post_meta( $post->ID, '_ultp_container_width', true );
+		$sidebar = get_post_meta( $post->ID, '_ultp_builder_sidebar', true );
+		$widget  = get_post_meta( $post->ID, '_ultp_builder_widget_area', true );
+		$p_type  = get_post_meta( $post->ID, '_ultp_builder_type', true );
 		$p_type  = $p_type ? $p_type : 'archive';
 
-		$widget_area = wp_get_sidebars_widgets(); // phpcs:ignore Generic.PHP.ForbiddenFunctions.Found -- Needs every sidebar ID incl. the sidebars_widgets filter; no public equivalent.
-		if ( isset( $widget_area['wp_inactive_widgets'] ) ) {
-			unset( $widget_area['wp_inactive_widgets'] );
-		}
-		if ( isset( $widget_area['array_version'] ) ) {
-			unset( $widget_area['array_version'] );
+		// The registered sidebars: the ones dynamic_sidebar() can print. Core also lists a block theme's
+		// earlier classic sidebars here (_wp_block_theme_register_classic_sidebars()).
+		global $wp_registered_sidebars;
+		$widget_area = is_array( $wp_registered_sidebars ) ? $wp_registered_sidebars : array();
+		// Keep a sidebar saved earlier selectable even if it is no longer registered, so saving does not clear it.
+		if ( is_string( $widget ) && '' !== $widget && ! isset( $widget_area[ $widget ] ) ) {
+			$widget_area[ $widget ] = array();
 		}
 		?>
 
@@ -280,12 +309,12 @@ class Builder {
 	function metabox_save_data( $post_id ) {
 		// For Featured Video
 		if ( isset( $_POST['video_meta_box_nonce'] ) ) {
-			if ( wp_verify_nonce( sanitize_key( wp_unslash( $_POST['video_meta_box_nonce'] ) ), 'video_meta_box' ) ) {
+			if ( wp_verify_nonce( sanitize_key( wp_unslash( $_POST['video_meta_box_nonce'] ) ), 'video_meta_box' ) && $this->can_save_meta_box( $post_id, 'post' ) ) {
 				if ( isset( $_POST['feature-video'] ) ) {
-					update_post_meta( $post_id, '__builder_feature_video', sanitize_text_field( $_POST['feature-video'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
+					update_post_meta( $post_id, '_ultp_builder_feature_video', wp_slash( sanitize_text_field( wp_unslash( $_POST['feature-video'] ) ) ) ); // update_post_meta() unslashes again, so the value goes back slashed.
 				}
-				if ( ! isset( $_POST['video-caption'] ) ) {
-					update_post_meta( $post_id, '__builder_feature_caption', sanitize_text_field( $_POST['video-caption'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
+				if ( isset( $_POST['video-caption'] ) ) {
+					update_post_meta( $post_id, '_ultp_builder_feature_caption', wp_slash( sanitize_text_field( wp_unslash( $_POST['video-caption'] ) ) ) ); // update_post_meta() unslashes again, so the value goes back slashed.
 				}
 			}
 		}
@@ -297,14 +326,17 @@ class Builder {
 		if ( ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['container_meta_box_nonce'] ) ), 'container_meta_box' ) ) {
 			return;
 		}
+		if ( ! $this->can_save_meta_box( $post_id, 'ultp_builder' ) ) {
+			return;
+		}
 		if ( isset( $_POST['container-width'] ) ) {
-			update_post_meta( $post_id, '__container_width', sanitize_text_field( $_POST['container-width'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
+			update_post_meta( $post_id, '_ultp_container_width', wp_slash( sanitize_text_field( wp_unslash( $_POST['container-width'] ) ) ) ); // update_post_meta() unslashes again, so the value goes back slashed.
 		}
 		if ( isset( $_POST['builder-sidebar'] ) ) {
-			update_post_meta( $post_id, '__builder_sidebar', sanitize_text_field( $_POST['builder-sidebar'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
+			update_post_meta( $post_id, '_ultp_builder_sidebar', wp_slash( sanitize_text_field( wp_unslash( $_POST['builder-sidebar'] ) ) ) ); // update_post_meta() unslashes again, so the value goes back slashed.
 		}
 		if ( isset( $_POST['builder-widget-area'] ) ) {
-			update_post_meta( $post_id, '__builder_widget_area', sanitize_text_field( $_POST['builder-widget-area'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- update_post_meta() unslashes; unslashing here would strip backslashes twice.
+			update_post_meta( $post_id, '_ultp_builder_widget_area', wp_slash( sanitize_text_field( wp_unslash( $_POST['builder-widget-area'] ) ) ) ); // update_post_meta() unslashes again, so the value goes back slashed.
 		}
 
 		// Save Conditions Data
@@ -342,7 +374,16 @@ class Builder {
 					case 'author':
 					case 'archive':
 					case 'category':
-						$extra = $p_type != 'archive' ? '/' . $p_type : '';
+						// Only the archive subtypes this builder saves. The suffix comes from this map, never from the request.
+						$archive_suffixes = array(
+							'archive'  => '',
+							'author'   => '/author',
+							'category' => '/category',
+							'date'     => '/date',
+							'post_tag' => '/post_tag',
+							'search'   => '/search',
+						);
+						$extra            = $archive_suffixes[ $p_type ];
 						if ( isset( $settings['archive'] ) ) {
 							if ( ! isset( $settings['archive'][ $post_id ] ) ) {
 								$up_meta                         = 'archive';
@@ -350,7 +391,7 @@ class Builder {
 							}
 						} else {
 							$up_meta                         = 'archive';
-							$settings['archive'][ $post_id ] = array( 'include/archive' + $extra );
+							$settings['archive'][ $post_id ] = array( 'include/archive' . $extra );
 						}
 						break;
 					case 'header':
@@ -389,7 +430,7 @@ class Builder {
 						break;
 				}
 				if ( $up_meta ) {
-					update_post_meta( $post_id, '__ultp_builder_type', $up_meta );
+					update_post_meta( $post_id, '_ultp_builder_type', $up_meta );
 				}
 				update_option( 'ultp_builder_conditions', $settings );
 			}

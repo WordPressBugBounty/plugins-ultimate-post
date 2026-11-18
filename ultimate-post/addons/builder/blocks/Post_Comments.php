@@ -61,7 +61,6 @@ class Post_Comments {
 			'hideDesktop'      => false,
 			'hideTablet'       => false,
 			'hideMobile'       => false,
-			'advanceCss'       => '',
 		);
 	}
 
@@ -81,13 +80,16 @@ class Post_Comments {
 		$block_name     = 'post-comments';
 		$wrapper_before = $wrapper_after = $wrapper_content = '';
 
-		if ( is_single() ) {
+		// Like core's comments_template(), nothing is listed for a password-protected post until the password is entered.
+		if ( is_single() && ! post_password_required() ) {
 
 			$attr['className'] = isset( $attr['className'] ) && $attr['className'] ? preg_replace( '/[^A-Za-z0-9_ -]/', '', $attr['className'] ) : '';
 			$attr['align']     = isset( $attr['align'] ) && $attr['align'] ? preg_replace( '/[^A-Za-z0-9_ -]/', '', $attr['align'] ) : '';
 			$attr['advanceId'] = isset( $attr['advanceId'] ) ? sanitize_html_class( $attr['advanceId'] ) : '';
 			$attr['blockId']   = isset( $attr['blockId'] ) ? sanitize_html_class( $attr['blockId'] ) : '';
 			$attr['layout']    = sanitize_html_class( $attr['layout'] );
+			// Layout class of the form. The default can be changed through ultp_post_comments_layout_class.
+			$layout_class = sanitize_html_class( apply_filters( 'ultp_post_comments_layout_class', 'layout1', $attr ) );
 
 			$allowed_html_tags        = ultimate_post()->ultp_allowed_html_tags();
 			$attr['nameInputText']    = wp_kses( $attr['nameInputText'], $allowed_html_tags );
@@ -108,7 +110,7 @@ class Post_Comments {
 			$email_label   = $attr['inputLabel'] ? '<label for="email">' . $attr['emailInputText'] . ( $req ? '<span class="required">*</span>' : '' ) . '</label>' : '';
 			$url_label     = $attr['inputLabel'] ? '<label for="url">' . $attr['webInputText'] . '</label>' : '';
 			$comment_label = $attr['inputLabel'] ? '<label for="comment">' . $attr['cmntInputText'] . '</label>' : '';
-			$cookies_label = $attr['cookiesEnable'] ? '<p class="comment-form-cookies-consent"><input id="wp-comment-cookies-consent" name="wp-comment-cookies-consent" type="checkbox" value="yes"/><label for="wp-comment-cookies-consent">' . $attr['cookiesText'] . '</label></p>' : '';
+			$cookies_label = $attr['cookiesEnable'] ? '<p class="comment-form-cookies-consent"><input id="wp-comment-cookies-consent" name="wp-comment-cookies-consent" type="checkbox" value="yes"/><label for="wp-comment-cookies-consent">' . wp_kses( $attr['cookiesText'], $allowed_html_tags ) . '</label></p>' : '';
 
 			$comments_args = array(
 				'comment_field'       => '<div class="comment-form-comment ultp-comment-input ultp-field-control">' . wp_kses_post( $comment_label ) . '<textarea class="hi" id="comment" name="comment" placeholder="' . esc_attr( $attr['inputPlaceHolder'] ) . '" cols="45" rows="8" aria-required="true"></textarea></div>',
@@ -123,9 +125,9 @@ class Post_Comments {
 				),
 				'class_submit'        => 'ultp-comment-btn',
 				'comment_notes_after' => '',
-				'submit_button'       => '<input name="%1$s" type="submit" id="%2$s" class="%3$s ultp-comment-btn" value="' . $attr['subBtnText'] . '" />',
+				'submit_button'       => '<input name="%1$s" type="submit" id="%2$s" class="%3$s ultp-comment-btn" value="' . esc_attr( $attr['subBtnText'] ) . '" />',
 				'class_form'          => 'ultp-comment-form',
-				'title_reply'         => ( $attr['replyHeading'] ? '<div class="crunchify-text ultp-comments-title">' . $attr['leaveRepText'] . '</div>' : '' ),
+				'title_reply'         => ( $attr['replyHeading'] ? '<div class="crunchify-text ultp-comments-title">' . wp_kses( $attr['leaveRepText'], $allowed_html_tags ) . '</div>' : '' ),
 				'class_container'     => 'ultp-comment-form-container',
 			);
 
@@ -143,36 +145,47 @@ class Post_Comments {
 				'reverse_children'  => '',
 				'format'            => current_theme_supports( 'html5', 'comment-list' ) ? 'html5' : 'xhtml',
 				'short_ping'        => false,
-				'echo'              => true,
+				'echo'              => false, // Returned, so no output buffer is needed.
 			);
 
-			$moderation_enable = get_option( 'comment_moderation' );
-			$comments          = get_comments(
-				array(
-					'post_id' => get_the_ID(),
-					'status'  => $moderation_enable ? 'approve' : 'all',
-				)
+			// Approved comments for everyone. A held comment is listed only for the person who wrote it, as core's comments_template() does.
+			$comment_args = array(
+				'post_id' => get_the_ID(),
+				'status'  => 'approve',
 			);
+			if ( is_user_logged_in() ) {
+				$comment_args['include_unapproved'] = array( get_current_user_id() );
+			} else {
+				$unapproved_email = wp_get_unapproved_comment_author_email();
+				if ( $unapproved_email ) {
+					$comment_args['include_unapproved'] = array( $unapproved_email );
+				}
+			}
+			$comments = get_comments( $comment_args );
 
-			$wrapper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '">';
-				$wrapper_before .= '<div class="ultp-block-wrapper  ultp-block-comments ultp-comments-' . $attr['layout'] . '">';
+			$wrapper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . esc_attr( $attr['advanceId'] ) . '" ' : '' ) . ' class="wp-block-ultimate-post-' . esc_attr( $block_name ) . ' ultp-block-' . esc_attr( $attr['blockId'] ) . ( $attr['className'] ? ' ' . esc_attr( $attr['className'] ) : '' ) . '' . ( $attr['align'] ? ' align' . esc_attr( $attr['align'] ) : '' ) . '">';
+				$wrapper_before .= '<div class="ultp-block-wrapper  ultp-block-comments ultp-comments-' . esc_attr( $layout_class ) . '">';
 			if ( $attr['commentCount'] && count( $comments ) > 0 ) {
 				$wrapper_content     .= '<div class="ultp-comment-reply-heading">';
-					$wrapper_content .= count( $comments ) . ' ' . $attr['replyText'];
+					$wrapper_content .= esc_html( count( $comments ) ) . ' ' . wp_kses( $attr['replyText'], $allowed_html_tags );
 				$wrapper_content     .= '</div>';
 			}
-					$wrapper_content .= '<div class="ultp-builder-comment-reply">';
-						ob_start();
-						wp_list_comments( $arg, $comments );
-						$wrapper_content .= ob_get_clean();
-					$wrapper_content     .= '</div>';
-					$wrapper_content     .= '<div class="ultp-builder-comments">';
-						ob_start();
-						comment_form( $comments_args );
-						$wrapper_content .= ob_get_clean();
-					$wrapper_content     .= '</div>';
-				$wrapper_after           .= '</div>';
-			$wrapper_after               .= '</div>';
+			$wrapper_content .= '<div class="ultp-builder-comment-reply">';
+			$wrapper_content .= wp_kses( (string) wp_list_comments( $arg, $comments ), ultimate_post()->rendered_content_allowed_html() );
+			$wrapper_content .= '</div>';
+			$wrapper_content .= '<div class="ultp-builder-comments">';
+
+			// comment_form() can only echo. The buffer is closed in `finally`, so nothing can leave it open.
+			ob_start();
+			try {
+				comment_form( $comments_args );
+			} finally {
+				$wrapper_content .= wp_kses( ob_get_clean(), ultimate_post()->rendered_content_allowed_html() );
+			}
+
+			$wrapper_content .= '</div>';
+			$wrapper_after   .= '</div>';
+			$wrapper_after   .= '</div>';
 		}
 
 		return $wrapper_before . $wrapper_content . $wrapper_after;

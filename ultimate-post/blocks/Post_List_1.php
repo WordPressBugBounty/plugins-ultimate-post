@@ -14,7 +14,6 @@ class Post_List_1 {
 		return array(
 			'blockId'             => '',
 			'previewImg'          => '',
-			'infiniteScroll'      => false,
 
 			/*
 			============================
@@ -59,12 +58,7 @@ class Post_List_1 {
 			'queryExclude'        => '[]',
 			'queryAuthor'         => '[]',
 			'queryOffset'         => '0',
-			'queryExcludeTerm'    => '[]',
-			'queryExcludeAuthor'  => '[]',
 			'querySticky'         => true,
-			'queryUnique'         => '',
-			'queryPosts'          => '[]',
-			'queryCustomPosts'    => '[]',
 
 			/*
 			============================
@@ -108,9 +102,7 @@ class Post_List_1 {
 			'taxonomy'            => 'category',
 			'catStyle'            => 'classic',
 			'catPosition'         => 'aboveTitle',
-			'customCatColor'      => false,
 			'seperatorLink'       => admin_url( 'edit-tags.php?taxonomy=category' ),
-			'onlyCatColor'        => false,
 
 			/*
 			============================
@@ -123,8 +115,6 @@ class Post_List_1 {
 			'imgOverlayType'      => 'default',
 			'fallbackEnable'      => true,
 			'fallbackImg'         => '',
-			'imgSrcset'           => false,
-			'imgLazy'             => false,
 
 			/*
 			============================
@@ -139,8 +129,6 @@ class Post_List_1 {
 				'unit' => 'px',
 			),
 			// by default should be off
-			'enablePopup'         => false,
-			'enablePopupTitle'    => true,
 
 			/*
 			============================
@@ -173,7 +161,6 @@ class Post_List_1 {
 			'fullExcerptLg'       => false,
 			'excerptLimit'        => 25,
 			'excerptLimitLg'      => '70',
-			'excerptLimitLg'      => '70',
 
 			/*
 			============================
@@ -197,7 +184,6 @@ class Post_List_1 {
 			'hideExtraLarge'      => false,
 			'hideTablet'          => false,
 			'hideMobile'          => false,
-			'advanceCss'          => '',
 			'currentPostId'       => '',
 
 			// --------------------------------
@@ -235,18 +221,16 @@ class Post_List_1 {
 	}
 
 	public function content( $attr, $noAjax ) {
-		$attr                = wp_parse_args( $attr, $this->get_attributes() );
-		$attr['queryUnique'] = isset( $attr['queryUnique'] ) ? $attr['queryUnique'] : '';
-		global $ultp_unique_ID;
+		$attr = wp_parse_args( $attr, $this->get_attributes() );
 
 		if ( ! $noAjax ) {
 			$paged         = is_front_page() ? get_query_var( 'page' ) : get_query_var( 'paged' );
 			$attr['paged'] = $paged ? $paged : 1;
 		}
-		if ( $attr['queryUnique'] && isset( $attr['savedQueryUnique'] ) ) {
-			$ultp_unique_ID = $attr['savedQueryUnique'];
-		}
+		// Lets an add-on prepare for the query of this block.
+		do_action( 'ultp_block_before_query', $attr );
 		$block_name          = 'post-list-1';
+		$img_opts            = ultimate_post()->image_options( $attr, $block_name );
 		$wraper_before       = $wraper_after = $post_loop = '';
 		$attr['queryNumber'] = ultimate_post()->get_post_number( 6, $attr['queryNumber'], $attr['queryNumPosts'] );
 		$recent_posts        = new \WP_Query( ultimate_post()->get_query( $attr ) );
@@ -259,11 +243,8 @@ class Post_List_1 {
 		if ( is_single() ) {
 			$curr_post_id = get_the_ID();
 		}
-		// Loadmore and Unique content
-		if ( $attr['queryUnique'] && isset( $attr['loadMoreQueryUnique'] ) && $attr['paginationShow'] && ( $attr['paginationType'] == 'loadMore' ) ) {
-			$ultp_unique_ID            = $attr['loadMoreQueryUnique'];
-			$current_unique_posts = $attr['ultp_current_unique_posts'];
-		}
+		// Lets an add-on act once the query of this block has run.
+		do_action( 'ultp_block_after_query', $attr );
 
 		$attr['className']      = isset( $attr['className'] ) && $attr['className'] ? preg_replace( '/[^A-Za-z0-9_ -]/', '', $attr['className'] ) : '';
 		$attr['align']          = isset( $attr['align'] ) && $attr['align'] ? preg_replace( '/[^A-Za-z0-9_ -]/', '', $attr['align'] ) : '';
@@ -277,38 +258,36 @@ class Post_List_1 {
 		$attr['readMoreText']   = wp_kses( $attr['readMoreText'], ultimate_post()->ultp_allowed_html_tags() );
 		$attr['gridStyle']      = sanitize_html_class( $attr['gridStyle'] );
 
-		$iscroll   = '';
-		$wrap_data = '';
-		if ( $attr['infiniteScroll'] ) {
-			$iscroll = 'ultp-iscroll-active';
-			include ULTP_PATH . 'blocks/template/infinite_scroll_data.php';
-		}
+		// Wrapper class and data attributes an add-on may supply (empty by default). See classes/Extended_Compat.php.
+		$infinite  = \ULTP\Extended_Compat::infinite_scroll( $attr, isset( $paged ) ? $paged : null, $pageNum, $block_name, isset( $curr_post_id ) ? $curr_post_id : '' );
+		$iscroll   = $infinite['class'];
+		$wrap_data = $infinite['wrap_data'];
 
 		if ( $recent_posts->have_posts() ) {
 			// Pagination Block Html
 			include ULTP_PATH . 'blocks/template/pagination_block.php';
-			$wraper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="ultp-post-grid-block wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '' . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . ' ' . $iscroll . ' ">';
-				$wraper_before .= '<div class="ultp-block-wrapper" ' . $wrap_data . '>';
+			$wraper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . esc_attr( $attr['advanceId'] ) . '" ' : '' ) . ' class="ultp-post-grid-block wp-block-ultimate-post-' . esc_attr( $block_name ) . ' ultp-block-' . esc_attr( $attr['blockId'] ) . '' . ( $attr['align'] ? ' align' . esc_attr( $attr['align'] ) : '' ) . '' . ( $attr['className'] ? ' ' . esc_attr( $attr['className'] ) : '' ) . ' ' . esc_attr( $iscroll ) . ' ">';
+				$wraper_before .= wp_kses( '<div class="ultp-block-wrapper" ' . $wrap_data . '>', ultimate_post()->rendered_content_allowed_html() );
 
 					// Loading
-					$wraper_before .= ultimate_post()->postx_loading();
-			if ( $attr['headingShow'] || $attr['filterShow'] || $attr['paginationShow'] ) {
-				$wraper_before     .= '<div class="ultp-heading-filter">';
+					$wraper_before .= wp_kses( ultimate_post()->postx_loading(), ultimate_post()->rendered_content_allowed_html() );
+			if ( $attr['headingShow'] || ultimate_post()->inline_filter_on( $attr ) || ultimate_post()->inline_pagination_on( $attr ) ) {
+				$wraper_before     .= '<div class="ultp-heading-filter' . ( empty( $attr['headingShow'] ) ? ' ultp-no-heading' : '' ) . '">';
 					$wraper_before .= '<div class="ultp-heading-filter-in">';
 
 						// Heading
 						include ULTP_PATH . 'blocks/template/heading.php';
 
-				if ( $attr['filterShow'] || $attr['paginationShow'] ) {
+				if ( ultimate_post()->inline_filter_on( $attr ) || ultimate_post()->inline_pagination_on( $attr ) ) {
 					$wraper_before .= '<div class="ultp-filter-navigation">';
 
 						// Filter
-					if ( $attr['filterShow'] && $attr['queryType'] != 'posts' && $attr['queryType'] != 'customPosts' ) {
+					if ( ultimate_post()->inline_filter_on( $attr ) ) {
 						include ULTP_PATH . 'blocks/template/filter.php';
 					}
 
 						// Navigation
-					if ( $attr['paginationShow'] && ( $attr['paginationType'] == 'navigation' ) && ( $attr['navPosition'] == 'topRight' ) ) {
+					if ( ultimate_post()->inline_navigation_on( $attr, true ) ) {
 									include ULTP_PATH . 'blocks/template/navigation-before.php';
 					}
 									$wraper_before .= '</div>';
@@ -318,8 +297,8 @@ class Post_List_1 {
 						$wraper_before .= '</div>';
 			}
 
-					$wraper_before .= '<div class="ultp-block-items-wrap ultp-block-row ultp-block-column-' . sanitize_html_class( json_decode( wp_json_encode( $attr['columns'] ), true )['lg'] ) . ' ultp-pl1a-' . $attr['gridStyle'] . ' ultp-post-list1-' . $attr['layout'] . '">';
-						$idx        = ( $attr['paginationShow'] && ( $attr['paginationType'] == 'loadMore' ) ) ? ( $noAjax ? 1 : 0 ) : 0;
+					$wraper_before .= '<div class="ultp-block-items-wrap ultp-block-row ultp-block-column-' . esc_attr( sanitize_html_class( json_decode( wp_json_encode( $attr['columns'] ), true )['lg'] ) ) . ' ' . esc_attr( sanitize_html_class( apply_filters( 'ultp_post_list_1_style_class', 'ultp-pl1a-style1', $attr ) ) ) . ' ' . esc_attr( sanitize_html_class( apply_filters( 'ultp_post_list_1_layout_class', 'ultp-post-list1-layout1', $attr ) ) ) . '">';
+						$idx        = ( ultimate_post()->inline_pagination_on( $attr, 'loadMore' ) ) ? ( $noAjax ? 1 : 0 ) : 0;
 						$index      = 0;
 			while ( $recent_posts->have_posts() ) :
 				$recent_posts->the_post();
@@ -334,161 +313,165 @@ class Post_List_1 {
 
 				include ULTP_PATH . 'blocks/template/category.php';
 
-				if ( $attr['queryUnique'] ) {
-					$ultp_unique_ID[ $attr['queryUnique'] ][] = $post_id;
-					$current_unique_posts[]              = $post_id;
-				}
+				// Lets an add-on note each post the block shows.
+				do_action( 'ultp_block_loop_post', $post_id, $attr );
 
-				$post_loop         .= '<' . $attr['contentTag'] . ' class="ultp-block-item post-id-' . $post_id . '">';
+				$post_loop         .= '<' . tag_escape( $attr['contentTag'] ) . ' class="ultp-block-item post-id-' . esc_attr( $post_id ) . '">';
 					$post_loop     .= '<div class="ultp-block-content-wrap">';
 						$post_loop .= '<div class="ultp-block-entry-content">';
 
-						$post_loop .= $dcContent[9];
+						$post_loop .= wp_kses( $dcContent[9], ultimate_post()->rendered_content_allowed_html() );
 
-				if ( ( $attr['gridStyle'] == 'style3' && $idx == 0 ) && ( ( $post_thumb_id || $attr['fallbackEnable'] ) && $attr['showImage'] ) ) {
-						$post_loop     .= '<div class="ultp-block-image ultp-block-image-' . $attr['imgAnimation'] . ( $attr['imgOverlay'] ? ' ultp-block-image-overlay ultp-block-image-' . $attr['imgOverlayType'] . ' ultp-block-image-' . $attr['imgOverlayType'] . $idx : '' ) . '">';
-							$post_loop .= '<a href="' . $titlelink . '" ' . ( $attr['openInTab'] ? 'target="_blank"' : '' ) . '>';
-							// Post Image Id
-							$block_img_id = $post_thumb_id ? $post_thumb_id : ( $attr['fallbackEnable'] && isset( $attr['fallbackImg']['id'] ) ? $attr['fallbackImg']['id'] : '' );
-
-							// Post Image
-					if ( $post_thumb_id || ( $attr['fallbackEnable'] && $block_img_id ) ) {
-						$post_loop .= ultimate_post()->get_image( $block_img_id, $attr['imgCrop'], '', $title, $attr['imgSrcset'], $attr['imgLazy'] );
-					} else {
-						$video      = ultimate_post()->get_youtube_id( $post_video );
-						$post_loop .= '<img  src="' . ( $video ? 'https://img.youtube.com/vi/' . $video . '/0.jpg' : $dummy_url ) . '" alt="dummy-img" />';
-					}
-
-					if ( $post_video && ! ( $attr['enablePopup'] ) ) {
-						$post_loop .= '<div class="ultp-block-video-content" style="display: none;" >';
-						$post_loop .= ultimate_post()->get_embeded_video( $post_video, false, true, false, true, true, false, true, array() );
-						$post_loop .= '</div>';
-					}
-							$post_loop .= '</a>';
-					if ( ( $attr['catPosition'] != 'aboveTitle' ) && $attr['catShow'] ) {
-						$post_loop .= '<div class="ultp-category-img-grid">' . $category . '</div>';
-					}
-						$post_loop .= '</div>';
+				// Context the image slots of the post share.
+				$image_ctx = array(
+					'idx'           => $idx,
+					'post_id'       => $post_id,
+					'post_thumb_id' => $post_thumb_id,
+					'titlelink'     => $titlelink,
+					'title'         => $title,
+					'post_video'    => $post_video,
+					'dummy_url'     => $dummy_url,
+					'category'      => $category,
+					'img_opts'      => $img_opts,
+				);
+				// Image above the heading of the first post (empty by default). It can be changed through ultp_post_list_1_top_image_html.
+				if ( $idx == 0 && ( $post_thumb_id || $attr['fallbackEnable'] ) && $attr['showImage'] ) {
+					$post_loop .= wp_kses(
+						ultimate_post()->esc_filtered_markup(
+							apply_filters( 'ultp_post_list_1_top_image_html', '', $attr, $image_ctx ),
+							''
+						),
+						ultimate_post()->rendered_content_allowed_html()
+					);
 				}
 
 						$post_loop .= '<div class="ultp-block-entry-heading">';
 
-							$post_loop .= $dcContent[8];
+							$post_loop .= wp_kses( $dcContent[8], ultimate_post()->rendered_content_allowed_html() );
 
 							// Category
 				if ( ( $attr['catPosition'] == 'aboveTitle' ) && $attr['catShow'] ) {
-					$post_loop .= $category;
+					$post_loop .= wp_kses( $category, ultimate_post()->rendered_content_allowed_html() );
 				}
 
-							$post_loop .= $dcContent[7];
+							$post_loop .= wp_kses( $dcContent[7], ultimate_post()->rendered_content_allowed_html() );
 
 							// Title
 				if ( $title && $attr['titleShow'] && $attr['titlePosition'] == 1 ) {
 					include ULTP_PATH . 'blocks/template/title.php';
 				}
 
-							$post_loop .= $dcContent[6];
+							$post_loop .= wp_kses( $dcContent[6], ultimate_post()->rendered_content_allowed_html() );
 
 							// Meta
 				if ( $attr['metaPosition'] == 'top' ) {
 					include ULTP_PATH . 'blocks/template/meta.php';
 				}
 
-							$post_loop .= $dcContent[5];
+							$post_loop .= wp_kses( $dcContent[5], ultimate_post()->rendered_content_allowed_html() );
 
 							// Title
 				if ( $title && $attr['titleShow'] && $attr['titlePosition'] == 0 ) {
 					include ULTP_PATH . 'blocks/template/title.php';
 				}
 
-							$post_loop .= $dcContent[4];
+							$post_loop .= wp_kses( $dcContent[4], ultimate_post()->rendered_content_allowed_html() );
 
 						$post_loop .= '</div>';
 
-				if ( ( $attr['gridStyle'] != 'style3' || $attr['gridStyle'] == 'style3' && $idx != 0 ) && ( ( $post_thumb_id || $attr['fallbackEnable'] ) && $attr['showImage'] ) ) {
-								$post_loop     .= '<div class="ultp-block-image ultp-block-image-' . $attr['imgAnimation'] . ( $attr['imgOverlay'] ? ' ultp-block-image-overlay ultp-block-image-' . $attr['imgOverlayType'] . ' ultp-block-image-' . $attr['imgOverlayType'] . $idx : '' ) . '">';
-									$post_loop .= '<a href="' . $titlelink . '" ' . ( $attr['openInTab'] ? 'target="_blank"' : '' ) . '>';
-									// Post Image Size
-									$imgSize = $attr['gridStyle'] != 'style1' ? ( $idx == 0 ? $attr['imgCrop'] : $attr['imgCropSmall'] ) : $attr['imgCrop'];
-									// Post Image Id
-									$block_img_id = $post_thumb_id ? $post_thumb_id : ( $attr['fallbackEnable'] && isset( $attr['fallbackImg']['id'] ) ? $attr['fallbackImg']['id'] : '' );
-									// Post Image
+				// The image block of the post. The default block can be changed through ultp_post_list_1_image_html.
+				if ( ( $post_thumb_id || $attr['fallbackEnable'] ) && $attr['showImage'] ) {
+					$post_before_image = $post_loop;
+					$post_loop         = '';
+					$post_loop        .= '<div class="ultp-block-image ultp-block-image-' . esc_attr( $attr['imgAnimation'] ) . ( $attr['imgOverlay'] ? ' ultp-block-image-overlay ultp-block-image-' . esc_attr( $attr['imgOverlayType'] ) . ' ultp-block-image-' . esc_attr( $attr['imgOverlayType'] ) . esc_attr( $idx ) : '' ) . '">';
+					$post_loop        .= '<a href="' . esc_url( $titlelink ) . '" ' . ( $attr['openInTab'] ? 'target="_blank"' : '' ) . '>';
+					// Post Image Size. The large crop by default; the size of a post can be changed through ultp_post_list_1_image_size.
+					$imgSize = apply_filters( 'ultp_post_list_1_image_size', $attr['imgCrop'], $attr, $idx );
+					// Post Image Id
+					$block_img_id = $post_thumb_id ? $post_thumb_id : ( $attr['fallbackEnable'] && isset( $attr['fallbackImg']['id'] ) ? $attr['fallbackImg']['id'] : '' );
+					// Post Image
 					if ( $post_thumb_id || ( $attr['fallbackEnable'] && $block_img_id ) ) {
-								$post_loop .= ultimate_post()->get_image( $block_img_id, $imgSize, '', $title, $attr['imgSrcset'], $attr['imgLazy'] );
+						$post_loop .= wp_kses( ultimate_post()->get_image( $block_img_id, $imgSize, '', $title, $img_opts['srcset'], $img_opts['lazy'] ), ultimate_post()->rendered_content_allowed_html() );
 					} else {
-								$video          = ultimate_post()->get_youtube_id( $post_video );
-									$post_loop .= '<img  src="' . ( $video ? 'https://img.youtube.com/vi/' . $video . '/0.jpg' : $dummy_url ) . '" alt="dummy-img" />';
+						$video      = ultimate_post()->get_youtube_id( $post_video );
+						$post_loop .= '<img  src="' . esc_url( $video ? 'https://img.youtube.com/vi/' . $video . '/0.jpg' : $dummy_url ) . '" alt="dummy-img" />';
 					}
-									$post_loop .= '</a>';
-					if ( $post_video && ! ( $attr['enablePopup'] ) ) {
-						$post_loop .= '<div class="ultp-block-video-content" style="display: none;" >';
-						$post_loop .= ultimate_post()->get_embeded_video( $post_video, false, true, false, true, true, false, true, array() );
-						$post_loop .= '</div>';
+					$post_loop .= '</a>';
+					if ( $post_video ) {
+						$inline_default = '<div class="ultp-block-video-content" style="display: none;" >' . wp_kses( ultimate_post()->get_embeded_video( $post_video, false, true, false, true, true, false, true, array() ), ultimate_post()->rendered_content_allowed_html() ) . '</div>';
+						// The inline player of the post. The default is the player PostX draws; it can be changed through ultp_post_list_1_video_inline_html.
+						$post_loop .= ultimate_post()->esc_filtered_markup(
+							apply_filters( 'ultp_post_list_1_video_inline_html', $inline_default, $attr, array( 'post_id' => $post_id, 'post_video' => $post_video, 'idx' => $idx ) ),
+							$inline_default
+						);
 					}
 					if ( $post_video ) {
 						include ULTP_PATH . 'blocks/template/video_icon.php';
 					}
 					if ( ( $attr['catPosition'] != 'aboveTitle' ) && $attr['catShow'] ) {
-						$post_loop .= '<div class="ultp-category-img-grid">' . $category . '</div>';
+						$post_loop .= '<div class="ultp-category-img-grid">' . wp_kses( $category, ultimate_post()->rendered_content_allowed_html() ) . '</div>';
 					}
-								$post_loop .= '</div>';
+					$post_loop .= '</div>';
+					$image_block = $post_loop;
+					$post_loop   = $post_before_image;
+					$post_loop  .= ultimate_post()->esc_filtered_markup( apply_filters( 'ultp_post_list_1_image_html', $image_block, $attr, $image_ctx ), $image_block );
 				}
 
 										$post_loop .= '</div>';
 										$post_loop .= '<div class="ultp-block-content">';
 
-										$post_loop .= $dcContent[3];
+										$post_loop .= wp_kses( $dcContent[3], ultimate_post()->rendered_content_allowed_html() );
 
 										// Excerpt
 				if ( $attr['excerptShow'] ) {
-					$excerptLim      = $index == 0 && $attr['gridStyle'] != 'style1' ? $attr['excerptLimitLg'] : $attr['excerptLimit'];
-					$showFullexcerpt = $index == 0 && $attr['gridStyle'] != 'style1' ? $attr['fullExcerptLg'] : $attr['showFullExcerpt'];
-					$post_loop      .= '<div class="ultp-block-excerpt">' . ultimate_post()->get_excerpt( $post_id, $attr['showSeoMeta'], $showFullexcerpt, $excerptLim ) . '</div>';
+					// Limit and full-excerpt flag of the post. The defaults can be changed through ultp_post_list_1_excerpt_options.
+					$excerpt_options = apply_filters( 'ultp_post_list_1_excerpt_options', array( 'limit' => $attr['excerptLimit'], 'full' => $attr['showFullExcerpt'] ), $attr, $index );
+					$post_loop      .= '<div class="ultp-block-excerpt">' . wp_kses_post( ultimate_post()->get_excerpt( $post_id, $attr['showSeoMeta'], $excerpt_options['full'], $excerpt_options['limit'] ) ) . '</div>';
 				}
 
-										$post_loop .= $dcContent[2];
+										$post_loop .= wp_kses( $dcContent[2], ultimate_post()->rendered_content_allowed_html() );
 				if ( $attr['readMore'] ) {
-					$post_loop .= '<div class="ultp-block-readmore"><a aria-label="' . $title . '" href="' . $titlelink . '" ' . ( $attr['openInTab'] ? 'target="_blank"' : '' ) . '>' . ( $attr['readMoreText'] ? $attr['readMoreText'] : esc_html__( 'Read More', 'ultimate-post' ) ) . ultimate_post()->get_svg_icon( $attr['readMoreIcon'] ) . '</a></div>';
+					$post_loop .= '<div class="ultp-block-readmore"><a aria-label="' . esc_attr( $title ) . '" href="' . esc_url( $titlelink ) . '" ' . ( $attr['openInTab'] ? 'target="_blank"' : '' ) . '>' . ( $attr['readMoreText'] ? wp_kses( $attr['readMoreText'], ultimate_post()->ultp_allowed_html_tags() ) : esc_html__( 'Read More', 'ultimate-post' ) ) . wp_kses( ultimate_post()->get_svg_icon( $attr['readMoreIcon'] ), ultimate_post()->rendered_content_allowed_html() ) . '</a></div>';
 				}
 
-										$post_loop .= $dcContent[1];
+										$post_loop .= wp_kses( $dcContent[1], ultimate_post()->rendered_content_allowed_html() );
 
 										// Meta
 				if ( $attr['metaPosition'] == 'bottom' ) {
 					include ULTP_PATH . 'blocks/template/meta.php';
 				}
 
-										$post_loop .= $dcContent[0];
+										$post_loop .= wp_kses( $dcContent[0], ultimate_post()->rendered_content_allowed_html() );
 
 										$post_loop .= '</div>';
 										$post_loop .= '</div>';
-				if ( $post_video && $attr['enablePopup'] ) {
-					include ULTP_PATH . 'blocks/template/video_popup.php';
+				if ( $post_video ) {
+					$post_loop .= wp_kses( \ULTP\Extended_Compat::video_popup( $attr, $post_video, $title, $titlelink ), ultimate_post()->rendered_content_allowed_html() );
 				}
-										$post_loop .= '</' . $attr['contentTag'] . '>';
+										$post_loop .= '</' . tag_escape( $attr['contentTag'] ) . '>';
 										++$idx;
 										++$index;
 						endwhile;
-			if ( $attr['queryUnique'] ) {
-				$post_loop .= "<span style='display: none;' class='ultp-current-unique-posts' data-ultp-unique-ids= " . wp_json_encode( $ultp_unique_ID ) . ' data-current-unique-posts= ' . wp_json_encode( $current_unique_posts ) . '> </span>';
-			}
+			// Markup an add-on may add after the posts. Empty by default.
+			$loop_end   = apply_filters( 'ultp_block_loop_end', '', $attr );
+			$post_loop .= wp_kses( ultimate_post()->esc_filtered_markup( $loop_end, '' ), ultimate_post()->rendered_content_allowed_html() );
 						// if ( ($attr['paginationShow'] || $attr['advPaginationEnable'] )  && ($attr['paginationType'] == 'loadMore')) {
 						// $wraper_after .= '<span class="ultp-loadmore-insert-before"></span>';
 						// }
 					$wraper_after .= '</div>';// ultp-block-items-wrap
 
 					// Load More
-			if ( $attr['paginationShow'] && ( $attr['paginationType'] == 'loadMore' ) ) {
+			if ( ultimate_post()->inline_pagination_on( $attr, 'loadMore' ) ) {
 				include ULTP_PATH . 'blocks/template/loadmore.php';
 			}
 
 					// Navigation
-			if ( $attr['paginationShow'] && ( $attr['paginationType'] == 'navigation' ) && ( $attr['navPosition'] != 'topRight' ) ) {
+			if ( ultimate_post()->inline_navigation_on( $attr, false ) ) {
 				include ULTP_PATH . 'blocks/template/navigation-after.php';
 			}
 
 					// Pagination
-			if ( $attr['paginationShow'] && ( $attr['paginationType'] == 'pagination' ) ) {
+			if ( ultimate_post()->inline_pagination_on( $attr, 'pagination' ) ) {
 				include ULTP_PATH . 'blocks/template/pagination.php';
 			}
 
@@ -498,7 +481,7 @@ class Post_List_1 {
 
 			wp_reset_postdata();
 		} else {
-			$wraper_before .= ultimate_post()->get_no_result_found_html( $attr['notFoundMessage'] );
+			$wraper_before .= wp_kses( ultimate_post()->get_no_result_found_html( $attr['notFoundMessage'] ), ultimate_post()->rendered_content_allowed_html() );
 		}
 
 		return $noAjax ? $post_loop : $wraper_before . $post_loop . $wraper_after;

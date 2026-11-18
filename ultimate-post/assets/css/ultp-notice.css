@@ -1,5 +1,5 @@
 /**
- * PostX admin notices: campaign banners and the data-collection consent notice.
+ * PostX admin notices: campaign banners, content notices and image banners.
  * Loaded only on admin pages where one of them shows. Keep every selector scoped to its notice.
  */
 
@@ -206,50 +206,4 @@
 	.ultp-image-notice-wrapper {
 		display: none;
 	}
-}
-
-/* Data-collection consent notice */
-.ultp-consent-box {
-	width: 656px;
-	padding: 16px !important;
-	border: 1px solid #070707;
-	border-left-width: 4px;
-	border-radius: 4px;
-	background-color: #fff;
-	position: relative;
-	width: 100%;
-	box-sizing: border-box;
-}
-.ultp-consent-content {
-	display: flex;
-	justify-content: flex-start;
-	align-items: flex-end;
-	gap: 26px;
-}
-
-.ultp-consent-text-first {
-	font-size: 14px;
-	font-weight: 600;
-	color: #070707;
-}
-.ultp-consent-text-last {
-	margin: 4px 0 0;
-	font-size: 14px;
-	color: #070707;
-}
-
-.ultp-consent-accept {
-	background-color: #070707;
-	color: #fff !important; 
-	border: none;
-	padding: 6px 10px;
-	border-radius: 4px;
-	cursor: pointer;
-	font-size: 12px;
-	font-weight: 600;
-	text-decoration: none;
-}
-.ultp-consent-accept:hover {
-	background-color:rgb(38, 38, 38);
-	color: #fff;
 }

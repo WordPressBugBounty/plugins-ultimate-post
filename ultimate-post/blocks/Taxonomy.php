@@ -21,7 +21,6 @@ class Taxonomy {
 			'taxValue'              => '[]',
 			'queryNumber'           => 6,
 			// General Setting
-			'taxGridEn'             => true,
 			'columns'               => (object) array( 'lg' => '1' ),
 			'rowGap'                => (object) array(
 				'lg'   => '20',
@@ -46,7 +45,6 @@ class Taxonomy {
 			'titleTag'              => 'span',
 			'contentTitleAlign'     => 'left',
 			'titlePosition'         => true,
-			'customTaxTitleColor'   => false,
 			'seperatorTaxTitleLink' => admin_url( 'edit-tags.php?taxonomy=category' ),
 
 			// Content Setting/Style
@@ -59,7 +57,6 @@ class Taxonomy {
 			'separatorShow'         => false,
 
 			// Custom Wrapper Style
-			'customTaxColor'        => false,
 			'seperatorTaxLink'      => admin_url( 'edit-tags.php?taxonomy=category' ),
 			'TaxAnimation'          => 'none',
 			'advanceId'             => '',
@@ -67,7 +64,6 @@ class Taxonomy {
 			'hideExtraLarge'        => false,
 			'hideTablet'            => false,
 			'hideMobile'            => false,
-			'advanceCss'            => '',
 		);
 	}
 
@@ -92,7 +88,7 @@ class Taxonomy {
 
 		$block_name    = 'ultp-taxonomy';
 		$wraper_before = $wraper_after = $post_loop = '';
-		$recent_posts  = ultimate_post()->get_category_data( json_decode( $attr['taxValue'] ), $attr['queryNumber'], $attr['taxType'], $attr['taxSlug'] );
+		$recent_posts  = ultimate_post()->get_category_data( ultimate_post()->decode_json_attr( $attr['taxValue'], false, array() ), $attr['queryNumber'], $attr['taxType'], $attr['taxSlug'] );
 
 		if ( ! empty( $recent_posts ) ) {
 
@@ -101,12 +97,13 @@ class Taxonomy {
 			$attr['advanceId']    = isset( $attr['advanceId'] ) ? sanitize_html_class( $attr['advanceId'] ) : '';
 			$attr['blockId']      = isset( $attr['blockId'] ) ? sanitize_html_class( $attr['blockId'] ) : '';
 			$attr['titleTag']     = in_array( $attr['titleTag'], ultimate_post()->ultp_allowed_block_tags() ) ? $attr['titleTag'] : 'span';
-			$attr['layout']       = sanitize_html_class( $attr['layout'] );
+			// The layout is layout 1 unless ultp_taxonomy_layout gives another.
+			$attr['layout']       = sanitize_html_class( apply_filters( 'ultp_taxonomy_layout', '1', $attr ) );
 			$attr['TaxAnimation'] = sanitize_html_class( $attr['TaxAnimation'] );
 
-			$wraper_before         .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . ' ' . ( $attr['className'] ? $attr['className'] : '' ) . '">';
+			$wraper_before         .= '<div ' . ( $attr['advanceId'] ? 'id="' . esc_attr( $attr['advanceId'] ) . '" ' : '' ) . ' class="wp-block-ultimate-post-' . esc_attr( $block_name ) . ' ultp-block-' . esc_attr( $attr['blockId'] ) . ' ' . ( $attr['className'] ? esc_attr( $attr['className'] ) : '' ) . '">';
 				$wraper_before     .= '<div class="ultp-block-wrapper">';
-					$wraper_before .= ultimate_post()->postx_loading(); // Loading
+					$wraper_before .= wp_kses( ultimate_post()->postx_loading(), ultimate_post()->rendered_content_allowed_html() ); // Loading
 
 			if ( $attr['headingShow'] ) {
 				$wraper_before     .= '<div class="ultp-heading-filter">';
@@ -117,53 +114,38 @@ class Taxonomy {
 			}
 
 					$wraper_before     .= '<div class="ultp-block-items-wrap">';
-						$wraper_before .= '<ul class="ultp-taxonomy-items ' . ( isset( $attr['TaxAnimation'] ) ? ' ultp-taxonomy-animation-' . $attr['TaxAnimation'] : '' ) . ' ultp-taxonomy-column-' . sanitize_html_class( json_decode( wp_json_encode( $attr['columns'] ), true )['lg'] ) . ' ultp-taxonomy-layout-' . $attr['layout'] . '">';
+						$wraper_before .= '<ul class="ultp-taxonomy-items ' . ( isset( $attr['TaxAnimation'] ) ? ' ultp-taxonomy-animation-' . esc_attr( $attr['TaxAnimation'] ) : '' ) . ' ultp-taxonomy-column-' . esc_attr( sanitize_html_class( json_decode( wp_json_encode( $attr['columns'] ), true )['lg'] ) ) . ' ultp-taxonomy-layout-' . esc_attr( $attr['layout'] ) . '">';
 
 			foreach ( $recent_posts as $value ) {
-				$_style          = ( ( $attr['customTaxColor'] && $value['color'] ) ? ' style="background-color:' . $value['color'] . ';"' : '' );
-				$_style_color    = ( ( in_array( $attr['layout'], array( 1, 4, 5 ) ) && $value['color'] && $attr['customTaxTitleColor'] ) ? ' style="color:' . $value['color'] . ';"' : '' );
-				$_style_title_bg = ( ( in_array( $attr['layout'], array( 7, 8 ) ) && $value['color'] && $attr['customTaxTitleColor'] ) ? ' style="background:' . $value['color'] . ';"' : '' );
-				$post_loop      .= '<li class="ultp-block-item ultp-taxonomy-item">';
+				$post_loop .= '<li class="ultp-block-item ultp-taxonomy-item">';
 
-				$style = in_array( $attr['layout'], array( 2, 3, 6, 7, 8 ) ) ? 'style="' . ( $value['image'] ? 'background-image: url(' . $value['image'][ $attr['imgCrop'] ] . ')' : '' ) . '"' : '';
+				// Colour of the name ("ultp_taxonomy_name_style") and of the count ("ultp_taxonomy_count_style").
+				$name_style  = ultimate_post()->filtered_style_value( apply_filters( 'ultp_taxonomy_name_style', '', $attr, $value ) );
+				$count_style = ultimate_post()->filtered_style_value( apply_filters( 'ultp_taxonomy_count_style', '', $attr, $value ) );
+				$name        = ( $attr['titleShow'] && $value['name'] ) ? '<' . tag_escape( $attr['titleTag'] ) . ' class="ultp-taxonomy-name" ' . ( null !== $name_style ? 'style="' . esc_attr( $name_style ) . '"' : '' ) . '>' . esc_html( $value['name'] ) . '</' . tag_escape( $attr['titleTag'] ) . '>' : '';
+				$count       = ( $attr['countShow'] && $value['count'] ) ? '<span class="ultp-taxonomy-count" ' . ( null !== $count_style ? 'style="' . esc_attr( $count_style ) . '"' : '' ) . '>' . esc_html( $value['count'] ) . '</span>' : '';
+				$excerpt    = ( $attr['excerptShow'] && $value['desc'] ) ? '<div class="ultp-taxonomy-desc">' . wp_kses_post( $value['desc'] ) . '</div>' : '';
 
-					$name       = ( $attr['titleShow'] && $value['name'] ) ? '<' . $attr['titleTag'] . ' class="ultp-taxonomy-name" ' . $_style_color . '>' . $value['name'] . '</' . $attr['titleTag'] . '>' : '';
-					$count      = ( $attr['countShow'] && $value['count'] ) ? '<span class="ultp-taxonomy-count" ' . $_style_color . '>' . $value['count'] . '</span>' : '';
-					$excerpt    = ( $attr['excerptShow'] && $value['desc'] ) ? '<div class="ultp-taxonomy-desc">' . $value['desc'] . '</div>' : '';
-					$post_loop .= '<a href="' . $value['url'] . '" ' . ( $attr['layout'] != 3 ? $style : '' ) . '>';
-				switch ( $attr['layout'] ) {
-					case 1:
-						$post_loop .= $name . $count . $excerpt;
-						break;
-					case 2:
-									$post_loop .= '<div class="ultp-taxonomy-lt2-overlay"' . $_style . '></div><div class="ultp-taxonomy-lt2-content">' . $name . '<span class="ultp-taxonomy-bar"></span>' . $count . '</div>' . $excerpt;
-						break;
-					case 3:
-							$post_loop .= '<div class="ultp-taxonomy-lt3-img" ' . $style . '></div><div class="ultp-taxonomy-lt3-overlay"' . $_style . '></div><div class="ultp-taxonomy-lt3-content">' . $name . '<span class="ultp-taxonomy-bar"></span>' . $count . '</div>' . $excerpt;
-						break;
-					case 4:
-						$img        = $value['image'] ? '<img src="' . $value['image'][ $attr['imgCrop'] ] . '" alt="' . $value['name'] . '"/>' : '';
-						$post_loop .= $img . '<div class="ultp-taxonomy-lt4-content">' . $name . $count . '</div>' . $excerpt;
-						break;
-					case 5:
-						$img        = $value['image'] ? '<img src="' . $value['image'][ $attr['imgCrop'] ] . '" alt="' . $value['name'] . '"/>' : '';
-						$post_loop .= $img . '<span class="ultp-taxonomy-lt5-content">' . $name . $count . $excerpt . '</span>';
-						break;
-					case 6:
-						$post_loop .= '<div class="ultp-taxonomy-lt6-overlay"' . $_style . '></div>' . $name . $count . $excerpt;
-						break;
-					case 7:
-						$post_loop .= '<div class="ultp-taxonomy-lt7-overlay"' . $_style . '></div><' . $attr['titleTag'] . ' class="ultp-taxonomy-name" ' . $_style_title_bg . '>' . $value['name'] . $count . '</' . $attr['titleTag'] . '>' . $excerpt;
-						break;
-					case 8:
-						$post_loop .= '<div class="ultp-taxonomy-lt8-overlay"' . $_style . '></div><' . $attr['titleTag'] . ' class="ultp-taxonomy-name" ' . $_style_title_bg . '>' . $value['name'] . $count . '</' . $attr['titleTag'] . '>' . $excerpt;
-						break;
-					default:
-						// code...
-						break;
+				// Other layouts are drawn through ultp_taxonomy_item_html; layout 1 is below.
+				$item = ultimate_post()->esc_filtered_markup(
+					apply_filters(
+						'ultp_taxonomy_item_html',
+						'',
+						$attr,
+						$value,
+						array(
+							'name'    => $name,
+							'count'   => $count,
+							'excerpt' => $excerpt,
+						)
+					),
+					''
+				);
+				if ( '' === $item ) {
+					$item = '<a href="' . esc_url( $value['url'] ) . '" >' . $name . $count . $excerpt . '</a>';
 				}
-					$post_loop         .= '</a>';
-							$post_loop .= '</li>';
+				$post_loop .= wp_kses( $item, ultimate_post()->rendered_content_allowed_html() );
+				$post_loop .= '</li>';
 			}
 
 						$wraper_after .= '</ul>';
@@ -172,7 +154,7 @@ class Taxonomy {
 			$wraper_after             .= '</div>';
 			wp_reset_postdata();
 		} else {
-			$wraper_before .= ultimate_post()->get_no_result_found_html( $attr['notFoundMessage'] );
+			$wraper_before .= wp_kses( ultimate_post()->get_no_result_found_html( $attr['notFoundMessage'] ), ultimate_post()->rendered_content_allowed_html() );
 		}
 
 		return $noAjax ? $post_loop : $wraper_before . $post_loop . $wraper_after;

@@ -3,13 +3,16 @@
 	$.fn.UltpSlider = function (options) {
 		/*Merge options and default options*/
 		let opts = $.extend({}, $.fn.UltpSlider.defaults, options);
+		// The vertical and horizontal tickers run here; an add-on runs any other type itself.
+		if (opts.type != "horizontal" && opts.type != "vertical") {
+			return;
+		}
 		/*Functions Scope*/
 		let thisTicker = $(this),
 			intervalID,
 			timeoutID,
 			isPause = false;
 		let pauseVal = true;
-		let onPressTime = 0;
 
 		/*Always wrap, used in many place*/
 		thisTicker.wrap("<div class='acmeticker-wrap'></div>");
@@ -23,21 +26,9 @@
 			.addClass("active"); /* ====  ADD active class to first item ===== */
 
 		/* ==================================================
-		horizontal , vertical and typewriter Control
+		horizontal and vertical Control
 		===================================================== */
-		if (
-			opts.type == "horizontal" ||
-			opts.type == "vertical" ||
-			opts.type == "typewriter"
-		) {
-			/* ====  typewriter ===== */
-			let typeAutoPlay = "";
-			if (opts.type == "typewriter") {
-				typeAutoPlay = setInterval(function () {
-					slidePlay();
-				}, opts.speed);
-			}
-
+		{
 			let sliderAutoPlay = "";
 			if (opts.type == "horizontal" || opts.type == "vertical") {
 				sliderAutoPlay = setInterval(function () {
@@ -56,15 +47,6 @@
 						}, opts.speed);
 					}
 				}
-				if (opts.type == "typewriter") {
-					clearInterval(typeAutoPlay);
-					handleSlider("prev");
-					if (pauseVal) {
-						typeAutoPlay = setInterval(function () {
-							slidePlay();
-						}, opts.speed);
-					}
-				}
 			});
 
 			/* =====  Next Event  ===== */
@@ -74,15 +56,6 @@
 					handleSlider("next");
 					if (pauseVal) {
 						sliderAutoPlay = setInterval(function () {
-							slidePlay();
-						}, opts.speed);
-					}
-				}
-				if (opts.type == "typewriter") {
-					clearInterval(typeAutoPlay);
-					handleSlider("next");
-					if (pauseVal) {
-						typeAutoPlay = setInterval(function () {
 							slidePlay();
 						}, opts.speed);
 					}
@@ -103,37 +76,17 @@
 						}, opts.speed);
 					}
 				}
-				if (opts.type == "typewriter") {
-					if (pauseVal) {
-						pauseVal = false;
-						clearInterval(typeAutoPlay);
-					} else {
-						pauseVal = true;
-						clearInterval(typeAutoPlay);
-						typeAutoPlay = setInterval(function () {
-							slidePlay();
-						}, opts.speed);
-					}
-				}
 			});
 
 			/* ===== Hover Pause Event  ===== */
 			if (opts.pauseOnHover) {
 				thisTicker.on("mouseenter", function () {
-					if (opts.type === "typewriter") {
-						clearInterval(typeAutoPlay);
-					}
 					if (opts.type === "horizontal" || opts.type === "vertical") {
 						clearInterval(sliderAutoPlay);
 					}
 				});
 
 				thisTicker.on("mouseleave", function () {
-					if (opts.type === "typewriter" && pauseVal) {
-						typeAutoPlay = setInterval(function () {
-							slidePlay();
-						}, opts.speed);
-					}
 					if (
 						(opts.type === "horizontal" || opts.type === "vertical") &&
 						pauseVal
@@ -146,255 +99,6 @@
 			}
 		}
 
-		/* =========================
-		Marque Slide Control
-		============================ */
-		if (opts.type == "marquee") {
-			let marqueeSpeed = opts.speed;
-			let i = 0;
-			let mainWidth;
-			let dir = opts.direction;
-			let contentWidth = thisTicker.outerWidth();
-			let wrapperWidth = $(".ultp-newsTicker-wrap").outerWidth();
-			let rtl = $(document).find("body").hasClass("rtl");
-
-			if (dir == "right") {
-				mainWidth = wrapperWidth;
-			}
-			if (dir == "left") {
-				mainWidth = thisTicker.outerWidth();
-			}
-			let marqueeSlide = setInterval(function () {
-				if (mainWidth < i && dir == "left" && !rtl) {
-					i = -wrapperWidth;
-				}
-				// if(-(mainWidth)  > i && dir == "left" && !rtl){
-				// i = wrapperWidth;
-				// }
-				if (mainWidth < i && dir == "right" && !rtl) {
-					i = -contentWidth;
-				}
-
-				/* ===== For RTL Support  ===== */
-				if (contentWidth < i && dir == "right" && rtl) {
-					i = -wrapperWidth;
-				}
-				if (wrapperWidth < i && dir == "left" && rtl) {
-					i = -mainWidth;
-				}
-				thisTicker.css(dir, -i);
-				i++;
-			}, marqueeSpeed);
-
-			/* =====================
-			Prev Button Control
-			======================== */
-			$(opts.controls.prev).on("click", function () {
-				if (!pauseVal) {
-					/* ===== If Slide Pause ===== */
-					pauseVal = true;
-					marqueeSlide = setInterval(function () {
-						if (mainWidth < i && dir == "left" && !rtl) {
-							i = -wrapperWidth;
-						}
-						if (-wrapperWidth > i && dir == "left" && !rtl) {
-							i = mainWidth - 100;
-						}
-						if (mainWidth < i && dir == "right" && !rtl) {
-							i = -contentWidth;
-						}
-
-						/* ===== For RTL Support  ===== */
-						if (contentWidth < i && dir == "right" && rtl) {
-							i = -mainWidth;
-						}
-						if (wrapperWidth < i && dir == "left" && rtl) {
-							i = -mainWidth;
-						}
-						thisTicker.css(dir, -i);
-						i++;
-					}, marqueeSpeed);
-				} else {
-					if (-thisTicker.outerWidth() > i && dir == "right" && !rtl) {
-						// i =  $(window).width();
-						i = mainWidth;
-					}
-					if (
-						i < -$(".ultp-newsTicker-wrap").outerWidth() &&
-						dir == "left" &&
-						!rtl
-					) {
-						i = mainWidth;
-					}
-
-					/* ===== For RTL Support  ===== */
-					if (-mainWidth > i && dir == "right" && rtl) {
-						i = thisTicker.outerWidth();
-					}
-					if (-mainWidth > i && dir == "left" && rtl) {
-						i = $(".ultp-newsTicker-wrap").outerWidth();
-					}
-					// let childWidth = thisTicker.outerWidth() / thisTicker.children().length;
-					i = i - 250;
-				}
-			});
-
-			/* ===== Onpress Event  ===== */
-			$(opts.controls.prev)
-				.on("mousedown touchstart", function (e) {
-					onPressTime = setInterval(function () {
-						if (!rtl && dir == "right") {
-							if (i > -contentWidth) {
-								i = i - 30;
-							} else {
-								i = $(".ultp-newsTicker-wrap").outerWidth() - 10;
-							}
-						} else if (rtl && dir == "left") {
-							if (i < -contentWidth) {
-								i = $(".ultp-newsTicker-wrap").outerWidth() - 10;
-							}
-							i = i - 30;
-						} else if (!rtl && dir == "left") {
-							if (i < -$(".ultp-newsTicker-wrap").outerWidth()) {
-								i = contentWidth;
-							}
-							i = i - 30;
-						} else {
-							if (
-								i < -$(".ultp-newsTicker-wrap").outerWidth() &&
-								rtl &&
-								dir == "right"
-							) {
-								i = contentWidth;
-							}
-							i = i - 30;
-						}
-					}, 100);
-				})
-				.bind("mouseup mouseleave touchend", function () {
-					clearInterval(onPressTime);
-				});
-
-			/* =====================
-				Next Event Control
-			======================== */
-			$(opts.controls.next).on("click", function () {
-				if (!pauseVal) {
-					/* ===== If Slide Pause ===== */
-					pauseVal = true;
-					marqueeSlide = setInterval(function () {
-						if (mainWidth < i && dir == "left" && !rtl) {
-							i = -wrapperWidth;
-						}
-						// if(-(mainWidth)  > i && dir == "left" && !rtl){
-						// i = wrapperWidth;
-						// }
-						if (mainWidth < i && dir == "right" && !rtl) {
-							i = -contentWidth;
-						}
-
-						/* ===== RTL Support ===== */
-						if (wrapperWidth < i && dir == "left" && rtl) {
-							i = -mainWidth;
-						}
-						if (contentWidth < i && dir == "right" && rtl) {
-							i = -mainWidth;
-						}
-						thisTicker.css(dir, -i);
-						i++;
-					}, marqueeSpeed);
-				} else {
-					// let ChildWidth = thisTicker.outerWidth() / thisTicker.children().length;
-					i = i + 250;
-				}
-			});
-
-			/* =======  Next Onpress Event  ======= */
-			$(opts.controls.next)
-				.on("mousedown touchstart", function (e) {
-					onPressTime = setInterval(function () {
-						i = i + 80;
-					}, 80);
-				})
-				.bind("mouseup mouseleave touchend", function () {
-					clearInterval(onPressTime);
-				});
-
-			/* =====================
-				Pause Event Control
-			======================== */
-			$(opts.controls.toggle).on("click", function () {
-				if (pauseVal) {
-					pauseVal = false;
-					clearInterval(marqueeSlide);
-				} else {
-					pauseVal = true;
-					marqueeSlide = setInterval(function () {
-						if (mainWidth < i && dir == "left" && !rtl) {
-							i = -wrapperWidth;
-						}
-						// if(-(mainWidth)  > i && dir == "left" && !rtl){
-						// i = wrapperWidth;
-						// }
-						if (
-							$(".ultp-newsTicker-wrap").outerWidth() < i &&
-							dir == "left" &&
-							rtl
-						) {
-							i = -(contentWidth + 100);
-						}
-						if (mainWidth < i && dir == "right" && !rtl) {
-							i = -contentWidth;
-						}
-						if (contentWidth < i && dir == "right" && rtl) {
-							i = -$(".ultp-newsTicker-wrap").outerWidth();
-						}
-						thisTicker.css(dir, -i);
-						i++;
-					}, marqueeSpeed);
-				}
-			});
-
-			/* =======  Hover Pause Control Button   ======= */
-			if (opts.pauseOnHover) {
-				thisTicker.on("mouseenter", function () {
-					clearInterval(marqueeSlide);
-				});
-
-				thisTicker.on("mouseleave", function () {
-					if (pauseVal) {
-						marqueeSlide = setInterval(function () {
-							if (mainWidth < i && dir === "left" && !rtl) {
-								i = -$(".ultp-newsTicker-wrap").outerWidth();
-							}
-
-							if (
-								$(".ultp-newsTicker-wrap").outerWidth() < i &&
-								dir === "left" &&
-								rtl
-							) {
-								i = -mainWidth;
-							}
-
-							if (
-								$(".ultp-newsTicker-wrap").outerWidth() < i &&
-								dir === "right" &&
-								!rtl
-							) {
-								i = -contentWidth;
-							}
-
-							if (contentWidth < i && dir === "right" && rtl) {
-								i = -mainWidth;
-							}
-
-							thisTicker.css(dir, -i);
-							i++;
-						}, marqueeSpeed);
-					}
-				});
-			}
-		}
 		/* =====================================
 			Next Previous Auto Play Control
 		===================================== */
@@ -445,18 +149,16 @@
 		Default Value
 	===================== */
 	$.fn.UltpSlider.defaults = {
-		/*Note: Marquee only take speed not autoplay*/
-		type: "horizontal" /*vertical/horizontal/marquee/typewriter*/,
-		autoplay: 2000 /*true/false/number*/ /*For vertical/horizontal 4000*/ /*For typewriter 2000*/,
-		speed: 50 /*true/false/number*/ /*For vertical/horizontal 600*/ /*For marquee 0.05*/ /*For typewriter 50*/,
-		direction:
-			"up" /*up/down/left/right*/ /*For vertical up/down*/ /*For horizontal/marquee right/left*/ /*For typewriter direction doesnot work*/,
+		type: "horizontal" /*vertical/horizontal*/,
+		autoplay: 2000 /*true/false/number*/ /*For vertical/horizontal 4000*/,
+		speed: 50 /*true/false/number*/ /*For vertical/horizontal 600*/,
+		direction: "up" /*up/down/left/right*/ /*For vertical up/down*/ /*For horizontal right/left*/,
 		pauseOnFocus: true,
 		pauseOnHover: true,
 		controls: {
-			prev: "" /*Can be used for vertical/horizontal/typewriter*/ /*not work for marquee*/,
-			next: "" /*Can be used for vertical/horizontal/typewriter*/ /*not work for marquee*/,
-			toggle: "" /*Can be used for vertical/horizontal/marquee/typewriter*/,
+			prev: "",
+			next: "",
+			toggle: "",
 		},
 	};
 })(jQuery);

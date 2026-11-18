@@ -13,7 +13,7 @@ class Saved_Templates {
 	}
 
 	public function templates_table_head( $defaults ) {
-		$type_array = array( 'type' => __( 'Shortcode', 'ultimate-post' ) );
+		$type_array = array( 'type' => esc_html__( 'Shortcode', 'ultimate-post' ) );
 		array_splice( $defaults, 2, 0, $type_array );
 		return $defaults;
 	}

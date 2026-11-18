@@ -1,0 +1,390 @@
+<?php // phpcs:ignore
+
+namespace ULTP\Includes\Helper;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Core class for managing plugin actions and integrations.
+ */
+class Xpo {
+
+	/**
+	 * Whether upgrade prompts (upsell cards, upgrade links, offers) are shown.
+	 *
+	 * Filter `ultp_show_upsell`: `$show` bool, true by default.
+	 *
+	 * @return bool
+	 */
+	public static function show_upsell() {
+		return (bool) apply_filters( 'ultp_show_upsell', true );
+	}
+
+	/**
+	 * Get Option Value bypassing cache
+	 * Inspired By WordPress Core get_option
+	 *
+	 * @since v.1.0.7
+	 * @param string  $option Option Name.
+	 * @param boolean $default_value option default value.
+	 * @return mixed
+	 */
+	public static function get_option_without_cache( $option, $default_value = false ) {
+		global $wpdb;
+
+		if ( is_scalar( $option ) ) {
+			$option = trim( $option );
+		}
+
+		if ( empty( $option ) ) {
+			return false;
+		}
+
+		$value = $default_value;
+
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1", $option ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+
+		if ( is_object( $row ) ) {
+			$value = $row->option_value;
+		} else {
+			return apply_filters( "ultp_default_option_{$option}", $default_value, $option );
+		}
+
+		return apply_filters( "ultp_option_{$option}", maybe_unserialize( $value ), $option );
+	}
+
+	/**
+	 * Add option without adding to the cache
+	 * Inspired By WordPress Core set_transient
+	 *
+	 * @since v.1.0.7
+	 * @param string $option option name.
+	 * @param string $value option value.
+	 * @param string $autoload whether to load WordPress startup.
+	 * @return bool
+	 */
+	public static function add_option_without_cache( $option, $value = '', $autoload = 'yes' ) {
+		global $wpdb;
+
+		if ( is_scalar( $option ) ) {
+			$option = trim( $option );
+		}
+
+		if ( empty( $option ) ) {
+			return false;
+		}
+
+		wp_protect_special_option( $option );
+
+		if ( is_object( $value ) ) {
+			$value = clone $value;
+		}
+
+		$value = sanitize_option( $option, $value );
+
+		/*
+		* Make sure the option doesn't already exist.
+		*/
+
+		if ( apply_filters( "ultp_default_option_{$option}", false, $option, false ) !== self::get_option_without_cache( $option ) ) {
+			return false;
+		}
+
+		$serialized_value = maybe_serialize( $value );
+		$autoload         = ( 'no' === $autoload || false === $autoload ) ? 'no' : 'yes';
+
+		$result = $wpdb->query( $wpdb->prepare( "INSERT INTO `$wpdb->options` (`option_name`, `option_value`, `autoload`) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE `option_name` = VALUES(`option_name`), `option_value` = VALUES(`option_value`), `autoload` = VALUES(`autoload`)", $option, $serialized_value, $autoload ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		if ( ! $result ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Get Transient Value bypassing cache
+	 * Inspired By WordPress Core get_transient
+	 *
+	 * @since v.1.0.7
+	 * @param string $transient Transient Name.
+	 * @return mixed
+	 */
+	public static function get_transient_without_cache( $transient ) {
+		$transient_option  = '_transient_' . $transient;
+		$transient_timeout = '_transient_timeout_' . $transient;
+		$timeout           = self::get_option_without_cache( $transient_timeout );
+
+		if ( false !== $timeout && $timeout < time() ) {
+			delete_option( $transient_option );
+			delete_option( $transient_timeout );
+			$value = false;
+		}
+
+		if ( ! isset( $value ) ) {
+			$value = self::get_option_without_cache( $transient_option );
+		}
+
+		return apply_filters( "ultp_transient_{$transient}", $value, $transient );
+	}
+
+	/**
+	 * Set transient without adding to the cache
+	 * Inspired By WordPress Core set_transient
+	 *
+	 * @since v.1.0.7
+	 * @param string  $transient Transient Name.
+	 * @param mixed   $value Transient Value.
+	 * @param integer $expiration Time until expiration in seconds.
+	 * @return bool
+	 */
+	public static function set_transient_without_cache( $transient, $value, $expiration = 0 ) {
+
+		$expiration = (int) $expiration;
+
+		$transient_timeout = '_transient_timeout_' . $transient;
+		$transient_option  = '_transient_' . $transient;
+
+		$result = false;
+
+		if ( false === self::get_option_without_cache( $transient_option ) ) {
+			$autoload = 'yes';
+			if ( $expiration ) {
+				$autoload = 'no';
+				self::add_option_without_cache( $transient_timeout, time() + $expiration, 'no' );
+			}
+			$result = self::add_option_without_cache( $transient_option, $value, $autoload );
+		} else {
+			/*
+			* If expiration is requested, but the transient has no timeout option,
+			* delete, then re-create transient rather than update.
+			*/
+			$update = true;
+
+			if ( $expiration ) {
+				if ( false === self::get_option_without_cache( $transient_timeout ) ) {
+					delete_option( $transient_option );
+					self::add_option_without_cache( $transient_timeout, time() + $expiration, 'no' );
+					$result = self::add_option_without_cache( $transient_option, $value, 'no' );
+					$update = false;
+				} else {
+					update_option( $transient_timeout, time() + $expiration );
+				}
+			}
+
+			if ( $update ) {
+				$result = update_option( $transient_option, $value );
+			}
+		}
+
+		return $result;
+	}
+
+	public static function generate_utm_link( $params = array() ) {
+		$default_config = array(
+			'example'               => array(
+				'source'   => 'db-postx-featurename',
+				'medium'   => 'block-feature',
+				'campaign' => 'postx-dashboard',
+			),
+			'summer_db'             => array(
+				'source'   => 'db-postx-notice',
+				'medium'   => 'summer-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			'birthday'             => array(
+				'source'   => 'db-postx-notice',
+				'medium'   => 'birthday',
+				'campaign' => 'postx-dashboard',
+			),
+			'plugin_dir_pro'        => array(
+				'source'   => 'db-postx-plugin',
+				'medium'   => 'upgrade-pro',
+				'campaign' => 'postx-dashboard',
+			),
+			'post_type_page'        => array(
+				'source'   => 'db-postx-posttype',
+				'medium'   => 'upgrade-pro',
+				'campaign' => 'postx-dashboard',
+			),
+			'plugin_dir_support'    => array(
+				'source'   => 'db-postx-pluginmeta',
+				'medium'   => 'meta-support',
+				'campaign' => 'postx-dashboard',
+			),
+			'dashboard_go_pro'      => array(
+				'source'   => 'db-postx-submenu',
+				'medium'   => 'left-menu-upgrade',
+				'campaign' => 'postx-dashboard',
+			),
+			'sub_menu'              => array(
+				'source'   => 'db-postx-submenu',
+				'medium'   => 'upgrade-pro',
+				'campaign' => 'postx-dashboard',
+			),
+			'content_notice'        => array(
+				'source'   => 'db-postx-notice',
+				'medium'   => 'spring-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			'summer_sale_meta'      => array(
+				'source'   => 'db-postx-plugin-meta',
+				'medium'   => 'summer-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			'base_price_meta'       => array(
+				'source'   => 'db-postx-plugin-meta',
+				'medium'   => 'base-price',
+				'campaign' => 'postx-dashboard',
+			),
+
+			// Flash sale.
+			'flash_sale_content'    => array(
+				'source'   => 'db-postx-notice-content',
+				'medium'   => 'summer-flash-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			'flash_sale'            => array(
+				'source'   => 'db-postx-notice',
+				'medium'   => 'summer-flash-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			'flash_sale_meta'       => array(
+				'source'   => 'db-postx-plugin-meta',
+				'medium'   => 'summer-flash-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			// Massive Sale
+			'massive_sale_content'  => array(
+				'source'   => 'db-postx-notice-content',
+				'medium'   => 'summer-massive-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			'massive_sale'          => array(
+				'source'   => 'db-postx-notice',
+				'medium'   => 'summer-massive-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			'massive_sale_meta'     => array(
+				'source'   => 'db-postx-plugin-meta',
+				'medium'   => 'summer-massive-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			// Surprise Sale
+			'surprise_sale_content' => array(
+				'source'   => 'db-postx-notice-content',
+				'medium'   => 'summer-surprise-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			'surprise_sale'         => array(
+				'source'   => 'db-postx-notice',
+				'medium'   => 'summer-surprise-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			'surprise_sale_meta'    => array(
+				'source'   => 'db-postx-plugin-meta',
+				'medium'   => 'summer-surprise-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			// Final Hours Sale
+			'final_hours_content'   => array(
+				'source'   => 'db-postx-notice-content',
+				'medium'   => 'summer-final-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			'final_hour'            => array(
+				'source'   => 'db-postx-notice',
+				'medium'   => 'summer-final-sale',
+				'campaign' => 'postx-dashboard',
+			),
+			'final_hour_meta'       => array(
+				'source'   => 'db-postx-plugin-meta',
+				'medium'   => 'summer-final-sale',
+				'campaign' => 'postx-dashboard',
+			),
+		);
+
+		// Step 1: Get parameters
+		$base_url      = $params['url'] ?? 'https://www.wpxpo.com/postx/';
+		$utm_key       = $params['utmKey'] ?? null;
+		$affiliate     = $params['affiliate'] ?? apply_filters( 'ultp_affiliate_id', '' );
+		$hash          = $params['hash'] ?? 'pricing';
+		$custom_config = $params['config'] ?? null;
+
+		$parsed_url = wp_parse_url( $base_url );
+		$scheme     = $parsed_url['scheme'] ?? 'https';
+		$host       = $parsed_url['host'] ?? '';
+		$path       = $parsed_url['path'] ?? '';
+		$query      = array();
+
+		// Step 3: Extract existing query params if present
+		if ( isset( $parsed_url['query'] ) ) {
+			parse_str( $parsed_url['query'], $query );
+		}
+
+		// Step 4: Determine config
+		$utm_config = $custom_config ?? ( $utm_key && isset( $default_config[ $utm_key ] ) ? $default_config[ $utm_key ] : array() );
+
+		// Step 5: Add UTM parameters
+		if ( ! empty( $utm_config ) ) {
+			$query = array_merge(
+				$query,
+				array(
+					'utm_source'   => $utm_config['source'],
+					'utm_medium'   => $utm_config['medium'],
+					'utm_campaign' => $utm_config['campaign'],
+				)
+			);
+		}
+
+		// Step 6: Add affiliate if present
+		if ( $affiliate ) {
+			$query['ref'] = $affiliate;
+		}
+
+		// Step 7: Reconstruct URL
+		$final_url = $scheme . '://' . $host . $path;
+
+		if ( ! empty( $query ) ) {
+			$final_url .= '?' . http_build_query( $query );
+		}
+
+		if ( $hash ) {
+			$final_url .= '#' . $hash;
+		}
+
+		return $final_url;
+	}
+
+
+	/**
+	 * Get WOW Products Details
+	 *
+	 * @return array
+	 */
+	public static function get_wow_products_details() {
+		return array(
+			'products'        => array(
+				'wow_shipping'  => file_exists( WP_PLUGIN_DIR . '/wow-table-rate-shipping/wow-table-rate-shipping.php' ),
+				'post_x'        => file_exists( WP_PLUGIN_DIR . '/ultimate-post/ultimate-post.php' ),
+				'wow_store'     => file_exists( WP_PLUGIN_DIR . '/product-blocks/product-blocks.php' ),
+				'wow_optin'     => file_exists( WP_PLUGIN_DIR . '/optin/optin.php' ),
+				'wow_revenue'   => file_exists( WP_PLUGIN_DIR . '/revenue/revenue.php' ),
+				'wholesale_x'   => file_exists( WP_PLUGIN_DIR . '/wholesalex/wholesalex.php' ),
+				'wow_addon'     => file_exists( WP_PLUGIN_DIR . '/product-addons/product-addons.php' ),
+				'wow_invoice'   => file_exists( WP_PLUGIN_DIR . '/wow-pdf-invoices-packing-slips/wow-pdf-invoices-packing-slips.php' ),
+				'wow_recommend' => file_exists( WP_PLUGIN_DIR . '/wow-ai-product-recommendations/wow-ai-product-recommendations.php' ),
+			),
+			'products_active' => array(
+				'wow_shipping'  => defined( 'WTRS_VER' ),
+				'post_x'        => defined( 'ULTP_VER' ),
+				'wow_store'     => defined( 'WOPB_VER' ),
+				'wow_optin'     => defined( 'OPTN_VERSION' ),
+				'wow_revenue'   => defined( 'REVENUE_VER' ),
+				'wholesale_x'   => defined( 'WHOLESALEX_VER' ),
+				'wow_addon'     => defined( 'PRAD_VER' ),
+				'wow_invoice'   => defined( 'WINV_VER' ),
+				'wow_recommend' => defined( 'PRECO_VER' ),
+			),
+		);
+	}
+}

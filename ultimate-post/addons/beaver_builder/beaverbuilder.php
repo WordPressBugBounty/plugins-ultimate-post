@@ -37,12 +37,12 @@ FLBuilder::register_module(
 						'edit_template'    => array(
 							'type'    => 'raw',
 							'label'   => __( 'Edit Template', 'ultimate-post' ),
-							'content' => '<a href="' . admin_url( 'admin.php?page=ultp-settings#saved-templates' ) . '" style="color:#fff; background-color:#0c0d0e; padding:10px 20px; border-radius:4px; display:inline-block;" target="_blank"><span style="color:#fff; font-size:12px; width:12px; height:12px;" class="dashicons dashicons-edit"></span> ' . __( 'Edit This Template', 'ultimate-post' ) . '</a>',
+							'content' => '<a href="' . esc_url( admin_url( 'admin.php?page=ultp-settings#saved-templates' ) ) . '" style="color:#fff; background-color:#0c0d0e; padding:10px 20px; border-radius:4px; display:inline-block;" target="_blank"><span style="color:#fff; font-size:12px; width:12px; height:12px;" class="dashicons dashicons-edit"></span> ' . esc_html__( 'Edit This Template', 'ultimate-post' ) . '</a>',
 						),
 						'add_new_template' => array(
 							'type'    => 'raw',
 							'label'   => 'Add New Template',
-							'content' => '<a href="' . admin_url( 'post-new.php?post_type=ultp_templates' ) . '" style="color:#fff; background-color:#0c0d0e; padding:10px 20px; border-radius:4px; display:inline-block;" target="_blank"><span style="color:#fff; font-size:12px; width:12px; height:12px;" class="dashicons dashicons-plus-alt2"></span> ' . __( 'Add New Template', 'ultimate-post' ) . '</a>',
+							'content' => '<a href="' . esc_url( admin_url( 'post-new.php?post_type=ultp_templates' ) ) . '" style="color:#fff; background-color:#0c0d0e; padding:10px 20px; border-radius:4px; display:inline-block;" target="_blank"><span style="color:#fff; font-size:12px; width:12px; height:12px;" class="dashicons dashicons-plus-alt2"></span> ' . esc_html__( 'Add New Template', 'ultimate-post' ) . '</a>',
 						),
 					),
 				),

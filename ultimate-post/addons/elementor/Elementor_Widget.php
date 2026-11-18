@@ -39,14 +39,14 @@ class ULTP_Elementor_Post_Blocks_Widget extends \Elementor\Widget_Base {
 			'edit_template',
 			array(
 				'type' => \Elementor\Controls_Manager::RAW_HTML,
-				'raw'  => '<a href="' . admin_url( 'edit.php?post_type=ultp_templates' ) . '" style="color:#fff; background-color:#0c0d0e; padding:10px 20px; border-radius:4px; display:inline-block;" target="_blank"><span style="color:#fff; font-size:12px; width:12px; height:12px;" class="dashicons dashicons-edit"></span> ' . __( 'Edit This Template', 'ultimate-post' ) . '</a>',
+				'raw'  => '<a href="' . esc_url( admin_url( 'edit.php?post_type=ultp_templates' ) ) . '" style="color:#fff; background-color:#0c0d0e; padding:10px 20px; border-radius:4px; display:inline-block;" target="_blank"><span style="color:#fff; font-size:12px; width:12px; height:12px;" class="dashicons dashicons-edit"></span> ' . esc_html__( 'Edit This Template', 'ultimate-post' ) . '</a>',
 			)
 		);
 		$this->add_control(
 			'add_new_template',
 			array(
 				'type' => \Elementor\Controls_Manager::RAW_HTML,
-				'raw'  => '<a href="' . admin_url( 'post-new.php?post_type=ultp_templates' ) . '" style="color:#fff; background-color:#0c0d0e; padding:10px 20px; border-radius:4px; display:inline-block;" target="_blank"><span style="color:#fff; font-size:12px; width:12px; height:12px;" class="dashicons dashicons-plus-alt2"></span> ' . __( 'Add New Template', 'ultimate-post' ) . '</a>',
+				'raw'  => '<a href="' . esc_url( admin_url( 'post-new.php?post_type=ultp_templates' ) ) . '" style="color:#fff; background-color:#0c0d0e; padding:10px 20px; border-radius:4px; display:inline-block;" target="_blank"><span style="color:#fff; font-size:12px; width:12px; height:12px;" class="dashicons dashicons-plus-alt2"></span> ' . esc_html__( 'Add New Template', 'ultimate-post' ) . '</a>',
 			)
 		);
 		$this->end_controls_section();
@@ -59,7 +59,7 @@ class ULTP_Elementor_Post_Blocks_Widget extends \Elementor\Widget_Base {
 
 		if ( $id ) {
 			if ( isset( $_GET['action'] ) || isset( $_POST['action'] ) ) { //phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.NonceVerification.Recommended
-				echo ultimate_post()->build_css_for_inline_print( $id, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- <style> tag from build_css_for_inline_print(): integer post ID, CSS passed through wp_strip_all_tags().
+				ultimate_post()->print_inline_css( $id, true );
 			}
 			echo '<div class="ultp-shortcode" data-postid="' . esc_attr( $id ) . '">';
 				$args      = array(

@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 	class="ultp-notice-wrapper ultp-banner-notice notice"
 	style="
 		border-left: 3px solid <?php echo esc_attr( $notice->get( 'brand_color' ) ); ?>;
-		background-image: url('<?php echo esc_attr( $notice->get_image( 'bg' ) ); ?>');
+		background-image: url('<?php echo esc_url( $notice->get_image( 'bg' ) ); ?>');
 ">
 	<a
 		class="wc-dismiss-notice dashicons dashicons-no-alt"
@@ -46,6 +46,7 @@ defined( 'ABSPATH' ) || exit;
 						color: <?php echo esc_attr( $notice->get( 'countdown_color' ) ); ?>;
 					"
 					data-notice-key="<?php echo esc_attr( $notice->get_key() . '-countdown' ); ?>"
+					data-end-time="<?php echo esc_attr( $notice->get_end_timestamp() ); ?>"
 					data-duration="<?php echo esc_attr( $notice->get( 'countdown_duration' ) ); ?>">
 					00:00:00:00
 				</div>

@@ -12,7 +12,7 @@ class Post_Module_2 {
 
 	public function get_attributes() {
 
-		return array(
+		$defaults = array(
 			'blockId'             => '',
 			'previewImg'          => '',
 			// --------------------------
@@ -38,12 +38,7 @@ class Post_Module_2 {
 			'queryExclude'        => '[]',
 			'queryAuthor'         => '[]',
 			'queryOffset'         => '0',
-			'queryExcludeTerm'    => '[]',
-			'queryExcludeAuthor'  => '[]',
 			'querySticky'         => true,
-			'queryUnique'         => '',
-			'queryPosts'          => '[]',
-			'queryCustomPosts'    => '[]',
 			// --------------------------
 			// General Setting
 			// --------------------------
@@ -100,9 +95,7 @@ class Post_Module_2 {
 			'showSmallCat'        => false,
 			'catStyle'            => 'classic',
 			'catPosition'         => 'aboveTitle',
-			'customCatColor'      => false,
 			'seperatorLink'       => admin_url( 'edit-tags.php?taxonomy=category' ),
-			'onlyCatColor'        => false,
 
 			// --------------------------
 			// Meta Setting/Style
@@ -128,14 +121,11 @@ class Post_Module_2 {
 			// --------------------------
 			'columnFlip'          => false,
 			'imgCrop'             => 'full',
-			'imgCropSmall'        => ( ultimate_post()->get_setting( 'disable_image_size' ) == 'yes' ? 'full' : 'ultp_layout_square' ),
 			'imgAnimation'        => 'opacity',
 			'imgOverlay'          => false,
 			'imgOverlayType'      => 'default',
 			'fallbackEnable'      => true,
 			'fallbackImg'         => '',
-			'imgSrcset'           => false,
-			'imgLazy'             => false,
 
 			// --------------------------
 			// Video Setting/Style
@@ -149,8 +139,6 @@ class Post_Module_2 {
 				'unit' => 'px',
 			),
 			// by default should be off
-			'enablePopup'         => false,
-			'enablePopupTitle'    => true,
 
 			// --------------------------
 			// Separator
@@ -189,7 +177,6 @@ class Post_Module_2 {
 			'hideExtraLarge'      => false,
 			'hideTablet'          => false,
 			'hideMobile'          => false,
-			'advanceCss'          => '',
 			'currentPostId'       => '',
 
 			// --------------------------------
@@ -216,6 +203,7 @@ class Post_Module_2 {
 			'dcFields'            => array(),
 			'dcSize'              => 8,
 		);
+		return apply_filters( 'ultp_post_module_2_attributes', $defaults );
 	}
 
 	public function register() {
@@ -229,19 +217,32 @@ class Post_Module_2 {
 		);
 	}
 
+	/**
+	 * Shared display settings of this block, retaining saved choices without an add-on.
+	 *
+	 * @param array $attr Block attributes.
+	 * @return array
+	 */
+	public function addon_attributes( $attr ) {
+		// Retain saved Free choices while allowing add-ons to filter them.
+		$attr = \ULTP\Extended_Compat::meta_and_category_options( $attr, $this->get_attributes(), 'post-module-2' );
+
+		return $attr;
+	}
+
 	public function content( $attr, $noAjax ) {
 		$attr = wp_parse_args( $attr, $this->get_attributes() );
-		global $ultp_unique_ID;
+		$attr = $this->addon_attributes( $attr );
 
 		if ( ! $noAjax ) {
 			$paged         = is_front_page() ? get_query_var( 'page' ) : get_query_var( 'paged' );
 			$attr['paged'] = $paged ? $paged : 1;
 		}
-		if ( $attr['queryUnique'] && isset( $attr['savedQueryUnique'] ) ) {
-			$ultp_unique_ID = $attr['savedQueryUnique'];
-		}
+		// Lets an add-on prepare for the query of this block.
+		do_action( 'ultp_block_before_query', $attr );
 
 		$block_name          = 'post-module-2';
+		$img_opts            = ultimate_post()->image_options( $attr, $block_name );
 		$vid_icon_redirect   = true; // Its used for video icon do not remove it
 		$wraper_before       = $wraper_after = $post_loop = '';
 		$attr['queryNumber'] = ultimate_post()->get_post_number( 5, $attr['queryNumber'], $attr['queryNumPosts'] );
@@ -250,11 +251,8 @@ class Post_Module_2 {
 		// Dummy Img Url
 		$dummy_url = ULTP_URL . 'assets/img/ultp-fallback-img.png';
 
-		// Loadmore and Unique content
-		if ( $attr['queryUnique'] && isset( $attr['loadMoreQueryUnique'] ) && $attr['paginationShow'] && ( $attr['paginationType'] == 'loadMore' ) ) {
-			$ultp_unique_ID            = $attr['loadMoreQueryUnique'];
-			$current_unique_posts = $attr['ultp_current_unique_posts'];
-		}
+		// Lets an add-on act once the query of this block has run.
+		do_action( 'ultp_block_after_query', $attr );
 
 		if ( $recent_posts->have_posts() ) {
 
@@ -273,37 +271,36 @@ class Post_Module_2 {
 			$attr['readMoreText']   = wp_kses( $attr['readMoreText'], ultimate_post()->ultp_allowed_html_tags() );
 			$attr['varticalAlign']  = sanitize_html_class( $attr['varticalAlign'] );
 
-			$wraper_before .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="ultp-post-grid-block wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '' . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '">';
+			$wraper_before .= '<div ' . ( $attr['advanceId'] ? 'id="' . esc_attr( $attr['advanceId'] ) . '" ' : '' ) . ' class="ultp-post-grid-block wp-block-ultimate-post-' . esc_attr( $block_name ) . ' ultp-block-' . esc_attr( $attr['blockId'] ) . '' . ( $attr['align'] ? ' align' . esc_attr( $attr['align'] ) : '' ) . '' . ( $attr['className'] ? ' ' . esc_attr( $attr['className'] ) : '' ) . '">';
 			$wraper_before .= '<div class="ultp-block-wrapper">';
 
 			// Loading
-			$wraper_before .= ultimate_post()->postx_loading();
+			$wraper_before .= wp_kses( ultimate_post()->postx_loading(), ultimate_post()->rendered_content_allowed_html() );
 
-			if ( $attr['headingShow'] || $attr['filterShow'] || $attr['paginationShow'] ) {
-				$wraper_before .= '<div class="ultp-heading-filter">';
+			// Inline filter bar and top navigation, next to the heading. Each one only when the block shows it (see Functions::inline_filter_on()).
+			$inline_filter = ultimate_post()->inline_filter_on( $attr );
+			$top_nav       = ultimate_post()->inline_navigation_on( $attr, true );
+			if ( $attr['headingShow'] || $inline_filter || $top_nav ) {
+				$wraper_before .= '<div class="ultp-heading-filter' . ( empty( $attr['headingShow'] ) ? ' ultp-no-heading' : '' ) . '">';
 				$wraper_before .= '<div class="ultp-heading-filter-in">';
-
 				// Heading
 				include ULTP_PATH . 'blocks/template/heading.php';
-
-				if ( $attr['filterShow'] || $attr['paginationShow'] ) {
+				if ( $inline_filter || $top_nav ) {
 					$wraper_before .= '<div class="ultp-filter-navigation">';
 					// Filter
-					if ( $attr['filterShow'] && $attr['queryType'] != 'posts' && $attr['queryType'] != 'customPosts' ) {
+					if ( $inline_filter ) {
 						include ULTP_PATH . 'blocks/template/filter.php';
 					}
 					// Navigation
-					if ( $attr['paginationShow'] && ( $attr['paginationType'] == 'navigation' ) && ( $attr['navPosition'] == 'topRight' ) ) {
+					if ( $top_nav ) {
 						include ULTP_PATH . 'blocks/template/navigation-before.php';
 					}
 					$wraper_before .= '</div>';
 				}
-
 				$wraper_before .= '</div>';
 				$wraper_before .= '</div>';
 			}
-
-			$wraper_before .= '<div class="ultp-block-items-wrap ultp-block-post-module2 ultp-block-content-' . $attr['varticalAlign'] . ' ultp-block-content-' . ( $attr['columnFlip'] ? 'true' : 'false' ) . ' ultp-' . $attr['layout'] . '">';
+			$wraper_before .= '<div class="ultp-block-items-wrap ultp-block-post-module2 ultp-block-content-' . esc_attr( $attr['varticalAlign'] ) . ' ultp-block-content-' . ( apply_filters( 'ultp_post_block_flip', false, $attr, array( 'block' => $block_name ) ) ? 'true' : 'false' ) . ' ' . esc_attr( sanitize_html_class( apply_filters( 'ultp_post_module_2_layout_class', 'ultp-layout1', $attr ) ) ) . '">';
 			$idx            = 0; // $idx = $noAjax ? 1 : 0;
 			while ( $recent_posts->have_posts() ) :
 				$recent_posts->the_post();
@@ -318,118 +315,114 @@ class Post_Module_2 {
 
 				include ULTP_PATH . 'blocks/template/category.php';
 
-				if ( $attr['queryUnique'] ) {
-					$ultp_unique_ID[ $attr['queryUnique'] ][] = $post_id;
-					$current_unique_posts[]              = $post_id;
-				}
+				// Lets an add-on note each post the block shows.
+				do_action( 'ultp_block_loop_post', $post_id, $attr );
 
-				$post_loop .= '<' . $attr['contentTag'] . ' class="ultp-block-item post-id-' . $post_id . '">';
+				$post_loop .= '<' . tag_escape( $attr['contentTag'] ) . ' class="ultp-block-item post-id-' . esc_attr( $post_id ) . '">';
 
 				$post_loop .= '<div class="ultp-block-content-wrap">';
-				if ( ( $post_thumb_id || $attr['fallbackEnable'] ) && $attr['showImage'] && ( $idx == 0 || ( $attr['layout'] == 'layout2' ) || ( $attr['layout'] == 'layout3' ) || ( $attr['layout'] == 'layout5' ) ) ) {
-					$post_loop .= '<div class="ultp-block-image ultp-block-image-' . $attr['imgAnimation'] . ( $attr['imgOverlay'] ? ' ultp-block-image-overlay ultp-block-image-' . $attr['imgOverlayType'] . ' ultp-block-image-' . $attr['imgOverlayType'] . $idx : '' ) . '">';
+				if ( ( $post_thumb_id || $attr['fallbackEnable'] ) && $attr['showImage'] ) {
 					if ( $idx == 0 ) {
-						$post_loop .= '<a href="' . $titlelink . '" ' . ( $attr['openInTab'] ? 'target="_blank"' : '' ) . '>';
+						$post_loop .= '<div class="ultp-block-image ultp-block-image-' . esc_attr( $attr['imgAnimation'] ) . ( $attr['imgOverlay'] ? ' ultp-block-image-overlay ultp-block-image-' . esc_attr( $attr['imgOverlayType'] ) . ' ultp-block-image-' . esc_attr( $attr['imgOverlayType'] ) . esc_attr( $idx ) : '' ) . '">';
+						$post_loop .= '<a href="' . esc_url( $titlelink ) . '" ' . ( $attr['openInTab'] ? 'target="_blank"' : '' ) . '>';
 						// Post Image Id
 						$block_img_id = $post_thumb_id ? $post_thumb_id : ( $attr['fallbackEnable'] && isset( $attr['fallbackImg']['id'] ) ? $attr['fallbackImg']['id'] : '' );
 						// Post Image
 						if ( $post_thumb_id || ( $attr['fallbackEnable'] && $block_img_id ) ) {
-							$post_loop .= ultimate_post()->get_image( $block_img_id, $attr['imgCrop'], '', $title, $attr['imgSrcset'], $attr['imgLazy'] );
+							$post_loop .= wp_kses( ultimate_post()->get_image( $block_img_id, $attr['imgCrop'], '', $title, $img_opts['srcset'], $img_opts['lazy'] ), ultimate_post()->rendered_content_allowed_html() );
 						} else {
 							$video      = ultimate_post()->get_youtube_id( $post_video );
-							$post_loop .= '<img  src="' . ( $video ? 'https://img.youtube.com/vi/' . $video . '/0.jpg' : $dummy_url ) . '" alt="dummy-img" />';
+							$post_loop .= '<img  src="' . esc_url( $video ? 'https://img.youtube.com/vi/' . $video . '/0.jpg' : $dummy_url ) . '" alt="dummy-img" />';
 						}
 						$post_loop .= '</a>';
+						if ( ( $attr['catPosition'] != 'aboveTitle' ) && $attr['catShow'] ) {
+							$post_loop .= '<div class="ultp-category-img-grid">' . wp_kses( $category, ultimate_post()->rendered_content_allowed_html() ) . '</div>';
+						}
+						$post_loop .= '</div>';
 					} else {
-						if ( ( $attr['layout'] == 'layout2' ) || ( $attr['layout'] === 'layout3' ) || ( $attr['layout'] === 'layout5' ) ) {
-							// Image
-							$post_loop .= '<a href="' . $titlelink . '" ' . ( $attr['openInTab'] ? 'target="_blank"' : '' ) . '>';
-							// Post Image Id
-							$block_img_id = $post_thumb_id ? $post_thumb_id : ( $attr['fallbackEnable'] && isset( $attr['fallbackImg']['id'] ) ? $attr['fallbackImg']['id'] : '' );
-							// Post Image
-							if ( $post_thumb_id || ( $attr['fallbackEnable'] && $block_img_id ) ) {
-								$post_loop .= ultimate_post()->get_image( $block_img_id, $attr['imgCropSmall'], '', $title, $attr['imgSrcset'], $attr['imgLazy'] );
-							} else {
-								$video      = ultimate_post()->get_youtube_id( $post_video );
-								$post_loop .= '<img  src="' . ( $video ? 'https://img.youtube.com/vi/' . $video . '/0.jpg' : $dummy_url ) . '" alt="dummy-img" />';
-							}
-							$post_loop .= '</a>';
-						}
-						if ( $post_video ) {
-							include ULTP_PATH . 'blocks/template/video_icon.php';
-						}
+						// The image of a small post. The default is empty; it can be changed through ultp_post_module_2_small_image_html.
+						$small_ctx = array(
+							'idx'           => $idx,
+							'post_id'       => $post_id,
+							'post_thumb_id' => $post_thumb_id,
+							'titlelink'     => $titlelink,
+							'title'         => $title,
+							'post_video'    => $post_video,
+							'dummy_url'     => $dummy_url,
+							'category'      => $category,
+							'img_opts'      => $img_opts,
+						);
+						$post_loop .= ultimate_post()->esc_filtered_markup( apply_filters( 'ultp_post_module_2_small_image_html', '', $attr, $small_ctx ), '' );
 					}
-					if ( ( $attr['catPosition'] != 'aboveTitle' ) && ( $idx == 0 || $attr['showSmallCat'] ) && $attr['catShow'] ) {
-						$post_loop .= '<div class="ultp-category-img-grid">' . $category . '</div>';
-					}
-					$post_loop .= '</div>';
 				}
 				$post_loop .= '<div class="ultp-block-content">';
 
-				$post_loop .= $dcContent[7];
+				$post_loop .= wp_kses( $dcContent[7], ultimate_post()->rendered_content_allowed_html() );
 
 				// Category
 				if ( ( $attr['catPosition'] == 'aboveTitle' ) && ( $idx == 0 || $attr['showSmallCat'] ) && $attr['catShow'] ) {
-					$post_loop .= $category;
+					$post_loop .= wp_kses( $category, ultimate_post()->rendered_content_allowed_html() );
 				}
 
-				$post_loop .= $dcContent[6];
+				$post_loop .= wp_kses( $dcContent[6], ultimate_post()->rendered_content_allowed_html() );
 
 				// Title
 				if ( $title && $attr['titleShow'] && $attr['titlePosition'] == 1 ) {
 					include ULTP_PATH . 'blocks/template/title.php';
 				}
 
-				$post_loop .= $dcContent[5];
+				$post_loop .= wp_kses( $dcContent[5], ultimate_post()->rendered_content_allowed_html() );
 
 				// Meta
 				if ( $attr['metaPosition'] == 'top' ) {
 					include ULTP_PATH . 'blocks/template/meta.php';
 				}
 
-				$post_loop .= $dcContent[4];
+				$post_loop .= wp_kses( $dcContent[4], ultimate_post()->rendered_content_allowed_html() );
 
 				// Title
 				if ( $title && $attr['titleShow'] && $attr['titlePosition'] == 0 ) {
 					include ULTP_PATH . 'blocks/template/title.php';
 				}
 
-				$post_loop .= $dcContent[3];
+				$post_loop .= wp_kses( $dcContent[3], ultimate_post()->rendered_content_allowed_html() );
 
 				// Large Excerpt
 				if ( $idx == 0 && $attr['excerptShow'] ) {
-					$post_loop .= '<div class="ultp-block-excerpt">' . ultimate_post()->get_excerpt( $post_id, $attr['showSeoMeta'], $attr['showFullExcerpt'], $attr['excerptLimit'] ) . '</div>';
+					$post_loop .= '<div class="ultp-block-excerpt">' . wp_kses_post( ultimate_post()->get_excerpt( $post_id, $attr['showSeoMeta'], $attr['showFullExcerpt'], $attr['excerptLimit'] ) ) . '</div>';
 				}
 				// Small Excerpt
 				if ( $idx != 0 && $attr['showSmallExcerpt'] ) {
-					$post_loop .= '<div class="ultp-block-excerpt">' . ultimate_post()->get_excerpt( $post_id, $attr['showSeoMeta'], $attr['showFullExcerpt'], $attr['smallExcerptLimit'] ) . '</div>';
+					$post_loop .= '<div class="ultp-block-excerpt">' . wp_kses_post( ultimate_post()->get_excerpt( $post_id, $attr['showSeoMeta'], $attr['showFullExcerpt'], $attr['smallExcerptLimit'] ) ) . '</div>';
 				}
 
-				$post_loop .= $dcContent[2];
+				$post_loop .= wp_kses( $dcContent[2], ultimate_post()->rendered_content_allowed_html() );
 
 				// Read More
 				if ( $attr['readMore'] && ( $idx == 0 || $attr['showSmallBtn'] ) ) {
-					$post_loop .= '<div class="ultp-block-readmore"><a aria-label="' . $title . '" href="' . $titlelink . '" ' . ( $attr['openInTab'] ? 'target="_blank"' : '' ) . '>' . ( $attr['readMoreText'] ? $attr['readMoreText'] : esc_html__( 'Read More', 'ultimate-post' ) ) . ultimate_post()->get_svg_icon( $attr['readMoreIcon'] ) . '</a></div>';
+					$post_loop .= '<div class="ultp-block-readmore"><a aria-label="' . esc_attr( $title ) . '" href="' . esc_url( $titlelink ) . '" ' . ( $attr['openInTab'] ? 'target="_blank"' : '' ) . '>' . ( $attr['readMoreText'] ? wp_kses( $attr['readMoreText'], ultimate_post()->ultp_allowed_html_tags() ) : esc_html__( 'Read More', 'ultimate-post' ) ) . wp_kses( ultimate_post()->get_svg_icon( $attr['readMoreIcon'] ), ultimate_post()->rendered_content_allowed_html() ) . '</a></div>';
 				}
 
-				$post_loop .= $dcContent[1];
+				$post_loop .= wp_kses( $dcContent[1], ultimate_post()->rendered_content_allowed_html() );
 
 				// Bottom
 				if ( $attr['metaPosition'] == 'bottom' ) {
 					include ULTP_PATH . 'blocks/template/meta.php';
 				}
 
-				$post_loop .= $dcContent[0];
+				$post_loop .= wp_kses( $dcContent[0], ultimate_post()->rendered_content_allowed_html() );
 
 				$post_loop .= '</div>';
 				if ( $post_video && $idx == 0 ) {
 					include ULTP_PATH . 'blocks/template/video_icon.php';
 				}
 				$post_loop .= '</div>';
-				if ( $post_video && $attr['enablePopup'] && ( $attr['layout'] != 'layout1' && $attr['layout'] != 'layout4' || $idx == 0 ) ) {
-					include ULTP_PATH . 'blocks/template/video_popup.php';
+				if ( $post_video ) {
+					// Popup of the post. The default is the popup of the first post; it can be changed through ultp_post_module_2_video_popup_html.
+					$popup_default = $idx == 0 ? wp_kses( \ULTP\Extended_Compat::video_popup( $attr, $post_video, $title, $titlelink ), ultimate_post()->rendered_content_allowed_html() ) : '';
+					$post_loop    .= ultimate_post()->esc_filtered_markup( apply_filters( 'ultp_post_module_2_video_popup_html', $popup_default, $attr, array( 'idx' => $idx, 'post_video' => $post_video, 'title' => $title, 'titlelink' => $titlelink ) ), $popup_default );
 				}
-				$post_loop .= '</' . $attr['contentTag'] . '>';
+				$post_loop .= '</' . tag_escape( $attr['contentTag'] ) . '>';
 
 				if ( $idx == 0 ) {
 					$bigloop   = $post_loop;
@@ -438,9 +431,9 @@ class Post_Module_2 {
 
 				++$idx;
 			endwhile;
-			if ( $attr['queryUnique'] ) {
-				$post_loop .= "<span style='display: none;' class='ultp-current-unique-posts' data-ultp-unique-ids= " . wp_json_encode( $ultp_unique_ID ) . ' data-current-unique-posts= ' . wp_json_encode( $current_unique_posts ) . '> </span>';
-			}
+			// Markup an add-on may add after the posts. Empty by default.
+			$loop_end   = apply_filters( 'ultp_block_loop_end', '', $attr );
+			$post_loop .= wp_kses( ultimate_post()->esc_filtered_markup( $loop_end, '' ), ultimate_post()->rendered_content_allowed_html() );
 			$bigloop   = '<div class="ultp-big-post-module2">' . $bigloop . '</div>';
 			$post_loop = $bigloop . '<div class="ultp-small-post-module2">' . $post_loop . '</div>';
 
@@ -449,13 +442,22 @@ class Post_Module_2 {
 			// }
 
 			$wraper_after .= '</div>'; // ultp-block-items-wrap
+
+			// Inline Load More and pagination. Post Module #2 has never drawn a navigation below its posts, so none here.
+			if ( ultimate_post()->inline_pagination_on( $attr, 'loadMore' ) ) {
+				include ULTP_PATH . 'blocks/template/loadmore.php';
+			}
+			if ( ultimate_post()->inline_pagination_on( $attr, 'pagination' ) ) {
+				include ULTP_PATH . 'blocks/template/pagination.php';
+			}
+
 			$wraper_after .= $pagi_block_html;
 			$wraper_after .= '</div>';
 			$wraper_after .= '</div>';
 
 			wp_reset_postdata();
 		} else {
-			$wraper_before .= ultimate_post()->get_no_result_found_html( $attr['notFoundMessage'] );
+			$wraper_before .= wp_kses( ultimate_post()->get_no_result_found_html( $attr['notFoundMessage'] ), ultimate_post()->rendered_content_allowed_html() );
 		}
 
 		return $noAjax ? $post_loop : $wraper_before . $post_loop . $wraper_after;

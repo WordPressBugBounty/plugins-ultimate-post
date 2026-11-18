@@ -18,6 +18,13 @@ defined( 'ABSPATH' ) || exit;
 class Blocks {
 
 	/**
+	 * IDs of the saved templates filter_content_return() is expanding, to stop cycles.
+	 *
+	 * @var array
+	 */
+	private $expanding_templates = array();
+
+	/**
 	 * Setup class.
 	 *
 	 * Registers AJAX actions and includes all block classes.
@@ -53,24 +60,10 @@ class Blocks {
 	 * @return NULL
 	 */
 	public function include_all_blocks() {
-		spl_autoload_register(
-			function ( $class ) {
-				if ( strpos( $class, 'ULTP\blocks' ) === 0 ) {
-						$source = ULTP_PATH . 'blocks/' . explode( '\\', $class )[2] . '.php';
-					if ( file_exists( $source ) ) {
-						include_once $source;
-					} else {
-						$source = ULTP_PATH . 'addons/builder/blocks/' . explode( '\\', $class )[2] . '.php';
-						if ( file_exists( $source ) ) {
-							include_once $source;
-						}
-					}
-				}
-			}
-		);
-
-		$request    = isset( $_POST['action'] ) ? sanitize_text_field( $_POST['action'] ) : '';
-		$get_action = isset( $_GET['action'] ) ? sanitize_text_field( $_GET['action'] ) : '';
+		// Read-only: tells the Divi and Elementor editor requests apart, to decide whether to load the
+		// block classes in wp-admin. Nothing is changed, so there is no nonce to check.
+		$request    = isset( $_POST['action'] ) ? sanitize_text_field( wp_unslash( $_POST['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Read-only routing check, see above.
+		$get_action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing check, see above.
 
 		if (
 			is_admin() &&
@@ -164,20 +157,22 @@ class Blocks {
 	 * @param STRING       $postId         The post ID.
 	 * @param STRING|ARRAY $filterValue    The filter value.
 	 * @param STRING       $filterType     The filter type.
-	 * @param ARRAY        $ultp_uniqueIds Unique IDs for pagination.
-	 * @param ARRAY        $ultp_current_unique_posts Current unique posts.
+	 * @param ARRAY        $unused_a       Not used. Kept so callers of the old signature keep working.
+	 * @param ARRAY        $unused_b       Not used. Kept so callers of the old signature keep working.
 	 * @param STRING       $widgetBlockId  The widget block ID.
 	 * @param STRING       $exclude_post_id The post ID to exclude.
 	 * @param ARRAY        $adv_filter_data Advanced filter data.
 	 * @return STRING The AJAX response.
 	 */
-	public function pagination_content_return( $blocks, $paged, $blockId, $blockRaw, $blockName, $builder, $postId, $filterValue, $filterType, $ultp_uniqueIds = array(), $ultp_current_unique_posts = array(), $widgetBlockId = '', $exclude_post_id = '', $adv_filter_data = array() ) {
+	public function pagination_content_return( $blocks, $paged, $blockId, $blockRaw, $blockName, $builder, $postId, $filterValue, $filterType, $unused_a = array(), $unused_b = array(), $widgetBlockId = '', $exclude_post_id = '', $adv_filter_data = array() ) {
 		foreach ( $blocks as $key => $value ) {
 			if ( $blockName == $value['blockName'] ) {
-				if ( $value['attrs']['blockId'] == $blockId ) {
-					$objName     = str_replace( ' ', '_', ucwords( str_replace( array( 'ultimate-post/', '-' ), array( '', ' ' ), $blockName ) ) );
-					$new_obj     = '\ULTP\blocks\\' . $objName;
-					$objectBlock = new $new_obj();
+				// Freeform entries have no attrs; ?? gives the same null comparison as before, without the notice.
+				if ( ( $value['attrs']['blockId'] ?? null ) == $blockId ) {
+					$objectBlock = $this->ajax_block_object( $blockName );
+					if ( ! $objectBlock ) {
+						continue;
+					}
 					$attr        = $objectBlock->get_attributes( true );
 
 					// Fix for grid blocks that do not support load more by default (pagination block)
@@ -195,15 +190,7 @@ class Blocks {
 							$attr['current_post'] = $exclude_post_id;
 						}
 					}
-					if ( isset( $value['attrs']['queryUnique'] ) && $value['attrs']['queryUnique'] ) {
-						$value['attrs']['loadMoreQueryUnique']            = $ultp_uniqueIds;
-						$ultp_uniqueIds[ $value['attrs']['queryUnique'] ] = array_diff( $ultp_uniqueIds[ $value['attrs']['queryUnique'] ], $ultp_current_unique_posts );
-						$value['attrs']['savedQueryUnique']               = $ultp_uniqueIds;
-						$value['attrs']['ultp_current_unique_posts']      = $ultp_current_unique_posts;
-					}
-					if ( isset( $value['attrs']['queryUnique'] ) && $value['attrs']['queryUnique'] && ( $value['attrs']['paginationType'] == 'loadMore' || $value['attrs']['paginationType'] == 'navigation' ) && isset( $ultp_uniqueIds ) && ! isset( $ultp_current_unique_posts ) ) {
-						die();
-					}
+					$value['attrs'] = $this->ajax_block_attrs( $value['attrs'], 'pagination', $blockName );
 
 					if ( $filterValue ) {
 						$value['attrs']['queryTaxValue'] = $adv_filter_data['is_adv'] ? wp_json_encode( $filterValue ) : wp_json_encode( array( $filterValue ) );
@@ -222,7 +209,8 @@ class Blocks {
 					}
 					// Exclude Current Post From Pagination
 					if ( $exclude_post_id ) {
-						$queryArr                       = json_decode( $value['attrs']['queryExclude'] );
+						$queryArr                       = ultimate_post()->decode_json_attr( isset( $value['attrs']['queryExclude'] ) ? $value['attrs']['queryExclude'] : '', false, array() );
+						$queryArr                       = is_array( $queryArr ) ? $queryArr : array();
 						$queryArr[]                     = array(
 							'value' => $exclude_post_id,
 							'title' => '',
@@ -230,14 +218,38 @@ class Blocks {
 						$value['attrs']['queryExclude'] = wp_json_encode( $queryArr );
 					}
 					$attr = array_merge( $attr, $value['attrs'] );
-					echo $objectBlock->content( $attr, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Block render output; each block escapes its own markup.
+					echo wp_kses( $objectBlock->content( $attr, true ), ultimate_post()->rendered_content_allowed_html() );
 					die();
 				}
 			}
 			if ( ! empty( $value['innerBlocks'] ) ) {
-				$this->pagination_content_return( $value['innerBlocks'], $paged, $blockId, $blockRaw, $blockName, $builder, $postId, $filterValue, $filterType, $ultp_uniqueIds, $ultp_current_unique_posts, $widgetBlockId, $exclude_post_id, $adv_filter_data );
+				$this->pagination_content_return( $value['innerBlocks'], $paged, $blockId, $blockRaw, $blockName, $builder, $postId, $filterValue, $filterType, $unused_a, $unused_b, $widgetBlockId, $exclude_post_id, $adv_filter_data );
 			}
 		}
+	}
+
+	/**
+	 * Attributes of the block an AJAX request renders, after an add-on has had its say.
+	 *
+	 * Filter `ultp_ajax_block_attrs`: `$attrs` the block's saved attributes, `$context` array with
+	 * `request` (`pagination` for the page and next/previous requests, `filter` for the filter
+	 * requests) and `block_name`. The default is the saved attributes, unchanged.
+	 *
+	 * @param array  $attrs      Saved attributes of the block.
+	 * @param string $request    `pagination` or `filter`.
+	 * @param string $block_name Block name, e.g. `ultimate-post/post-grid-1`.
+	 * @return array
+	 */
+	private function ajax_block_attrs( $attrs, $request, $block_name ) {
+		$filtered = apply_filters(
+			'ultp_ajax_block_attrs',
+			$attrs,
+			array(
+				'request'    => $request,
+				'block_name' => $block_name,
+			)
+		);
+		return is_array( $filtered ) ? $filtered : $attrs;
 	}
 
 
@@ -249,64 +261,40 @@ class Blocks {
 	 * @return STRING The AJAX response.
 	 */
 	public function ultp_next_prev_callback() {
-		if ( ! $this->verify_public_nonce() ) {
+		if ( ! check_ajax_referer( 'ultp-public-nonce', 'wpnonce', false ) ) {
+			$this->refuse_public_nonce();
 			return;
 		}
 
-		$paged           = isset( $_POST['paged'] ) ? sanitize_text_field( $_POST['paged'] ) : '';
-		$blockId         = isset( $_POST['blockId'] ) ? sanitize_text_field( $_POST['blockId'] ) : '';
-		$postId          = isset( $_POST['postId'] ) ? sanitize_text_field( $_POST['postId'] ) : '';
-		$blockRaw        = isset( $_POST['blockName'] ) ? sanitize_text_field( $_POST['blockName'] ) : '';
-		$builder         = isset( $_POST['builder'] ) ? sanitize_text_field( $_POST['builder'] ) : '';
-		$blockName       = str_replace( '_', '/', $blockRaw );
-		$widgetBlockId   = isset( $_POST['widgetBlockId'] ) ? sanitize_text_field( $_POST['widgetBlockId'] ) : '';
-		$exclude_post_id = isset( $_POST['exclude'] ) ? sanitize_text_field( $_POST['exclude'] ) : '';
-
-		if ( $postId ) { // patch security issue
-			$post = get_post( (int) $postId );
-
-			if ( ! $post ) {
-				wp_send_json_error( array( 'message' => 'Post not found' ) );
-				return;
-			}
-
-			// Block private posts
-			if ( $post->post_status === 'private' && ! current_user_can( 'read_private_posts' ) ) {
-				wp_send_json_error( array( 'message' => 'Private post' ) );
-				return;
-			}
-
-			// Block draft/pending
-			if ( in_array( $post->post_status, array( 'draft', 'pending' ), true )
-				&& ! current_user_can( 'edit_post', $post->ID ) ) {
-				wp_send_json_error( array( 'message' => 'Not allowed' ) );
-				return;
-			}
-
-			// Block password protected
-			if ( post_password_required( $post ) ) {
-				wp_send_json_error( array( 'message' => 'Password protected' ) );
-				return;
-			}
+		$paged           = isset( $_POST['paged'] ) ? sanitize_text_field( wp_unslash( $_POST['paged'] ) ) : '';
+		if ( $paged ) {
+			$paged = $this->sanitize_paged( $paged );
 		}
+		$blockId         = isset( $_POST['blockId'] ) ? sanitize_text_field( wp_unslash( $_POST['blockId'] ) ) : '';
+		$postId          = isset( $_POST['postId'] ) ? sanitize_text_field( wp_unslash( $_POST['postId'] ) ) : '';
+		$blockRaw        = isset( $_POST['blockName'] ) ? sanitize_text_field( wp_unslash( $_POST['blockName'] ) ) : '';
+		$builder         = isset( $_POST['builder'] ) ? sanitize_text_field( wp_unslash( $_POST['builder'] ) ) : '';
+		$blockName       = str_replace( '_', '/', $blockRaw );
+		$widgetBlockId   = isset( $_POST['widgetBlockId'] ) ? sanitize_text_field( wp_unslash( $_POST['widgetBlockId'] ) ) : '';
+		$exclude_post_id = isset( $_POST['exclude'] ) ? sanitize_text_field( wp_unslash( $_POST['exclude'] ) ) : '';
 
-		$is_adv      = isset( $_POST['isAdv'] ) ? ultimate_post()->ultp_rest_sanitize_params( $_POST['isAdv'] ) : false;
+		$is_adv     = isset( $_POST['isAdv'] ) ? map_deep( wp_unslash( $_POST['isAdv'] ), 'sanitize_text_field' ) : false;
 		$filterValue = isset( $_POST['filterValue'] ) ?
 			(
 				is_array( $_POST['filterValue'] ) ?
-					ultimate_post()->ultp_rest_sanitize_params( $_POST['filterValue'] ) :
-					sanitize_text_field( $_POST['filterValue'] )
+					map_deep( wp_unslash( $_POST['filterValue'] ), 'sanitize_text_field' ) :
+					sanitize_text_field( wp_unslash( $_POST['filterValue'] ) )
 			) :
 			'';
 
-		$filterType  = isset( $_POST['filterType'] ) ? sanitize_text_field( $_POST['filterType'] ) : '';
-		$filterShow  = isset( $_POST['filterShow'] ) ? sanitize_text_field( $_POST['filterShow'] ) : false;
-		$checkFilter = isset( $_POST['checkFilter'] ) ? sanitize_text_field( $_POST['checkFilter'] ) : false;
-		$author      = isset( $_POST['author'] ) ? sanitize_text_field( $_POST['author'] ) : false;
-		$orderby     = isset( $_POST['orderby'] ) ? sanitize_text_field( $_POST['orderby'] ) : 'date';
-		$order       = isset( $_POST['order'] ) ? sanitize_text_field( $_POST['order'] ) : 'DESC';
-		$search      = isset( $_POST['search'] ) ? sanitize_text_field( $_POST['search'] ) : '';
-		$adv_sort    = isset( $_POST['adv_sort'] ) ? sanitize_text_field( $_POST['adv_sort'] ) : '';
+		$filterType  = isset( $_POST['filterType'] ) ? sanitize_text_field( wp_unslash( $_POST['filterType'] ) ) : '';
+		$filterShow  = isset( $_POST['filterShow'] ) ? sanitize_text_field( wp_unslash( $_POST['filterShow'] ) ) : false;
+		$checkFilter = isset( $_POST['checkFilter'] ) ? sanitize_text_field( wp_unslash( $_POST['checkFilter'] ) ) : false;
+		$author      = isset( $_POST['author'] ) ? sanitize_text_field( wp_unslash( $_POST['author'] ) ) : false;
+		$orderby     = isset( $_POST['orderby'] ) ? sanitize_text_field( wp_unslash( $_POST['orderby'] ) ) : 'date';
+		$order       = isset( $_POST['order'] ) ? sanitize_text_field( wp_unslash( $_POST['order'] ) ) : 'DESC';
+		$search      = isset( $_POST['search'] ) ? wp_slash( sanitize_text_field( wp_unslash( $_POST['search'] ) ) ) : ''; // Kept slashed: WP_Query unslashes "s" itself.
+		$adv_sort    = isset( $_POST['adv_sort'] ) ? sanitize_text_field( wp_unslash( $_POST['adv_sort'] ) ) : '';
 
 		$adv_filter_data = array(
 			'is_adv'       => filter_var( $is_adv, FILTER_VALIDATE_BOOLEAN ),
@@ -320,17 +308,17 @@ class Blocks {
 			'notFirstLoad' => true,
 		);
 
-		$ultp_uniqueIds            = isset( $_POST['ultpUniqueIds'] ) ? json_decode( stripslashes( sanitize_text_field( $_POST['ultpUniqueIds'] ) ), true ) : array();
-		$ultp_current_unique_posts = isset( $_POST['ultpCurrentUniquePosts'] ) ? json_decode( stripslashes( sanitize_text_field( $_POST['ultpCurrentUniquePosts'] ) ), true ) : array();
-
 		if ( $widgetBlockId ) {
-			$blocks = parse_blocks( get_option( 'widget_block' )[ $widgetBlockId ]['content'] );
-			$this->pagination_content_return( $blocks, $paged, $blockId, $blockRaw, $blockName, $builder, '', $filterValue, $filterType, $ultp_uniqueIds, $ultp_current_unique_posts, $widgetBlockId, '', $adv_filter_data );
+			$blocks = parse_blocks( $this->widget_block_content( $widgetBlockId ) );
+			$this->pagination_content_return( $blocks, $paged, $blockId, $blockRaw, $blockName, $builder, '', $filterValue, $filterType, array(), array(), $widgetBlockId, '', $adv_filter_data );
 		} elseif ( $paged && $blockId && $postId && $blockName ) {
-			$post = get_post( $postId );
+			$post = $this->readable_source_post( $postId );
+			if ( ! $post ) {
+				$this->refuse_source_post();
+			}
 			if ( has_blocks( $post->post_content ) ) {
 				$blocks = parse_blocks( $post->post_content );
-				$this->pagination_content_return( $blocks, $paged, $blockId, $blockRaw, $blockName, $builder, $postId, $filterValue, $filterType, $ultp_uniqueIds, $ultp_current_unique_posts, '', $exclude_post_id, $adv_filter_data );
+				$this->pagination_content_return( $blocks, $paged, $blockId, $blockRaw, $blockName, $builder, $post->ID, $filterValue, $filterType, array(), array(), '', $exclude_post_id, $adv_filter_data );
 			}
 		}
 	}
@@ -343,29 +331,34 @@ class Blocks {
 	 * @return STRING The AJAX response.
 	 */
 	public function ultp_filter_callback() {
-		if ( ! $this->verify_public_nonce() ) {
+		if ( ! check_ajax_referer( 'ultp-public-nonce', 'wpnonce', false ) ) {
+			$this->refuse_public_nonce();
 			return;
 		}
 
-		$taxtype = isset( $_POST['taxtype'] ) ? sanitize_text_field( $_POST['taxtype'] ) : '';
+		$taxtype = isset( $_POST['taxtype'] ) ? sanitize_text_field( wp_unslash( $_POST['taxtype'] ) ) : '';
 		if ( $taxtype ) {
-			$blockId                   = isset( $_POST['blockId'] ) ? sanitize_text_field( $_POST['blockId'] ) : '';
-			$postId                    = isset( $_POST['postId'] ) ? sanitize_text_field( $_POST['postId'] ) : '';
-			$taxonomy                  = isset( $_POST['taxonomy'] ) ? sanitize_text_field( $_POST['taxonomy'] ) : '';
-			$blockRaw                  = isset( $_POST['blockName'] ) ? sanitize_text_field( $_POST['blockName'] ) : '';
+			$blockId                   = isset( $_POST['blockId'] ) ? sanitize_text_field( wp_unslash( $_POST['blockId'] ) ) : '';
+			$postId                    = isset( $_POST['postId'] ) ? sanitize_text_field( wp_unslash( $_POST['postId'] ) ) : '';
+			$taxonomy                  = isset( $_POST['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_POST['taxonomy'] ) ) : '';
+			$blockRaw                  = isset( $_POST['blockName'] ) ? sanitize_text_field( wp_unslash( $_POST['blockName'] ) ) : '';
 			$blockName                 = str_replace( '_', '/', $blockRaw );
-			$post                      = get_post( $postId );
-			$widgetBlockId             = isset( $_POST['widgetBlockId'] ) ? sanitize_text_field( $_POST['widgetBlockId'] ) : '';
-			$ultp_uniqueIds            = isset( $_POST['ultpUniqueIds'] ) ? json_decode( stripslashes( sanitize_text_field( $_POST['ultpUniqueIds'] ) ), true ) : array();
-			$ultp_current_unique_posts = isset( $_POST['ultpCurrentUniquePosts'] ) ? json_decode( stripslashes( sanitize_text_field( $_POST['ultpCurrentUniquePosts'] ) ), true ) : array();
+			$widgetBlockId             = isset( $_POST['widgetBlockId'] ) ? sanitize_text_field( wp_unslash( $_POST['widgetBlockId'] ) ) : '';
 			$toReturn                  = array();
 
+			if ( ! $widgetBlockId ) {
+				$post = $this->readable_source_post( $postId );
+				if ( ! $post ) {
+					$this->refuse_source_post();
+				}
+			}
+
 			if ( $widgetBlockId ) {
-				$blocks = parse_blocks( get_option( 'widget_block' )[ $widgetBlockId ]['content'] );
-				$data   = $this->filter_content_return( $blocks, $blockId, $blockRaw, $blockName, $taxtype, $taxonomy, $postId, $toReturn, $widgetBlockId, array(), $ultp_uniqueIds, $ultp_current_unique_posts );
+				$blocks = parse_blocks( $this->widget_block_content( $widgetBlockId ) );
+				$data   = $this->filter_content_return( $blocks, $blockId, $blockRaw, $blockName, $taxtype, $taxonomy, $postId, $toReturn, $widgetBlockId, array() );
 			} elseif ( has_blocks( $post->post_content ) ) {
 				$blocks = parse_blocks( $post->post_content );
-				$data   = $this->filter_content_return( $blocks, $blockId, $blockRaw, $blockName, $taxtype, $taxonomy, $postId, $toReturn, '', array(), $ultp_uniqueIds, $ultp_current_unique_posts );
+				$data   = $this->filter_content_return( $blocks, $blockId, $blockRaw, $blockName, $taxtype, $taxonomy, $postId, $toReturn, '', array() );
 			}
 			return wp_send_json_success(
 				array(
@@ -383,20 +376,21 @@ class Blocks {
 	 * @return STRING The AJAX response.
 	 */
 	public function ultp_adv_filter_callback() {
-		if ( ! $this->verify_public_nonce() ) {
+		if ( ! check_ajax_referer( 'ultp-public-nonce', 'wpnonce', false ) ) {
+			$this->refuse_public_nonce();
 			return;
 		}
 
-		$blockId = isset( $_POST['blockId'] ) ? sanitize_text_field( $_POST['blockId'] ) : '';
-		$postId  = isset( $_POST['postId'] ) ? sanitize_text_field( $_POST['postId'] ) : '';
+		$blockId = isset( $_POST['blockId'] ) ? sanitize_text_field( wp_unslash( $_POST['blockId'] ) ) : '';
+		$postId  = isset( $_POST['postId'] ) ? sanitize_text_field( wp_unslash( $_POST['postId'] ) ) : '';
 
-		$taxonomy   = isset( $_POST['taxonomy'] ) ? ultimate_post()->ultp_rest_sanitize_params( $_POST['taxonomy'] ) : '[]';
-		$builder_id = isset( $_POST['builder_id'] ) ? sanitize_text_field( $_POST['builder_id'] ) : '';
-		$author     = isset( $_POST['author'] ) ? ultimate_post()->ultp_rest_sanitize_params( $_POST['author'] ) : false;
-		$orderby    = isset( $_POST['orderby'] ) ? sanitize_text_field( $_POST['orderby'] ) : ''; // default orderbyt title requested from support
-		$order      = isset( $_POST['order'] ) ? sanitize_text_field( $_POST['order'] ) : 'DESC';
-		$search     = isset( $_POST['search'] ) ? sanitize_text_field( $_POST['search'] ) : '';
-		$adv_sort   = isset( $_POST['adv_sort'] ) ? sanitize_text_field( $_POST['adv_sort'] ) : '';
+		$taxonomy   = isset( $_POST['taxonomy'] ) ? map_deep( wp_unslash( $_POST['taxonomy'] ), 'sanitize_text_field' ) : '[]';
+		$builder_id = isset( $_POST['builder_id'] ) ? sanitize_text_field( wp_unslash( $_POST['builder_id'] ) ) : '';
+		$author     = isset( $_POST['author'] ) ? map_deep( wp_unslash( $_POST['author'] ), 'sanitize_text_field' ) : false;
+		$orderby    = isset( $_POST['orderby'] ) ? sanitize_text_field( wp_unslash( $_POST['orderby'] ) ) : ''; // default orderbyt title requested from support
+		$order      = isset( $_POST['order'] ) ? sanitize_text_field( wp_unslash( $_POST['order'] ) ) : 'DESC';
+		$search     = isset( $_POST['search'] ) ? wp_slash( sanitize_text_field( wp_unslash( $_POST['search'] ) ) ) : ''; // Kept slashed: WP_Query unslashes "s" itself.
+		$adv_sort   = isset( $_POST['adv_sort'] ) ? sanitize_text_field( wp_unslash( $_POST['adv_sort'] ) ) : '';
 
 		$adv_filter_data = array(
 			'is_adv'      => true,
@@ -410,21 +404,24 @@ class Blocks {
 			'builder'     => $builder_id,
 		);
 
-		$blockRaw      = isset( $_POST['blockName'] ) ? sanitize_text_field( $_POST['blockName'] ) : '';
+		$blockRaw      = isset( $_POST['blockName'] ) ? sanitize_text_field( wp_unslash( $_POST['blockName'] ) ) : '';
 		$blockName     = str_replace( '_', '/', $blockRaw );
-		$post          = get_post( $postId );
-		$widgetBlockId = isset( $_POST['widgetBlockId'] ) ? sanitize_text_field( $_POST['widgetBlockId'] ) : '';
+		$widgetBlockId = isset( $_POST['widgetBlockId'] ) ? sanitize_text_field( wp_unslash( $_POST['widgetBlockId'] ) ) : '';
 		$toReturn      = array();
 
-		$ultp_uniqueIds            = isset( $_POST['ultpUniqueIds'] ) ? json_decode( stripslashes( sanitize_text_field( $_POST['ultpUniqueIds'] ) ), true ) : array();
-		$ultp_current_unique_posts = isset( $_POST['ultpCurrentUniquePosts'] ) ? json_decode( stripslashes( sanitize_text_field( $_POST['ultpCurrentUniquePosts'] ) ), true ) : array();
+		if ( ! $widgetBlockId ) {
+			$post = $this->readable_source_post( $postId );
+			if ( ! $post ) {
+				$this->refuse_source_post();
+			}
+		}
 
 		if ( $widgetBlockId ) {
-			$blocks = parse_blocks( get_option( 'widget_block' )[ $widgetBlockId ]['content'] );
-			$data   = $this->filter_content_return( $blocks, $blockId, $blockRaw, $blockName, 'multiTaxonomy', $taxonomy, $postId, $toReturn, $widgetBlockId, $adv_filter_data, $ultp_uniqueIds, $ultp_current_unique_posts );
+			$blocks = parse_blocks( $this->widget_block_content( $widgetBlockId ) );
+			$data   = $this->filter_content_return( $blocks, $blockId, $blockRaw, $blockName, 'multiTaxonomy', $taxonomy, $postId, $toReturn, $widgetBlockId, $adv_filter_data );
 		} elseif ( has_blocks( $post->post_content ) ) {
 			$blocks = parse_blocks( $post->post_content );
-			$data   = $this->filter_content_return( $blocks, $blockId, $blockRaw, $blockName, 'multiTaxonomy', $taxonomy, $postId, $toReturn, '', $adv_filter_data, $ultp_uniqueIds, $ultp_current_unique_posts );
+			$data   = $this->filter_content_return( $blocks, $blockId, $blockRaw, $blockName, 'multiTaxonomy', $taxonomy, $postId, $toReturn, '', $adv_filter_data );
 		}
 		return wp_send_json_success(
 			array(
@@ -441,46 +438,58 @@ class Blocks {
 	 * @return STRING The AJAX response.
 	 */
 	public function ultp_pagination_callback() {
-		if ( ! $this->verify_public_nonce() ) {
+		if ( ! check_ajax_referer( 'ultp-public-nonce', 'wpnonce', false ) ) {
+			$this->refuse_public_nonce();
 			return;
 		}
 
-		$paged = isset( $_POST['paged'] ) ? sanitize_text_field( $_POST['paged'] ) : '';
+		$paged = isset( $_POST['paged'] ) ? sanitize_text_field( wp_unslash( $_POST['paged'] ) ) : '';
 		if ( $paged ) {
-			$blockId         = isset( $_POST['blockId'] ) ? sanitize_text_field( $_POST['blockId'] ) : '';
-			$postId          = isset( $_POST['postId'] ) ? sanitize_text_field( $_POST['postId'] ) : '';
-			$blockRaw        = isset( $_POST['blockName'] ) ? sanitize_text_field( $_POST['blockName'] ) : '';
-			$builder         = isset( $_POST['builder'] ) ? sanitize_text_field( $_POST['builder'] ) : '';
+			$paged = $this->sanitize_paged( $paged );
+			$blockId         = isset( $_POST['blockId'] ) ? sanitize_text_field( wp_unslash( $_POST['blockId'] ) ) : '';
+			$postId          = isset( $_POST['postId'] ) ? sanitize_text_field( wp_unslash( $_POST['postId'] ) ) : '';
+			$blockRaw        = isset( $_POST['blockName'] ) ? sanitize_text_field( wp_unslash( $_POST['blockName'] ) ) : '';
+			$builder         = isset( $_POST['builder'] ) ? sanitize_text_field( wp_unslash( $_POST['builder'] ) ) : '';
 			$blockName       = str_replace( '_', '/', $blockRaw );
-			$post            = get_post( $postId );
-			$widgetBlockId   = isset( $_POST['widgetBlockId'] ) ? sanitize_text_field( $_POST['widgetBlockId'] ) : '';
-			$exclude_post_id = isset( $_POST['exclude'] ) ? sanitize_text_field( $_POST['exclude'] ) : '';
+			$widgetBlockId   = isset( $_POST['widgetBlockId'] ) ? sanitize_text_field( wp_unslash( $_POST['widgetBlockId'] ) ) : '';
+			$exclude_post_id = isset( $_POST['exclude'] ) ? sanitize_text_field( wp_unslash( $_POST['exclude'] ) ) : '';
 
-			$is_adv = isset( $_POST['isAdv'] ) ? ultimate_post()->ultp_rest_sanitize_params( $_POST['isAdv'] ) : false;
+			if ( ! $widgetBlockId ) {
+				$post = $this->readable_source_post( $postId );
+				if ( ! $post ) {
+					$this->refuse_source_post();
+				}
+			}
+
+			$is_adv = isset( $_POST['isAdv'] ) ? map_deep( wp_unslash( $_POST['isAdv'] ), 'sanitize_text_field' ) : false;
 
 			$filterValue = array();
 
 			if ( isset( $_POST['filterValue'] ) ) {
+				// The frontend sends an array (jQuery parses a JSON data attribute), or a single
+				// value such as a term slug. A JSON array is decoded; any other non-empty string
+				// (a plain slug is not valid JSON) is kept as the sanitized string, as ultp_next_prev_callback() does.
 				if ( is_array( $_POST['filterValue'] ) ) {
-					$filterValue = ultimate_post()->ultp_rest_sanitize_params( $_POST['filterValue'] );
-				} else {
-					$decoded = json_decode( $_POST['filterValue'] );
-					if ( is_array( $decoded ) ) {
+					$filterValue = map_deep( wp_unslash( $_POST['filterValue'] ), 'sanitize_text_field' );
+				} elseif ( is_string( $_POST['filterValue'] ) ) {
+					$raw_filter = sanitize_text_field( wp_unslash( $_POST['filterValue'] ) );
+					$decoded    = json_decode( $raw_filter, true );
+					if ( JSON_ERROR_NONE === json_last_error() && is_array( $decoded ) ) {
 						$filterValue = ultimate_post()->ultp_rest_sanitize_params( $decoded );
-					} elseif ( $decoded ) {
-						$filterValue = sanitize_text_field( $_POST['filterValue'] );
+					} elseif ( '' !== $raw_filter ) {
+						$filterValue = $raw_filter;
 					}
 				}
 			}
 
-			$filterType  = isset( $_POST['filterType'] ) ? sanitize_text_field( $_POST['filterType'] ) : '';
-			$filterShow  = isset( $_POST['filterShow'] ) ? sanitize_text_field( $_POST['filterShow'] ) : false;
-			$checkFilter = isset( $_POST['checkFilter'] ) ? sanitize_text_field( $_POST['checkFilter'] ) : false;
-			$author      = isset( $_POST['author'] ) ? sanitize_text_field( $_POST['author'] ) : false;
-			$orderby     = isset( $_POST['orderby'] ) ? sanitize_text_field( $_POST['orderby'] ) : 'title'; // default orderbyt title requested from support
-			$order       = isset( $_POST['order'] ) ? sanitize_text_field( $_POST['order'] ) : 'DESC';
-			$search      = isset( $_POST['search'] ) ? sanitize_text_field( $_POST['search'] ) : '';
-			$adv_sort    = isset( $_POST['adv_sort'] ) ? sanitize_text_field( $_POST['adv_sort'] ) : '';
+			$filterType  = isset( $_POST['filterType'] ) ? sanitize_text_field( wp_unslash( $_POST['filterType'] ) ) : '';
+			$filterShow  = isset( $_POST['filterShow'] ) ? sanitize_text_field( wp_unslash( $_POST['filterShow'] ) ) : false;
+			$checkFilter = isset( $_POST['checkFilter'] ) ? sanitize_text_field( wp_unslash( $_POST['checkFilter'] ) ) : false;
+			$author      = isset( $_POST['author'] ) ? sanitize_text_field( wp_unslash( $_POST['author'] ) ) : false;
+			$orderby     = isset( $_POST['orderby'] ) ? sanitize_text_field( wp_unslash( $_POST['orderby'] ) ) : 'title'; // default orderbyt title requested from support
+			$order       = isset( $_POST['order'] ) ? sanitize_text_field( wp_unslash( $_POST['order'] ) ) : 'DESC';
+			$search      = isset( $_POST['search'] ) ? wp_slash( sanitize_text_field( wp_unslash( $_POST['search'] ) ) ) : ''; // Kept slashed: WP_Query unslashes "s" itself.
+			$adv_sort    = isset( $_POST['adv_sort'] ) ? sanitize_text_field( wp_unslash( $_POST['adv_sort'] ) ) : '';
 
 			$adv_filter_data = array(
 				'is_adv'      => filter_var( $is_adv, FILTER_VALIDATE_BOOLEAN ),
@@ -493,15 +502,12 @@ class Blocks {
 				'adv_sort'    => $adv_sort,
 			);
 
-			$ultp_uniqueIds            = isset( $_POST['ultpUniqueIds'] ) ? json_decode( stripslashes( sanitize_text_field( $_POST['ultpUniqueIds'] ) ), true ) : array();
-			$ultp_current_unique_posts = isset( $_POST['ultpCurrentUniquePosts'] ) ? json_decode( stripslashes( sanitize_text_field( $_POST['ultpCurrentUniquePosts'] ) ), true ) : array();
-
 			if ( $widgetBlockId ) {
-				$blocks = parse_blocks( get_option( 'widget_block' )[ $widgetBlockId ]['content'] );
-				$this->pagination_content_return( $blocks, $paged, $blockId, $blockRaw, $blockName, $builder, '', $filterValue, $filterType, $ultp_uniqueIds, $ultp_current_unique_posts, $widgetBlockId, '', $adv_filter_data );
+				$blocks = parse_blocks( $this->widget_block_content( $widgetBlockId ) );
+				$this->pagination_content_return( $blocks, $paged, $blockId, $blockRaw, $blockName, $builder, '', $filterValue, $filterType, array(), array(), $widgetBlockId, '', $adv_filter_data );
 			} elseif ( has_blocks( $post->post_content ) ) {
 				$blocks = parse_blocks( $post->post_content );
-				$this->pagination_content_return( $blocks, $paged, $blockId, $blockRaw, $blockName, $builder, $postId, $filterValue, $filterType, $ultp_uniqueIds, $ultp_current_unique_posts, '', $exclude_post_id, $adv_filter_data );
+				$this->pagination_content_return( $blocks, $paged, $blockId, $blockRaw, $blockName, $builder, $post->ID, $filterValue, $filterType, array(), array(), '', $exclude_post_id, $adv_filter_data );
 			}
 		}
 	}
@@ -514,11 +520,12 @@ class Blocks {
 	 * @return void
 	 */
 	public function ultp_share_count_callback() {
-		if ( ! $this->verify_public_nonce() ) {
+		if ( ! check_ajax_referer( 'ultp-public-nonce', 'wpnonce', false ) ) {
+			$this->refuse_public_nonce();
 			return;
 		}
 
-		$post_id = isset( $_POST['postId'] ) ? absint( $_POST['postId'] ) : 0;
+		$post_id = isset( $_POST['postId'] ) && is_scalar( $_POST['postId'] ) ? absint( $_POST['postId'] ) : 0; // An array (postId[]=1) is no post ID.
 
 		// Validate post ID
 		if ( ! $post_id ) {
@@ -569,11 +576,11 @@ class Blocks {
 		set_transient( $transient_key, true, 60 ); // 60 seconds cooldown
 
 		// Always increment by 1 from database - ignore POST shareCount
-		$current_count = get_post_meta( $post_id, 'share_count', true );
+		$current_count = get_post_meta( $post_id, '_ultp_share_count', true );
 		$current_count = $current_count ? absint( $current_count ) : 0;
 		$new_count     = $current_count + 1;
 
-		update_post_meta( $post_id, 'share_count', $new_count );
+		update_post_meta( $post_id, '_ultp_share_count', $new_count );
 	}
 
 	/**
@@ -591,28 +598,33 @@ class Blocks {
 	 * @param ARRAY        $toReturn     The array to return.
 	 * @param STRING       $widgetBlockId The widget block ID.
 	 * @param ARRAY        $adv_filter_data The advanced filter data.
-	 * @param ARRAY        $ultp_uniqueIds The unique IDs.
-	 * @param ARRAY        $ultp_current_unique_posts The current unique posts.
+	 * @param ARRAY        $unused_a      Not used. Kept so callers of the old signature keep working.
+	 * @param ARRAY        $unused_b      Not used. Kept so callers of the old signature keep working.
 	 * @return ARRAY
 	 */
-	public function filter_content_return( $blocks, $blockId, $blockRaw, $blockName, $taxtype, $taxonomy, $postId, &$toReturn, $widgetBlockId = '', $adv_filter_data = array(), $ultp_uniqueIds = array(), $ultp_current_unique_posts = array() ) {
+	public function filter_content_return( $blocks, $blockId, $blockRaw, $blockName, $taxtype, $taxonomy, $postId, &$toReturn, $widgetBlockId = '', $adv_filter_data = array(), $unused_a = array(), $unused_b = array() ) {
 		foreach ( $blocks as $key => $value ) {
 			if ( ( $value['blockName'] ?? '' ) === 'core/shortcode' ) {
 				if ( preg_match( '/id="([^"]+)"/', $value['innerHTML'] ?? '', $matches ) ) {
-					$template_post = get_post( $matches[1] );
-					if ( $template_post && ! empty( $template_post->post_content ) ) {
+					$template_post = $this->readable_source_post( $matches[1] );
+					// A template that embeds itself, directly or through another, would recurse forever.
+					if ( $template_post && ! empty( $template_post->post_content ) && ! isset( $this->expanding_templates[ $template_post->ID ] ) ) {
 						$template_blocks = parse_blocks( $template_post->post_content );
 						// recurse into the expanded blocks instead
-						$this->filter_content_return( $template_blocks, $blockId, $blockRaw, $blockName, $taxtype, $taxonomy, $postId, $toReturn, $widgetBlockId, $adv_filter_data, $ultp_uniqueIds, $ultp_current_unique_posts );
+						$this->expanding_templates[ $template_post->ID ] = true;
+						$this->filter_content_return( $template_blocks, $blockId, $blockRaw, $blockName, $taxtype, $taxonomy, $postId, $toReturn, $widgetBlockId, $adv_filter_data, $unused_a, $unused_b );
+						unset( $this->expanding_templates[ $template_post->ID ] );
 						continue; // skip the shortcode block itself
 					}
 				}
         	}
 			if ( $blockName == $value['blockName'] ) {
-				if ( $value['attrs']['blockId'] == $blockId ) {
-					$objName     = str_replace( ' ', '_', ucwords( str_replace( array( 'ultimate-post/', '-' ), array( '', ' ' ), $blockName ) ) );
-					$new_obj     = '\ULTP\blocks\\' . $objName;
-					$objectBlock = new $new_obj();
+				// Freeform entries have no attrs; ?? gives the same null comparison as before, without the notice.
+				if ( ( $value['attrs']['blockId'] ?? null ) == $blockId ) {
+					$objectBlock = $this->ajax_block_object( $blockName );
+					if ( ! $objectBlock ) {
+						continue;
+					}
 					$attr        = $objectBlock->get_attributes( true );
 					if ( $taxonomy ) {
 
@@ -637,18 +649,17 @@ class Blocks {
 						$value['attrs']['queryNumber'] = $value['attrs']['queryNumber'];
 					}
 
-					if ( isset( $value['attrs']['queryUnique'] ) && $value['attrs']['queryUnique'] ) {
-						$value['attrs']['loadMoreQueryUnique']            = $ultp_uniqueIds;
-						$ultp_uniqueIds[ $value['attrs']['queryUnique'] ] = array_diff( $ultp_uniqueIds[ $value['attrs']['queryUnique'] ], $ultp_current_unique_posts );
-						$value['attrs']['savedQueryUnique']               = $ultp_uniqueIds;
-						$value['attrs']['ultp_current_unique_posts']      = $ultp_current_unique_posts;
-					}
+					$value['attrs'] = $this->ajax_block_attrs( $value['attrs'], 'filter', $blockName );
 
-					if ( $adv_filter_data['builder'] ) {
+					if ( ! empty( $adv_filter_data['builder'] ) ) {
 						$value['attrs']['builder'] = $adv_filter_data['builder'];
 					}
 
 					$attr = array_merge( $attr, $value['attrs'] );
+					// Settings an add-on may supply for this block (see the block's addon_attributes()).
+					if ( method_exists( $objectBlock, 'addon_attributes' ) ) {
+						$attr = $objectBlock->addon_attributes( $attr );
+					}
 
 					$filter_attributes = array();
 
@@ -677,10 +688,60 @@ class Blocks {
 				}
 			}
 			if ( ! empty( $value['innerBlocks'] ) ) {
-				$this->filter_content_return( $value['innerBlocks'], $blockId, $blockRaw, $blockName, $taxtype, $taxonomy, $postId, $toReturn, $widgetBlockId, $adv_filter_data, $ultp_uniqueIds, $ultp_current_unique_posts );
+				$this->filter_content_return( $value['innerBlocks'], $blockId, $blockRaw, $blockName, $taxtype, $taxonomy, $postId, $toReturn, $widgetBlockId, $adv_filter_data, $unused_a, $unused_b );
 			}
 		}
 		return $toReturn;
+	}
+
+	/**
+	 * The PostX block class an AJAX request names, or null when there is none to render.
+	 *
+	 * The name comes from a public request: a block without its own render class (such as
+	 * post-pagination), or one without content(), would otherwise be a fatal error.
+	 *
+	 * @since v.5.1.2
+	 *
+	 * @param STRING $block_name Block name, e.g. ultimate-post/post-grid-1.
+	 * @return object|null
+	 */
+	private function ajax_block_object( $block_name ) {
+		$class = '\ULTP\blocks\\' . str_replace( ' ', '_', ucwords( str_replace( array( 'ultimate-post/', '-' ), array( '', ' ' ), (string) $block_name ) ) );
+		if ( ! class_exists( $class ) || ! method_exists( $class, 'get_attributes' ) || ! method_exists( $class, 'content' ) ) {
+			return null;
+		}
+		return new $class();
+	}
+
+	/**
+	 * A page number from an AJAX request, as a whole number from 1 up.
+	 *
+	 * Anything that is not a number counts as page 1. The upper limit keeps the SQL offset
+	 * (page x posts per page) inside an integer; no site has that many pages.
+	 *
+	 * @since v.5.1.2
+	 *
+	 * @param MIXED $paged Page number from the request.
+	 * @return int
+	 */
+	private function sanitize_paged( $paged ) {
+		return min( max( 1, absint( $paged ) ), 1000000 );
+	}
+
+	/**
+	 * Content of a widget block, or an empty string when the widget is not there.
+	 *
+	 * @since v.5.1.2
+	 *
+	 * @param STRING $widget_block_id Widget block ID from the request.
+	 * @return STRING
+	 */
+	private function widget_block_content( $widget_block_id ) {
+		$widgets = get_option( 'widget_block' );
+		if ( is_array( $widgets ) && isset( $widgets[ $widget_block_id ]['content'] ) && is_string( $widgets[ $widget_block_id ]['content'] ) ) {
+			return $widgets[ $widget_block_id ]['content'];
+		}
+		return '';
 	}
 
 	/**
@@ -707,28 +768,31 @@ class Blocks {
 
 		if ( $attr['paginationType'] == 'loadMore' ) {
 			$wraper_after     .= '<div ' . $style . ' class="ultp-loadmore "' . '>';
-				$wraper_after .= '<span class="ultp-loadmore-action" tabindex="0" role="button" data-pages="' . $pageNum . '" data-pagenum="1" data-blockid="' . $attr['blockId'] . '" data-blockname="' . $blockRaw . '" data-postid="' . $postId . '" ' . ultimate_post()->get_builder_attr( $attr['queryType'] ) . $datasets . '>' . ( isset( $attr['loadMoreText'] ) ? $attr['loadMoreText'] : 'Load More' ) . ' <span class="ultp-spin">' . ultimate_post()->get_svg_icon( 'refresh' ) . '</span></span>';
+				$wraper_after .= wp_kses( '<span class="ultp-loadmore-action" tabindex="0" role="button" data-pages="' . esc_attr( $pageNum ) . '" data-pagenum="1" data-blockid="' . esc_attr( $attr['blockId'] ) . '" data-blockname="' . esc_attr( $blockRaw ) . '" data-postid="' . esc_attr( $postId ) . '" ' . ultimate_post()->get_builder_attr( $attr['queryType'] ) . $datasets . '>', ultimate_post()->rendered_content_allowed_html() ) . esc_html( isset( $attr['loadMoreText'] ) ? $attr['loadMoreText'] : 'Load More' ) . ' <span class="ultp-spin">' . wp_kses( ultimate_post()->get_svg_icon( 'refresh' ), ultimate_post()->rendered_content_allowed_html() ) . '</span></span>';
 			$wraper_after     .= '</div>';
 		} elseif ( $attr['paginationType'] == 'navigation' ) {
-			$wraper_after     .= '<div ' . $style . '  class="ultp-next-prev-wrap" data-pages="' . $pageNum . '" data-pagenum="1" data-blockid="' . $attr['blockId'] . '" data-blockname="' . $blockRaw . '" data-postid="' . $postId . '" ' . ultimate_post()->get_builder_attr( $attr['queryType'] ) . $datasets . '>';
-				$wraper_after .= ultimate_post()->next_prev();
+			$wraper_after     .= wp_kses( '<div ' . $style . '  class="ultp-next-prev-wrap" data-pages="' . esc_attr( $pageNum ) . '" data-pagenum="1" data-blockid="' . esc_attr( $attr['blockId'] ) . '" data-blockname="' . esc_attr( $blockRaw ) . '" data-postid="' . esc_attr( $postId ) . '" ' . ultimate_post()->get_builder_attr( $attr['queryType'] ) . $datasets . '>', ultimate_post()->rendered_content_allowed_html() );
+				$wraper_after .= wp_kses( ultimate_post()->next_prev(), ultimate_post()->rendered_content_allowed_html() );
 			$wraper_after     .= '</div>';
 		} elseif ( $attr['paginationType'] == 'pagination' ) {
-			$wraper_after .= '<div class="ultp-pagination-wrap' . ( $attr['paginationAjax'] ? ' ultp-pagination-ajax-action' : '' ) . '" data-paged="1" data-blockid="' . $attr['blockId'] . '" data-postid="' . $postId . '" data-pages="' . $pageNum . '" data-blockname="' . $blockRaw . '" ' . ultimate_post()->get_builder_attr( $attr['queryType'] ) . $datasets . '>';
+			$wraper_after .= wp_kses( '<div class="ultp-pagination-wrap' . ( $attr['paginationAjax'] ? ' ultp-pagination-ajax-action' : '' ) . '" data-paged="1" data-blockid="' . esc_attr( $attr['blockId'] ) . '" data-postid="' . esc_attr( $postId ) . '" data-pages="' . esc_attr( $pageNum ) . '" data-blockname="' . esc_attr( $blockRaw ) . '" ' . ultimate_post()->get_builder_attr( $attr['queryType'] ) . $datasets . '>', ultimate_post()->rendered_content_allowed_html() );
 
-			$wraper_after .= ultimate_post()->pagination(
-				$pageNum,
-				$attr['paginationNav'],
-				$attr['paginationText'],
-				$attr['paginationAjax'],
-				isset( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( $_SERVER['HTTP_REFERER'] ) : '',
-				$attr['blockId']
+			$wraper_after .= wp_kses(
+				ultimate_post()->pagination(
+					$pageNum,
+					$attr['paginationNav'],
+					$attr['paginationText'],
+					$attr['paginationAjax'],
+					isset( $_SERVER['HTTP_REFERER'] ) ? sanitize_url( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '',
+					$attr['blockId']
+				),
+				ultimate_post()->rendered_content_allowed_html()
 			);
 
 			$wraper_after .= '</div>';
 		}
-		wp_reset_query();
-			
+		wp_reset_postdata();
+
 		// queryQuick
 		return array(
 			'pagination_content' => $wraper_after,
@@ -751,9 +815,111 @@ class Blocks {
 	}
 
 	/**
-	 * Verify the front-end AJAX nonce, or end the request.
+	 * The post a public block AJAX request may read blocks from.
 	 *
-	 * Fails with a machine-readable 403 rather than the bare `return` these
+	 * The pagination and filter handlers are open to visitors and take the source
+	 * post ID from the request, so the ID is untrusted: without this check any
+	 * draft, private, scheduled or trashed post could be rendered by guessing its
+	 * ID and a block ID. Neither the public nonce nor the block ID authorises the
+	 * read.
+	 *
+	 * Allowed:
+	 *  - published posts of a viewable post type, unless password protected and the
+	 *    visitor has not entered the password;
+	 *  - published PostX builder and saved templates, block templates, template
+	 *    parts and synced patterns, which are not viewable types but are rendered
+	 *    into public pages;
+	 *  - anything else only to a user who may read (non-published) or edit
+	 *    (non-viewable type) that post.
+	 *
+	 * A revision stands in for its parent: the block-theme lookup in
+	 * get_page_post_id() can return one. The parent is checked and its current
+	 * content used, so an autosave never leaks unpublished edits.
+	 *
+	 * @since v.5.1.2
+	 *
+	 * @param MIXED $post_id Post ID from the request.
+	 * @return \WP_Post|null The post, or null when this request may not read it.
+	 */
+	private function readable_source_post( $post_id ) {
+		$post_id = absint( $post_id );
+		if ( ! $post_id ) {
+			return null;
+		}
+
+		$post = get_post( $post_id );
+		if ( $post && 'revision' === $post->post_type ) {
+			$post = $post->post_parent ? get_post( $post->post_parent ) : null;
+		}
+		if ( ! $post || post_password_required( $post ) ) {
+			return null;
+		}
+
+		if ( 'publish' !== $post->post_status ) {
+			return $this->current_user_can_post( 'read_post', $post ) ? $post : null;
+		}
+
+		/**
+		 * Filter `ultp_ajax_source_post_types`: post types that are not publicly viewable
+		 * but whose published posts are rendered into public pages, such as a theme
+		 * builder's layout type. Visitors may page and filter PostX blocks stored in them.
+		 *
+		 * @param array $types Post type names.
+		 */
+		$rendered_types = (array) apply_filters( 'ultp_ajax_source_post_types', array( 'ultp_builder', 'ultp_templates', 'wp_template', 'wp_template_part', 'wp_block' ) );
+		if ( is_post_type_viewable( $post->post_type ) || in_array( $post->post_type, $rendered_types, true ) ) {
+			return $post;
+		}
+
+		return $this->current_user_can_post( 'edit_post', $post ) ? $post : null;
+	}
+
+	/**
+	 * Whether the current user has a post capability on one post.
+	 *
+	 * map_meta_cap() cannot answer for an unregistered post type (an addon's type while the
+	 * addon is off) and raises _doing_it_wrong, so for those it asks for edit_others_posts,
+	 * which is what core falls back to.
+	 *
+	 * @since v.5.1.2
+	 *
+	 * @param string   $cap  'read_post' or 'edit_post'.
+	 * @param \WP_Post $post The post.
+	 * @return bool
+	 */
+	private function current_user_can_post( $cap, $post ) {
+		if ( ! post_type_exists( $post->post_type ) ) {
+			return current_user_can( 'edit_others_posts' );
+		}
+		return current_user_can( $cap, $post->ID );
+	}
+
+	/**
+	 * End a block AJAX request whose source post the visitor may not read.
+	 *
+	 * 403 so the front-end AJAX error path runs; a 200 would be inserted into the
+	 * block as markup. The code differs from 'ultp_invalid_nonce' so the client
+	 * does not fetch a new nonce and retry.
+	 *
+	 * @since v.5.1.2
+	 *
+	 * @return void
+	 */
+	private function refuse_source_post() {
+		wp_send_json_error(
+			array(
+				'code'    => 'ultp_source_forbidden',
+				'message' => __( 'This content is not available.', 'ultimate-post' ),
+			),
+			403
+		);
+	}
+
+	/**
+	 * End a front-end AJAX request whose nonce failed.
+	 *
+	 * Each handler checks its own nonce with check_ajax_referer( 'ultp-public-nonce', 'wpnonce', false )
+	 * and calls this on failure. It fails with a machine-readable 403 rather than the bare `return` these
 	 * handlers used to do. A bare return lets admin-ajax emit "0" at HTTP 200,
 	 * which the client cannot tell apart from a real response — ultp_next_prev's
 	 * success handler treated that "0" as markup and rendered it into the block.
@@ -765,15 +931,11 @@ class Blocks {
 	 * not an attack signal. See ultp_get_nonce_callback() for what this nonce
 	 * does and does not protect.
 	 *
-	 * @since v.5.1.0
+	 * @since v.5.1.0 As verify_public_nonce(); since 5.1.2 the check itself sits in each handler.
 	 *
-	 * @return BOOLEAN True when the nonce is valid; otherwise the request ends.
+	 * @return void The request ends.
 	 */
-	private function verify_public_nonce() {
-		if ( isset( $_REQUEST['wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['wpnonce'] ) ), 'ultp-public-nonce' ) ) {
-			return true;
-		}
-
+	private function refuse_public_nonce() {
 		wp_send_json_error(
 			array(
 				'code'    => 'ultp_invalid_nonce',
@@ -781,8 +943,6 @@ class Blocks {
 			),
 			403
 		);
-
-		return false;
 	}
 
 	/**

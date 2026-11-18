@@ -96,14 +96,6 @@
 		});
 	}
 
-	// *************************************
-	// Add target blank for upgrade button
-	// *************************************
-	const postxMenuHref = $("#toplevel_page_ultp-settings > a").attr("href");
-	if (postxMenuHref?.indexOf("?page=ultp-settings") > 0) {
-		$("#toplevel_page_ultp-settings > a").attr("href", postxMenuHref + "#home");
-	}
-
 	// $("#toplevel_page_ultp-settings ul > li > a").each(function (e) {
 	// 	if (
 	// 		$(this).attr("href") &&
@@ -159,21 +151,6 @@
 	$(document).on("click", ".ultp-block-settings", function (e) {
 		$(this).parent().find(".ultp-popup-container").addClass("active");
 	});
-
-	// *************************************
-	// Add URL for PostX
-	// *************************************
-	$(document).on(
-		"click",
-		"#plugin-information-content ul > li > a",
-		function (e) {
-			const URL = $(this).attr("href");
-			if (URL.includes("downloads/gutenberg-post-blocks-pro")) {
-				e.preventDefault();
-				window.open("https://www.wpxpo.com/postx/");
-			}
-		},
-	);
 
 	// *************************************
 	// PostX Builder Metabox Settings
@@ -304,7 +281,7 @@
 			url: ultp_option_panel.ajax,
 			type: "POST",
 			data: {
-				action: "disable_google_font",
+				action: "ultp_disable_google_font",
 				wpnonce: ultp_option_panel.security,
 			},
 			beforeSend: function () {
@@ -326,18 +303,28 @@
 		});
 	});
 
-	// saved template back button
-	$(document).ready(function () {
-		if (
-			$(".block-editor-page") &&
-			ultp_option_panel.post_type == "ultp_templates"
-		) {
-			setTimeout(function () {
-				if ($(".edit-post-fullscreen-mode-close").length > 0) {
-					$(".edit-post-fullscreen-mode-close")[0].href =
-						ultp_option_panel.saved_template_url;
-				}
-			}, 1);
-		}
-	});
+	// -------------------------------
+	// -- Saved Template / Builder Back Button --
+	// -------------------------------
+	// The editor's back button links to edit.php?post_type=..., the list screen. Send it to the
+	// post type's PostX dashboard tab instead. The button has no stable class across WordPress
+	// versions and is re-rendered, so match it by its link and fix it as the user reaches it.
+	const editorBackUrls = {
+		ultp_templates: ultp_option_panel.saved_template_url,
+		ultp_builder: ultp_option_panel.builder_url,
+	};
+	const editorBackUrl =
+		$("body").hasClass("block-editor-page") &&
+		editorBackUrls[ultp_option_panel.post_type];
+	if (editorBackUrl) {
+		$(document).on("pointerover focusin click", "a[href]", function () {
+			const url = new URL(this.href, window.location.href);
+			if (
+				url.pathname.endsWith("/edit.php") &&
+				url.search === "?post_type=" + ultp_option_panel.post_type
+			) {
+				this.href = editorBackUrl;
+			}
+		});
+	}
 })(jQuery);

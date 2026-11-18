@@ -40,7 +40,6 @@ class Post_View_Count {
 			'hideDesktop'    => false,
 			'hideTablet'     => false,
 			'hideMobile'     => false,
-			'advanceCss'     => '',
 		);
 	}
 
@@ -60,7 +59,7 @@ class Post_View_Count {
 		$block_name     = 'post-view-count';
 		$wrapper_before = $wrapper_after = $content = '';
 
-		$count = get_post_meta( get_the_ID(), '__post_views_count', true );
+		$count = get_post_meta( get_the_ID(), '_ultp_post_views_count', true );
 
 		$attr['className']     = isset( $attr['className'] ) && $attr['className'] ? preg_replace( '/[^A-Za-z0-9_ -]/', '', $attr['className'] ) : '';
 		$attr['align']         = isset( $attr['align'] ) && $attr['align'] ? preg_replace( '/[^A-Za-z0-9_ -]/', '', $attr['align'] ) : '';
@@ -68,17 +67,17 @@ class Post_View_Count {
 		$attr['blockId']       = isset( $attr['blockId'] ) ? sanitize_html_class( $attr['blockId'] ) : '';
 		$attr['viewLabelText'] = wp_kses( $attr['viewLabelText'], ultimate_post()->ultp_allowed_html_tags() );
 
-		$wrapper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '">';
+		$wrapper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . esc_attr( $attr['advanceId'] ) . '" ' : '' ) . ' class="wp-block-ultimate-post-' . esc_attr( $block_name ) . ' ultp-block-' . esc_attr( $attr['blockId'] ) . ( $attr['className'] ? ' ' . esc_attr( $attr['className'] ) : '' ) . '' . ( $attr['align'] ? ' align' . esc_attr( $attr['align'] ) : '' ) . '">';
 			$wrapper_before .= '<div class="ultp-block-wrapper">';
 				$content    .= '<span class="ultp-view-count">';
 		if ( $attr['viewIconShow'] && $attr['viewIconStyle'] ) {
-			$content .= ultimate_post()->get_svg_icon( $attr['viewIconStyle'] );
+			$content .= wp_kses( ultimate_post()->get_svg_icon( $attr['viewIconStyle'] ), ultimate_post()->rendered_content_allowed_html() );
 		}
 					$content     .= '<span class="ultp-view-count-number">';
-						$content .= $count ? $count : 0;
+						$content .= esc_html( $count ? $count : 0 );
 					$content     .= '</span>';
 		if ( $attr['viewLabel'] ) {
-			$content .= '<span class="ultp-view-label"> ' . $attr['viewLabelText'] . '</span>';
+			$content .= '<span class="ultp-view-label"> ' . wp_kses( $attr['viewLabelText'], ultimate_post()->ultp_allowed_html_tags() ) . '</span>';
 		}
 				$content   .= '</span>';
 			$wrapper_after .= '</div>';

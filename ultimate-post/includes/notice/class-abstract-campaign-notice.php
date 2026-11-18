@@ -9,7 +9,7 @@ namespace ULTP\Includes\Notice;
 
 defined( 'ABSPATH' ) || exit;
 
-use ULTP\Includes\Durbin\Xpo;
+use ULTP\Includes\Helper\Xpo;
 
 /**
  * A notice that shows between two dates until the user dismisses it.
@@ -58,7 +58,7 @@ abstract class Abstract_Campaign_Notice implements Notice_Type {
 			'end'             => '',   // e.g. '2026-05-21 23:59 Asia/Dhaka'.
 			'url'             => '',   // Full link. Leave empty to build one from `utm_key`.
 			'utm_key'         => '',   // Key passed to Xpo::generate_utm_link().
-			'visibility'      => null, // null shows the notice only while no Pro licence is active.
+			'visibility'      => null, // null shows the notice only while PostX Pro is not active.
 			'repeat_interval' => 0,    // Seconds before a dismissed notice may return. 0 hides it for good.
 		);
 	}
@@ -118,7 +118,7 @@ abstract class Abstract_Campaign_Notice implements Notice_Type {
 	 */
 	protected function is_visible() {
 		if ( null === $this->args['visibility'] ) {
-			return ! Xpo::is_lc_active();
+			return Xpo::show_upsell();
 		}
 		return (bool) $this->args['visibility'];
 	}

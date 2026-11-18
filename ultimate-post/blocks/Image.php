@@ -32,8 +32,6 @@ class Image {
 			'imgMargin'      => (object) array( 'lg' => '' ),
 			'imgOverlay'     => false,
 			'imgOverlayType' => 'default',
-			'imgSrcset'      => false,
-			'imgLazy'        => false,
 			// Heading Setting/Style
 			'headingText'    => 'This is a Image Example',
 			'headingEnable'  => false,
@@ -51,7 +49,6 @@ class Image {
 			'hideExtraLarge' => false,
 			'hideTablet'     => false,
 			'hideMobile'     => false,
-			'advanceCss'     => '',
 		);
 	}
 
@@ -73,34 +70,37 @@ class Image {
 		if ( ultimate_post()->is_dc_active( $attr ) ) {
 
 			// Dark Image
-			$dark_image_content_src = $attr['dc']['darkImage']['contentSrc'];
-			$dark_image_post_id     = $attr['dc']['darkImage']['postId'];
+			$dark_image_content_src = $attr['dc']['darkImage']['contentSrc'] ?? null;
+			$dark_image_post_id     = $attr['dc']['darkImage']['postId'] ?? null;
 
-			if ( is_string( $dark_image_content_src ) && $attr['dcEnabled']['darkImage'] ) {
+			// The defaults are stdClass objects, and a block that never saved this attribute keeps that default, so cast before writing an offset.
+			if ( is_string( $dark_image_content_src ) && ( $attr['dcEnabled']['darkImage'] ?? false ) ) {
+				$attr['darkImage']        = (array) $attr['darkImage'];
 				$attr['darkImage']['url'] = \ULTP\DCService::get_dc_content_for_image( $dark_image_post_id, $dark_image_content_src );
 			}
 
 			// Image
-			$image_content_src = $attr['dc']['imageUpload']['contentSrc'];
-			$image_post_id     = $attr['dc']['imageUpload']['postId'];
+			$image_content_src = $attr['dc']['imageUpload']['contentSrc'] ?? null;
+			$image_post_id     = $attr['dc']['imageUpload']['postId'] ?? null;
 
-			if ( is_string( $image_content_src ) && $attr['dcEnabled']['imageUpload'] ) {
+			if ( is_string( $image_content_src ) && ( $attr['dcEnabled']['imageUpload'] ?? false ) ) {
+				$attr['imageUpload']        = (array) $attr['imageUpload'];
 				$attr['imageUpload']['url'] = \ULTP\DCService::get_dc_content_for_image( $image_post_id, $image_content_src );
 			}
 
 			// imgLink
-			$img_link_link_src = $attr['dc']['imgLink']['linkSrc'];
-			$img_link_post_id  = $attr['dc']['imgLink']['postId'];
-			if ( is_string( $img_link_link_src ) && $attr['dcEnabled']['imgLink'] ) {
+			$img_link_link_src = $attr['dc']['imgLink']['linkSrc'] ?? null;
+			$img_link_post_id  = $attr['dc']['imgLink']['postId'] ?? null;
+			if ( is_string( $img_link_link_src ) && ( $attr['dcEnabled']['imgLink'] ?? false ) ) {
 				if ( str_starts_with( $img_link_link_src, 'link_' ) ) {
 					$attr['imgLink'] = \ULTP\DCService::get_link( $img_link_post_id, $img_link_link_src );
 				}
 			}
 
 			// btnLink
-			$btn_link_link_src = $attr['dc']['btnLink']['linkSrc'];
-			$btn_link_post_id  = $attr['dc']['btnLink']['postId'];
-			if ( is_string( $btn_link_link_src ) && $attr['dcEnabled']['btnLink'] ) {
+			$btn_link_link_src = $attr['dc']['btnLink']['linkSrc'] ?? null;
+			$btn_link_post_id  = $attr['dc']['btnLink']['postId'] ?? null;
+			if ( is_string( $btn_link_link_src ) && ( $attr['dcEnabled']['btnLink'] ?? false ) ) {
 				if ( str_starts_with( $btn_link_link_src, 'link_' ) ) {
 					$attr['btnLink'] = \ULTP\DCService::get_link( $btn_link_post_id, $btn_link_link_src );
 				}
@@ -109,12 +109,13 @@ class Image {
 
 		$wraper_before       = '';
 		$block_name          = 'image';
+		$img_opts            = ultimate_post()->image_options( $attr, $block_name );
 		$attr['headingShow'] = true;
 		$darkImageArr        = (array) $attr['darkImage'];
 		$darkImg             = array(
 			'enable' => $attr['darkImgEnable'],
 			'url'    => isset( $darkImageArr['url'] ) ? $darkImageArr['url'] : ULTP_URL . 'assets/img/ultp-placeholder.jpg',
-			'srcset' => ( $attr['imgSrcset'] && isset( $darkImageArr['id'] ) ) ? ' srcset="' . esc_attr( wp_get_attachment_image_srcset( $darkImageArr['id'] ) ) . '"' : '',
+			'srcset' => ( $img_opts['srcset'] && isset( $darkImageArr['id'] ) ) ? ' srcset="' . esc_attr( wp_get_attachment_image_srcset( $darkImageArr['id'] ) ) . '"' : '',
 		);
 
 		$attr['className']      = isset( $attr['className'] ) && $attr['className'] ? preg_replace( '/[^A-Za-z0-9_ -]/', '', $attr['className'] ) : '';
@@ -127,28 +128,27 @@ class Image {
 		$attr['btnText']        = wp_kses( $attr['btnText'], $allowed_html_tags );
 		$attr['headingText']    = wp_kses( $attr['headingText'], $allowed_html_tags );
 
-		$wraper_before             .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '' . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '">';
+		$wraper_before             .= '<div ' . ( $attr['advanceId'] ? 'id="' . esc_attr( $attr['advanceId'] ) . '" ' : '' ) . ' class="wp-block-ultimate-post-' . esc_attr( $block_name ) . ' ultp-block-' . esc_attr( $attr['blockId'] ) . '' . ( $attr['align'] ? ' align' . esc_attr( $attr['align'] ) : '' ) . '' . ( $attr['className'] ? ' ' . esc_attr( $attr['className'] ) : '' ) . '">';
 			$wraper_before         .= '<div class="ultp-block-wrapper">';
 				$wraper_before     .= '<figure class="ultp-image-block-wrapper">';
-					$wraper_before .= '<div class="ultp-image-block ultp-image-block-' . $attr['imgAnimation'] . ( $attr['imgOverlay'] ? ' ultp-image-block-overlay ultp-image-block-' . $attr['imgOverlayType'] : '' ) . '">';
+					$wraper_before .= '<div class="ultp-image-block ultp-image-block-' . esc_attr( $attr['imgAnimation'] ) . ( $attr['imgOverlay'] ? ' ultp-image-block-overlay ultp-image-block-' . esc_attr( $attr['imgOverlayType'] ) : '' ) . '">';
 						// Single Image
 						$img_arr = (array) $attr['imageUpload'];
 						$img_url = ( isset( $img_arr['size'] ) && isset( $img_arr['size'][ $attr['imgCrop'] ] ) ) ? ( isset( $img_arr['size'][ $attr['imgCrop'] ]['url'] ) ? $img_arr['size'][ $attr['imgCrop'] ]['url'] : $img_arr['size'][ $attr['imgCrop'] ] ) : $img_arr['url'];
 		if ( ! empty( $img_arr ) ) {
-			$srcset_data = $attr['imgSrcset'] ? ' srcset="' . esc_attr( wp_get_attachment_image_srcset( $img_arr['id'] ) ) . '"' : '';
+			$srcset_data = $img_opts['srcset'] ? ' srcset="' . esc_attr( wp_get_attachment_image_srcset( $img_arr['id'] ) ) . '"' : '';
 			if ( $attr['linkType'] == 'link' && $attr['imgLink'] ) {
-				$wraper_before .= '<a href="' . esc_url( $attr['imgLink'] ) . '" target="' . sanitize_html_class( $attr['linkTarget'] ) . '">' . ultimate_post()->get_image_html( $img_url, 'full', 'ultp-image', $attr['imgAlt'], $attr['imgLazy'], $darkImg, $srcset_data ) . '</a>';
+				$wraper_before .= '<a href="' . esc_url( $attr['imgLink'] ) . '" target="' . esc_attr( sanitize_html_class( $attr['linkTarget'] ) ) . '">' . wp_kses( ultimate_post()->get_image_html( $img_url, 'full', 'ultp-image', $attr['imgAlt'], $img_opts['lazy'], $darkImg, $srcset_data ), ultimate_post()->rendered_content_allowed_html() ) . '</a>';
 			} else {
-				// $wraper_before .= ultimate_post()->get_image_html($img_arr['url'], 'full', 'ultp-image', $attr['imgAlt'], $attr['imgLazy'], $darkImg);
-				$wraper_before .= ultimate_post()->get_image_html( $img_url, 'full', 'ultp-image', $attr['imgAlt'], $attr['imgLazy'], $darkImg, $srcset_data );
+				$wraper_before .= wp_kses( ultimate_post()->get_image_html( $img_url, 'full', 'ultp-image', $attr['imgAlt'], $img_opts['lazy'], $darkImg, $srcset_data ), ultimate_post()->rendered_content_allowed_html() );
 			}
 		}
 		if ( $attr['btnLink'] && $attr['linkType'] == 'button' ) {
-			$wraper_before .= '<div class="ultp-image-button ultp-image-button-' . sanitize_html_class( $attr['btnPosition'] ) . '"><a href="' . esc_url( $attr['btnLink'] ) . '" target="' . sanitize_html_class( $attr['btnTarget'] ) . '">' . $attr['btnText'] . '</a></div>';
+			$wraper_before .= '<div class="ultp-image-button ultp-image-button-' . esc_attr( sanitize_html_class( $attr['btnPosition'] ) ) . '"><a href="' . esc_url( $attr['btnLink'] ) . '" target="' . esc_attr( sanitize_html_class( $attr['btnTarget'] ) ) . '">' . wp_kses( $attr['btnText'], $allowed_html_tags ) . '</a></div>';
 		}
 					$wraper_before .= '</div>';
 		if ( $attr['headingEnable'] == 1 ) {
-			$wraper_before .= '<figcaption class="ultp-image-caption">' . $attr['headingText'] . '</figcaption>';
+			$wraper_before .= '<figcaption class="ultp-image-caption">' . wp_kses( $attr['headingText'], $allowed_html_tags ) . '</figcaption>';
 		}
 				$wraper_before .= '</figure>';
 			$wraper_before     .= '</div>';

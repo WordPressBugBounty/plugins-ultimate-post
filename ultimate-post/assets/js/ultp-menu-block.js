@@ -3,79 +3,13 @@
 	/*************************************
          Menu Block
       *************************************/
-	setTimeout(() => {
-		handleMegaMenuWidth("setTimeout");
-	}, 10);
-	handleMegaMenuWidth("normal");
-
-	function handleMegaMenuWidth(t) {
-		if ($(".editor-styles-wrapper")?.length) {
-			return;
-		}
-		const hasMegaMenu = $(
-			".wp-block-ultimate-post-menu-item.hasMegaMenuChild > .ultp-menu-item-wrapper > .ultp-menu-item-content"
-		);
-		if (hasMegaMenu.length > 0) {
-			hasMegaMenu.each(function () {
-				if ($(this).hasClass("ultpMegaWindowWidth")) {
-					const bodyWrapperWidth = $("body")?.width() || 1200;
-					const bodyWrapperLeft = $("body")?.offset()?.left || 0;
-					const contentLeft = $(this)?.offset()?.left || 0;
-					$(this)
-						.find(
-							" > .wp-block-ultimate-post-mega-menu > .ultp-mega-menu-wrapper"
-						)
-						.css({
-							maxWidth: `${bodyWrapperWidth}px`,
-							boxSizing: "border-box",
-						});
-					// $(this).css({ "left" : `${bodyWrapperLeft - contentLeft}px`});
-
-					const siblingLeft =
-						$(this).siblings(".ultp-menu-item-label-container")?.offset()
-							?.left || 0;
-					$(this).css({ left: `${bodyWrapperLeft - siblingLeft}px` });
-
-					//do not remove $('.wp-block-ultimate-post-menu-item.hasMegaMenuChild > .ultp-menu-item-wrapper > .ultp-menu-item-content.ultpMegaWindowWidth > .block-editor-inner-blocks > .block-editor-block-list__layout > .wp-block > .wp-block-ultimate-post-mega-menu > .ultp-mega-menu-wrapper').css({ "maxWidth" : `${editorMainWrapperWidth}px`, "boxSizing": "border-box"});
-					//do not remove $('.wp-block-ultimate-post-menu-item.hasMegaMenuChild > .ultp-menu-item-wrapper > .ultp-menu-item-content.ultpMegaWindowWidth > .block-editor-inner-blocks').css({ "left" : `-${contentLeft - editorMainWrapperLeft}px`});
-				} else if ($(this).hasClass("ultpMegaMenuWidth")) {
-					const closetMenuWidth =
-						$(this).closest(".wp-block-ultimate-post-menu")?.width() || 800;
-					const closetMenuLeft =
-						$(this).closest(".wp-block-ultimate-post-menu")?.offset()?.left ||
-						0;
-					const contentLeft = $(this)?.offset()?.left || 0;
-					$(this)
-						.find(
-							" > .wp-block-ultimate-post-mega-menu > .ultp-mega-menu-wrapper"
-						)
-						.css({ maxWidth: `${closetMenuWidth}px`, boxSizing: "border-box" });
-					$(this).css({ left: `${closetMenuLeft - contentLeft}px` });
-					const siblingLeft =
-						$(this).siblings(".ultp-menu-item-label-container")?.offset()
-							?.left || 0;
-					$(this).css({ left: `${closetMenuLeft - siblingLeft}px` });
-				} else {
-					$(this)
-						.find(
-							" > .wp-block-ultimate-post-mega-menu > .ultp-mega-menu-wrapper"
-						)
-						.css({ maxWidth: ``, boxSizing: "" });
-					$(this).css({ left: `` });
-				}
-			});
-		}
-	}
+	// The menu, list menu and mobile view. Blocks an add-on places inside a menu item position
+	// themselves.
 
 	/*
           Menu responsive
       */
 	const isFront = $("body.postx-admin-page").length == 0;
-	if (isFront) {
-		$(window).on("resize", function () {
-			handleMegaMenuWidth("resize");
-		});
-	}
 	let currentStack = "";
 	let prevStack = [];
 	let toAppend;
@@ -84,7 +18,6 @@
 	let mv_rcsstype;
 	let mv_rstr;
 	let mv_naviIcon;
-	let mv_naviExpandIcon;
 	let mv_animationDuration;
 	let mv_HeadText;
 	let mv_dropIconArray = [];
@@ -139,10 +72,8 @@
 			"click",
 			".ultp-mobile-view-container .ultp-mv-back, .ultp-mobile-view-container .ultp-mv-back-label-con",
 			function (e) {
-				if (mv_rstr == "mv_dissolve" || mv_rstr == "mv_slide") {
+				if (!menuNavigationHandled(e, "back")) {
 					handleResponsiveMenuHtml(e, "back");
-				} else {
-					handleMenuDropDownStyle(e, "back");
 				}
 			}
 		);
@@ -172,13 +103,41 @@
 					return;
 				}
 				e.preventDefault();
-				if (mv_rstr == "mv_dissolve" || mv_rstr == "mv_slide") {
+				if (!menuNavigationHandled(e, "next")) {
 					handleResponsiveMenuHtml(e, "next");
-				} else {
-					handleMenuDropDownStyle(e, "next");
 				}
 			}
 		);
+	}
+
+	// The mobile view slides from one level to the next. An add-on may run another navigation
+	// effect (the block's `data-rstr`): it handles `ultp_menu_navigate` or `ultp_menu_swap` and
+	// calls preventDefault().
+	function menuNavigationContext(direction) {
+		return {
+			effect: mv_rstr,
+			direction: direction,
+			menu: rawMenu,
+			duration: mv_animationDuration,
+			naviIcon: mv_naviIcon,
+		};
+	}
+	function menuNavigationHandled(e, direction) {
+		const navigateEvent = $.Event("ultp_menu_navigate");
+		$(document).trigger(navigateEvent, [
+			Object.assign(menuNavigationContext(direction), { event: e }),
+		]);
+		return navigateEvent.isDefaultPrevented();
+	}
+	function menuSwapHandled(direction, html) {
+		const swapEvent = $.Event("ultp_menu_swap");
+		$(document).trigger(swapEvent, [
+			Object.assign(menuNavigationContext(direction), {
+				container: toAppend,
+				html: html,
+			}),
+		]);
+		return swapEvent.isDefaultPrevented();
 	}
 
 	function enableDisableMolibeView(e, type = "") {
@@ -236,12 +195,6 @@
 				.closest(".wp-block-ultimate-post-menu")
 				.find(
 					"> .ultp-mobile-view-container > .ultp-mv-icons > .ultp-mv-label-icon svg"
-				)
-				.prop("outerHTML");
-			mv_naviExpandIcon = that
-				.closest(".wp-block-ultimate-post-menu")
-				.find(
-					"> .ultp-mobile-view-container > .ultp-mv-icons > .ultp-mv-label-icon-expand svg"
 				)
 				.prop("outerHTML");
 
@@ -315,7 +268,7 @@
 						? theHtml.replaceAll("ultpMenuCss", "ultpMenu__Css")
 						: theHtml
 				);
-				toAppendBack.html(mv_HeadText);
+				toAppendBack.text(mv_HeadText);
 			}
 		} else if (src == "next") {
 			const that = $(e.target);
@@ -336,10 +289,10 @@
 						)
 						.html();
 				} else {
+					// Whatever block the item opens (an add-on may supply one); hidden means no next level.
 					d_none = parentItem
-						.find(
-							"> .ultp-menu-item-wrapper > .ultp-menu-item-content > .wp-block-ultimate-post-mega-menu"
-						)
+						.find("> .ultp-menu-item-wrapper > .ultp-menu-item-content > *")
+						.first()
 						.css("display");
 					theHtml = parentItem
 						.find("> .ultp-menu-item-wrapper > .ultp-menu-item-content")
@@ -368,35 +321,13 @@
 							.html()
 					);
 
-					if (mv_rstr == "mv_dissolve") {
-						toAppend.find("> *").animate(
-							{
-								opacity: 0.2,
-							},
-							mv_animationDuration,
-							function () {
-								toAppend.html(
-									mv_rcsstype == "custom"
-										? theHtml.replaceAll("ultpMenuCss", "ultpMenu__Css")
-										: theHtml
-								);
-
-								toAppend.find("> *").css("opacity", ".1");
-								toAppend.find("> *").animate(
-									{
-										opacity: 1,
-									},
-									mv_animationDuration
-								);
-							}
-						);
-					} else {
+					const nextHtml =
+						mv_rcsstype == "custom"
+							? theHtml.replaceAll("ultpMenuCss", "ultpMenu__Css")
+							: theHtml;
+					if (!menuSwapHandled("next", nextHtml)) {
 						// Slide View
-						toAppend.html(
-							mv_rcsstype == "custom"
-								? theHtml.replaceAll("ultpMenuCss", "ultpMenu__Css")
-								: theHtml
-						);
+						toAppend.html(nextHtml);
 						toAppend.find("> *").css({
 							opacity: ".1",
 							transform: "translateX(100%)",
@@ -426,7 +357,7 @@
 				backHtml = $(rawMenu)
 					.find("> .ultp-menu-wrapper > .ultp-menu-content")
 					.html();
-				toAppendBack.html(mv_HeadText);
+				toAppendBack.text(mv_HeadText);
 				$(rawMenu).find(".ultp-mv-back-label-con").addClass("ultpmenu-dnone");
 			} else {
 				if (
@@ -463,33 +394,13 @@
 						.html()
 				);
 
-				if (mv_rstr == "mv_dissolve") {
-					toAppend.find("> *").animate(
-						{
-							opacity: 0.2,
-						},
-						mv_animationDuration,
-						function () {
-							toAppend.html(
-								mv_rcsstype == "custom"
-									? backHtml.replaceAll("ultpMenuCss", "ultpMenu__Css")
-									: backHtml
-							);
-						}
-					);
-					toAppend.find("> *").animate(
-						{
-							opacity: 1,
-						},
-						mv_animationDuration
-					);
-				} else {
+				const prevHtml =
+					mv_rcsstype == "custom"
+						? backHtml.replaceAll("ultpMenuCss", "ultpMenu__Css")
+						: backHtml;
+				if (!menuSwapHandled("back", prevHtml)) {
 					// Slide View
-					toAppend.html(
-						mv_rcsstype == "custom"
-							? backHtml.replaceAll("ultpMenuCss", "ultpMenu__Css")
-							: backHtml
-					);
+					toAppend.html(prevHtml);
 					toAppend.find("> *").css({
 						opacity: ".1",
 						transform: "translateX(-100%)",
@@ -510,110 +421,5 @@
 			}
 		}
 		// console.log(prevStack, currentStack);
-	}
-
-	function handleMenuDropDownStyle(e, type) {
-		const that = $(e.target);
-		const parentItem = that.closest(".wp-block-ultimate-post-menu-item");
-		let c_type = "next";
-		if (parentItem.hasClass("ultp-menu-res-css")) {
-			c_type = "back";
-		} else {
-			parentItem.addClass("ultp-menu-res-css");
-		}
-		let target;
-		let theHeight;
-		if (c_type == "next") {
-			parentItem.addClass("ultp-hammenu-accordian-active");
-			if (mv_naviExpandIcon) {
-				parentItem
-					.find(
-						"> .ultp-menu-item-wrapper > .ultp-menu-item-label-container .ultp-menu-item-dropdown"
-					)
-					.html(mv_naviExpandIcon);
-			}
-
-			if (parentItem.hasClass("hasListMenuChild")) {
-				target = parentItem.find(
-					"> .ultp-menu-item-wrapper > .ultp-menu-item-content > .wp-block-ultimate-post-list-menu > .ultp-list-menu-wrapper > .ultp-list-menu-content"
-				);
-			} else {
-				target = parentItem.find(
-					"> .ultp-menu-item-wrapper > .ultp-menu-item-content"
-				);
-			}
-			if (!target.length) {
-				target = parentItem.find(
-					"> .ultp-menu-item-wrapper > .ultp-menu-item-content"
-				);
-			}
-			theHeight = target.outerHeight();
-			const paddingObj = parentItem.find(
-				"> .ultp-menu-item-wrapper > .ultp-menu-item-content"
-			);
-			const paddingTop = paddingObj.css("padding-top");
-			const paddingBottom = paddingObj.css("padding-bottom");
-
-			parentItem
-				.find("> .ultp-menu-item-wrapper > .ultp-menu-item-content")
-				.html(target.html());
-			parentItem
-				.find("> .ultp-menu-item-wrapper > .ultp-menu-item-content")
-				.css({ height: "0px", "padding-top": "0", "padding-bottom": "0" });
-			parentItem
-				.find("> .ultp-menu-item-wrapper > .ultp-menu-item-content")
-				.animate(
-					{
-						height: theHeight + "px",
-						"padding-top": paddingTop,
-						"padding-bottom": paddingBottom,
-					},
-					mv_animationDuration,
-					function () {
-						$(this).css({
-							height: "",
-							"padding-top": "",
-							"padding-bottom": "",
-						});
-					}
-				);
-		} else if (c_type == "back") {
-			parentItem.removeClass("ultp-hammenu-accordian-active");
-			parentItem
-				.find(".wp-block-ultimate-post-menu-item")
-				.removeClass("ultp-hammenu-accordian-active");
-			parentItem
-				.find("> .ultp-menu-item-wrapper > .ultp-menu-item-content")
-				.animate(
-					{
-						height: "0",
-						paddingTop: "0",
-						paddingBottom: "0",
-					},
-					mv_animationDuration,
-					function () {
-						$(this).css({
-							height: "",
-							paddingTop: "",
-							paddingBottom: "",
-						});
-						if (mv_naviIcon) {
-							parentItem
-								.find(
-									".ultp-menu-item-wrapper .ultp-menu-item-label-container .ultp-menu-item-dropdown"
-								)
-								.each(function () {
-									if ($(this).html()) {
-										$(this).html(mv_naviIcon);
-									}
-								});
-						}
-						parentItem.removeClass("ultp-menu-res-css");
-						parentItem
-							.find(".wp-block-ultimate-post-menu-item")
-							.removeClass("ultp-menu-res-css");
-					}
-				);
-		}
 	}
 })(jQuery);

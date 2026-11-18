@@ -63,11 +63,7 @@ class Caches {
 		$type = isset( $post['type'] ) ? ultimate_post()->ultp_rest_sanitize_params( $post['type'] ) : '';
 
 		if ( $type == 'fetch_all_data' ) {
-			$this->fetch_all_data_callback( array() );
-			return array(
-				'success' => true,
-				'message' => __( 'Data Fetched!!!', 'ultimate-post' ),
-			);
+			return $this->fetch_all_data_callback( array() );
 		} else {
 			try {
 				$upload_dir_url = wp_upload_dir();
@@ -81,37 +77,51 @@ class Caches {
 				}
 
 				if ( $type == 'get_starter_lists_nd_design' ) {
+					$data = array();
+					foreach ( array( 'starter_lists', 'design' ) as $name ) {
+						$value = $this->get_premade_data( $name, $dir );
+						if ( is_array( $value ) ) {
+							return $value;
+						}
+						$data[ $name ] = $value;
+					}
 					return array(
 						'success'  => true,
 						'success2' => is_admin(),
-						'data'     => array(
-							'starter_lists' => file_exists( $dir . 'starter_lists.json' ) ?
-								ultimate_post()->get_path_file_contents( $dir . 'starter_lists.json' )
-								:
-								$this->reset_premade_json_file( 'starter_lists' ),
-							'design'        => file_exists( $dir . 'design.json' ) ?
-								ultimate_post()->get_path_file_contents( $dir . 'design.json' )
-								:
-								$this->reset_premade_json_file( 'design' ),
-						),
-					);
-				} else {
-					$_path = $dir . $type . '.json';
-					return array(
-						'success' => true,
-						'data'    => file_exists( $_path ) ?
-							ultimate_post()->get_path_file_contents( $_path )
-							:
-							$this->reset_premade_json_file( $type ),
+						'data'     => $data,
 					);
 				}
-			} catch ( \Exception $e ) {
+				// $type names a file, so only the known cache files are accepted.
+				if ( ! in_array( $type, array( 'starter_lists', 'design' ), true ) ) {
+					return array(
+						'success' => false,
+						'message' => __( 'Unknown data type.', 'ultimate-post' ),
+					);
+				}
+				$data = $this->get_premade_data( $type, $dir );
+				return is_array( $data ) ? $data : array(
+					'success' => true,
+					'data'    => $data,
+				);
+			} catch ( \Throwable $e ) {
 				return array(
 					'success' => false,
 					'message' => $e->getMessage(),
 				);
 			}
 		}
+	}
+
+	/**
+	 * Read a usable cache, or fetch it without disguising a failed write as success.
+	 *
+	 * @param string $type Known cache name.
+	 * @param string $dir Cache directory.
+	 * @return string|array JSON data or error response.
+	 */
+	private function get_premade_data( $type, $dir ) {
+		$data = file_exists( $dir . $type . '.json' ) ? ultimate_post()->get_path_file_contents( $dir . $type . '.json' ) : '';
+		return is_string( $data ) && '' !== $data ? $data : $this->reset_premade_json_file( $type );
 	}
 
 	/**
@@ -122,22 +132,11 @@ class Caches {
 	 * @return ARRAY Data of the design.
 	 */
 	public function fetch_all_data_callback( $request ) {
-		$upload     = wp_upload_dir();
-		$upload_dir = trailingslashit( $upload['basedir'] ) . 'ultp/';
-
-		if ( file_exists( $upload_dir . '/template_nd_design.json' ) ) {
-			wp_delete_file( $upload_dir . '/template_nd_design.json' );
+		$result = $this->reset_premade_json_file( 'all' );
+		if ( is_array( $result ) && empty( $result['success'] ) ) {
+			return $result;
 		}
-		if ( file_exists( $upload_dir . '/premade.json' ) ) {
-			wp_delete_file( $upload_dir . '/premade.json' );
-		}
-		if ( file_exists( $upload_dir . '/design.json' ) ) {
-			wp_delete_file( $upload_dir . '/design.json' );
-		}
-		if ( file_exists( $upload_dir . '/starter_lists.json' ) ) {
-			wp_delete_file( $upload_dir . '/starter_lists.json' );
-		}
-		$this->reset_premade_json_file( 'all' );
+		// Keep the last cache until replacement succeeds; a failed fetch must not erase it.
 		return array(
 			'success' => true,
 			'message' => __( 'Data Fetched!!!', 'ultimate-post' ),
@@ -149,15 +148,12 @@ class Caches {
 	 *
 	 * @since v.1.0.0 Updated from 4.0.0
 	 * @param STRING $type The type of data to reset.
-	 * @return ARRAY|NULL Exception message or NULL.
+	 * @return string|array JSON data for a single file, or operation status/error.
 	 */
 	public function reset_premade_json_file( $type = 'all' ) {
 		global $wp_filesystem;
-		if ( ! $wp_filesystem ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-		}
-		WP_Filesystem();
 
+		$errors     = array();
 		$file_names = $type == 'all' ? array( 'starter_lists', 'design' ) : array( $type );
 		foreach ( $file_names as $key => $name ) {
 			if ( $name == 'starter_lists' ) {
@@ -180,14 +176,33 @@ class Caches {
 					)
 				);
 			}
-			if ( ! is_wp_error( $response ) ) {
-				$path_url = $this->create_directory_for_premade( $name );
-				$wp_filesystem->put_contents( $path_url . $name . '.json', $response['body'] );
-				if ( $type != 'all' ) {
-					return $response['body'];
-				}
+			if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) || ! is_string( wp_remote_retrieve_body( $response ) ) ) {
+				$errors[] = __( 'PostX could not fetch its template data. The existing cache was retained.', 'ultimate-post' );
+				continue;
+			}
+			$body = wp_remote_retrieve_body( $response );
+			json_decode( $body );
+			if ( JSON_ERROR_NONE !== json_last_error() ) {
+				$errors[] = __( 'PostX received invalid template data. The existing cache was retained.', 'ultimate-post' );
+				continue;
+			}
+			$path_url = $this->create_directory_for_premade( $name );
+			if ( ! is_string( $path_url ) ) {
+				$errors[] = isset( $path_url['message'] ) ? $path_url['message'] : __( 'PostX could not access its data folder.', 'ultimate-post' );
+				continue;
+			}
+			if ( ! $wp_filesystem->put_contents( $path_url . $name . '.json', $body ) ) {
+				$errors[] = __( 'PostX could not save its template data. Check the uploads folder permissions and try again.', 'ultimate-post' );
+				continue;
+			}
+			if ( 'all' !== $type ) {
+				return $body;
 			}
 		}
+		return array(
+			'success' => empty( $errors ),
+			'message' => implode( ' ', array_unique( $errors ) ),
+		);
 	}
 
 	/**
@@ -200,20 +215,28 @@ class Caches {
 	public function create_directory_for_premade( $type = '' ) {
 		try {
 			global $wp_filesystem;
-			if ( ! $wp_filesystem ) {
-				require_once ABSPATH . 'wp-admin/includes/file.php';
-			}
 			$upload_dir_url = wp_upload_dir();
 			$dir            = trailingslashit( $upload_dir_url['basedir'] ) . 'ultp/';
-			WP_Filesystem( false, $upload_dir_url['basedir'], true );
-			if ( ! $wp_filesystem->is_dir( $dir ) ) {
-				$wp_filesystem->mkdir( $dir );
+			if ( ! ultimate_post()->ensure_filesystem( $upload_dir_url['basedir'], true ) ) {
+				return array(
+					'success' => false,
+					'message' => __( 'PostX could not access the WordPress filesystem to save its data files. Check the uploads folder permissions or the server filesystem settings.', 'ultimate-post' ),
+				);
 			}
-			if ( ! $wp_filesystem->exists( $dir . $type . '.json' ) ) {
-				$wp_filesystem->put_contents( $dir . $type . '.json', '' );
+			if ( ! $wp_filesystem->is_dir( $dir ) && ! $wp_filesystem->mkdir( $dir ) ) {
+				return array(
+					'success' => false,
+					'message' => __( 'PostX could not create its data folder in the uploads directory. Check the uploads folder permissions.', 'ultimate-post' ),
+				);
+			}
+			if ( ! $wp_filesystem->exists( $dir . $type . '.json' ) && ! $wp_filesystem->put_contents( $dir . $type . '.json', '' ) ) {
+				return array(
+					'success' => false,
+					'message' => __( 'PostX could not write its data file in the uploads directory. Check the uploads folder permissions.', 'ultimate-post' ),
+				);
 			}
 			return $dir;
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			return array(
 				'success' => false,
 				'message' => $e->getMessage(),

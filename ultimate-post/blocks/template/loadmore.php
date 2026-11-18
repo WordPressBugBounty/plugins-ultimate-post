@@ -14,6 +14,6 @@ $self_post_id  = 'data-selfpostid="' . ( ( isset( $attr['currentPostId'] ) && $a
 $exclude_id    = isset( $curr_post_id ) ? $curr_post_id : '';
 $wraper_after .= '<div class="ultp-loadmore">';
 if ( 1 != $pageNum ) {
-	$wraper_after .= '<span class="ultp-loadmore-action" tabindex="0" role="button" data-pages="' . $pageNum . '" data-pagenum="1"  data-expost="' . $exclude_id . '" data-blockid="' . $attr['blockId'] . '" data-blockname="ultimate-post_' . $block_name . '" data-postid="' . $page_post_id . '" ' . ultimate_post()->get_builder_attr( $attr['queryType'] ) . $self_post_id . $adv_filter_dataset . '>' . $attr['loadMoreText'] . ' <span class="ultp-spin">' . ultimate_post()->get_svg_icon( 'refresh' ) . '</span></span>';
+	$wraper_after .= wp_kses( '<span class="ultp-loadmore-action" tabindex="0" role="button" data-pages="' . esc_attr( $pageNum ) . '" data-pagenum="1"  data-expost="' . esc_attr( $exclude_id ) . '" data-blockid="' . esc_attr( $attr['blockId'] ) . '" data-blockname="ultimate-post_' . esc_attr( $block_name ) . '" data-postid="' . esc_attr( $page_post_id ) . '" ' . ultimate_post()->get_builder_attr( $attr['queryType'] ) . $self_post_id . $adv_filter_dataset . '>', ultimate_post()->rendered_content_allowed_html() ) . wp_kses( $attr['loadMoreText'], $allowed_html_tags ) . ' <span class="ultp-spin">' . wp_kses( ultimate_post()->get_svg_icon( 'refresh' ), ultimate_post()->rendered_content_allowed_html() ) . '</span></span>';
 }
 $wraper_after .= '</div>';

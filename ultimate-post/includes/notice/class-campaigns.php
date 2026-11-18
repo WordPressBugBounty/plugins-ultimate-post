@@ -34,7 +34,7 @@ final class Campaigns {
 	}
 
 	/**
-	 * Hello bar ids the dashboard may dismiss. Every `id` in reactjs/src/dashboard/hellobar/index.js
+	 * Hello bar ids the dashboard may dismiss. Every `id` in src/dashboard/hellobar/index.js
 	 * must be listed here, or its bar can't be hidden: add the id here when you add a hello bar there.
 	 *
 	 * @return string[]

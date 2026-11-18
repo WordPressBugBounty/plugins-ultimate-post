@@ -40,7 +40,7 @@ class Compatibility {
 	public function handle_front_page_builder() {
 
 		if ( get_option( 'ultp_frontpage_builder_comp' ) != 'yes' ) {
-			$builder_condition = get_option( 'ultp_builder_conditions', array() );
+			$builder_condition = ultimate_post()->normalize_builder_conditions( get_option( 'ultp_builder_conditions', array() ) );
 			if ( ! empty( $builder_condition ) &&
 				! empty( $builder_condition['singular'] )
 			) {
@@ -48,7 +48,7 @@ class Compatibility {
 				foreach ( $builder_condition['singular'] as $id => $paths ) {
 					if ( in_array( 'include/singular/front_page', $paths ) ) {
 						$f_pages[ $id ] = array( 'include/front_page' ); // Add the ID to the list
-						update_post_meta( $id, '__ultp_builder_type', 'front_page' );
+						update_post_meta( $id, '_ultp_builder_type', 'front_page' );
 						unset( $builder_condition['singular'][ $id ] );
 					}
 				}
@@ -57,8 +57,10 @@ class Compatibility {
 				} else {
 					$builder_condition['front_page'] = $builder_condition['front_page'] + $f_pages;
 				}
-				update_option( 'ultp_frontpage_builder_comp', 'yes' );
 				update_option( 'ultp_builder_conditions', $builder_condition );
+				if ( get_option( 'ultp_builder_conditions', array() ) === $builder_condition ) {
+					update_option( 'ultp_frontpage_builder_comp', 'yes' );
+				}
 			}
 		}
 	}
@@ -75,21 +77,6 @@ class Compatibility {
 	 * @param ARRAY $args Additional arguments.
 	 */
 	public function ultp_revisionary_copy_postmeta_callback( $from_post, $to_post_id, $args ) {
-		global $wp_filesystem;
-		if ( ! $wp_filesystem ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-			WP_Filesystem();
-		}
-		$css_meta           = get_post_meta( $to_post_id, '_ultp_css', true );
-		$upload_dir_url     = wp_get_upload_dir();
-		$upload_css_dir_url = trailingslashit( $upload_dir_url['basedir'] );
-		$css_dir_path       = $upload_css_dir_url . "ultimate-post/ultp-css-{$to_post_id}.css";
-
-		if ( file_exists( $css_dir_path ) ) {
-			$css = $wp_filesystem->get_contents( $css_dir_path );
-			if ( $css_meta != $css ) {
-				$wp_filesystem->put_contents( $css_dir_path, $css_meta );
-			}
-		}
+		return Styles::regenerate_block_css( $to_post_id );
 	}
 }

@@ -47,7 +47,6 @@ class Post_Author_Meta {
 			'hideDesktop'       => false,
 			'hideTablet'        => false,
 			'hideMobile'        => false,
-			'advanceCss'        => '',
 		);
 	}
 
@@ -75,22 +74,22 @@ class Post_Author_Meta {
 		$attr['authMetaLabelText'] = wp_kses( $attr['authMetaLabelText'], ultimate_post()->ultp_allowed_html_tags() );
 
 		if ( $author_id ) {
-			$wrapper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '">';
+			$wrapper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . esc_attr( $attr['advanceId'] ) . '" ' : '' ) . ' class="wp-block-ultimate-post-' . esc_attr( $block_name ) . ' ultp-block-' . esc_attr( $attr['blockId'] ) . ( $attr['className'] ? ' ' . esc_attr( $attr['className'] ) : '' ) . '' . ( $attr['align'] ? ' align' . esc_attr( $attr['align'] ) : '' ) . '">';
 				$wrapper_before .= '<div class="ultp-block-wrapper">';
 					$content    .= '<span class="ultp-authMeta-count">';
 			if ( $attr['authMetaIconShow'] && ( $attr['authMetaIconStyle'] != '' ) ) {
-				$content .= ultimate_post()->get_svg_icon( $attr['authMetaIconStyle'] );
+				$content .= wp_kses( ultimate_post()->get_svg_icon( $attr['authMetaIconStyle'] ), ultimate_post()->rendered_content_allowed_html() );
 			}
 			if ( $attr['authMetAvatar'] ) {
 				$content     .= '<div class="ultp-authMeta-avatar">';
-					$content .= get_avatar( $author_id, 32 );
+					$content .= wp_kses( get_avatar( $author_id, 32 ), ultimate_post()->rendered_content_allowed_html() );
 				$content     .= '</div>';
 			}
 			if ( $attr['authMetaLabel'] ) {
-				$content .= '<span class="ultp-authMeta-label">' . $attr['authMetaLabelText'] . '</span>';
+				$content .= '<span class="ultp-authMeta-label">' . wp_kses( $attr['authMetaLabelText'], ultimate_post()->ultp_allowed_html_tags() ) . '</span>';
 			}
-						$content     .= '<a class="ultp-authMeta-name" href="' . get_author_posts_url( $author_id ) . '">';
-							$content .= get_the_author_meta( 'display_name', $author_id );
+						$content     .= '<a class="ultp-authMeta-name" href="' . esc_url( get_author_posts_url( $author_id ) ) . '">';
+							$content .= esc_html( get_the_author_meta( 'display_name', $author_id ) );
 						$content     .= '</a>';
 					$content         .= '</span>';
 				$wrapper_after       .= '</div>';

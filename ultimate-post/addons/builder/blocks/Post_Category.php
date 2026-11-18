@@ -43,7 +43,6 @@ class Post_Category {
 			'hideDesktop'    => false,
 			'hideTablet'     => false,
 			'hideMobile'     => false,
-			'advanceCss'     => '',
 		);
 	}
 
@@ -73,18 +72,18 @@ class Post_Category {
 
 		$categories = get_the_category();
 		if ( ! empty( $categories ) ) {
-			$wrapper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '">';
+			$wrapper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . esc_attr( $attr['advanceId'] ) . '" ' : '' ) . ' class="wp-block-ultimate-post-' . esc_attr( $block_name ) . ' ultp-block-' . esc_attr( $attr['blockId'] ) . ( $attr['className'] ? ' ' . esc_attr( $attr['className'] ) : '' ) . '' . ( $attr['align'] ? ' align' . esc_attr( $attr['align'] ) : '' ) . '">';
 				$wrapper_before .= '<div class="ultp-block-wrapper">';
 					$content    .= '<div class="ultp-builder-category">';
 			if ( $attr['catIconShow'] ) {
-				$content .= ultimate_post()->get_svg_icon( '' . $attr['catIconStyle'] . '' );
+				$content .= wp_kses( ultimate_post()->get_svg_icon( '' . $attr['catIconStyle'] . '' ), ultimate_post()->rendered_content_allowed_html() );
 			}
 			if ( $attr['catLabelShow'] ) {
-				$content .= '<div class="cat-builder-label">' . $attr['catLabel'] . '</div>';
+				$content .= '<div class="cat-builder-label">' . wp_kses( $attr['catLabel'], $allowed_html_tags ) . '</div>';
 			}
 						$content .= '<div class="cat-builder-content">';
 			foreach ( $categories as $key => $category ) {
-				$content .= ( ( $key > 0 && $attr['catSeparator'] ) ? ' ' . $attr['catSeparator'] : '' ) . '<a class="ultp-category-list" href="' . get_term_link( $category->term_id ) . '">' . $category->name . '</a>';
+				$content .= ( ( $key > 0 && $attr['catSeparator'] ) ? ' ' . wp_kses( $attr['catSeparator'], $allowed_html_tags ) : '' ) . '<a class="ultp-category-list" href="' . esc_url( ultimate_post()->esc_term_link( $category->term_id ) ) . '">' . esc_html( $category->name ) . '</a>';
 			}
 						$content .= '</div>';
 					$content     .= '</div>';

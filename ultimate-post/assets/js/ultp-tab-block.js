@@ -25,9 +25,13 @@
 				.first()
 				.children(".wp-block-ultimate-post-tab-item");
 
+			// Navigation at the top or bottom runs across; any other (left) runs down.
+			const isSideNav = function () {
+				return !$(this).is(".ultp-nav-top, .ultp-nav-bottom");
+			};
 			const isTabVertical =
-				tab.children().children(".ultp-nav-right").length > 0 ||
-				tab.children().children(".ultp-nav-left").length > 0;
+				tab.children().children(".ultp-tab-wrapper").filter(isSideNav)
+					.length > 0;
 
 			if (tab.parent(".wp-block-ultimate-post-tab-item").length > 0) {
 				tab.closest(".ultp-tab-content").css({ overflow: "hidden" });
@@ -86,13 +90,13 @@
 			const leftArrow = tab.find(".ultp-tab-left-arrow").first();
 			const rightArrow = tab.find(".ultp-tab-right-arrow").first();
 
+			// "On Hover" tabs change on mouseenter, all others on click.
 			const tabevent =
-				tab.data("tabevent") == "autoplay" ? "click" : tab.data("tabevent");
+				tab.data("tabevent") == "mouseenter" ? "mouseenter" : "click";
 
 			let tabOverflow =
 				responsiveType == "slider" ||
-				tab.find(".ultp-tab-wrapper").hasClass("ultp-nav-left") ||
-				tab.find(".ultp-tab-wrapper").hasClass("ultp-nav-right");
+				tab.find(".ultp-tab-wrapper").filter(isSideNav).length > 0;
 
 			let navContainerSize = isTabVertical
 				? tabNavMain.height()
@@ -229,104 +233,22 @@
 				});
 			}
 
-			// Auto Play function
-			function handleTabSlider(tab, tabContent, tabNavMain) {
-				const parentBlock =
-					tab.parent(".wp-block-ultimate-post-tab-item").length > 0
-						? tab.parent(".wp-block-ultimate-post-tab-item").hasClass("active")
-						: true;
-				if (parentBlock) {
-					navContainerSize = isTabVertical
-						? tabNavMain.height()
-						: tabNavMain.width();
-
-					singleElementWidth = navContainerSize / tabNavMain?.children().length;
-
-					navParenTContainer = isTabVertical
-						? tabNavContainer.height()
-						: tabNavContainer.width();
-					const navContent = tabNavMain.find(".ultp-tabs-nav-element");
-					// SlideshitValue = SlideshitValue + singleElementWidth;
-
-					if (slideIndex * singleElementWidth < navParenTContainer) {
-						tabNavMain.css({ transform: `translate(0px, 0px)` });
-						if (responsiveType == "slider") {
-							rightArrow.addClass("ultp-arrow-active");
-							leftArrow.removeClass("ultp-arrow-active");
-						}
-					}
-
-					if (slideIndex * singleElementWidth > navParenTContainer) {
-						if (tabOverflow) {
-							leftArrow.addClass("ultp-arrow-active");
-							rightArrow.addClass("ultp-arrow-active");
-						}
-						let transformStyle = isTabVertical
-							? `translate(0px, ${
-									navParenTContainer - slideIndex * singleElementWidth
-								}px)`
-							: `translate(${
-									navParenTContainer - slideIndex * singleElementWidth
-								}px, 0px)`;
-						tabNavMain.css({ transform: transformStyle });
-					}
-
-					const totalElementCount = navContent.parent().children().length;
-
-					navContent.each(function (idx) {
-						if (progressbarEnable) {
-							$(this).removeClass("tab-progressbar-active");
-						}
-						if (idx + 1 == slideIndex) {
-							$(this).addClass("ultp-tab-active");
-							if (progressbarEnable) {
-								$(this).addClass("tab-progressbar-active");
-							}
-						} else {
-							$(this).removeClass("ultp-tab-active");
-						}
-					});
-
-					tabContent.each(function (idx) {
-						$(this).each(function () {
-							if (idx + 1 == slideIndex) {
-								$(this).addClass("active");
-							} else {
-								$(this).removeClass("active");
-							}
-						});
-					});
-
-					if (totalElementCount == slideIndex) {
-						rightArrow.removeClass("ultp-arrow-active");
-						slideIndex = 0;
-					}
-					slideIndex++;
-				}
-			}
-
-			// Auto Play
-			const progressbarEnable = tab.data("progressbar");
-			const duration = $(this).data("duration") * 1000;
-
-			let slideIndex = rootTabSelector($(this)).data("activetab") - 1 || 1;
-			if ($(this).data("tabevent") == "autoplay") {
-				let tabSlider = setInterval(
-					() => handleTabSlider(tab, tabContent, tabNavMain),
-					duration,
-				);
-
-				tab.off("mouseleave").on("mouseleave", function () {
-					tabSlider = setInterval(
-						() => handleTabSlider(tab, tabContent, tabNavMain),
-						duration,
-					);
-				});
-
-				tab.off("mouseenter").on("mouseenter", function () {
-					clearInterval(tabSlider);
-				});
-			}
+			// The block is set up (again after each resize). An add-on that changes tabs on its own
+			// gets the pieces it needs from this event; the same object stays on the block as
+			// `ultpTabBlock` for a script that loads after this one.
+			const tabBlock = {
+				tab: tab,
+				tabContent: tabContent,
+				tabNavMain: tabNavMain,
+				tabNavContainer: tabNavContainer,
+				leftArrow: leftArrow,
+				rightArrow: rightArrow,
+				isTabVertical: isTabVertical,
+				tabOverflow: tabOverflow,
+				responsiveType: responsiveType,
+			};
+			tab.data("ultpTabBlock", tabBlock);
+			$(document).trigger("ultp_tab_block_ready", [tabBlock]);
 		});
 	}
 })(jQuery);

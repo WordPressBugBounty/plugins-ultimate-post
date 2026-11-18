@@ -25,6 +25,7 @@ final class ULTP_Elementor_Extension {
 	public function widget_styles() {
 		wp_register_style( 'ultp-style', ULTP_URL . 'assets/css/style.min.css', array(), ultimate_post()->get_setting( 'save_version' ) );
 		wp_enqueue_style( 'ultp-style' );
+		do_action( 'ultp_common_assets_enqueued' );
 	}
 
 	public function widget_scripts() {

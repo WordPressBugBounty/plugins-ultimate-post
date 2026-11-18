@@ -46,7 +46,6 @@ class Post_Comment_Count {
 			'hideDesktop'       => false,
 			'hideTablet'        => false,
 			'hideMobile'        => false,
-			'advanceCss'        => '',
 		);
 	}
 
@@ -73,15 +72,15 @@ class Post_Comment_Count {
 		$attr['commentLabelText'] = wp_kses( $attr['commentLabelText'], ultimate_post()->ultp_allowed_html_tags() );
 
 		$comment_count           = get_post_field( 'comment_count', '' );
-		$wrapper_before         .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '">';
+		$wrapper_before         .= '<div ' . ( $attr['advanceId'] ? 'id="' . esc_attr( $attr['advanceId'] ) . '" ' : '' ) . ' class="wp-block-ultimate-post-' . esc_attr( $block_name ) . ' ultp-block-' . esc_attr( $attr['blockId'] ) . ( $attr['className'] ? ' ' . esc_attr( $attr['className'] ) : '' ) . '' . ( $attr['align'] ? ' align' . esc_attr( $attr['align'] ) : '' ) . '">';
 				$wrapper_before .= '<div class="ultp-block-wrapper">';
 					$content    .= '<span class="ultp-comment-count">';
 		if ( $attr['commentIconShow'] && ( $attr['commentIconStyle'] != '' ) ) {
-			$content .= ultimate_post()->get_svg_icon( $attr['commentIconStyle'] );
+			$content .= wp_kses( ultimate_post()->get_svg_icon( $attr['commentIconStyle'] ), ultimate_post()->rendered_content_allowed_html() );
 		}
-						$content .= '<span>' . ( $comment_count ? $comment_count : 0 ) . '</span>';
+						$content .= '<span>' . esc_html( $comment_count ? $comment_count : 0 ) . '</span>';
 		if ( $attr['commentLabel'] ) {
-			$content .= '<span class="ultp-comment-label">' . $attr['commentLabelText'] . '</span>';
+			$content .= '<span class="ultp-comment-label">' . wp_kses( $attr['commentLabelText'], ultimate_post()->ultp_allowed_html_tags() ) . '</span>';
 		}
 					$content .= '</span>';
 			$wrapper_after   .= '</div>';

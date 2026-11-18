@@ -30,9 +30,9 @@ if ( $attr['advPaginationEnable'] && ( $attr['paginationType'] == 'pagination' )
 	$pagi_class = ' class="ultp-pagination-wrap' . ( $attr['paginationAjax'] ? ' ultp-pagination-ajax-action' : '' ) . '" ';
 
 
-	$pagi_block_html .= '<div' . $pagi_class . ultimate_post()->get_builder_attr( $attr['queryType'] ) . $adv_filter_dataset . $f_pagi_datasets . '>';
+	$pagi_block_html .= wp_kses( '<div' . $pagi_class . ultimate_post()->get_builder_attr( $attr['queryType'] ) . $adv_filter_dataset . $f_pagi_datasets . '>', ultimate_post()->rendered_content_allowed_html() );
 
-	$pagi_block_html .= ultimate_post()->pagination( $pageNum, $attr['paginationNav'], $attr['paginationText'], $attr['paginationAjax'], '', $attr['blockId'] );
+	$pagi_block_html .= wp_kses( ultimate_post()->pagination( $pageNum, $attr['paginationNav'], $attr['paginationText'], $attr['paginationAjax'], '', $attr['blockId'] ), ultimate_post()->rendered_content_allowed_html() );
 
 	$pagi_block_html .= '</div>';
 }
@@ -53,10 +53,10 @@ if ( $attr['advPaginationEnable'] && ( $attr['paginationType'] == 'navigation' )
 	$f_pagi_datasets = ultimate_post()->get_formatted_datasets( $pagi_datasets );
 	$pagi_class      = ' class="ultp-next-prev-wrap" ';
 
-	$pagi_block_html .= '<div' . $pagi_class . ultimate_post()->get_builder_attr( $attr['queryType'] ) . $adv_filter_dataset . $f_pagi_datasets . '>';
+	$pagi_block_html .= wp_kses( '<div' . $pagi_class . ultimate_post()->get_builder_attr( $attr['queryType'] ) . $adv_filter_dataset . $f_pagi_datasets . '>', ultimate_post()->rendered_content_allowed_html() );
 
 	if ( 1 != $pageNum ) {
-		$pagi_block_html .= ultimate_post()->next_prev();
+		$pagi_block_html .= wp_kses( ultimate_post()->next_prev(), ultimate_post()->rendered_content_allowed_html() );
 	}
 
 	$pagi_block_html .= '</div>';
@@ -79,7 +79,7 @@ if ( $attr['advPaginationEnable'] && ( $attr['paginationType'] == 'loadMore' ) )
 	$pagi_block_html .= '<div class="ultp-loadmore">';
 
 	if ( 1 != $pageNum ) {
-		$pagi_block_html .= '<span' . $pagi_class . ' tabindex="0" role="button" data-for="ultp-block-' . $attr['blockId'] . '" data-pages="' . $pageNum . '" data-pagenum="' . $paged . '"  data-expost="' . $exclude_id . '" data-blockid="' . $attr['blockId'] . '" data-blockname="ultimate-post_' . $block_name . '" data-postid="' . $page_post_id . '" ' . ultimate_post()->get_builder_attr( $attr['queryType'] ) . $self_post_id . $adv_filter_dataset . '>' . $attr['loadMoreText'] . ' <span class="ultp-spin">' . ultimate_post()->get_svg_icon( 'refresh' ) . '</span></span>';
+		$pagi_block_html .= wp_kses( '<span' . $pagi_class . ' tabindex="0" role="button" data-for="ultp-block-' . esc_attr( sanitize_html_class( $attr['blockId'] ) ) . '" data-pages="' . esc_attr( $pageNum ) . '" data-pagenum="' . esc_attr( $paged ) . '"  data-expost="' . esc_attr( $exclude_id ) . '" data-blockid="' . esc_attr( sanitize_html_class( $attr['blockId'] ) ) . '" data-blockname="ultimate-post_' . esc_attr( $block_name ) . '" data-postid="' . esc_attr( $page_post_id ) . '" ' . ultimate_post()->get_builder_attr( $attr['queryType'] ) . $self_post_id . $adv_filter_dataset . '>', ultimate_post()->rendered_content_allowed_html() ) . wp_kses( $attr['loadMoreText'], $allowed_html_tags ) . ' <span class="ultp-spin">' . wp_kses( ultimate_post()->get_svg_icon( 'refresh' ), ultimate_post()->rendered_content_allowed_html() ) . '</span></span>';
 	}
 
 	$pagi_block_html .= '</div>';

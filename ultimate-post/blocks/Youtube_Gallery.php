@@ -20,8 +20,6 @@ class Youtube_Gallery {
 			'className'                 => '',
 			'playlistIdOrUrl'           => 'PLPidnGLSR4qcAwVwIjMo1OVaqXqjUp_s4',
 			'youTubeApiKey'             => '',
-			'cacheDuration'             => '0',
-			'sortBy'                    => 'date',
 			'layout'             => 'inline',
 			'videosPerPage'             => (object) array( 'lg' => 6 ),
 			'showVideoTitle'            => true,
@@ -41,8 +39,6 @@ class Youtube_Gallery {
 			'displayType'               => 'grid',
 			'enableListView'            => false,
 			'playIcon'                  => 'youtube_logo_icon_solid',
-			'enableAnimation'			  => false,
-			'defaultYoutubeIcon'           => true,
 		);
 	}
 
@@ -77,10 +73,10 @@ class Youtube_Gallery {
 
 		$block_class = 'ultp-post-grid-block  ultp-block-' . $attr['blockId'];
 		if ( $attr['align'] ) {
-			$block_class .= ' align' . $attr['align'];
+			$block_class .= ' align' . esc_attr( $attr['align'] );
 		}
 		if ( $attr['className'] ) {
-			$block_class .= ' ' . $attr['className'];
+			$block_class .= ' ' . esc_attr( $attr['className'] );
 		}
 
 		$videos_per_page = isset( $attr['videosPerPage'] ) ? $attr['videosPerPage'] : array( 'lg' => 9, 'md' => 6, 'sm' => 3 );
@@ -90,31 +86,42 @@ class Youtube_Gallery {
 
 		$block_name = 'youtube-gallery';
 
-		$content .= '<div '. ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '' . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '"';
-		$content .= ' data-playlist="' . esc_attr( $attr['playlistIdOrUrl'] ) . '"';
-		$content .= ' data-api-key="' . esc_attr( $attr['youTubeApiKey'] ) . '"';
-		$content .= ' data-cache-duration="' . esc_attr( $attr['cacheDuration'] ) . '"';
-		$content .= ' data-sort-by="' . esc_attr( $attr['sortBy'] ) . '"';
-		$content .= ' data-gallery-layout="' . esc_attr( $attr['layout'] ) . '"';
-		$content .= ' data-videos-per-page="' . esc_attr( wp_json_encode( $videos_per_page ) ) . '"';
-		$content .= ' data-show-video-title="' . ( $attr['showVideoTitle'] ? '1' : '0' ) . '"';
-		$content .= ' data-video-title-length="' . esc_attr( wp_json_encode( $video_title_length ) ) . '"';
-		$content .= ' data-load-more-enable="' . ( $attr['loadMoreEnable'] ? '1' : '0' ) . '"';
-		$content .= ' data-more-button-label="' . esc_attr( $attr['moreButtonLabel'] ) . '"';
-		$content .= ' data-autoplay="' . ( $attr['layout'] == 'playlist' ? ( $attr['autoplayPlaylist'] ? '1' : '0' ) : ( $attr['autoplay'] ? '1' : '0' ) ) . '"';
-		$content .= ' data-loop="' . ( $attr['loop'] ? '1' : '0' ) . '"';
-		$content .= ' data-mute="' . ( $attr['mute'] ? '1' : '0' ) . '"';
-		$content .= ' data-show-player-control="' . ( $attr['showPlayerControl'] ? '1' : '0' ) . '"';
-		$content .= ' data-hide-youtube-logo="' . ( $attr['hideYoutubeLogo'] ? '1' : '0' ) . '"';
-		$content .= ' data-show-description="' . ( $attr['showDescription'] ? '1' : '0' ) . '"';
-		$content .= ' data-video-description-length="' . esc_attr( wp_json_encode( $video_description_length ) ) . '"';
-		$content .= ' data-image-height-ratio="' . esc_attr( $attr['imageHeightRatio'] ) . '"';
-		$content .= ' data-gallery-column="' . esc_attr( wp_json_encode( $gallery_column ) ) . '"';
-		$content .= ' data-display-type="' . esc_attr( $attr['displayType'] ) . '"';
-		$content .= ' data-enable-list-view="' . ( $attr['enableListView'] ? '1' : '0' ) . '"';
-		$content .= ' data-enable-youtube-icon="' . ( $attr['defaultYoutubeIcon'] ? '1' : '0' ) . '"';
-		$content .= ' data-enable-icon-animation="' . ( $attr['enableAnimation'] ? '1' : '0' ) . '"';
-		$content .= ' data-img-height="' . ( $attr['imageHeightRatio']  ) . '"';
+		// The layout is inline unless ultp_youtube_gallery_layout gives another.
+		$attr['layout'] = apply_filters( 'ultp_youtube_gallery_layout', 'inline', $attr );
+
+		// Data attributes read by the gallery script, in order. Values are escaped here; the
+		// ultp_youtube_gallery_data filter may change or add entries (escaping its own values).
+		$data_attributes = array(
+			'playlist'                 => esc_attr( $attr['playlistIdOrUrl'] ),
+			'api-key'                  => esc_attr( $attr['youTubeApiKey'] ),
+			'gallery-layout'           => esc_attr( $attr['layout'] ),
+			'videos-per-page'          => esc_attr( wp_json_encode( $videos_per_page ) ),
+			'show-video-title'         => ( $attr['showVideoTitle'] ? '1' : '0' ),
+			'video-title-length'       => esc_attr( wp_json_encode( $video_title_length ) ),
+			'load-more-enable'         => ( $attr['loadMoreEnable'] ? '1' : '0' ),
+			'more-button-label'        => esc_attr( $attr['moreButtonLabel'] ),
+			'autoplay'                 => ( $attr['autoplay'] ? '1' : '0' ),
+			'loop'                     => ( $attr['loop'] ? '1' : '0' ),
+			'mute'                     => ( $attr['mute'] ? '1' : '0' ),
+			'show-player-control'      => ( $attr['showPlayerControl'] ? '1' : '0' ),
+			'hide-youtube-logo'        => ( $attr['hideYoutubeLogo'] ? '1' : '0' ),
+			'show-description'         => ( $attr['showDescription'] ? '1' : '0' ),
+			'video-description-length' => esc_attr( wp_json_encode( $video_description_length ) ),
+			'image-height-ratio'       => esc_attr( $attr['imageHeightRatio'] ),
+			'gallery-column'           => esc_attr( wp_json_encode( $gallery_column ) ),
+			'display-type'             => esc_attr( $attr['displayType'] ),
+			'enable-list-view'         => ( $attr['enableListView'] ? '1' : '0' ),
+			'img-height'               => ( $attr['imageHeightRatio'] ),
+		);
+		$data_attributes = apply_filters( 'ultp_youtube_gallery_data', $data_attributes, $attr );
+
+		$content .= '<div '. ( $attr['advanceId'] ? 'id="' . esc_attr( $attr['advanceId'] ) . '" ' : '' ) . ' class="wp-block-ultimate-post-' . esc_attr( $block_name ) . ' ultp-block-' . esc_attr( $attr['blockId'] ) . '' . ( $attr['align'] ? ' align' . esc_attr( $attr['align'] ) : '' ) . '' . ( $attr['className'] ? ' ' . esc_attr( $attr['className'] ) : '' ) . '"';
+		foreach ( $data_attributes as $data_key => $data_value ) {
+			if ( ! is_string( $data_key ) || ! is_scalar( $data_value ) ) {
+				continue;
+			}
+			$content .= ' data-' . sanitize_key( $data_key ) . '="' . esc_attr( $data_value ) . '"';
+		}
 		$content .= '>';
 
 		$grid_class = 'ultp-ytg-view-grid ultp-layout-' . esc_attr( $attr['layout'] );
@@ -130,14 +137,16 @@ class Youtube_Gallery {
 		$content .= '<div class="ultp-ytg-container ' . esc_attr( $grid_class ) . '">';
 		$content .= '<div class=""></div>';
 		$content .= '</div>';
-		if ( $attr['loadMoreEnable']  &&  $attr['layout'] != 'playlist') {
-			$content .= '<div class="ultp-ytg-loadmore-btn">';
-			$content .= esc_html( $attr['moreButtonLabel'] );
-			$content .= '</div>';
+		// The "load more" button when loadMoreEnable is on. The ultp_youtube_gallery_load_more_html filter can replace it.
+		$load_more_default = '';
+		if ( $attr['loadMoreEnable'] ) {
+			$load_more_default = '<div class="ultp-ytg-loadmore-btn">' . esc_html( $attr['moreButtonLabel'] ) . '</div>';
 		}
+		$content .= ultimate_post()->esc_filtered_markup( apply_filters( 'ultp_youtube_gallery_load_more_html', $load_more_default, $attr ), $load_more_default );
 		if($attr['playIcon']) {
 			$content .= '<div class="ultp-ytg-play__icon" style="display:none;" >';
-			$content .= $attr['defaultYoutubeIcon'] ? '<svg
+			// The YouTube logo. The ultp_youtube_gallery_play_icon filter can replace it.
+			$default_icon = '<svg
 										xmlns="http://www.w3.org/2000/svg"
 										viewBox="0 0 28.57 20"
 										preserveAspectRatio="xMidYMid meet"
@@ -152,7 +161,8 @@ class Youtube_Gallery {
 												fill="white"
 											/>
 										</g>
-									</svg>' : ultimate_post()->get_svg_icon( $attr['playIcon']);
+									</svg>';
+			$content .= wp_kses( ultimate_post()->esc_filtered_markup( apply_filters( 'ultp_youtube_gallery_play_icon', $default_icon, $attr ), $default_icon ), ultimate_post()->rendered_content_allowed_html() );
 			$content .= '</div>';
 		}
 		

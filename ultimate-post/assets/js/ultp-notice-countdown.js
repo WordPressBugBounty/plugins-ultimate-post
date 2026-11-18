@@ -1,6 +1,6 @@
 /**
- * Countdown for PostX banner notices. Keeps each timer in localStorage so it survives page loads,
- * and restarts it when it runs out.
+ * Countdown for PostX banner notices. A banner that has its campaign end time counts down to that
+ * time. A banner without one keeps a per-browser timer in localStorage. Both stop at zero and never restart.
  */
 jQuery(function($) {
 	'use strict';
@@ -29,19 +29,50 @@ jQuery(function($) {
 		return 0;
 	};
 
+	const parseEndTimeToSeconds = function(endTime) {
+		const seconds = parseInt(endTime, 10);
+		return Number.isFinite(seconds) && seconds > 0 ? seconds : 0;
+	};
+
 	const nowInSeconds = function() {
 		return Math.floor(Date.now() / 1000);
+	};
+
+	// Shows the remaining time now and then every second. Stops at zero; does not restart.
+	const runCountdown = function(countdownElement, getRemaining) {
+		const firstRemaining = Math.max(getRemaining(), 0);
+		countdownElement.text(formatCountdown(firstRemaining));
+
+		if (firstRemaining > 0) {
+			const timerId = window.setInterval(function() {
+				const remaining = Math.max(getRemaining(), 0);
+				countdownElement.text(formatCountdown(remaining));
+
+				if (remaining <= 0) {
+					window.clearInterval(timerId);
+				}
+			}, 1000);
+		}
 	};
 
 	$('.ultp-notice-countdown').each(function() {
 		const countdownElement = $(this);
 		const noticeKey = String(countdownElement.data('noticeKey') || '');
+		const campaignEnd = parseEndTimeToSeconds(countdownElement.data('endTime'));
 		const duration = parseDurationToSeconds(countdownElement.data('duration'));
 
-		if (!noticeKey || duration <= 0) {
+		if (!noticeKey || (campaignEnd <= 0 && duration <= 0)) {
 			return;
 		}
 
+		if (campaignEnd > 0) {
+			runCountdown(countdownElement, function() {
+				return campaignEnd - nowInSeconds();
+			});
+			return;
+		}
+
+		// No campaign end time: keep a per-browser timer that starts on the first view.
 		const storageKey = storagePrefix + noticeKey;
 		let endAt = 0;
 
@@ -57,41 +88,23 @@ jQuery(function($) {
 			endAt = 0;
 		}
 
-		const saveTimerState = function(nextEndAt) {
+		if (endAt <= 0) {
+			endAt = nowInSeconds() + duration;
 			try {
 				window.localStorage.setItem(
 					storageKey,
 					JSON.stringify({
-						endAt: nextEndAt,
+						endAt: endAt,
 						duration: duration,
 					})
 				);
 			} catch (error) {
 				// No-op.
 			}
-		};
-
-		const resetTimer = function(currentTime) {
-			endAt = currentTime + duration;
-			saveTimerState(endAt);
-		};
-
-		const tick = function() {
-			const currentTime = nowInSeconds();
-
-			if (endAt <= currentTime) {
-				resetTimer(currentTime);
-			}
-
-			const remaining = Math.max(endAt - currentTime, 0);
-			countdownElement.text(formatCountdown(remaining));
-		};
-
-		if (endAt <= nowInSeconds()) {
-			resetTimer(nowInSeconds());
 		}
 
-		tick();
-		window.setInterval(tick, 1000);
+		runCountdown(countdownElement, function() {
+			return endAt - nowInSeconds();
+		});
 	});
 });

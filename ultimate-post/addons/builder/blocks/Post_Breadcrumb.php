@@ -36,7 +36,6 @@ class Post_Breadcrumb {
 			'hideDesktop'         => false,
 			'hideTablet'          => false,
 			'hideMobile'          => false,
-			'advanceCss'          => '',
 		);
 	}
 
@@ -64,13 +63,13 @@ class Post_Breadcrumb {
         $attr['bcrumbRootText'] = wp_kses($attr['bcrumbRootText'], ultimate_post()->ultp_allowed_html_tags());
         $separator = '';
 
-        $wrapper_before .= '<div '.( $attr['advanceId'] ? 'id="'.$attr['advanceId'].'" ':'' ).' class="wp-block-ultimate-post-'.$block_name.' ultp-block-'.$attr["blockId"].( $attr["className"] ?' '.$attr["className"]:'' ).''.( $attr["align"] ? ' align' .$attr["align"]:'' ).'">';
+        $wrapper_before .= '<div '.( $attr['advanceId'] ? 'id="'.esc_attr( $attr['advanceId'] ).'" ':'' ).' class="wp-block-ultimate-post-'.esc_attr( $block_name ).' ultp-block-'.esc_attr( $attr["blockId"] ).( $attr["className"] ?' '.esc_attr( $attr["className"] ):'' ).''.( $attr["align"] ? ' align' .esc_attr( $attr["align"] ):'' ).'">';
             $wrapper_before .= '<div class="ultp-block-wrapper">';
-                $content .= '<ul class="ultp-builder-breadcrumb ultp-breadcrumb-'.sanitize_html_class( $attr['bcrumbSeparatorIcon'] ).'">';
+                $content .= '<ul class="ultp-builder-breadcrumb ultp-breadcrumb-'.esc_attr( sanitize_html_class( $attr['bcrumbSeparatorIcon'] ) ).'">';
                     if ($attr['bcrumbSeparator']) {
                         $separator .= '<li class="ultp-breadcrumb-separator"></li>';
                     }
-                    $content .= '<li><a href="'.esc_url(home_url('/')).'">'.( strlen($attr['bcrumbRootText']) > 0 && 'Home' !== $attr['bcrumbRootText'] ? $attr['bcrumbRootText'] : __( 'Home', 'ultimate-post' ) ).'</a></li>';
+                    $content .= '<li><a href="'.esc_url(home_url('/')).'">'.( strlen($attr['bcrumbRootText']) > 0 && 'Home' !== $attr['bcrumbRootText'] ? wp_kses( $attr['bcrumbRootText'], ultimate_post()->ultp_allowed_html_tags() ) : esc_html__( 'Home', 'ultimate-post' ) ).'</a></li>';
                     if (is_category() || is_single() || is_tag() || is_author()) {
                         if (is_category()) {
                             $cat = get_queried_object();
@@ -87,38 +86,38 @@ class Post_Breadcrumb {
                                     }
                                 }
                                 foreach ($parents as $parent_cat) {
-                                    $content .= $separator.'<li><a href="'.esc_url(get_term_link($parent_cat->term_id, 'category')).'">'.esc_html($parent_cat->name).'</a></li>';
+                                    $content .= $separator.'<li><a href="'.esc_url( ultimate_post()->esc_term_link( $parent_cat->term_id, 'category' ) ).'">'.esc_html($parent_cat->name).'</a></li>';
                                 }
                             }
-                            $content .= $separator.'<li>'.single_cat_title('', false).'</li>';
+                            $content .= $separator.'<li>'.esc_html( single_cat_title('', false) ).'</li>';
                         }
                         if (is_tag()) {
-                            $content .= $separator.'<li>'.single_tag_title('', false).'</li>';
+                            $content .= $separator.'<li>'.esc_html( single_tag_title('', false) ).'</li>';
                         }
                         if (is_author()) {
-                            $content .= $separator.'<li>'.get_the_author_meta('display_name', false).'</li>';
+                            $content .= $separator.'<li>'.esc_html( get_the_author_meta('display_name', false) ).'</li>';
                         }
                         if (is_single()) {
                             $cat = get_the_category();
                             if (isset($cat[0])) {
-                                $content .= $separator.'<li><a href="'.get_term_link($cat[0]->term_id).'">'.$cat[0]->name.'</a></li>';
+                                $content .= $separator.'<li><a href="'.esc_url( ultimate_post()->esc_term_link( $cat[0]->term_id ) ).'">'.esc_html( $cat[0]->name ).'</a></li>';
                             }
                             if ($attr['bcrumbName']) {
-                                $content .= $separator.'<li>'.get_the_title().'</li>';
+                                $content .= $separator.'<li>'.wp_kses_post( get_the_title() ).'</li>';
                             }
                         }
                     } elseif (is_page()) {
                         if ($post->post_parent) {
-                            $ancestor = get_post_ancestors($post->post_parent);
-                            if (isset($ancestor[0])) {
-                                $content = $separator.'<li><a href="'.get_permalink($ancestor[0]).'">'.get_the_title($ancestor[0]).'</a></li>';
+                            $ancestors = array_reverse( get_post_ancestors( $post ) ); // Topmost first, includes the direct parent
+                            foreach ($ancestors as $ancestor_id) {
+                                $content .= $separator.'<li><a href="'.esc_url( get_permalink($ancestor_id) ).'">'.wp_kses_post( get_the_title($ancestor_id) ).'</a></li>';
                             }
                         }
                         if ($attr['bcrumbName']) {
-                            $content .= $separator.'<li>'.get_the_title().'</li>';
+                            $content .= $separator.'<li>'.wp_kses_post( get_the_title() ).'</li>';
                         }
                     } elseif (is_search()) {
-                        $content .= $separator.'<li>'.get_search_query().'</li>';
+                        $content .= $separator.'<li>'.esc_html( get_search_query() ).'</li>';
                     }
                 $content .= '</ul>';
             $wrapper_after .= '</div>';

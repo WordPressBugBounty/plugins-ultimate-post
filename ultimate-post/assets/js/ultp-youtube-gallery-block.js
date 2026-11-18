@@ -18,6 +18,21 @@
 			return typeof val === "object" && val !== null ? val : fallback;
 		}
 
+		// Escape a value from the YouTube API for use in HTML text or a quoted attribute.
+		// Call it once, at the point of interpolation, and only on the final string.
+		function escapeHtml(value) {
+			if (value === null || value === undefined) return "";
+			return String(value).replace(/[&<>"']/g, function (ch) {
+				return {
+					"&": "&amp;",
+					"<": "&lt;",
+					">": "&gt;",
+					'"': "&quot;",
+					"'": "&#39;",
+				}[ch];
+			});
+		}
+
 		// Helper to truncate text responsively
 		function truncateText(text, length) {
 			if (!text) return "";
@@ -35,33 +50,14 @@
 				: text;
 		}
 
-		// Helper to sort videos
-		function sortVideos(videos, sortBy) {
+		// Helper to sort videos, oldest first
+		function sortVideos(videos) {
 			const sorted = [...videos];
-			switch (sortBy) {
-				case "title":
-					return sorted.sort((a, b) =>
-						a.title.localeCompare(b.title, undefined, {
-							sensitivity: "base",
-						})
-					);
-				case "latest":
-					return sorted.sort(
-						(a, b) =>
-							new Date(b.publishedAt).getTime() -
-							new Date(a.publishedAt).getTime()
-					);
-				case "date":
-					return sorted.sort(
-						(a, b) =>
-							new Date(a.publishedAt).getTime() -
-							new Date(b.publishedAt).getTime()
-					);
-				case "popular":
-					return sorted.sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
-				default:
-					return videos;
-			}
+			return sorted.sort(
+				(a, b) =>
+					new Date(a.publishedAt).getTime() -
+					new Date(b.publishedAt).getTime()
+			);
 		}
 
 		// Extract playlist ID from URL or direct ID, and handle channel URLs/handles
@@ -105,21 +101,22 @@
 
 		// Helper function to generate video player iframe
 		function generatePlayerIframe(videoId, config) {
+			const safeVideoId = escapeHtml(videoId);
 			const params = [
 				`autoplay=${config.autoplay ? "1" : "0"}`,
 				`loop=${config.loop ? "1" : "0"}`,
 				`mute=${config.mute ? "1" : "0"}`,
 				`controls=${config.showPlayerControl ? "1" : "0"}`,
 				`modestbranding=${config.hideYoutubeLogo ? "1" : "0"}`,
-				config.loop ? `playlist=${videoId}` : null,
+				config.loop ? `playlist=${safeVideoId}` : null,
 			]
 				.filter(Boolean)
 				.join("&");
 
 			return `
 				<div class="ultp-ytg-video-wrapper">
-					<iframe 
-						src="https://www.youtube.com/embed/${videoId}?${params}"
+					<iframe
+						src="https://www.youtube.com/embed/${safeVideoId}?${params}"
 						title="YouTube Video"
 						frameborder="0"
 						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -141,16 +138,16 @@
 		) {
 			let html = '<div class="ultp-ytg-content">';
 			if (enableTitle) {
-				html += `<div class="ultp-ytg-title"><a href="https://www.youtube.com/watch?v=${videoId}" target="_blank" rel="noopener noreferrer">${truncateText(
+				html += `<div class="ultp-ytg-title"><a href="https://www.youtube.com/watch?v=${escapeHtml(videoId)}" target="_blank" rel="noopener noreferrer">${escapeHtml(truncateText(
 					title,
 					titleLength
-				)}</a></div>`;
+				))}</a></div>`;
 			}
 			if (enableDesc) {
-				html += `<div class="ultp-ytg-description">${truncateText(
+				html += `<div class="ultp-ytg-description">${escapeHtml(truncateText(
 					description,
 					descriptionLength
-				)}</div>`;
+				))}</div>`;
 			}
 			html += "</div>";
 			return html;
@@ -159,6 +156,12 @@
 		// Initialize YouTube Gallery
 		$(".wp-block-ultimate-post-youtube-gallery").each(function () {
 			const $block = $(this);
+			// An add-on may run this block itself; it then calls preventDefault().
+			const initEvent = $.Event("ultp_youtube_gallery_init");
+			$block.trigger(initEvent);
+			if (initEvent.isDefaultPrevented()) {
+				return;
+			}
 			const $wrapper = $block.find(".ultp-block-wrapper");
 			let $container = $block.find(".ultp-ytg-view-grid, .ultp-ytg-container");
 			const $loadMoreBtn = $block.find(".ultp-ytg-loadmore-btn");
@@ -167,9 +170,6 @@
 			const config = {
 				playlistIdOrUrl: $block.data("playlist") || "",
 				apiKey: $block.data("api-key") || "",
-				cacheDuration: parseInt($block.data("cache-duration")) || 0,
-				sortBy: $block.data("sort-by") || "date",
-				galleryLayout: $block.data("gallery-layout") || "grid",
 				videosPerPage: parseMaybeJSON($block.data("videos-per-page"), {
 					lg: 9,
 					md: 6,
@@ -205,8 +205,6 @@
 				}),
 				displayType: $block.data("display-type") || "grid",
 				enableListView: $block.data("enable-list-view") == "1",
-				enableIconAnimation: $block.data("enable-icon-animation") == "1",
-				defaultYoutubeIcon: $block.data("enable-youtube-icon") == "1",
 				imgHeight: $block.data("img-height"),
 			};
 
@@ -245,7 +243,6 @@
 				// State management
 				let allVideos = [];
 				let shownCount = config.videosPerPage.lg || 9;
-				let activeVideo = null;
 				let playingId = null;
 
 				// Update responsive counts
@@ -258,73 +255,6 @@
 					} else {
 						shownCount = Math.max(shownCount, config.videosPerPage.lg || 9);
 					}
-				}
-
-				// Render videos for playlist layout
-				function renderPlaylistLayout(videos) {
-					if (!videos.length) {
-						$container.html("<p>No videos found in this playlist.</p>");
-						return;
-					}
-
-					if (!activeVideo) {
-						activeVideo = videos[0];
-					}
-
-					let html = '<div class="ultp-ytg-main">';
-					// Generate player iframe and place .ultp-ytg-content inside .ultp-ytg-video-wrapper
-					const playerWrapper = `
-						<div class="ultp-ytg-video-wrapper">
-							<iframe 
-								src="https://www.youtube.com/embed/${activeVideo.videoId}?${[
-						`autoplay=${config.autoplay ? "1" : "0"}`,
-						`loop=${config.loop ? "1" : "0"}`,
-						`mute=${config.mute ? "1" : "0"}`,
-						`controls=${config.showPlayerControl ? "1" : "0"}`,
-						`modestbranding=${config.hideYoutubeLogo ? "1" : "0"}`,
-						config.loop ? `playlist=${activeVideo.videoId}` : null,
-					]
-						.filter(Boolean)
-						.join("&")}"
-								title="YouTube Video"
-								frameborder="0"
-								allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-								allowfullscreen
-							></iframe>
-							${getYoutubeTextContent(
-								config.showVideoTitle,
-								activeVideo.title,
-								config.videoTitleLength,
-								config.showDescription,
-								activeVideo.description,
-								config.videoDescriptionLength,
-								activeVideo.videoId
-							)}
-						</div>
-					`;
-					html += playerWrapper;
-					html += "</div>";
-
-					html += '<div class="ultp-ytg-playlist-sidebar">';
-					html += '<div class="ultp-ytg-playlist-items">';
-					videos.forEach(function (video) {
-						const isActive = video.videoId === activeVideo.videoId;
-						html += `
-							<div class="ultp-ytg-playlist-item ${
-								isActive ? "active" : ""
-							}" data-video-id="${video.videoId}">
-								<img src="${video.thumbnail}" alt="${video.title}" loading="lazy" />
-								<div class="ultp-ytg-playlist-item-content">
-									<div class="ultp-ytg-playlist-item-title">
-										${truncateText(video.title, config.videoTitleLength)}
-									</div>
-								</div>
-							</div>
-						`;
-					});
-					html += "</div></div>";
-
-					$container.html(html);
 				}
 
 				// Render videos for grid/list layout
@@ -344,17 +274,14 @@
 						if (isPlaying) {
 							html += generatePlayerIframe(video.videoId, config);
 						} else {
-							// enableIconAnimation
 							const getSvgIcon = $(".ultp-ytg-play__icon").html();
 							html += `
-								<img src="${video.thumbnail}" alt="${
+								<img src="${escapeHtml(video.thumbnail)}" alt="${escapeHtml(
 								video.title
-							}" loading="lazy" data-video-id="${
+							)}" loading="lazy" data-video-id="${escapeHtml(
 								video.videoId
-							}" style="cursor:pointer;" />
-								<div class="ultp-ytg-play__icon${
-									config.enableIconAnimation ? " ytg-icon-animation" : ""
-								}">
+							)}" style="cursor:pointer;" />
+								<div class="ultp-ytg-play__icon">
 									${getSvgIcon}
 								</div>
 							`;
@@ -384,177 +311,73 @@
 					}
 				}
 
-				// Render based on layout type
 				function renderVideos(videos, count) {
-					if (config.galleryLayout === "playlist") {
-						renderPlaylistLayout(videos);
-					} else {
-						renderGridLayout(videos, count);
-					}
+					renderGridLayout(videos, count);
 				}
 
 				// Fetch videos from YouTube API
-				const cacheKey = `ultp_youtube_gallery_${playlistId}_${config.apiKey}_${config.sortBy}_${config.imgHeight}`;
-				const duration = config.cacheDuration;
-				let cached = null;
+				$container.html(`
+					<div class="ultp-ytg-loading gallery-postx gallery-active">
+						<div class="skeleton-box"></div>
+						<div class="skeleton-box"></div>
+						<div class="skeleton-box"></div>
+						<div class="skeleton-box"></div>
+						<div class="skeleton-box"></div>
+						<div class="skeleton-box"></div>
+					</div>
+				`);
 
-				try {
-					cached = JSON.parse(localStorage.getItem(cacheKey));
-				} catch (e) {
-					cached = null;
-				}
-
-				const now = Date.now();
-				if (
-					cached &&
-					cached.data &&
-					cached.timestamp &&
-					duration > 0 &&
-					now - cached.timestamp < duration * 1000
-				) {
-					allVideos = sortVideos(cached.data, config.sortBy);
-					renderVideos(allVideos, shownCount);
-				} else {
-					// Only show loading skeleton for grid/list layouts, not for playlist layout
-					if (config.galleryLayout !== "playlist") {
-						$container.html(`
-							<div class="ultp-ytg-loading gallery-postx gallery-active">
-								<div class="skeleton-box"></div>
-								<div class="skeleton-box"></div>
-								<div class="skeleton-box"></div>
-								<div class="skeleton-box"></div>
-								<div class="skeleton-box"></div>
-								<div class="skeleton-box"></div>
-							</div>
-						`);
-					} else {
-						$container.html(`
-							<div class="ultp-ytg-loading ultp-ytg-playlist-loading">
-								<div class="ytg-loader"></div>
-							</div>`);
-					}
-
-					$.get("https://www.googleapis.com/youtube/v3/playlistItems", {
-						part: "snippet",
-						maxResults: 50,
-						playlistId: playlistId,
-						key: config.apiKey,
-					})
-						.done(function (data) {
-							setTimeout(function () {
-								$container.empty(); // Remove loading after 3s
-								if (data.error) {
-									$container.html(
-										`<div class="ultp-ytg-error">${
-											data.error.message || "Failed to fetch playlist."
-										}</div>`
-									);
-									return;
-								}
-
-								const videos = (data.items || [])
-									.filter(function (item) {
-										return (
-											item.snippet.title !== "Private video" &&
-											item.snippet.title !== "Deleted video"
-										);
-									})
-									.map(function (item) {
-										return {
-											videoId: item.snippet.resourceId.videoId,
-											title: item.snippet.title,
-											thumbnail:
-												(item.snippet.thumbnails &&
-													item.snippet.thumbnails[config.imgHeight] &&
-													item.snippet.thumbnails[config.imgHeight].url) ||
-												item.snippet.thumbnails[config.imgHeight].url ||
-												item.snippet.thumbnails?.medium?.url ||
-												"",
-											publishedAt: item.snippet.publishedAt || "",
-											description: item.snippet.description || "",
-											viewCount: 0, // Initialize for popular sorting
-										};
-									}); // If sorting by popular, fetch view counts
-								if (config.sortBy === "popular") {
-									const videoIds = videos.map((v) => v.videoId).join(",");
-									$.get(
-										`https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${videoIds}&key=${config.apiKey}`
-									)
-										.done(function (statsData) {
-											if (statsData.items) {
-												const statsMap = {};
-												statsData.items.forEach(function (item) {
-													statsMap[item.id] = item.statistics.viewCount;
-												});
-												videos.forEach(function (v) {
-													v.viewCount = parseInt(statsMap[v.videoId] || 0);
-												});
-											}
-											allVideos = sortVideos(videos, config.sortBy);
-											if (duration > 0) {
-												try {
-													localStorage.setItem(
-														cacheKey,
-														JSON.stringify({
-															data: videos,
-															timestamp: now,
-														})
-													);
-												} catch (e) {
-													console.warn("Failed to cache videos:", e);
-												}
-											}
-											renderVideos(allVideos, shownCount);
-										})
-										.fail(function () {
-											console.warn(
-												"Failed to fetch video statistics for popular sorting."
-											);
-											allVideos = sortVideos(videos, config.sortBy);
-											renderVideos(allVideos, shownCount);
-										});
-								} else {
-									allVideos = sortVideos(videos, config.sortBy);
-									if (duration > 0) {
-										try {
-											localStorage.setItem(
-												cacheKey,
-												JSON.stringify({
-													data: videos,
-													timestamp: now,
-												})
-											);
-										} catch (e) {
-											console.warn("Failed to cache videos:", e);
-										}
-									}
-									renderVideos(allVideos, shownCount);
-								}
-							}, 2000);
-						})
-						.fail(function () {
-							setTimeout(function () {
-								$container.empty();
+				$.get("https://www.googleapis.com/youtube/v3/playlistItems", {
+					part: "snippet",
+					maxResults: 50,
+					playlistId: playlistId,
+					key: config.apiKey,
+				})
+					.done(function (data) {
+						setTimeout(function () {
+							$container.empty(); // Remove loading after 3s
+							if (data.error) {
 								$container.html(
-									'<div class="ultp-ytg-error">Failed to fetch videos. Please try again.</div>'
+									`<div class="ultp-ytg-error">${escapeHtml(
+										data.error.message || "Failed to fetch playlist."
+									)}</div>`
 								);
-							}, 3000);
-						});
-				}
+								return;
+							}
 
-				// Event handlers
-				$block.on("click", ".ultp-ytg-playlist-item", function () {
-					const videoId = $(this).data("video-id");
-					if (!videoId) return;
-
-					activeVideo = allVideos.find(function (v) {
-						return v.videoId === videoId;
+							const videos = (data.items || [])
+								.filter(function (item) {
+									return (
+										item.snippet.title !== "Private video" &&
+										item.snippet.title !== "Deleted video"
+									);
+								})
+								.map(function (item) {
+									return {
+										videoId: item.snippet.resourceId.videoId,
+										title: item.snippet.title,
+										thumbnail:
+											item.snippet.thumbnails?.[config.imgHeight]?.url ||
+											item.snippet.thumbnails?.medium?.url ||
+											"",
+										publishedAt: item.snippet.publishedAt || "",
+										description: item.snippet.description || "",
+									};
+								});
+							allVideos = sortVideos(videos);
+							renderVideos(allVideos, shownCount);
+						}, 2000);
+					})
+					.fail(function () {
+						setTimeout(function () {
+							$container.empty();
+							$container.html(
+								'<div class="ultp-ytg-error">Failed to fetch videos. Please try again.</div>'
+							);
+						}, 3000);
 					});
 
-					if (activeVideo) {
-						renderPlaylistLayout(allVideos);
-					}
-				});
+				// Event handlers
 				// Make clicking the play icon also start the video with loader fallback (per item)
 				$block.on("click", ".ultp-ytg-play__icon", function () {
 					// Find the previous img[data-video-id] sibling to get the videoId

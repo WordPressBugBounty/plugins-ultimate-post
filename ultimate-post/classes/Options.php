@@ -9,7 +9,7 @@
 
 namespace ULTP;
 
-use ULTP\Includes\Durbin\Xpo;
+use ULTP\Includes\Helper\Xpo;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -31,8 +31,7 @@ class Options {
 	public function __construct() {
 		add_action( 'admin_init', array( $this, 'handle_external_redirects' ) );
 		add_action( 'admin_menu', array( $this, 'menu_page_callback' ) );
-		add_action( 'admin_footer', array( $this, 'sync_addon_submenu_visibility' ) );
-		add_action( 'in_admin_header', array( $this, 'remove_all_notices' ) );
+		// add_action( 'in_admin_header', array( $this, 'remove_all_notices' ) );
 		add_filter( 'plugin_row_meta', array( $this, 'plugin_settings_meta' ), 10, 2 );
 		add_filter( 'plugin_action_links_' . ULTP_BASE, array( $this, 'plugin_action_links_callback' ) );
 	}
@@ -75,7 +74,7 @@ class Options {
 			'ultp_options' => '<a href="' . esc_url( admin_url( 'admin.php?page=ultp-settings#startersites' ) ) . '">' . esc_html__( 'Starter Sites', 'ultimate-post' ) . '</a>',
 		);
 
-		// The "Upgrade to Pro" / "Renew License" link is added after this by
+		// The "Upgrade to Pro" link is added after this by
 		// includes/notice/class-promo-links.php.
 		return array_merge( $setting_link, $links );
 	}
@@ -117,9 +116,13 @@ class Options {
 			'blocks'          => esc_html__( 'Blocks', 'ultimate-post' ),
 			'settings'        => esc_html__( 'Settings', 'ultimate-post' ),
 		);
-		if ( defined( 'ULTP_PRO_VER' ) ) {
-			$menu_lists['license'] = esc_html__( 'License ', 'ultimate-post' );
-		}
+
+		/**
+		 * Pages other plugins add to the PostX dashboard menu (slug => title). PostX Pro adds its own.
+		 *
+		 * @param array $menu_lists Menu pages.
+		 */
+		$menu_lists = apply_filters( 'ultp_dashboard_submenus', $menu_lists );
 
 		foreach ( $menu_lists as $key => $val ) {
 			add_submenu_page(
@@ -128,7 +131,7 @@ class Options {
 				$val,
 				$menupage_cap,
 				'ultp-settings#' . $key,
-				array( __CLASS__, 'render_main' )
+				array( __CLASS__, 'ultp_dashboard' )
 			);
 		}
 		add_submenu_page(
@@ -140,7 +143,7 @@ class Options {
 			array( __CLASS__, 'ultp_wizard_page' )
 		);
 
-		// The "Upgrade to Pro" / "Renew License" item is added last by includes/notice/class-promo-links.php.
+		// The "Upgrade to Pro" item is added last by includes/notice/class-promo-links.php.
 
 		add_theme_page(
 			__( 'Starter Sites', 'ultimate-post' ),
@@ -152,12 +155,15 @@ class Options {
 	}
 
 	/**
-	 * Sync addon-backed WordPress submenu items with addon enabled status.
+	 * Whether each addon-backed WordPress submenu item should show, keyed by its dashboard slug.
+	 *
+	 * Passed to assets/js/ultp-admin-shared.js as ultp_admin_menu.addon_submenus, which shows or hides
+	 * the items and gives each one the id postx-submenu-{slug}.
 	 *
 	 * @since v.4.1.7
-	 * @return void No return value.
+	 * @return array<string, bool> Submenu slug => true when its addon is enabled.
 	 */
-	public function sync_addon_submenu_visibility() {
+	public static function get_addon_submenu_visibility() {
 		$settings = ultimate_post()->get_setting();
 		$submenus = array(
 			'builder'         => 'ultp_builder',
@@ -168,25 +174,8 @@ class Options {
 		foreach ( $submenus as $slug => $setting_key ) {
 			$submenus[ $slug ] = isset( $settings[ $setting_key ] ) && $settings[ $setting_key ] !== 'false';
 		}
-		?>
-		<script>
-			( function() {
-				const postxAddonSubmenus = <?php echo wp_json_encode( $submenus ); ?>;
 
-				Object.keys( postxAddonSubmenus ).forEach( function( slug ) {
-					const link = document.querySelector( '#adminmenu a[href*="page=ultp-settings#' + slug + '"]' );
-					const item = link ? link.closest( 'li' ) : null;
-
-					if ( ! item ) {
-						return;
-					}
-
-					item.id = 'postx-submenu-' + slug;
-					item.style.display = postxAddonSubmenus[ slug ] ? '' : 'none';
-				} );
-			}() );
-		</script>
-		<?php
+		return $submenus;
 	}
 
 	/**
@@ -196,7 +185,7 @@ class Options {
 	 * @return void No return value.
 	 */
 	public function handle_external_redirects() {
-		if (empty($_GET['page'])) {     // @codingStandardsIgnoreLine
+		if ( empty( $_GET['page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only admin page slug.
 			return;
 		}
 		$_page = sanitize_key( $_GET['page'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only admin page slug.
@@ -243,11 +232,10 @@ class Options {
 	 * @return void No return value.
 	 */
 	public static function remove_all_notices() {
-		if (isset($_GET['page'])) {   // @codingStandardsIgnoreLine
-			$page = sanitize_key($_GET['page']);    // @codingStandardsIgnoreLine
+		if ( isset( $_GET['page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only admin page slug.
+			$page = sanitize_key( $_GET['page'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only admin page slug.
 			if (
 				$page === 'ultp-settings' ||
-				$page === 'ultp-license' ||
 				$page === 'ultp-setup-wizard'
 			) {
 				remove_all_actions( 'admin_notices' );

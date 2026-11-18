@@ -1,267 +1,145 @@
-=== Post Grid Gutenberg Blocks - PostX ===
+=== Post Grid Blocks & Templates for News, Magazine, & Blog Sites - PostX ===
 Contributors: wpxpo, anik4e, jakirhasan
-Tags: post grid, gutenberg blocks, blog grid, Gutenberg, grid
+Tags: post grid, gutenberg blocks, blog, magazine, news
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 5.1.1
+Stable tag: 5.1.7
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
 Design professional blogs with advanced Gutenberg blocks, premade templates, dynamic post grids, and smart filters.
-
+ 
 == Description ==
 
-🥇 The #1 WordPress news, magazine, and blogging solution
-📈 Highest post grid layout variations with enhanced customization
-💕 A plugin by **WPXPO**, that empowers **65K+** businesses!
-📞 Dedicated support team with **4.9/5** customer satisfaction on [**Trustpilot**](https://uk.trustpilot.com/review/wpxpo.com)
+🥇 A Post Grid plugin for WordPress blogs, news, and magazine websites
+📄 Display your blog posts, pages, and custom post types with **Post Grids, Post Lists, Post Sliders, Post Carousels, Post Modules, and more**.
+💕 Built by **WPXPO**, used by thousands of websites
+📞 Dedicated support team ready to help
 
-😲 [**Free Demo**](https://trypostx.wpxpo.com/) | 🔥 [**PostX Pro**](https://www.wpxpo.com/product/postx/) | 📃 [**Starter Templates**](https://www.wpxpo.com/product/postx/templates/) | 📦 [**All Blocks**](https://www.wpxpo.com/product/postx/features/blocks/)
+😲 [**View Demo**](https://trypostx.wpxpo.com/) | 🔥 [**PostX Pro**](https://www.wpxpo.com/product/postx/) | 📃 [**Starter Templates**](https://www.wpxpo.com/product/postx/templates/) | 📦 [**All Blocks**](https://www.wpxpo.com/product/postx/features/blocks/)
 
-== Ultimate Blog Website Builder for WordPress ==
-
-Create modern news, magazine, and blog websites with advanced Gutenberg blocks, ready-made site templates, dynamic grid layouts, and advanced post filtering – all without coding.
+PostX is a post grid plugin for WordPress that helps you build news, magazine, and blog layouts in the block editor. Display posts in customizable grids and lists, start with free templates and patterns, or choose PostX Pro for additional designs and advanced features.
+ 
+## Watch PostX in Action ##
 
 [youtube https://www.youtube.com/watch?v=FYgSe7kgb6M]
 
-== Key Features of PostX ==
+## Free Blocks and Features in PostX ##
 
-* Ready-to-import starter sites to launch full blog websites in minutes.
-* 45+ advanced Gutenberg blocks for creating dynamic, content-rich layouts.
-* 250+ ready-made pattern designs to speed up page creation.
-* Site builder to create custom templates for posts, categories, tags, authors, etc.
-* Query builder to display posts by category, tag, author, custom taxonomy, or custom logic.
-* Advanced post filtering, search, and pagination with Ajax for seamless browsing.
-* Dynamic content support to pull data from custom fields, post meta, and custom post types.
-* Global style settings to control colors, typography, and more across the entire site.
-* Multi-column layouts and templates to create custom headers, footers, and mega menus.
-* Advanced blogging tools such as table of contents, frontend post submission, and more.
-* Built-in AI (ChatGPT) and SEO plugins integration for content creation
-* Seamless integration with popular page builders such as Elementor, Divi, etc.
-* Use custom fonts, dark mode, and more design options
-* Mobile device responsive design & multi-language support
-* Performance optimized codebase
+The free version includes 35 Gutenberg blocks, 24+ patterns, 30+ templates, and 5 starter sites. These provide a starting point for designing your blog within the WordPress editor.
 
-== Starter Sites - Build Any Blog Website in 3 Steps! ==
+✅ **Post Grid:** Choose from seven post grid blocks to display articles in grid-based sections.
 
-Launch a fully designed blog website in minutes. With PostX starter sites, you can select a premade site template, customize it to match your brand, and go live – no need to spend hours manually creating every page!
+✅ **Post List:** Use four post list blocks to arrange articles in list formats.
 
-**👉 Check out the [Starter Site Templates!](https://www.wpxpo.com/product/postx/templates/)**
+✅ **Post Slider and Post Module:** Show posts in two slider blocks and two module blocks.
 
-With PostX, you can easily build:
+✅ **News Ticker:** Display headlines in a vertical or horizontal ticker.
 
-✅ News Websites
-✅ Magazine Websites
-✅ Sports News Websites
-✅ Tech News Websites
-✅ Gaming News Websites
-✅ Crypto News Websites
-✅ Movie News Websites
-✅ Travel Blog Websites
-✅ Personal Blog Websites
-✅ Food Blog Websites
-✅ And More!
+✅ **Search:** Add an Ajax-powered search block to help visitors find posts.
 
-👉 **Step-by-step guide on creating a news blog website in WordPress using PostX:**
+✅ **Advanced Filter:** Let readers filter posts by category, tag, author and order without a page reload.
+
+✅ **Pagination:** Add Load More, numeric, or next/previous navigation to post blocks.
+
+✅ **Menu:** Build navigation menus with the Menu block.
+
+✅ **Taxonomy, Dark/Light and YouTube Gallery:** List categories and tags, add a dark mode switch, and show videos from a YouTube channel or playlist.
+
+✅ **Row and Wrapper:** Structure page sections and group related blocks.
+
+✅ **Heading and Image:** Add section titles and images to your layouts.
+
+✅ **List and Button Group:** Present lists and add buttons that guide readers to another page.
+
+✅ **Image Gallery:** Display multiple images together in a gallery.
+
+✅ **Accordion:** Place supporting content inside expandable sections.
+
+✅ **Tabs:** Organize content into separate tabs.
+
+✅ **Star Rating:** Display a rating alongside your content.
+
+✅ **Social Icons:** Add links to your social profiles.
+
+✅ **Table of Contents:** Help readers jump to headings within longer posts.
+
+✅ **Dynamic Site Builder:** Create custom home, single-post, archive, category, tag, author, search, date and 404 templates, plus headers and footers with display conditions.
+
+✅ **Dynamic Content:** Insert post data such as excerpts, dates, and author names into PostX blocks.
+
+✅ **Custom Font:** Upload custom fonts and use them in PostX blocks with typography controls.
+
+✅ **Saved Templates:** Create unlimited reusable templates by converting Gutenberg block designs into shortcodes.
+
+✅ **Page Builder Integrations:** Reuse designs through Saved Templates with Elementor, Divi, WPBakery, Oxygen, Bricks Builder, and Beaver Builder.
+
+✅ **Free Starter Sites:** Import an available free starter site and customize its content and design.
+
+✅ **Free Templates and Patterns:** Insert available free page templates and section designs into your layouts.
+
+## Pro Blocks and Design Library in PostX ##
+
+PostX Pro is a separate plugin that adds designs and blocks on top of the free plugin, including 189+ Pro patterns and 36 ready-to-import starter sites.
+
+⭐ **Premium Post Designs:** 44+ grid, 46+ list and 17+ slider designs in the pattern library.
+
+⭐ **Extra Block Layouts:** Additional layouts for the post grid, list, module, slider, taxonomy and dark/light blocks.
+
+⭐ **Premium Starter Sites:** Import complete designs for news, magazine, travel, food, and other content websites.
+
+⭐ **Premium Templates and Patterns:** Build sections with Pro patterns and additional page templates.
+
+## Additional Features in PostX Pro ##
+
+PostX Pro adds these features alongside the free blocks and builder.
+
+⭐ **Mega Menu:** Add mega menu panels with custom layouts and content to the Menu block.
+
+⭐ **News Ticker Types:** Add Marquee and Typewriter tickers and a sticky ticker position.
+
+⭐ **Quick Query:** Use presets such as Trending Today, Weekly Popular Posts, Top of the Month, and Most Comments.
+
+⭐ **More Filters:** Add search, advanced sort and custom taxonomy filters to the Advanced Filter block.
+
+⭐ **Infinite Scroll:** Load additional posts as visitors scroll through supported post blocks.
+
+⭐ **Unique Content Groups:** Prevent the same posts from appearing across multiple blocks.
+
+⭐ **Dynamic Content Integrations:** Display field data from ACF, Meta Box, and Pods with Pro support.
+
+⭐ **Front End Post Submission:** Let writers submit posts from the front end without using the WordPress dashboard.
+
+⭐ **Reading Progress Bar:** Display a visual indicator of how far readers have scrolled.
+
+⭐ **Taxonomy Image and Color:** Assign images and colors to categories, tags, and custom taxonomies.
+
+⭐ **SEO Plugin Integrations:** Display meta descriptions from supported plugins, including Yoast, Rank Math, All-in-One SEO, SEOPress, and Squirrly.
+
+Explore [**PostX Pro**](https://www.wpxpo.com/product/postx/) for the additional designs and features.
+
+## Why Use PostX for Your Blog? ##
+
+**Build Where You Already Write**: Build layouts in the WordPress editor.
+
+**Give Each Section a Clear Purpose**: Organize stories into grids, lists, and topic sections.
+
+**Start with a Premade Design**: Customize free designs or choose premium designs with Pro.
+
+**Customize Your Post Displays**: Adjust block settings and preview responsive layouts.
+
+
+## Learn How to Build a News Website with PostX ##
 
 [youtube https://www.youtube.com/watch?v=xbOsCVvx1a0]
 
-
-== Gutenberg Blocks for Professional Blog Layouts ==
-Get all the essential blocks to build a professional blog website. PostX blocks help you organize and design blog pages that are unique and visually engaging. 
-
-✔ **Post Grid:** Showcase posts with 7+ cool grid layouts - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid6829)
-✔ **Post List:** Present content in structured list formats - [View Demo ](https://www.wpxpo.com/product/postx/features/blocks/#demoid6836)
-✔ **Post Slider & Carousel:** Highlight featured posts with interactive sliders - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid7487)
-✔ **Post Module:** Display posts in structured, magazine-style layouts - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid6825)
-✔ **Mega Menu:** Create advanced navigation menus - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid8819)
-✔ **Row/Column Block:** Build structured layouts easily - [View Demo](https://www.wpxpo.com/product/postx/features/row-column-block/)
-✔ **Image Block:** Style images with advanced controls - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid6843)
-✔ **News Ticker:** Display trending posts dynamically - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid6845)
-✔ **Search Block:** Ajax search for better navigation - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid8233)
-✔ **Star Rating:** Add rating systems to highlight content - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid8858)
-✔ **Accordion Block:** Display expandable content sections - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid8851)
-✔ **Button Group:** Stylish CTA buttons for more engagement - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid7952)
-✔ **Taxonomy Block:** Categories and tags in engaging designs - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid6841)
-✔ **Image Gallery Block:** Create visually rich image sections - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid8951)
-✔ **Tabs Block:** Organize blocks under tabs for improved visual - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid9045)
-✔ **YouTube Gallery Block:** Show video content in organized layouts - [View Demo](https://www.wpxpo.com/product/postx/features/blocks/#demoid9096)
-✔ [**More 20+**](https://www.wpxpo.com/product/postx/features/blocks/#site-cat-builder) Dynamic builder block
-
-
-== Dynamic Gutenberg Site Builder ==
-
-Design every part of your website exactly the way you want with PostX’s dynamic site builder. Create unique templates for specific pages to make them stand out – or maintain consistency with the same template. 
-
-✔ Diverse layouts for category and tag pages
-✔ Cool designs for archive Pages
-✔ Custom blog post templates
-✔ Custom Search & date pages
-✔ Custom 404 Not Found Pages
-✔ Custom home page designs
-✔ Custom author pages
-
-[**👉 More about the**](https://www.wpxpo.com/product/postx/features/gutenberg-site-builder/) Dynamic Site Builder
-
-== Query Builder for Enhanced Content Display ==
-
-Choose exactly what content to show inside a section. Using the Quick Query feature, you can utilize advanced sorting options and customization options for maximum control over content display.
-
-Here is the list of essential post-displaying options:
-
-✔ Display Posts Based on Category
-✔ Display Posts Based on Tags
-✔ Display Specific Posts/Pages
-✔ Display Posts from Specific Authors
-✔ Display Custom Post Types
-✔ Popular Posts
-✔ Random Posts
-✔ Oldest Posts
-✔ Most Commented Posts
-✔ Top Posts of the Month
-✔ All-time Favorites
-✔ Alphabetical ASC
-✔ Alphabetical DESC
-✔ Reorder Posts
-✔ Exclude Posts
-
-And a lot of other options! 👉 **Learn about [Query Builder](https://www.wpxpo.com/product/postx/features/advanced-query-builder/)**
-
-== Advanced Post Filter ==
-
-Let users easily filter and find the posts they are looking for – without reloading the whole page. You have all essential post-filtering options, including:
-
-✔ Filter By Ascending and Descending
-✔ Filter By Custom Taxonomy
-✔ Post Filter By Category
-✔ Post Filter By Author
-✔ Advanced Sort Filter
-✔ Post Filter Tags
-✔ Order By Filter
-✔ Search Filter
-
-👉 **Details about [Advanced Post Filter](https://www.wpxpo.com/product/postx/features/wordpress-post-filter/)**
-
-== Ajax Pagination ==
-
-Keep users engaged with seamless Ajax-powered pagination that loads content instantly without refreshing the page. PostX offers multiple pagination styles so you can choose what fits your website.
-
-✔ Load More pagination
-✔ Numeric pagination
-✔ Next/previous pagination
-
-**👉 Check out details for [Ajax Pagination](https://www.wpxpo.com/product/postx/features/ajax-pagination/)**
-
-
-== Enhanced Blogging Features ==
-
-Take your blog to the next level with advanced features designed to improve engagement, usability, and content management.
-
-[**Front End Post Submission**](https://www.wpxpo.com/product/postx/features/front-end-post-submission/) (Pro)
-Allow writers to submit content directly from the front end without giving them access to the WordPress dashboard. Perfect for managing guest and freelance writers.
-
-**Dynamic Content**
-Pull data dynamically from any post type and display information such as post meta, custom fields, and more. ACF, Meta Box and Pods fields come with PostX Pro.
-
-[**Table of Contents**](https://www.wpxpo.com/product/postx/features/table-of-content-wordpress/)
-Add a structured table of contents to posts that improves readability and navigation – which also helps in SEO.
-
-[**Reading Progress Bar**](https://www.wpxpo.com/product/postx/features/reading-progress-bar/) (Pro)
-Show a visual progress bar on posts to highlight how much the visitor has read or scrolled. You can also add the progress bar to any page of your WordPress site.
-
-[**Taxonomy Image & Color**](https://www.wpxpo.com/product/postx/features/wordpress-taxonomy-image-and-color/) (Pro)
-Add featured images and desired colors to categories, tags, and custom post types – making the taxonomies more visually appealing.
-
-== Header, Footer & Mega Menu Builder ==
-
-Improve your site’s navigation and direct visitors to highlighted sections of your site using fully customizable headers, footers, and mega menus.
-
-✔ A wide library of premade header and footer templates
-✔ Option to create different headers/footers for different pages
-✔ Build advanced mega menus with rich layouts, images, and content
-
-**Learn about:** [PostX Mega menu](https://www.wpxpo.com/product/postx/features/mega-menu/)
-**Learn about:** [PostX Header & Footer](https://www.wpxpo.com/product/postx/features/header-footer-builder/)
-
-== Premade Patterns ==
-
-Speed up your blog creation with a library of ready-made designs.
-
-Instead of building sections from scratch, choose from professionally designed layouts and customize them to fit your brand.
-
-**Check out the live demo of [Premade Patterns.](https://www.wpxpo.com/product/postx/features/patterns/)**
-
-== Blog Design & Customization ==
-
-Control the aesthetics of your entire blog effortlessly. Create a unique and consistent brand identity with global settings while having block-level control over designs.
-
-**Block-level Settings**
-Fine-tune every part of your blog layout with powerful styling controls built directly into each block. Easily switch between different layout variations, customize individual elements like title, image, meta, taxonomy, excerpt, and more.
-
-**[Global Styles](https://www.wpxpo.com/product/postx/features/wordpress-global-styles/)**
-Choose the colors and typography that you prefer and apply them globally across your website for a consistent look and feel.
-
-**[Custom Fonts](https://www.wpxpo.com/product/postx/features/custom-fonts-for-wordpress/)**
-Upload and use custom fonts that align with your brand guidelines. Use them with single or multiple variations – and use them inside PostX’s blocks with full typography customization options.
-
-**Dark Mode & RTL Support**
-Give your readers a modern, eye-friendly experience with a built-in Light/Dark mode toggle. Also, we provide RTL support, which ensures a seamless reading experience for users who prefer right-to-left languages.
-
-
-== Integrations & Compatibility ==
-
-PostX works seamlessly with your favorite tools and enhances your blog management workflow.
-
-**AI Integration**
-Integrate with your ChatGPT account to easily create and optimize content directly inside WordPress.
-
-**Gutenberg Blocks in Page Builders**
-Love the comfort of your favorite page builders? Easily use Gutenberg blocks and any PostX-created designs directly inside popular page builders such as:
-
-✔ Elementor
-✔ Divi
-✔ WPBakery
-✔ Oxygen
-✔ Bricks Builder
-✔ Beaver
-
-Design and reuse any set of designs with the help of the [Saved Template](https://www.wpxpo.com/product/postx/features/saved-template/) feature of PostX.
-
-== SEO Plugins Support (Pro) ==
-Fully compatible with major SEO plugins like Rank Math, Yoast, All-in-One SEO, Squirrly, SEOPress and others to display custom meta descriptions easily inside content. 
-
-== PostX Recommended Themes ==
-PostX should work properly with all popular WordPress themes. We have personally tested with various themes. Here is a list of themes that are fully compatible with PostX.
-
-✔ Twenty Twenty-Five
-✔ Astra
-✔ Blocksy
-✔ Kadence
-✔ Generatepress
-✔ Rishi Theme
-✔ Neve
-✔ Ocean WP
-✔ Blossom Theme
-✔ Block WP
-
-== Upcoming Features ==
-* Dynamic Image Generation
-* Infinite Scroll
-* Icon Block
-* Instagram Blocks
-* Countdown Timer Blocks
-
-**Have a cool idea for a feature? Let us know: [Request a feature](https://www.wpxpo.com/product/postx/roadmap/)**
-
-== Recommended by the WordPress Experts ==
+== What Reviewers Say ==
 
 Check out what Paul C (WPTuts) had to say about PostX.
 [youtube https://www.youtube.com/watch?v=fh72g1wPVa0]
-
 Check out the video of Jack Cao and learn how to create a News Magazine Website for free.
 [youtube https://www.youtube.com/watch?v=X4vKrjcSpI8]
-
 Check out how Alyssa creates a complete news website in minutes using PostX. 
 [youtube https://www.youtube.com/watch?v=s9w8Mt34_AQ]
 
@@ -275,55 +153,109 @@ You can Translate PostX on [translate.wordpress.org](https://translate.wordpress
 - Join our [Facebook Group](https://www.facebook.com/groups/gutenbergpostx).
 - Learn from our tutorials on [YouTube Channel](https://www.youtube.com/channel/UC9I7kzTtG31YlWdG3iL42Jg).
 
+## More Plugins by WPXPO ##
+
+Explore other WPXPO plugins for your website or WooCommerce store.
+
+
+
+➕ **WowAddons:** Add product options and custom fields to WooCommerce products.
+
+🎯 [**WowRecommend:**](https://www.wpxpo.com/product/wowrecommend/) Create WooCommerce product recommendations with flexible filters, sorting, and AI-assisted rule creation.
+
+🧲 **WowOptin:** Create popups and opt-in forms.
+
+💸 **WowRevenue:** Create WooCommerce discount campaigns and product offers.
+
+📦 [**WholesaleX:**](https://wordpress.org/plugins/wholesalex/) Manage wholesale pricing and B2B selling in WooCommerce.
+
+📄 [**WowInvoice:**](https://wordpress.org/plugins/wow-pdf-invoices-packing-slips/) Create PDF invoices and packing slips for WooCommerce orders.
+
+🚚 [**WowShipping:**](https://wordpress.org/plugins/wow-table-rate-shipping/) Set up table rate shipping rules for WooCommerce.
+
+💝 [**WowStore:**](https://wordpress.org/plugins/product-blocks/) Build and customize WooCommerce store pages.
+
 == Author ==
 
-Developed by [WPXPO](https://www.wpxpo.com). [Contribute to Gutenberg Post Blocks on Bitbucket](https://bitbucket.org/wpstabon/ultimate-post/src/release/) and join the party.
+Developed by [WPXPO](https://www.wpxpo.com). [Contribute to Gutenberg Post Blocks on Bitbucket](https://bitbucket.org/wpstabon/ultimate-post/src/dev/) and join the party.
 
 == Development ==
 
-PostX is developed in the open. The full source for this release — including the React sources
-behind the block editor UI, the dashboard and the setup wizard, and every build tool — lives at:
+The matching human-readable JavaScript, React and stylesheet sources for this package are included in `src/`. The plugin root includes the build inputs: `package.json`, `package-lock.json`, `webpack.config.js`, `gulpfile.mjs`, `generate-style-schema.cjs`, `.babelrc`, `tsconfig.json` and `eslint.config.mjs`.
 
-https://bitbucket.org/wpstabon/ultimate-post/src/release/
+To rebuild the frontend, block editor, dashboard and setup assets, use a Node.js version matching the `engines` requirement in `package.json`, run `npm ci`, then run `npm run build-release:ci`. Run `npm run build-package:ci` to create the installable ZIP. These sources and build inputs travel with the package, including changes that have not yet reached a public repository branch.
 
-== Other Plugins by WPXPO ==
+The public development repository is available below. It can contain changes beyond this package; use the included sources when rebuilding this package:
 
-We are glad that you are considering PostX. We have more amazing plugins that you can check out:
+https://bitbucket.org/wpstabon/ultimate-post/src/dev/
 
-📄 [**WowInvoice 🔥:**](https://wordpress.org/plugins/wow-pdf-invoices-packing-slips/) A comprehensive PDF invoices & packing slips plugin for WooCommerce that automates documents like invoices, packing slips, and picklists. 
+== Cookies and post view counts ==
 
-🚚 [**WowShipping 🔥:**](https://wordpress.org/plugins/wow-table-rate-shipping/) The complete table rate shipping plugin for WooCommerce, featuring 30+ flexible conditions and integrations with popular carriers like UPS, USPS, DHL, Sendle, and more.
+By default, PostX counts views on single-post pages and sets a first-party cookie named `ultp_view_<post_id>` for each viewed post. The cookie stores the value `1` and expires after 24 hours. The post ID is part of its name; it contains no visitor name or email address. While that cookie is present, repeat visits from the same browser do not increase that post's counter. View totals are stored in post metadata in your WordPress database.
 
-➕ [**WowAddons 🔥 :**](https://wordpress.org/plugins/product-addons/) The ultimate product addons plugin with 25+ extra product options, custom fields, allowing you to sell customizable products and increase average order value.
+To stop PostX from setting new view-count cookies and updating these counters, open PostX > Settings > General Settings, enable "Disable Post View Cookies", and click "Save Settings". Existing cookies are not deleted by this setting; they expire after their original 24-hour lifetime or can be cleared in the browser.
 
-🧲 [**WowOptin:**](https://wordpress.org/plugins/optin/) The next-gen optin and popup builder plugin with Canva-like design flexibility and detailed audience targeting.
-
-💝 [**WowStore:**](https://wordpress.org/plugins/product-blocks/) An all-in-one WooCommerce solution to create professional and conversion-focused eCommerce stores.
-
-💸 [**WowRevenue:**](https://wordpress.org/plugins/revenue/) Collections of various WooCommerce discount campaigns to boost revenue by increasing the average order value.
-
-📦 [**WholesaleX:**](https://wordpress.org/plugins/wholesalex/) A complete WooCommerce Wholesale solution with additional features like a bulk order form, dynamic pricing & discount rules.
-
+When a visitor clicks the Dark/Light toggle, PostX sets a first-party preference cookie named `ultplocalDLMode` to `ultpdark` or `ultplight`. It remembers that choice for 60 days and contains no visitor name or email address. The browser uses the current hostname and the current page's default directory path because PostX does not specify a Domain or Path attribute. This preference cookie is separate from post view counting and is not affected by "Disable Post View Cookies". Changing the preference refreshes its 60-day lifetime; visitors can remove it through their browser's cookie controls.
 
 == Privacy ==
 
+PostX sets two first-party cookies, described under "Cookies and post view counts" above. It also contacts the external services listed below. Each entry under External services says when a request is made, what is sent, and links the service's terms and privacy policy.
 
-PostX connects to external services only when related features are used.
+* PostX template service (WPXPO): starter sites, patterns, designs and premade templates, only when you open Starter Sites, Site Builder, the editor's "Template Kits" / "Builder Library" button or a block's "Ready-made Design" button, or import an item. Never on activation or on the dashboard Home screen.
+* WordPress.org: when you import a starter site with "Install required plugins" selected.
+* Google Fonts: only after you turn on "Enable Remote Google Fonts" in PostX settings. It is off by default.
+* YouTube: help videos when you press play, YouTube Gallery blocks, and oEmbed data for featured videos.
+* Vimeo: video popup playback and oEmbed data for featured videos.
 
-**Usage Analytics:** PostX sends usage and diagnostic data to WPXPO at inside.wpxpo.com/wp-json/durbin/v1/analytics after specific administrator actions, such as accepting data collection, importing starter sites with updates enabled, completing setup with sharing enabled, or submitting the deactivation survey. Skipping the survey sends nothing. See [**Data Collection Policy**](https://www.wpxpo.com/data-collection-policy/), [**Privacy Policy**](https://www.wpxpo.com/privacy-policy/), and [**Terms**](https://www.wpxpo.com/terms-and-conditions/).
+Social share buttons open the sharing site only when a visitor clicks one. Nothing is sent before the click.
 
-**Country Lookup:** When analytics are sent and no country is cached, PostX requests ipinfo.io/json. IPinfo can see the server’s public IP, but PostX stores only the two-letter country code for 180 days. The IP is not stored or sent to WPXPO. See [**IPinfo Terms**](https://ipinfo.io/terms-of-service) and [**Privacy Policy**](https://ipinfo.io/privacy-policy).
+== External services ==
 
-**Templates:** Starter sites and templates are loaded from postxkit.wpxpo.com. Only the PostX version and selected template/site ID are sent.
+**Activation and the PostX dashboard Home screen do not automatically request the WPXPO template catalogue or its remote preview images.** Template-screen requests, opt-in Google Fonts, configured YouTube and Vimeo media, and remote media retained in imported content are described below.
 
-**Support:** The support form sends your name, email, subject, and message to WPXPO.
+PostX connects to the services below. Each entry says when, what is sent, and links the service's terms and privacy policy.
 
-**ChatGPT:** After adding your API key, selected text, model, and API key are sent to OpenAI only when you run a ChatGPT action. See [**OpenAI Terms**](https://openai.com/policies/terms-of-use) and [**Privacy Policy**](https://openai.com/policies/privacy-policy).
+= PostX template service (WPXPO) =
 
-**Google Fonts:** Fonts may load from fonts.googleapis.com, exposing visitor IP addresses to Google. They can be disabled and served locally. See [**Google Privacy Policy**](https://policies.google.com/privacy).
+Starter sites, patterns, designs and premade builder templates are loaded from `postxkit.wpxpo.com`, a WPXPO service. The library is large and updated regularly, so it is hosted on this service and loaded when you open these screens; they have nothing to show without it. PostX contacts it **only when you open one of these screens yourself**:
 
-**YouTube Gallery:** After adding a YouTube API key, the block connects to the YouTube Data API and embedded YouTube player, which may expose visitor IP addresses to Google. See [**YouTube Terms**](https://www.youtube.com/t/terms) and [**Google Privacy Policy**](https://policies.google.com/privacy).
+* PostX > Starter Sites in the dashboard.
+* PostX > Site Builder in the dashboard.
+* The "Template Kits" button (or "Builder Library" on builder templates) in the block editor toolbar.
+* A post block's "Ready-made Design" button in the block editor.
 
+It is also contacted when you preview or import an item from those screens. It is not contacted on activation, on the dashboard Home screen, on other dashboard tabs, in the background, or on your site's front end. Lists are cached locally; a missing or empty list is fetched when you open one of the screens above, and a starter-site cache at least two days old is refreshed when you open one of them.
+
+The starter-site list and the premade design list come from two different addresses. Your server requests each one separately and saves the answer in `wp-content/uploads/ultp/`:
+
+* `https://postxkit.wpxpo.com/wp-json/importer/site_lists` returns the starter-site list. The request sends the PostX version.
+* `https://postxkit.wpxpo.com/wp-json/restapi/v2/design` returns the premade design list. The request sends no PostX data.
+
+Previewing or importing a single item uses further requests to the same host: `https://postxkit.wpxpo.com/wp-json/restapi/v2/single-template` and `https://postxkit.wpxpo.com/wp-json/restapi/v2/single-design` from your browser, and `https://postxkit.wpxpo.com/<starter-site>/wp-json/importer/single` and `.../importer/site_all_posts` from your server. PostX sends these requests only to the `postxkit.wpxpo.com` host, over HTTPS.
+
+The data sent depends on the request: starter-site list and content requests include the PostX version; individual template and design requests include the selected item ID; import requests can also include a request type. The selected starter site is identified by its service URL. When PostX Pro is active, applicable import and editor requests may also include its stored licence key. The editor licence field is otherwise empty. The design-list request has no PostX request body. PHP requests also use WordPress's default HTTP User-Agent, which includes the WordPress version and site URL; the service receives the server's IP address and normal request headers.
+
+Your browser requests preview images only on the screens listed above, as those images render, before an import is selected. Clicking a starter site to preview it loads that site's live demo in a frame from `postxkit.wpxpo.com`. Direct browser requests expose the browser's IP address and standard HTTP request information, which may include the referring page. Imported content can retain remote image or media URLs; viewing that content can continue to contact the corresponding host after import. Starter-site imports can also install plugins from WordPress.org (see below). [Terms](https://www.wpxpo.com/terms-and-conditions/) | [Privacy Policy](https://www.wpxpo.com/policy/privacy/)
+
+= WordPress.org (plugin installs) =
+
+When you import a starter site with "Install required plugins" ticked (the plugins are listed first), PostX downloads those plugins from WordPress.org through WordPress's own installer and activates them. PostX identifies each required plugin by its slug and uses WordPress's standard plugin-information and download requests. WordPress.org receives the server's IP address and normal WordPress HTTP headers, which can include the WordPress version and site URL. The dashboard's "Our Plugins" tab installs nothing: its Install and Activate buttons open WordPress's own plugin screens, where you choose what to do. [WordPress.org Privacy Policy](https://wordpress.org/about/privacy/)
+
+= Google Fonts =
+
+Remote Google Fonts are off by default, including on upgrades. PostX sends no request to Google until you turn on "Enable Remote Google Fonts" in PostX settings. After you turn it on, pages, the editor, and font previews that use Google Fonts may request stylesheets from `fonts.googleapis.com` and font files from `fonts.gstatic.com`. Each of these requests sends the visitor's IP address and standard browser request information, plus the requested font family and variants. No Google account is required. Turn the setting off to stop PostX from generating or outputting these remote font requests, and clear any page or CDN caches after changing it. System fonts and fonts you upload locally remain available without this setting; PostX does not automatically download Google Fonts for local hosting. [Google Fonts Terms](https://developers.google.com/fonts/terms) | [Google Terms of Service](https://policies.google.com/terms) | [Google Privacy Policy](https://policies.google.com/privacy) | [Google Fonts privacy FAQ](https://developers.google.com/fonts/faq/privacy)
+
+= YouTube (Google) =
+
+Dashboard, setup-wizard and tutorial help videos load their YouTube player after you click play. Configured YouTube Gallery blocks behave differently: opening their editor preview or rendering them on your site can automatically request video data from `www.googleapis.com/youtube/v3/` and thumbnails from YouTube image hosts such as `img.youtube.com` and `i.ytimg.com`, before a visitor presses play. The Data API requests include the configured API key and channel or playlist ID, or the configured handle as a channel-search query, together with request/count options. Cached video lists can reduce some API requests but do not always prevent channel lookups.
+
+Gallery players can load while previewing a configured gallery, depending on its layout and playback settings; popup players load when selected. The editor's YouTube player URL explicitly includes the editor site's origin (scheme, hostname and port). Browser API, thumbnail and player requests expose the browser's IP address and standard HTTP information, which may include the referring page. A YouTube account is not required for visitors to view a configured gallery.
+
+Post blocks that show a featured YouTube video can also ask WordPress to fetch oEmbed metadata while the page is rendered, before playback, unless a cached response is available. These server requests to YouTube's oEmbed service send the configured video URL and requested dimensions; Google receives the server's IP address and WordPress's default HTTP headers, including its version and site URL. Remove the gallery/API-key configuration or featured-video URL to stop the corresponding PostX requests, and refresh cached pages where needed. [YouTube Terms](https://www.youtube.com/t/terms) | [YouTube API Services Terms](https://developers.google.com/youtube/terms/api-services-terms-of-service) | [Google Privacy Policy](https://policies.google.com/privacy)
+
+= Vimeo =
+
+When a visitor plays a Vimeo video in a post block's video popup, the player loads from `player.vimeo.com`, exposing the browser's IP address and normal HTTP request information, which may include the referring page. Post blocks that show a featured Vimeo video can also ask WordPress to fetch oEmbed metadata from `vimeo.com/api/oembed.json` while the page is rendered, before playback, unless a cached response is available. These server requests send the configured video URL and requested dimensions; Vimeo receives the server's IP address and WordPress's default HTTP headers, including its version and site URL. Remove the featured-video URL to stop the corresponding PostX requests and refresh cached pages where needed. [Vimeo Terms](https://vimeo.com/terms) | [Vimeo Privacy Policy](https://vimeo.com/privacy)
 
 == Installation ==
 
@@ -339,7 +271,7 @@ Automatic installation is the easiest option as WordPress handles the file trans
 
 1. Go to your WordPress Plugin installation menu (Dashboard > Plugins > Add New)
 2. In the search field type PostX and press enter.
-3. "Install Now" and then click "Active"
+3. Click "Install Now" and then "Activate"
 
 
 = Manual installation =
@@ -359,9 +291,23 @@ Sometimes because of the permalink issue during the plugin update, just go to Wo
 
 == Frequently Asked Questions ==
 
-= Is this a Gutenberg Blocks plugin? =
+Find answers about the block editor, free designs, Pro features, and support.
 
-Yes, but it is a Gutenberg Post Block plugin.  It displays the dynamic post on your page. 
+= Is PostX a Gutenberg blocks plugin? =
+
+Yes. PostX adds blocks and design tools to the WordPress block editor for building news, magazine, and blog layouts.
+
+= Do I need coding knowledge to use PostX? =
+
+No. You can add blocks, import available designs, and customize layouts through the editor settings.
+
+= Are all templates and patterns free? =
+
+No. The free plugin includes a selection of starter sites, templates, and patterns. Premium designs require PostX Pro.
+
+= Do I need PostX Pro to use the free plugin? =
+
+No. Everything in the free plugin works without PostX Pro. PostX Pro is a separate plugin that adds the features and designs listed under PostX Pro above.
 
 = Where can I request new features? =
 
@@ -371,29 +317,82 @@ We are available on the WordPress support forum.
 
 Bugs can be reported on the WordPress support forum.
 
-= Is it working with older version of WordPress? =
+= Does PostX support WordPress 5.x? =
 
-PostX requires WordPress 6.0 or greater. It uses block editor APIs that were not available in
-earlier releases, so it is not supported on WordPress 5.x.
-
+No. PostX requires WordPress 6.0 or greater and PHP 7.4 or greater.
 
 == Screenshots ==
+ 
+1. Post query settings for selecting and ordering content.
+2. Pagination settings for supported post blocks.
+3. Ajax post filtering by category and tag.
+4. Post Slider block with responsive images.
+5. Starter sites for news, magazine, and blog websites.
+6. Premade post block designs.
+7. Post block layout variations.
+8. PostX addons, including free tools and separate Pro features.
+9. Table of Contents block settings and designs.
+10. News Ticker block for displaying headlines.
+11. Reusing PostX designs with Elementor and Saved Templates.
 
-1. Display desired posts and pages on specific blocks based on categories, tags, popular posts, related posts, recent posts, random posts, most commented posts, etc.
-2. Add and customize any of the available pagination types that include Ajax load more pagination, post pagination, navigation, and numeric pagination.
-3. The Ajax filter is also well known as a category filter, and the posts filter helps to let the visitors filter posts by categories and tags.
-4. The Slider blocks show blog posts with responsive images that you can use at home or on any other pages you want.
-5. There are multiple starter packs for different niches that include News, Magazine, Blog, Travel, Health, Sports News, Food, Gaming News, Crypto News, Beauty etc.
-6. All the Post Blocks have multiple premade designs that will be available to change once you add a block to any page.
-7. All blocks have multiple layout variations that will be available to change once you add a block to any page.
-8. PostX offers multiple addons to expand its functionalities that include Builder, Elementor, Table of Contents and Saved Templates. Taxonomy Image & Color, Progress Bar and the SEO Meta addons come with PostX Pro.
-9. The Gutenberg Table of Contents blocks is a complete solution multiple design, features and customization options.
-10. The Scrolling Breaking News Ticker is finely crafted for all types of News Magazine sites with lots of variations and customization options.
-11. With the help of the Elementor and Saved Template addons, you can use any of the post blocks of PostX to any pages while editing with Elementor builder.
 
 == Changelog ==
-= 5.1.1 – 06 October 2026 =
-* Update: Shorter, clearer Privacy section in the readme
+= 5.1.7 – 12 November 2026 =
+* Update: The PostX dashboard Home screen no longer contacts the PostX template service or loads remote preview images. The service is contacted only when you open Starter Sites, Site Builder, the editor's Template Kits / Builder Library button or a block's Ready-made Design button
+* Update: The readme scopes the activation and dashboard Home statement to the WPXPO template catalogue and preview images, while retaining the external-service and remote-media disclosures
+
+= 5.1.6 – 09 November 2026 =
+* Update: Post List #4 draws Load More and its navigation itself. They no longer depend on an add-on
+* Update: Remote Google Fonts is off until "Enable Remote Google Fonts" is turned on in PostX settings. It was on by default before
+* Update: Responsive hide rules, Title Hover Effects and Animation Color, the date formats of Post Date Meta and Advance Post Meta, and the News Ticker time badge format are provided by PostX Pro. Free keeps its default output and shows upgrade cards for the rest. Requires PostX Pro 1.11.0 or later
+* Update: The readme has a Privacy section, and External services lists what each service receives and when
+* Fix: The first-image output of Post List #1 is filtered before it is printed
+* Fix: The Archive Title background URL in layout 2 is encoded, so it cannot add CSS declarations
+* Fix: Core upgrader files are no longer included directly
+
+= 5.1.5 – 04 November 2026 =
+* Fix: CSS printed or saved by the plugin is checked with a CSS sanitizer that keeps only declarations WordPress allows, so it cannot close its style tag or load scripts
+* Update: PostX Pro now draws the filter bar of Post Grid #5, #6, #7, Post List #4 and Post Module #1, #2, the Post Grid #5 navigation, the navigation below the posts in Post Grid #6, #7 and Post Module #1, and the Load More and navigation of Post List #4. If you use PostX Pro, update it as well to keep them
+* Update: A saved Mega Menu block is shown like any other block
+* Fix: The Builder screen shows the Condition button again
+* Fix: The YouTube Gallery Inline layout thumbnail loads on case-sensitive servers
+
+= 5.1.4 – 01 November 2026 =
+* Fix: The Search block's live results require a valid front-end nonce and list only published posts of public post types
+* Fix: Admin requests check the security nonce and the user's permission as two separate steps
+* Fix: Custom font uploads check the media uploader's nonce and the user's permission
+* Fix: Site Builder templates, the template shortcode, page-builder modules and inline CSS are escaped with WordPress's own wp_kses() and wp_strip_all_tags()
+* Fix: The video popup works in Site Builder templates, AJAX pagination and the template shortcode
+* Fix: Advanced Filter keeps the block's Taxonomy Relation
+* Fix: Shape Divider previews show in the Row block's Type dropdown
+* Update: In Site Builder templates and the template shortcode, posts embedded from X, Instagram and TikTok show as a quote with a link, because their loader script is no longer printed
+
+= 5.1.3 – 28 October 2026 =
+* Fix: Site Builder templates, the template shortcode and AJAX pagination no longer print inline scripts from the rendered content; embeds from X, Instagram and TikTok keep working
+* Fix: Escaping for the CSS printed by the Oxygen, Bricks, Elementor and Divi modules, and for the dark logo and custom font URLs
+* Fix: Block and preset CSS is escaped so it cannot close its style tag
+* Fix: Bricks wrapper attributes are filtered before they are printed
+* Fix: Social Share buttons in Site Builder templates open the share window and count shares again
+
+= 5.1.2 – 27 October 2026 =
+* Fix: Saved Templates actions check the permission for each template; changing the template wishlist, dark logo and global settings requires an administrator
+* Fix: Escaping in every block's output, the template shortcode and the page-builder modules
+* Fix: Sanitizing and security checks for request data across the plugin
+* Update: Plugin-prefixed names for two internal actions and for some stored settings; existing data is moved automatically
+* Fix: The builder template's widget area list shows only sidebars the theme provides
+* Fix: Starter site import skipped every page when a builder template was published
+* Fix: Starter site import sets the dark logo when none is saved, and replacing a starter site no longer leaves a broken dark logo
+* Fix: AJAX pagination after a category filter click now stays filtered
+* Fix: Breadcrumb on child pages shows Home and every parent page
+* Fix: Advance Post Meta tag links point to the right archive
+* Fix: Featured video caption is kept when the post is saved without it
+* Fix: Template favourites show in the editor's design library
+* Fix: Regenerate CSS keeps custom fonts when Google Fonts are disabled
+* Fix: Bricks builder shows the template placeholder for an empty PostX element
+
+= 5.1.1 – 22 October 2026 =
+* Update: Shorter, clearer External services section in the readme
+* Update: Readme lists the blocks and features included in the free plugin, and describes PostX Pro only as additions
 
 = 5.1.0 – 04 October 2026 =
 * Update: Now requires WordPress 6.0 and PHP 7.4
@@ -451,7 +450,7 @@ earlier releases, so it is not supported on WordPress 5.x.
 * Fix: Block validation error issue
 
 = 5.0.29 – 30 June 2026 =
-* Fix: Infinite scroll support added to Post Grid 1, 2, 3 and Post List 1, 2, 3, 4
+* Fix: Infinite scroll support added to Post Grid 1, 2, 3 and Post List 1, 2, 3, 4 (this feature is now provided by PostX Pro)
 
 = 5.0.28 – 22 June 2026 =
 * Fix: Dashboard user experience updated

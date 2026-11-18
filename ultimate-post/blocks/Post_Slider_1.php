@@ -32,12 +32,7 @@ class Post_Slider_1 {
 			'queryExclude'              => '[]',
 			'queryAuthor'               => '[]',
 			'queryOffset'               => '0',
-			'queryExcludeTerm'          => '[]',
-			'queryExcludeAuthor'        => '[]',
 			'querySticky'               => true,
-			'queryUnique'               => '',
-			'queryPosts'                => '[]',
-			'queryCustomPosts'          => '[]',
 			// --------------------------
 			// General Setting
 			// --------------------------
@@ -113,9 +108,7 @@ class Post_Slider_1 {
 			'taxonomy'                  => 'category',
 			'catStyle'                  => 'classic',
 			'catPosition'               => 'aboveTitle',
-			'customCatColor'            => false,
 			'seperatorLink'             => admin_url( 'edit-tags.php?taxonomy=category' ),
-			'onlyCatColor'              => false,
 
 			// --------------------------
 			// Image Style
@@ -126,8 +119,6 @@ class Post_Slider_1 {
 			'imgOverlayType'            => 'default',
 			'fallbackEnable'            => true,
 			'fallbackImg'               => '',
-			'imgSrcset'                 => false,
-			'imgLazy'                   => false,
 
 			// --------------------------
 			// Read more Setting/Style
@@ -155,7 +146,6 @@ class Post_Slider_1 {
 			'hideExtraLarge'            => false,
 			'hideTablet'                => false,
 			'hideMobile'                => false,
-			'advanceCss'                => '',
 
 			/*
 			============================
@@ -180,7 +170,6 @@ class Post_Slider_1 {
 
 	public function content( $attr, $noAjax ) {
 		$attr = wp_parse_args( $attr, $this->get_attributes() );
-		global $ultp_unique_ID;
 
 		if ( ! $noAjax ) {
 			$paged         = is_front_page() ? get_query_var( 'page' ) : get_query_var( 'paged' );
@@ -188,6 +177,7 @@ class Post_Slider_1 {
 		}
 
 		$block_name          = 'post-slider-1';
+		$img_opts            = ultimate_post()->image_options( $attr, $block_name );
 		$wraper_before       = $wraper_after = $post_loop = '';
 		$attr['queryNumber'] = ultimate_post()->get_post_number( 5, $attr['queryNumber'], $attr['queryNumPosts'] );
 		$recent_posts        = new \WP_Query( ultimate_post()->get_query( $attr ) );
@@ -214,7 +204,7 @@ class Post_Slider_1 {
 			$attr['contentVerticalPosition']   = sanitize_html_class( $attr['contentVerticalPosition'] );
 			$attr['contentHorizontalPosition'] = sanitize_html_class( $attr['contentHorizontalPosition'] );
 
-			$wraper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '' . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '">';
+			$wraper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . esc_attr( $attr['advanceId'] ) . '" ' : '' ) . ' class="wp-block-ultimate-post-' . esc_attr( $block_name ) . ' ultp-block-' . esc_attr( $attr['blockId'] ) . '' . ( $attr['align'] ? ' align' . esc_attr( $attr['align'] ) : '' ) . '' . ( $attr['className'] ? ' ' . esc_attr( $attr['className'] ) : '' ) . '">';
 				$wraper_before .= '<div class="ultp-block-wrapper">';
 			if ( $attr['headingShow'] ) {
 				$wraper_before     .= '<div class="ultp-heading-filter">';
@@ -224,7 +214,7 @@ class Post_Slider_1 {
 				$wraper_before     .= '</div>';
 			}
 
-					$wraper_before .= '<div class="ultp-block-items-wrap" data-arrows="' . $attr['arrows'] . '" data-dots="' . $attr['dots'] . '" data-autoplay="' . $attr['autoPlay'] . '" data-slidespeed="' . $attr['slideSpeed'] . '" data-fade="' . $attr['fade'] . '" data-slidelg="' . ( isset( $slides['lg'] ) ? sanitize_html_class( $slides['lg'] ) : 1 ) . '" data-slidesm="' . ( isset( $slides['sm'] ) ? sanitize_html_class( $slides['sm'] ) : 1 ) . '" data-slidexs="' . ( isset( $slides['xs'] ) ? sanitize_html_class( $slides['xs'] ) : 1 ) . '">';
+					$wraper_before .= '<div class="ultp-block-items-wrap" data-arrows="' . esc_attr( $attr['arrows'] ) . '" data-dots="' . esc_attr( $attr['dots'] ) . '" data-autoplay="' . esc_attr( $attr['autoPlay'] ) . '" data-slidespeed="' . esc_attr( $attr['slideSpeed'] ) . '" data-fade="' . esc_attr( $attr['fade'] ) . '" data-slidelg="' . ( isset( $slides['lg'] ) ? esc_attr( sanitize_html_class( $slides['lg'] ) ) : 1 ) . '" data-slidesm="' . ( isset( $slides['sm'] ) ? esc_attr( sanitize_html_class( $slides['sm'] ) ) : 1 ) . '" data-slidexs="' . ( isset( $slides['xs'] ) ? esc_attr( sanitize_html_class( $slides['xs'] ) ) : 1 ) . '">';
 						$idx        = $noAjax ? 1 : 0;
 			while ( $recent_posts->have_posts() ) :
 				$recent_posts->the_post();
@@ -237,14 +227,13 @@ class Post_Slider_1 {
 
 				include ULTP_PATH . 'blocks/template/data.php';
 
-				if ( $attr['queryUnique'] ) {
-					$ultp_unique_ID[ $attr['queryUnique'] ][] = $post_id;
-				}
+				// Lets an add-on note each post the block shows.
+				do_action( 'ultp_block_loop_post', $post_id, $attr );
 
-				$post_loop .= '<' . $attr['contentTag'] . ' class="ultp-block-item post-id-' . $post_id . '">';
+				$post_loop .= '<' . tag_escape( $attr['contentTag'] ) . ' class="ultp-block-item post-id-' . esc_attr( $post_id ) . '">';
 				if ( $attr['preLoader'] ) {
 							$post_loop     .= '<div class="ultp-post-slider-loader-container">';
-								$post_loop .= ultimate_post()->postx_loading();
+								$post_loop .= wp_kses( ultimate_post()->postx_loading(), ultimate_post()->rendered_content_allowed_html() );
 							$post_loop     .= '</div>';
 				}
 
@@ -253,70 +242,70 @@ class Post_Slider_1 {
 
 						$post_loop .= '<div class="ultp-block-image-inner">';
 				if ( ( $post_thumb_id || $attr['fallbackEnable'] ) && $attr['imageShow'] ) {
-					$post_loop     .= '<div class="ultp-block-image ' . ( $attr['imgOverlay'] ? ' ultp-block-image-overlay ultp-block-image-' . $attr['imgOverlayType'] . ' ultp-block-image-' . $attr['imgOverlayType'] . $idx : '' ) . '">';
-						$post_loop .= '<a href="' . $titlelink . '" ' . ( $attr['openInTab'] ? 'target="_blank"' : '' ) . '>';
+					$post_loop     .= '<div class="ultp-block-image ' . ( $attr['imgOverlay'] ? ' ultp-block-image-overlay ultp-block-image-' . esc_attr( $attr['imgOverlayType'] ) . ' ultp-block-image-' . esc_attr( $attr['imgOverlayType'] ) . esc_attr( $idx ) : '' ) . '">';
+						$post_loop .= '<a href="' . esc_url( $titlelink ) . '" ' . ( $attr['openInTab'] ? 'target="_blank"' : '' ) . '>';
 						// Post Image Id
 						$block_img_id = $post_thumb_id ? $post_thumb_id : ( $attr['fallbackEnable'] && isset( $attr['fallbackImg']['id'] ) ? $attr['fallbackImg']['id'] : '' );
 						// Post Image
 					if ( $post_thumb_id || ( $attr['fallbackEnable'] && $block_img_id ) ) {
-										$post_loop .= ultimate_post()->get_image( $block_img_id, $attr['imgCrop'], '', $title, $attr['imgSrcset'], $attr['imgLazy'] );
+										$post_loop .= wp_kses( ultimate_post()->get_image( $block_img_id, $attr['imgCrop'], '', $title, $img_opts['srcset'], $img_opts['lazy'] ), ultimate_post()->rendered_content_allowed_html() );
 					} else {
-												$post_loop .= '<img  src="' . $dummy_url . '" alt="dummy-img" />';
+												$post_loop .= '<img  src="' . esc_url( $dummy_url ) . '" alt="dummy-img" />';
 					}
 											$post_loop .= '</a></div>'; // .ultp-block-image
 				}
 						$post_loop .= '</div>'; // .ultp-block-image-inner
 
-						$post_loop     .= '<div class="ultp-block-content ultp-block-content-' . $attr['contentVerticalPosition'] . ' ultp-block-content-' . $attr['contentHorizontalPosition'] . '">';
+						$post_loop     .= '<div class="ultp-block-content ultp-block-content-' . esc_attr( $attr['contentVerticalPosition'] ) . ' ultp-block-content-' . esc_attr( $attr['contentHorizontalPosition'] ) . '">';
 							$post_loop .= '<div class="ultp-block-content-inner">';
 
 								include ULTP_PATH . 'blocks/template/category.php';
-								$post_loop .= $category;
+								$post_loop .= wp_kses( $category, ultimate_post()->rendered_content_allowed_html() );
 
-								$post_loop .= $dcContent[6];
+								$post_loop .= wp_kses( $dcContent[6], ultimate_post()->rendered_content_allowed_html() );
 
 				if ( $title && $attr['titleShow'] && $attr['titlePosition'] ) {
 							include ULTP_PATH . 'blocks/template/title.php';
 				}
 
-								$post_loop .= $dcContent[5];
+								$post_loop .= wp_kses( $dcContent[5], ultimate_post()->rendered_content_allowed_html() );
 
 				if ( $attr['metaPosition'] == 'top' ) {
 								include ULTP_PATH . 'blocks/template/meta.php';
 				}
 
-													$post_loop .= $dcContent[4];
+													$post_loop .= wp_kses( $dcContent[4], ultimate_post()->rendered_content_allowed_html() );
 
 				if ( $title && $attr['titleShow'] && ! $attr['titlePosition'] ) {
 					include ULTP_PATH . 'blocks/template/title.php';
 				}
 
-													$post_loop .= $dcContent[3];
+													$post_loop .= wp_kses( $dcContent[3], ultimate_post()->rendered_content_allowed_html() );
 
 				if ( $attr['excerptShow'] ) {
-					$post_loop .= '<div class="ultp-block-excerpt">' . ultimate_post()->get_excerpt( $post_id, $attr['showSeoMeta'], $attr['showFullExcerpt'], $attr['excerptLimit'] ) . '</div>';
+					$post_loop .= '<div class="ultp-block-excerpt">' . wp_kses_post( ultimate_post()->get_excerpt( $post_id, $attr['showSeoMeta'], $attr['showFullExcerpt'], $attr['excerptLimit'] ) ) . '</div>';
 				}
 
-													$post_loop .= $dcContent[2];
+													$post_loop .= wp_kses( $dcContent[2], ultimate_post()->rendered_content_allowed_html() );
 
 				if ( $attr['readMore'] ) {
-					$post_loop .= '<div class="ultp-block-readmore"><a aria-label="' . $title . '" href="' . $titlelink . '" ' . ( $attr['openInTab'] ? 'target="_blank"' : '' ) . '>' . ( $attr['readMoreText'] ? $attr['readMoreText'] : esc_html__( 'Read More', 'ultimate-post' ) ) . ultimate_post()->get_svg_icon( $attr['readMoreIcon'] ) . '</a></div>';
+					$post_loop .= '<div class="ultp-block-readmore"><a aria-label="' . esc_attr( $title ) . '" href="' . esc_url( $titlelink ) . '" ' . ( $attr['openInTab'] ? 'target="_blank"' : '' ) . '>' . ( $attr['readMoreText'] ? wp_kses( $attr['readMoreText'], ultimate_post()->ultp_allowed_html_tags() ) : esc_html__( 'Read More', 'ultimate-post' ) ) . wp_kses( ultimate_post()->get_svg_icon( $attr['readMoreIcon'] ), ultimate_post()->rendered_content_allowed_html() ) . '</a></div>';
 				}
 
-													$post_loop .= $dcContent[1];
+													$post_loop .= wp_kses( $dcContent[1], ultimate_post()->rendered_content_allowed_html() );
 
 				if ( $attr['metaPosition'] == 'bottom' ) {
 					include ULTP_PATH . 'blocks/template/meta.php';
 				}
 
-													$post_loop .= $dcContent[0];
+													$post_loop .= wp_kses( $dcContent[0], ultimate_post()->rendered_content_allowed_html() );
 
 													$post_loop .= '</div>'; // .ultp-block-content-inner
 													$post_loop .= '</div>'; // .ultp-block-content
 
 													$post_loop .= '</div>'; // .ultp-block-slider-wrap
 													$post_loop .= '</div>'; // div
-													$post_loop .= '</' . $attr['contentTag'] . '>'; // .ultp-block-item
+													$post_loop .= '</' . tag_escape( $attr['contentTag'] ) . '>'; // .ultp-block-item
 
 						endwhile;
 
@@ -325,8 +314,8 @@ class Post_Slider_1 {
 			if ( $attr['arrows'] ) {
 				$wraper_after     .= '<div class="ultp-slick-nav" style="display:none">';
 					$nav           = explode( '#', $attr['arrowStyle'] );
-					$wraper_after .= '<div class="ultp-slick-prev"><div class="slick-arrow slick-prev">' . ultimate_post()->get_svg_icon( $nav[0] ) . '</div></div>';
-					$wraper_after .= '<div class="ultp-slick-next"><div class="slick-arrow slick-next">' . ultimate_post()->get_svg_icon( $nav[1] ) . '</div></div>';
+					$wraper_after .= '<div class="ultp-slick-prev"><div class="slick-arrow slick-prev">' . wp_kses( ultimate_post()->get_svg_icon( $nav[0] ), ultimate_post()->rendered_content_allowed_html() ) . '</div></div>';
+					$wraper_after .= '<div class="ultp-slick-next"><div class="slick-arrow slick-next">' . wp_kses( ultimate_post()->get_svg_icon( $nav[1] ), ultimate_post()->rendered_content_allowed_html() ) . '</div></div>';
 				$wraper_after     .= '</div>';
 			}
 
@@ -335,7 +324,7 @@ class Post_Slider_1 {
 
 			wp_reset_postdata();
 		} else {
-			$wraper_before .= ultimate_post()->get_no_result_found_html( $attr['notFoundMessage'] );
+			$wraper_before .= wp_kses( ultimate_post()->get_no_result_found_html( $attr['notFoundMessage'] ), ultimate_post()->rendered_content_allowed_html() );
 		}
 
 		return $noAjax ? $post_loop : $wraper_before . $post_loop . $wraper_after;

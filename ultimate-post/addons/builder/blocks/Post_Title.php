@@ -27,7 +27,6 @@ class Post_Title {
 			'hideDesktop'    => false,
 			'hideTablet'     => false,
 			'hideMobile'     => false,
-			'advanceCss'     => '',
 		);
 	}
 	public function register() {
@@ -54,9 +53,9 @@ class Post_Title {
 			$attr['blockId']   = isset( $attr['blockId'] ) ? sanitize_html_class( $attr['blockId'] ) : '';
 			$attr['titleTag']  = in_array( $attr['titleTag'], ultimate_post()->ultp_allowed_block_tags() ) ? $attr['titleTag'] : 'h1';
 
-			$wrapper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . $attr['advanceId'] . '" ' : '' ) . ' class="wp-block-ultimate-post-' . $block_name . ' ultp-block-' . $attr['blockId'] . ( $attr['className'] ? ' ' . $attr['className'] : '' ) . '' . ( $attr['align'] ? ' align' . $attr['align'] : '' ) . '">';
+			$wrapper_before     .= '<div ' . ( $attr['advanceId'] ? 'id="' . esc_attr( $attr['advanceId'] ) . '" ' : '' ) . ' class="wp-block-ultimate-post-' . esc_attr( $block_name ) . ' ultp-block-' . esc_attr( $attr['blockId'] ) . ( $attr['className'] ? ' ' . esc_attr( $attr['className'] ) : '' ) . '' . ( $attr['align'] ? ' align' . esc_attr( $attr['align'] ) : '' ) . '">';
 				$wrapper_before .= '<div class="ultp-block-wrapper">';
-					$content    .= '<' . $attr['titleTag'] . ' class="ultp-builder-title">' . $post_title . '</' . $attr['titleTag'] . '>';
+					$content    .= '<' . tag_escape( $attr['titleTag'] ) . ' class="ultp-builder-title">' . wp_kses_post( $post_title ) . '</' . tag_escape( $attr['titleTag'] ) . '>';
 				$wrapper_after  .= '</div>';
 			$wrapper_after      .= '</div>';
 		}
