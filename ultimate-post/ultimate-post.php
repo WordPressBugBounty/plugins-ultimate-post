@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Plugin Name: Post Grid Blocks & Templates for News, Magazine, & Blog Sites - PostX
+ * Plugin Name: Post Grid & Slider Layouts – PostX
  * Plugin URI:  https://www.wpxpo.com/postx/
  * Description: Gutenberg Blocks plugin with 35 free blocks that include post grid, post list, post slider, carousel, news ticker, and more. Dynamic site building and design variations make it a fit for News Magazine sites and any kind of blog, such as Personal, Travel, Fashion, Food Review and Recipe blogs.
- * Version:     5.1.7
+ * Version:     5.1.8
  * Author:      Post Grid Team by WPXPO
  * Author URI:  https://www.wpxpo.com/postx/?utm_source=db-postx-plugin&utm_medium=details&utm_campaign=postx-dashboard
  * Requires at least: 6.0
@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
 // Define
 // Server-generated block style contract, independent of editor/frontend API levels.
 define( 'ULTP_BLOCK_STYLE_API', 1 );
-define( 'ULTP_VER', '5.1.7' );
+define( 'ULTP_VER', '5.1.8' );
 define( 'ULTP_URL', plugin_dir_url( __FILE__ ) );
 define( 'ULTP_BASE', plugin_basename( __FILE__ ) );
 define( 'ULTP_PATH', plugin_dir_path( __FILE__ ) );

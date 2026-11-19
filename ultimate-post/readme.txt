@@ -1,15 +1,15 @@
-=== Post Grid Blocks & Templates for News, Magazine, & Blog Sites - PostX ===
+=== Post Grid & Slider Layouts – PostX ===
 Contributors: wpxpo, anik4e, jakirhasan
-Tags: post grid, gutenberg blocks, blog, magazine, news
+Tags: post grid, post slider, blog post grid, post carousel, post display
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 5.1.7
+Stable tag: 5.1.8
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
-Design professional blogs with advanced Gutenberg blocks, premade templates, dynamic post grids, and smart filters.
- 
+Design professional news and magazine sites with post grid, slider, list layouts, advanced post filters, and pagination.
+
 == Description ==
 
 🥇 A Post Grid plugin for WordPress blogs, news, and magazine websites
@@ -337,6 +337,10 @@ No. PostX requires WordPress 6.0 or greater and PHP 7.4 or greater.
 
 
 == Changelog ==
+= 5.1.8 – 19 November 2026 =
+* Update: New plugin name, tags and short description in the readme and plugin header
+* Fix: The noscript fallback of lazy-loaded images is kept in rendered content
+
 = 5.1.7 – 12 November 2026 =
 * Update: The PostX dashboard Home screen no longer contacts the PostX template service or loads remote preview images. The service is contacted only when you open Starter Sites, Site Builder, the editor's Template Kits / Builder Library button or a block's Ready-made Design button
 * Update: The readme scopes the activation and dashboard Home statement to the WPXPO template catalogue and preview images, while retaining the external-service and remote-media disclosures

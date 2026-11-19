@@ -61,6 +61,10 @@
 .toplevel_page_ultp-settings #wpcontent , .postx_page_ultp-setup-wizard #wpcontent{
 	padding-left: 0;
 }
+/* The PostX dashboard has its own notices; hide WordPress and other plugins' admin notices there as these will break the dashboard design. */
+.toplevel_page_ultp-settings .notice {
+	display: none !important;
+}
 /* =========================
 	Button
 ============================ */

@@ -231,6 +231,11 @@ class Xpo {
 				'medium'   => 'summer-sale',
 				'campaign' => 'postx-dashboard',
 			),
+			'black_friday_meta'     => array(
+				'source'   => 'db-postx',
+				'medium'   => 'bfcm-plugin-meta',
+				'campaign' => 'postx-dashboard',
+			),
 			'base_price_meta'       => array(
 				'source'   => 'db-postx-plugin-meta',
 				'medium'   => 'base-price',

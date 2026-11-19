@@ -2379,6 +2379,10 @@ class Functions {
 				'width'  => true,
 				'height' => true,
 			),
+			// The fallback an image plugin adds beside a lazy-loaded <img>. pre_kses (ULTP_Initialization::ultp_pre_kses_rendered_content())
+			// filters its body and puts the tags back, so they must pass here: without them the
+			// fallback image would be left in the page as a second, visible image.
+			'noscript' => array(),
 			'picture'  => array(),
 			'source'   => array(
 				'src'    => true,

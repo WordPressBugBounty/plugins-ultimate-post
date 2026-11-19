@@ -45,6 +45,7 @@ final class Campaigns {
 			'ultp_helloBar_summer_sale_2026_v1_2',
 			'ultp_helloBar_base_price_2026',
 			'ultp_helloBar_birthday_sale_2026_v1',
+			'ultp_helloBar_black_friday_2026_v1',
 		);
 	}
 
@@ -67,6 +68,12 @@ final class Campaigns {
 				'end'     => '2026-10-15 23:59 Asia/Dhaka',
 				'text'    => __( 'Enjoy 60% off', 'ultimate-post' ),
 				'utm_key' => 'birthday',
+			),
+			array(
+				'start'   => '2026-11-12 00:00 Asia/Dhaka',
+				'end'     => '2026-12-06 23:59 Asia/Dhaka',
+				'text'    => __( 'Upgrade to Pro & Save Up to 60% This Black Friday!', 'ultimate-post' ),
+				'utm_key' => 'black_friday_meta',
 			),
 		);
 	}
